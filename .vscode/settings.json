@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "*.tcc": "cpp",
+        "limits": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp"
+    }
+}
