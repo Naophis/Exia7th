@@ -1,5 +1,6 @@
 #include "driver/adc.h"
 #include "driver/gpio.h"
+#include "driver/ledc.h"
 #include "driver/mcpwm.h"
 #include "driver/pcnt.h"
 #include "driver/spi_common.h"
@@ -8,8 +9,10 @@
 #include "esp_adc_cal.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "include/defines.hpp"
 #include "sdkconfig.h"
 #include "soc/adc_channel.h"
+#include "soc/ledc_periph.h"
 #include "xtensa/core-macros.h"
 #include <driver/adc.h>
 #include <esp_adc_cal.h>
@@ -19,6 +22,8 @@
 
 // #include "VL53L0X.h"
 #include "esp_efuse_rtc_calib.h"
+
+#include "include/sensing_task.hpp"
 void init_uart() {
   const int uart_num = UART_NUM_0;
   uart_config_t uart_config = {.baud_rate = 2000000,
@@ -37,21 +42,23 @@ void init_gpio() {
   // 出力モード
   io_conf.mode = GPIO_MODE_OUTPUT;
   // 設定したいピンのビットマスク
-  io_conf.pin_bit_mask = 1ULL << GPIO_NUM_18;
-  // io_conf.pin_bit_mask |= 1ULL << GPIO_NUM_1;
-  // io_conf.pin_bit_mask |= 1ULL << GPIO_NUM_4;
-  // // io_conf.pin_bit_mask |= 1ULL << GPIO_NUM_6;
-  // io_conf.pin_bit_mask |= 1ULL << GPIO_NUM_8;
-  // io_conf.pin_bit_mask |= 1ULL << GPIO_NUM_10;
-  io_conf.pin_bit_mask |= 1ULL << GPIO_NUM_18;
-  io_conf.pin_bit_mask |= 1ULL << GPIO_NUM_19;
-  io_conf.pin_bit_mask |= 1ULL << GPIO_NUM_20;
-  io_conf.pin_bit_mask |= 1ULL << GPIO_NUM_21;
-  io_conf.pin_bit_mask |= 1ULL << GPIO_NUM_26;
-  io_conf.pin_bit_mask |= 1ULL << GPIO_NUM_38;
-  io_conf.pin_bit_mask |= 1ULL << GPIO_NUM_39;
-  io_conf.pin_bit_mask |= 1ULL << GPIO_NUM_40;
-  io_conf.pin_bit_mask |= 1ULL << GPIO_NUM_42;
+  io_conf.pin_bit_mask = 0;
+  io_conf.pin_bit_mask |= 1ULL << LED_R90;
+  io_conf.pin_bit_mask |= 1ULL << LED_R45;
+  io_conf.pin_bit_mask |= 1ULL << LED_F;
+  io_conf.pin_bit_mask |= 1ULL << LED_L45;
+  io_conf.pin_bit_mask |= 1ULL << LED_L90;
+  io_conf.pin_bit_mask |= 1ULL << A_CW_CCW;
+  io_conf.pin_bit_mask |= 1ULL << B_CW_CCW;
+
+  io_conf.pin_bit_mask |= 1ULL << LED1;
+  io_conf.pin_bit_mask |= 1ULL << LED2;
+  io_conf.pin_bit_mask |= 1ULL << LED3;
+  io_conf.pin_bit_mask |= 1ULL << LED4;
+  io_conf.pin_bit_mask |= 1ULL << LED5;
+
+  io_conf.pin_bit_mask |= 1ULL << SUCTION_PWM;
+
   // 内部プルダウンしない
   io_conf.pull_down_en = (gpio_pulldown_t)0;
   // 内部プルアップしない
@@ -126,20 +133,6 @@ void init_adc_config(esp_adc_cal_characteristics_t &adc1Char) {
   adc1_config_channel_atten(ADC1_CHANNEL_8, atten); // L45
 
   esp_adc_cal_characterize(unit, atten, width, DEFAULT_VREF, &adc1Char);
-  // esp_adc_cal_characteristics_t *adc_chars =
-  //     calloc(1, sizeof(esp_adc_cal_characteristics_t));
-  // esp_adc_cal_characterize(unit, ADC1_CHANNEL_1, width, DEFAULT_VREF,
-  // adc_chars); esp_adc_cal_characterize(unit, ADC1_CHANNEL_4, width,
-  // DEFAULT_VREF, adc_chars); esp_adc_cal_characterize(unit, ADC1_CHANNEL_6,
-  // width, DEFAULT_VREF, adc_chars); esp_adc_cal_characterize(unit,
-  // ADC1_CHANNEL_8, width, DEFAULT_VREF, adc_chars);
-
-  // adc2_config_width(width);
-  // adc2_config_channel_atten(ADC2_CHANNEL_0, atten);
-  // adc2_config_channel_atten(ADC2_CHANNEL_1, atten);
-  // esp_adc_cal_characteristics_t *adc_chars2 =
-  //     calloc(1, sizeof(esp_adc_cal_characteristics_t));
-  // esp_adc_cal_characterize(unit2, atten, width, DEFAULT_VREF, adc_chars2);
 }
 #define READ_FLAG 0x80
 uint8_t mpu9250_read1byte(spi_device_handle_t spi, const uint8_t address) {
@@ -158,6 +151,8 @@ uint8_t mpu9250_read1byte(spi_device_handle_t spi, const uint8_t address) {
   ret = spi_device_polling_transmit(spi, &t); // Transmit!
   assert(ret == ESP_OK);                      // Should have had no issues.
 
+  printf("read: %d %d %d %d %d\n", t.rx_data[0], t.rx_data[1], t.rx_data[2],
+         t.rx_data[3], address);
   uint8_t data =
       SPI_SWAP_DATA_RX(*(uint16_t *)t.rx_data, 16) & 0x00FF; // FF + Data
 
@@ -165,15 +160,13 @@ uint8_t mpu9250_read1byte(spi_device_handle_t spi, const uint8_t address) {
 }
 uint8_t mpu9250_write1byte(spi_device_handle_t spi, const uint8_t address,
                            const uint8_t data) {
-  // １バイト読み込み
-
   esp_err_t ret;
   spi_transaction_t t;
   memset(&t, 0, sizeof(t)); // Zero out the transaction
   t.length = 16;            // SPI_ADDRESS(8bit) + SPI_DATA(8bit)
   t.flags = SPI_TRANS_USE_RXDATA;
 
-  uint16_t tx_data = (READ_FLAG) << 8 | (0x0f & data);
+  uint16_t tx_data = (address) << 8 | (0x0f & data);
   tx_data = SPI_SWAP_DATA_TX(tx_data, 16);
   t.tx_buffer = &tx_data;
 
@@ -182,40 +175,78 @@ uint8_t mpu9250_write1byte(spi_device_handle_t spi, const uint8_t address,
 
   // uint16_t data = SPI_SWAP_DATA_RX(*(uint16_t *)t.rx_data, 16) & 0x00FF; //
   // FF + Data
+  printf("write: %d %d %d %d %d\n", t.rx_data[0], t.rx_data[1], t.rx_data[2],
+         t.rx_data[3], address);
 
   return 0;
 }
-void mpu9250_init(spi_device_handle_t spi) {
+uint8_t mpu9250_read2byte(spi_device_handle_t spi, const uint8_t address) {
+  // １バイト読み込み
+
+  esp_err_t ret;
+  spi_transaction_t t;
+  memset(&t, 0, sizeof(t)); // Zero out the transaction
+  t.length = 24;            // SPI_ADDRESS(8bit) + SPI_DATA(8bit)
+  t.flags = SPI_TRANS_USE_RXDATA;
+
+  uint16_t tx_data = (address | READ_FLAG) << 8;
+  tx_data = SPI_SWAP_DATA_TX(tx_data, 24);
+  t.tx_buffer = &tx_data;
+
+  ret = spi_device_polling_transmit(spi, &t); // Transmit!
+  assert(ret == ESP_OK);                      // Should have had no issues.
+
+  printf("read2: %d %d %d %d %d\n", t.rx_data[0], t.rx_data[1], t.rx_data[2],
+         t.rx_data[3], address);
+  uint8_t data =
+      SPI_SWAP_DATA_RX(*(uint16_t *)t.rx_data, 24) & 0x00FF; // FF + Data
+
+  return data;
+}
+void mpu9250_init(spi_device_handle_t &spi) {
   // Who AM I
   uint8_t mpu_id = mpu9250_read1byte(spi, 0x75);
 
-  printf("MPU ID: %02X\n", mpu_id);
+  printf("initial MPU ID: %02X\n", mpu_id);
   mpu9250_write1byte(spi, 0x6B, 0x80); //スリープ解除?
-  vTaskDelay(100 / portTICK_RATE_MS);
+  vTaskDelay(100 / portTICK_PERIOD_MS);
   mpu9250_write1byte(spi, 0x68, 0x04); //ジャイロリセット
-  vTaskDelay(100 / portTICK_RATE_MS);
+  vTaskDelay(100 / portTICK_PERIOD_MS);
   mpu9250_write1byte(spi, 0x6A, 0x10); // uercontrol i2c=disable
-  vTaskDelay(100 / portTICK_RATE_MS);
-  mpu9250_write1byte(spi, 0x1B,
-                     0x18); // gyro config ジャイロのフルスケールを±2000°/s
-  vTaskDelay(100 / portTICK_RATE_MS);
+  vTaskDelay(100 / portTICK_PERIOD_MS);
+  mpu9250_write1byte(spi, 0x1B, 0x18); // 2000
+  vTaskDelay(100 / portTICK_PERIOD_MS);
 }
 
 void init_spi(spi_device_handle_t &spi) {
   esp_err_t ret;
   spi_bus_config_t buscfg = {
-      .mosi_io_num = GPIO_NUM_13,
-      .miso_io_num = GPIO_NUM_16,
-      .sclk_io_num = GPIO_NUM_14,
+      .mosi_io_num = EN_MOSI,
+      .miso_io_num = EN_MISO,
+      .sclk_io_num = EN_CLK,
       .quadwp_io_num = -1,  // unused
       .quadhd_io_num = -1,  // unused
-      .max_transfer_sz = 4, // bytes
+      .max_transfer_sz = 2, // bytes
+      .flags = SPICOMMON_BUSFLAG_MASTER,
+      .intr_flags = 0 // 割り込みをしない
   };
+
   spi_device_interface_config_t devcfg = {
-      .mode = 3,                     // SPI mode 3
-      .clock_speed_hz = 1000 * 1000, // Clock out at 500 kHz
-      .spics_io_num = GPIO_NUM_15,   // CS pin
-      .queue_size = 7, // We want to be able to queue 7 transactions at a
+      .mode = 3,
+      .clock_speed_hz = 7 * 1000 * 1000, // aaaaaaaaaaa
+      .spics_io_num = EN_GN_SSL,
+      .queue_size = 7,
+      //
+      // .input_delay_ns = 0,
+      // .command_bits = 1, // aaaaaaaaaaaaaaaasdasdas
+      // .address_bits = 7,
+      // .dummy_bits = 0,
+      // .duty_cycle_pos = 0,
+      // .cs_ena_pretrans = 0,
+      // .cs_ena_posttrans = 0,
+      // .flags = 0,
+      // .pre_cb = NULL,
+      // .post_cb = NULL //
   };
   // Initialize the SPI bus
   ret = spi_bus_initialize(SPI2_HOST, &buscfg, SPI_DMA_DISABLED);
@@ -238,182 +269,137 @@ static const auto channel = ADC1_CHANNEL_1;
 static const adc_bits_width_t width = ADC_WIDTH_BIT_12;
 static const adc_atten_t atten = ADC_ATTEN_DB_11;
 static const adc_unit_t unit = ADC_UNIT_1;
-void adc1_init(void) {
-  auto res = esp_adc_cal_check_efuse(ESP_ADC_CAL_VAL_EFUSE_VREF);
-  printf("aaaaaa %d", (int)res);
 
-  adc1_config_width(width);
-  adc1_config_channel_atten(channel, atten);
-  // adc_chars = calloc(1, sizeof(esp_adc_cal_characteristics_t));
-  esp_adc_cal_value_t val_type =
-      esp_adc_cal_characterize(unit, atten, width, DEFAULT_VREF, &adc_chars);
-  print_char_val_type(val_type);
-}
-static void check_efuse(void) {
-  // Check TP is burned into eFuse
-  if (esp_adc_cal_check_efuse(ESP_ADC_CAL_VAL_EFUSE_TP) == ESP_OK) {
-    printf("eFuse Two Point: Supported\n");
-  } else {
-    printf("eFuse Two Point: NOT supported\n");
-  }
-
-  // Check Vref is burned into eFuse
-  if (esp_adc_cal_check_efuse(ESP_ADC_CAL_VAL_EFUSE_VREF) == ESP_OK) {
-    printf("eFuse Vref: Supported\n");
-  } else {
-    printf("eFuse Vref: NOT supported\n");
-  }
-}
 #include "include/adachi.hpp"
 
-void task0(void *arg) {}
-
 extern "C" void app_main() {
-  Adachi adachi;
-  xTaskCreatePinnedToCore(task0, "Task0", 4096, NULL, 1, NULL, 0);
+  // Adachi adachi;
+  // xTaskCreatePinnedToCore(task0, "Task0", 8192, NULL, 1, NULL, 1);
+
+  SensingTask st;
+  st.create_task();
+
   init_gpio();
   init_uart();
   spi_device_handle_t spi;
   init_spi(spi);
   mpu9250_init(spi);
+  // icm20689 driver(EN_MOSI, EN_MISO, EN_CLK, EN_GN_SSL);
+
   int i = 0;
   /* Set the GPIO as a push/pull output */
 
-  // gpio_set_level(GPIO_NUM_1, 0);
-  // gpio_set_level(GPIO_NUM_4, 0);
-  // gpio_set_level(GPIO_NUM_6, 0);
-  // gpio_set_level(GPIO_NUM_8, 0);
-  // gpio_set_level(GPIO_NUM_10, 0);
+  gpio_set_level(LED1, 0);
+  gpio_set_level(LED2, 0);
+  gpio_set_level(LED3, 0);
+  gpio_set_level(LED4, 0);
+  gpio_set_level(LED5, 0);
 
-  gpio_set_level(GPIO_NUM_18, 0);
-  gpio_set_level(GPIO_NUM_19, 0);
-  gpio_set_level(GPIO_NUM_20, 0);
-  gpio_set_level(GPIO_NUM_21, 0);
-  gpio_set_level(GPIO_NUM_26, 0);
+  mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, A_PWM);
+  mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM1A, B_PWM);
+  mcpwm_gpio_init(MCPWM_UNIT_1, MCPWM2A, SUCTION_PWM);
 
-  // mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, GPIO_NUM_15);
-  // // init_pwm(pwm_config);
-  // static const mcpwm_operator_t OPR_PH = MCPWM_OPR_A;
-  // static const mcpwm_duty_type_t DUTY_MODE = MCPWM_DUTY_MODE_0;
-  // mcpwm_config_t pwm_config;
-  // pwm_config.frequency = 20 * 1000; // PWM周波数= 10kHz,
-  // pwm_config.cmpr_a = 0; // デューティサイクルの初期値（0%）
-  // pwm_config.cmpr_b = 0; // デューティサイクルの初期値（0%）
-  // pwm_config.counter_mode = MCPWM_UP_COUNTER;
-  // pwm_config.duty_mode = DUTY_MODE; // アクティブハイ
-  // pwm_config.cmpr_a = 25; // デューティサイクルの初期値（0%）
-  // mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_0, &pwm_config);
-  //  　uint16_t analog_data;
-  //   while(1){
-  //       analog_data = adc1_get_raw( ADC1_CHANNEL_4);
-  //   	printf("ADC=%d",analog_data);
-  //   }
-  encoder_init(PCNT_UNIT_0, GPIO_NUM_35, GPIO_NUM_36);
-  encoder_init(PCNT_UNIT_1, GPIO_NUM_33, GPIO_NUM_34);
+  // init_pwm(pwm_config);
+  static const mcpwm_duty_type_t DUTY_MODE = MCPWM_DUTY_MODE_0;
+
+  mcpwm_config_t motor_pwm_conf;
+  motor_pwm_conf.frequency = MOTOR_HZ; // PWM周波数= 10kHz,
+  motor_pwm_conf.cmpr_a = 0; // デューティサイクルの初期値（0%）
+  motor_pwm_conf.cmpr_b = 0; // デューティサイクルの初期値（0%）
+  motor_pwm_conf.counter_mode = MCPWM_UP_COUNTER;
+  motor_pwm_conf.duty_mode = DUTY_MODE; // アクティブハイ
+  motor_pwm_conf.cmpr_a = 25; // デューティサイクルの初期値（0%）
+
+  mcpwm_config_t suction_pwm_conf;
+  suction_pwm_conf.frequency = SUCTION_MOTOR_HZ; // PWM周波数= 10kHz,
+  suction_pwm_conf.cmpr_a = 0; // デューティサイクルの初期値（0%）
+  suction_pwm_conf.cmpr_b = 0; // デューティサイクルの初期値（0%）
+  suction_pwm_conf.counter_mode = MCPWM_UP_COUNTER;
+  suction_pwm_conf.duty_mode = DUTY_MODE; // アクティブハイ
+  suction_pwm_conf.cmpr_a = 25; // デューティサイクルの初期値（0%）
+
+  mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_0, &motor_pwm_conf);
+  mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_1, &motor_pwm_conf);
+  mcpwm_init(MCPWM_UNIT_1, MCPWM_TIMER_2, &suction_pwm_conf);
+
+  encoder_init(PCNT_UNIT_0, ENC_R_A, ENC_R_B);
+  encoder_init(PCNT_UNIT_1, ENC_L_A, ENC_L_B);
 
   // adc1_init();
-  adc1_config_width(width);
-  adc1_config_channel_atten(ADC1_CHANNEL_1, atten); // R90
-  adc1_config_channel_atten(ADC1_CHANNEL_4, atten); // R45
-  // adc1_config_channel_atten(ADC1_CHANNEL_6, atten); // Front
-  adc1_config_channel_atten(ADC1_CHANNEL_8, atten); // L45
-  adc2_config_channel_atten(ADC2_CHANNEL_1, atten); // L90
-  adc2_config_channel_atten(ADC2_CHANNEL_0, atten); // battery
+
+  adc2_config_channel_atten(SEN_R90, atten);
+  adc2_config_channel_atten(SEN_R45, atten);
+  adc2_config_channel_atten(SEN_F, atten);
+  adc2_config_channel_atten(SEN_L45, atten);
+  adc2_config_channel_atten(SEN_L90, atten);
+  adc2_config_channel_atten(BATTERY, atten);
+
   int battery;
-  esp_adc_cal_characteristics_t adcChar;
-
-  esp_adc_cal_value_t val_type =
-      esp_adc_cal_characterize(ADC_UNIT_1, atten, width, 1100, &adcChar);
-  esp_err_t res = esp_adc_cal_check_efuse(val_type);
-  if (val_type == ESP_ADC_CAL_VAL_EFUSE_VREF) {
-    printf("eFuse Vref");
-  } else if (val_type == ESP_ADC_CAL_VAL_EFUSE_TP) {
-    printf("Two Point");
-  } else {
-    printf("Default");
-  }
-  // printf("%d %d %d \n", ESP_ADC_CAL_VAL_EFUSE_VREF, ESP_ADC_CAL_VAL_EFUSE_TP,
-  //        ESP_ADC_CAL_VAL_DEFAULT_VREF);
-
-  printf("result = %d\n version=%d\n", res, 0);
-  check_efuse();
+  int sen_r90;
+  int sen_r45;
+  int sen_front;
+  int sen_l45;
+  int sen_l90;
 
   while (1) {
-    // printf("%d mV\n", voltage);
     i++;
-    // printf("hello world\n");
-
+    printf("SW1 %d \n", gpio_get_level(SW1));
     if (i % 2 == 0) {
-      // gpio_set_level(GPIO_NUM_38, 1);
-      gpio_set_level(GPIO_NUM_39, 1);
-      gpio_set_level(GPIO_NUM_40, 1);
-      gpio_set_level(GPIO_NUM_42, 1);
+      gpio_set_level(LED1, 1);
+      gpio_set_level(LED2, 1);
+      gpio_set_level(LED3, 1);
     } else {
-      // gpio_set_level(GPIO_NUM_38, 0);
-      gpio_set_level(GPIO_NUM_39, 0);
-      gpio_set_level(GPIO_NUM_40, 0);
-      gpio_set_level(GPIO_NUM_42, 0);
+      gpio_set_level(LED1, 0);
+      gpio_set_level(LED2, 0);
+      gpio_set_level(LED3, 0);
     }
     int16_t count_L;
     int16_t count_R;
-    pcnt_get_counter_value(PCNT_UNIT_0, &count_L);
+    pcnt_get_counter_value(PCNT_UNIT_0, &count_R);
     pcnt_counter_clear(PCNT_UNIT_0);
-    pcnt_get_counter_value(PCNT_UNIT_1, &count_R);
+    pcnt_get_counter_value(PCNT_UNIT_1, &count_L);
     pcnt_counter_clear(PCNT_UNIT_1);
-    uint32_t adc_reading = 0;
+    // uint16_t gyro = driver.readWhoAmI();
+    // printf("%u\n", gyro);
+    uint8_t who_am_i = mpu9250_read1byte(spi, 0x75);
+    uint8_t gyro_z_h = mpu9250_read1byte(spi, 0x47);
+    uint8_t gyro_z_l = mpu9250_read1byte(spi, 0x48);
+    signed short gyro = (signed short)(gyro_z_h << 8 | gyro_z_l);
+    printf("%d %d %d %d\n", who_am_i, gyro_z_h, gyro_z_l, gyro);
+    adc2_get_raw(SEN_R90, width, &sen_r90);
+    adc2_get_raw(SEN_R45, width, &sen_r45);
+    adc2_get_raw(SEN_F, width, &sen_front);
+    adc2_get_raw(SEN_L45, width, &sen_l45);
+    adc2_get_raw(SEN_L90, width, &sen_l90);
+    adc2_get_raw(BATTERY, width, &battery);
 
-    int sen_r90 = adc1_get_raw(ADC1_CHANNEL_1);
-    int sen_r45 = adc1_get_raw(ADC1_CHANNEL_4);
-    int sen_front = adc1_get_raw(ADC1_CHANNEL_6);
-    int sen_l45 = adc1_get_raw(ADC1_CHANNEL_8);
-    int sen_l90 = 0;
-    // adc_reading = adc1_get_raw((adc1_channel_t)channel);
-    // int sen_r90 = adc1_get_raw(ADC1_CHANNEL_1);
-    // = adc1_get_raw(ADC1_CHANNEL_4);
-    // = adc1_get_raw(ADC1_CHANNEL_6);
-    // = adc1_get_raw(ADC1_CHANNEL_8);
-    // uint32_t sen_r90 = 0;
-    // uint32_t sen_r45 = 0;
-    // uint32_t sen_front = 0;
-    // uint32_t sen_l45 = 0;
-    uint8_t mpu_id = mpu9250_read1byte(spi, 0x75);
-    adc2_get_raw(ADC2_CHANNEL_0, width, &sen_l90);
-    adc2_get_raw(ADC2_CHANNEL_1, width, &battery);
-    // esp_adc_cal_get_voltage(ADC_CHANNEL_1, &adcChar, &sen_r90);
-    // esp_adc_cal_get_voltage(ADC_CHANNEL_4, &adcChar, &sen_r45);
-    // esp_adc_cal_get_voltage(ADC_CHANNEL_6, &adcChar, &sen_front);
-    // esp_adc_cal_get_voltage(ADC_CHANNEL_8, &adcChar, &sen_l45);
-    printf("MPU ID: %02X, %d, %d, %d\n", mpu_id, count_L, count_R, adc_reading);
-    printf("%u, %u, %u, %u, %u  %d\n", sen_l90, sen_l45, sen_front, sen_r45,
-           sen_r90, battery);
-    printf("GPIO_NUM_MAX = %d\n", (int)GPIO_NUM_MAX);
-    // uint16_t result_mm = 0;
-    // bool result = vl.read(&result_mm);
-    // if (result) {
-    //   printf("took_ms = %d\r\n", result_mm);
-    // } else {
-    //   printf("faild took_ms = %d\r\n", result_mm);
-    // }
-    // printf("hello world %d %d %d\n", i, count_L, adc_ch1_4);
-    // if (i % 2 == 0) {
-    //   gpio_set_level(GPIO_NUM_1, 1);
-    //   gpio_set_level(GPIO_NUM_2, 1);
-    // } else {
-    //   gpio_set_level(GPIO_NUM_1, 0);
-    //   gpio_set_level(GPIO_NUM_2, 0);
-    // }
-    // mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, OPR_PH);
-    // float duty = 5;
-    // if (gpio_get_level(GPIO_NUM_4)) {
-    //   gpio_set_level(GPIO_NUM_18, 1);
-    //   duty = 5;
-    // } else {
-    //   gpio_set_level(GPIO_NUM_18, 0);
-    //   duty = 15;
-    // }
-    // mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, duty);
-    // mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, DUTY_MODE);
+    float battery_v = 3.33 * 2 * battery / 4096;
 
-    vTaskDelay(125 / portTICK_RATE_MS);
+    printf("gyro: %u, %d, %d, %0.3f\n", 0, count_L, count_R, battery_v);
+    printf("%d, %d, %d, %d, %d\n", sen_l90, sen_l45, sen_front, sen_r45,
+           sen_r90);
+    float duty = 20;
+    if (gpio_get_level(SW1)) {
+      gpio_set_level(A_CW_CCW, 1);
+      gpio_set_level(B_CW_CCW, 1);
+    } else {
+      gpio_set_level(A_CW_CCW, 0);
+      gpio_set_level(B_CW_CCW, 0);
+      gpio_set_level(SUCTION_PWM, 1);
+      duty = 100;
+    }
+    mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A);
+    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, duty);
+    mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, DUTY_MODE);
+
+    mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A);
+    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A, duty);
+    mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A, DUTY_MODE);
+
+    mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A);
+    mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A, duty);
+    mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A, DUTY_MODE);
+
+    vTaskDelay(10 / portTICK_RATE_MS);
   }
 }

@@ -9,6 +9,7 @@ set(COMPONENT_ADD_INCLUDEDIRS
 )
 set(COMPONENT_SRCS 
     "main.cpp"
+    "task/task_controller.cpp"
     "search/adachi.cpp"
     "search/logic.cpp"
     )
