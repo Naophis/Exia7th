@@ -15,8 +15,10 @@ public:
 
   virtual ~BaseTask() { delete_task(); }
 
-  void create_task() {
-    xTaskCreate(task_entry_point, name, stack_size, this, priority, &handle);
+  void create_task(const BaseType_t xCoreID) {
+    // xTaskCreate(task_entry_point, name, stack_size, this, priority, &handle);
+    xTaskCreatePinnedToCore(task_entry_point, name, stack_size, this, priority,
+                            &handle, xCoreID);
   }
 
   void delete_task() { vTaskDelete(handle); }

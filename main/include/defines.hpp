@@ -59,4 +59,86 @@
 #define LEDC_INTR_DISABLE 0
 // #define LEDC_HIGH_SPEED_MODE 0
 
+#define ENCODER_H_LIM_VAL 32767
+#define ENCODER_L_LIM_VAL -32767
+#define READ_FLAG 0x80
+#define ESC 0x1B
+
+typedef struct {
+  int16_t right;
+  int16_t left;
+} encoder_data_t;
+
+typedef struct {
+  int raw;
+  double data;
+} sensing_data_t;
+
+typedef struct {
+  sensing_data_t right90;
+  sensing_data_t right45;
+  sensing_data_t front;
+  sensing_data_t left45;
+  sensing_data_t left90;
+} led_sensor_t;
+
+typedef struct {
+  led_sensor_t led_sen;
+  led_sensor_t led_sen_after;
+  led_sensor_t led_sen_before;
+  sensing_data_t gyro;
+  sensing_data_t battery;
+  encoder_data_t encoder_raw;
+  encoder_data_t encoder;
+} sensing_entity_t;
+
+typedef struct {
+  double val;
+  double speed;
+  double accl;
+} xva_t;
+
+typedef struct {
+  double right;
+  double left;
+} rpm_t;
+
+typedef struct {
+  double v_r;
+  double v_l;
+  double v_c;
+  double dist;
+
+  double w;
+  double angle;
+
+  rpm_t rpm;
+} ego_entity_t;
+
+typedef struct {
+  double p;
+  double i;
+  double d;
+} pid_param_t;
+
+typedef struct {
+  double tire;
+  double dt;
+  double gyro_w_gain;
+  pid_param_t motor_pid;
+  pid_param_t gyro_pid;
+} ego_param_t;
+
+typedef struct {
+  double duty;
+  double error_p;
+  double error_i;
+  double error_d;
+} target_t;
+
+typedef struct {
+  target_t right;
+  target_t left;
+} pid_calc_t;
+
 #endif

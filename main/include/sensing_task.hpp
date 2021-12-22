@@ -1,31 +1,33 @@
 #ifndef SENSING_TASK_HPP
 #define SENSING_TASK_HPP
 
-#include "base_task.hpp"
 #include "defines.hpp"
+#include "driver/pcnt.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "icm20689.hpp"
+#include <driver/adc.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-class SensingTask : public BaseTask {
+class SensingTask {
 public:
-  SensingTask() : BaseTask("sensing task", 1, 8192) {}
+  SensingTask();
+  virtual ~SensingTask();
 
-  virtual ~SensingTask() {}
+  void create_task(const BaseType_t xCoreID);
+  static void task_entry_point(void *task_instance);
+
+  sensing_entity_t *entity;
+  void set_sensing_entity(sensing_entity_t *_entity);
+  virtual void task();
 
 private:
-  virtual void task() {
-    const TickType_t xDelay = 1000 / portTICK_PERIOD_MS;
-    int i = 0;
-    while (1) {
-      if (i % 2 == 0) {
-        gpio_set_level(LED5, 1);
-        gpio_set_level(LED4, 0);
-      } else {
-        gpio_set_level(LED4, 1);
-        gpio_set_level(LED5, 0);
-      }
-      i++;
-      vTaskDelay(xDelay);
-    }
-  }
+  ICM20689 gyro_if;
+  xTaskHandle handle = 0;
+  void encoder_init(const pcnt_unit_t unit, const gpio_num_t pinA,
+                    const gpio_num_t pinB);
 };
 
 #endif
