@@ -15,7 +15,7 @@ void PlanningTask::motor_enable() {
 }
 void PlanningTask::suction_enable() {
   suction_en = true;
-  mcpwm_start(MCPWM_UNIT_1, MCPWM_TIMER_2); //
+  mcpwm_start(MCPWM_UNIT_1, MCPWM_TIMER_2);
 }
 void PlanningTask::motor_disable() {
   motor_en = false;
@@ -42,8 +42,27 @@ void PlanningTask::set_ego_param_entity(ego_param_t *_param) {
   param = _param; //
 }
 void PlanningTask::task() {
-//   init_gpio();
   const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
+  init_gpio();
+
+  bool is_low_battery = false;
+  int battery_cnt = 0;
+  // buzzer IO
+  ledc_channel_config_t ledc_channel;
+  ledc_channel.channel = (ledc_channel_t)LEDC_CHANNEL_0;
+  ledc_channel.duty = 50;
+  ledc_channel.gpio_num = LED1;
+  ledc_channel.speed_mode = (ledc_mode_t)LEDC_HIGH_SPEED_MODE;
+  ledc_channel.timer_sel = (ledc_timer_t)LEDC_TIMER_0;
+
+  ledc_timer_config_t ledc_timer;
+  ledc_timer.duty_resolution = (ledc_timer_bit_t)LEDC_TIMER_10_BIT;
+  ledc_timer.freq_hz = 880;
+  ledc_timer.speed_mode = (ledc_mode_t)LEDC_HIGH_SPEED_MODE; // timer mode
+  ledc_timer.timer_num = (ledc_timer_t)LEDC_TIMER_0;         // timer index
+
+  ledc_channel_config(&ledc_channel);
+  ledc_timer_config(&ledc_timer);
 
   mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, A_PWM);
   mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM1A, B_PWM);
@@ -68,10 +87,33 @@ void PlanningTask::task() {
   while (1) {
     // 自己位置更新
     update_ego_motion();
-    float duty_r = 20;
-    float duty_l = 20;
-    float duty_suction = 20;
+    float duty_r = 0;
+    float duty_l = 0;
+    float duty_suction = 99;
     set_next_duty(duty_l, duty_r, duty_suction);
+
+    if (entity->battery.data <= LOW_BATTERY_TH) {
+      is_low_battery = true;
+    } else {
+      ledc_set_duty(ledc_channel.speed_mode, ledc_channel.channel, 0);
+      ledc_update_duty(ledc_channel.speed_mode, ledc_channel.channel);
+    }
+
+    if (is_low_battery) {
+      battery_cnt++;
+    }
+
+    if (battery_cnt > 0 && battery_cnt < BATTERY_BUZZER_MAX_CNT) {
+      ledc_set_duty(ledc_channel.speed_mode, ledc_channel.channel, 50);
+    } else {
+      ledc_set_duty(ledc_channel.speed_mode, ledc_channel.channel, 0);
+    }
+    if (battery_cnt >= BATTERY_BUZZER_MAX_CNT * 2) {
+      is_low_battery = false;
+      battery_cnt = 0;
+    }
+    ledc_update_duty(ledc_channel.speed_mode, ledc_channel.channel);
+
     vTaskDelay(xDelay);
   }
 }
@@ -79,8 +121,8 @@ void PlanningTask::task() {
 void PlanningTask::update_ego_motion() {
   const double dt = param->dt;
   const double tire = param->tire;
-  ego->v_r = (double)(PI * tire * entity->encoder.right / 4096.0 / dt / 2);
-  ego->v_l = (double)(PI * tire * entity->encoder.left / 4096.0 / dt / 2);
+  ego->v_r = (double)(PI * tire * entity->encoder.right / 4096.0 / dt / 1);
+  ego->v_l = (double)(PI * tire * entity->encoder.left / 4096.0 / dt / 1);
   ego->v_c = (ego->v_l + ego->v_r) / 2;
   ego->rpm.right = 30.0 * ego->v_r / (PI * tire / 2);
   ego->rpm.left = 30.0 * ego->v_l / (PI * tire / 2);
@@ -121,4 +163,36 @@ void PlanningTask::set_next_duty(const double duty_l, const double duty_r,
   } else {
     suction_disable();
   }
+}
+void PlanningTask::init_gpio() {
+  gpio_config_t io_conf;
+  // 割り込みをしない
+  io_conf.intr_type = GPIO_INTR_DISABLE;
+  // 出力モード
+  io_conf.mode = GPIO_MODE_OUTPUT;
+  // 設定したいピンのビットマスク
+  io_conf.pin_bit_mask = 0;
+  io_conf.pin_bit_mask |= 1ULL << LED_R90;
+  io_conf.pin_bit_mask |= 1ULL << LED_R45;
+  io_conf.pin_bit_mask |= 1ULL << LED_F;
+  io_conf.pin_bit_mask |= 1ULL << LED_L45;
+  io_conf.pin_bit_mask |= 1ULL << LED_L90;
+  io_conf.pin_bit_mask |= 1ULL << A_CW_CCW;
+  io_conf.pin_bit_mask |= 1ULL << B_CW_CCW;
+
+  io_conf.pin_bit_mask |= 1ULL << LED1;
+  io_conf.pin_bit_mask |= 1ULL << LED2;
+  io_conf.pin_bit_mask |= 1ULL << LED3;
+  io_conf.pin_bit_mask |= 1ULL << LED4;
+  io_conf.pin_bit_mask |= 1ULL << LED5;
+
+  io_conf.pin_bit_mask |= 1ULL << SUCTION_PWM;
+
+  // 内部プルダウンしない
+  io_conf.pull_down_en = (gpio_pulldown_t)0;
+  // 内部プルアップしない
+  io_conf.pull_up_en = (gpio_pullup_t)0;
+  // 設定をセットする
+  gpio_config(&io_conf);
+  // gpio_set_direction((gpio_num_t)GPIO_OUTPUT_IO_8,
 }

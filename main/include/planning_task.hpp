@@ -2,11 +2,18 @@
 #define PLANNING_TASK_HPP
 
 #include "defines.hpp"
+#include "driver/ledc.h"
 #include "driver/mcpwm.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "include/maze_solver.hpp"
 
+#define LEDC_HIGH_SPEED_MODE 0
+#define LEDC_TIMER_10_BIT 10
+#define LEDC_TIMER_0 0
+#define LEDC_CHANNEL_0 0
+#define BATTERY_BUZZER_MAX_CNT 250
+#define LOW_BATTERY_TH 3.9
 class PlanningTask {
 public:
   PlanningTask();
@@ -36,6 +43,7 @@ private:
   void update_ego_motion();
   void set_next_duty(const double duty_l, const double duty_r,
                      const double duty_suction);
+  void init_gpio();
 };
 
 #endif

@@ -79,7 +79,7 @@ void SensingTask::task() {
     pcnt_counter_clear(PCNT_UNIT_1);
 
     entity->gyro.raw = gyro_if.read_gyro_z();
-    entity->battery.data = 3.33 * 2 * entity->battery.raw / 4096;
+    entity->battery.data = BATTERY_GAIN * 2 * entity->battery.raw / 4096;
     entity->encoder.right = entity->encoder_raw.right;
     entity->encoder.left = -1 * entity->encoder_raw.left; //反転必須
     vTaskDelay(xDelay);

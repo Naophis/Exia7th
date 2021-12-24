@@ -50,7 +50,6 @@
 
 #define SUCTION_PWM GPIO_NUM_37
 
-// #define LEDC_HIGH_SPEED_MODE 0
 #define LEDC_AUTO_CLK 0
 #define LEDC_TIMER_10_BIT 10
 #define LEDC_TIMER_14_BIT 14
