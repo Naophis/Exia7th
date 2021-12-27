@@ -11,7 +11,7 @@ void SensingTask::task_entry_point(void *task_instance) {
   static_cast<SensingTask *>(task_instance)->task();
 }
 
-void SensingTask::set_sensing_entity(sensing_entity_t *_entity) {
+void SensingTask::set_sensing_entity(sensing_result_entity_t *_entity) {
   entity = _entity; //
 }
 void SensingTask::task() {

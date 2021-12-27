@@ -1,11 +1,48 @@
 #include "include/ui.hpp"
 
-void UserInterface::set_sensing_entity(sensing_entity_t *_entity) {
-  entity_ro = _entity; //
+void UserInterface::set_sensing_entity(sensing_result_entity_t *_entity) {
+  entity_ro = _entity;
 }
-void UserInterface::set_tgt_entity(tgt_entity_t *_tgt) {
-  tgt = _tgt; //
+
+void UserInterface::set_tgt_entity(tgt_entity_t *_tgt) { tgt = _tgt; }
+
+void UserInterface::set_ego_entity(ego_entity_t *_ego) { ego = _ego; }
+
+bool UserInterface::button_state() {
+  return !gpio_get_level(SW1); //
 }
+
+bool UserInterface::button_state_hold() {
+  if (!gpio_get_level(SW1)) {
+    while (!gpio_get_level(SW1))
+      ;
+    return true;
+  } else {
+    return false;
+  }
+}
+
+int UserInterface::encoder_operation() {
+  double v_r = ego->v_r;
+  if (v_r > ENC_OPE_V_R_TH) {
+    tgt->buzzer.hz = 880;
+    tgt->buzzer.time = 100;
+    int buzzer_timestamp = tgt->buzzer.timstamp;
+    tgt->buzzer.timstamp = ++buzzer_timestamp;
+    vTaskDelay(tgt->buzzer.time / portTICK_PERIOD_MS);
+    return 1;
+  }
+  if (v_r < -ENC_OPE_V_R_TH) {
+    tgt->buzzer.hz = 440;
+    tgt->buzzer.time = 100;
+    int buzzer_timestamp = tgt->buzzer.timstamp;
+    tgt->buzzer.timstamp = ++buzzer_timestamp;
+    vTaskDelay(tgt->buzzer.time / portTICK_PERIOD_MS);
+    return -1;
+  }
+  return 0;
+}
+
 void UserInterface::motion_check() {
   int c = 0;
   while (1) {

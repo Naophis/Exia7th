@@ -11,7 +11,7 @@ void BuzzerTask::task_entry_point(void *task_instance) {
   static_cast<BuzzerTask *>(task_instance)->task();
 }
 
-void BuzzerTask::set_sensing_entity(sensing_entity_t *_entity) {
+void BuzzerTask::set_sensing_entity(sensing_result_entity_t *_entity) {
   entity = _entity; //
 }
 void BuzzerTask::set_ego_entity(ego_entity_t *_ego) {

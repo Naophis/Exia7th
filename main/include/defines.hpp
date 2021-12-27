@@ -51,7 +51,6 @@
 #define SUCTION_MOTOR_HZ 10000
 
 #define SUCTION_PWM GPIO_NUM_37
-
 #define LEDC_AUTO_CLK 0
 #define LEDC_TIMER_10_BIT 10
 #define LEDC_TIMER_14_BIT 14
@@ -64,6 +63,10 @@
 #define ENCODER_L_LIM_VAL -32767
 #define READ_FLAG 0x80
 #define ESC 0x1B
+
+// constexpr double MOTION_CHECK_TH = 1000;
+#define MOTION_CHECK_TH 1000
+#define ENC_OPE_V_R_TH 200
 
 typedef struct {
   int16_t right;
@@ -91,7 +94,7 @@ typedef struct {
   sensing_data_t battery;
   encoder_data_t encoder_raw;
   encoder_data_t encoder;
-} sensing_entity_t;
+} sensing_result_entity_t;
 
 typedef struct {
   double vel;

@@ -77,7 +77,7 @@ extern "C" void app_main() {
   // Adachi adachi;
 
   ego_param_t param = {0};
-  sensing_entity_t sensing_entity = {0};
+  sensing_result_entity_t sensing_entity = {0};
   ego_entity_t ego = {0};
   tgt_entity_t tgt = {0};
   motion_tgt_val_t tgt_val = {0};

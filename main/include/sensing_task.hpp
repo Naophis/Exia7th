@@ -20,8 +20,8 @@ public:
   void create_task(const BaseType_t xCoreID);
   static void task_entry_point(void *task_instance);
 
-  sensing_entity_t *entity;
-  void set_sensing_entity(sensing_entity_t *_entity);
+  sensing_result_entity_t *entity;
+  void set_sensing_entity(sensing_result_entity_t *_entity);
   virtual void task();
 
 private:

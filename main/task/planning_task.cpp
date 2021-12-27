@@ -32,7 +32,7 @@ void PlanningTask::suction_disable() {
 void PlanningTask::task_entry_point(void *task_instance) {
   static_cast<PlanningTask *>(task_instance)->task();
 }
-void PlanningTask::set_sensing_entity(sensing_entity_t *_entity) {
+void PlanningTask::set_sensing_entity(sensing_result_entity_t *_entity) {
   entity_ro = _entity; //
 }
 void PlanningTask::set_ego_entity(ego_entity_t *_ego) {
@@ -50,6 +50,8 @@ void PlanningTask::buzzer(ledc_channel_config_t &buzzer_ch,
   if (buzzer_timestamp != tgt->buzzer.timstamp) {
     buzzer_time_cnt = 0;
     buzzer_timestamp = tgt->buzzer.timstamp;
+    ledc_channel_config(&buzzer_ch);
+    ledc_timer_config(&buzzer_timer);
   }
   if (buzzer_time_cnt < tgt->buzzer.time) {
     duty = 50;

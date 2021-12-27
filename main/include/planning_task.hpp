@@ -24,7 +24,7 @@ public:
   void motor_disable();
   void suction_disable();
 
-  void set_sensing_entity(sensing_entity_t *_entity);
+  void set_sensing_entity(sensing_result_entity_t *_entity);
   void set_ego_entity(ego_entity_t *_ego);
   void set_ego_param_entity(ego_param_t *_param);
   void set_tgt_entity(tgt_entity_t *_tgt);
@@ -35,7 +35,7 @@ public:
   virtual void task();
 
   // read only
-  sensing_entity_t *entity_ro;
+  sensing_result_entity_t *entity_ro;
   ego_param_t *param_ro;
   tgt_entity_t *tgt;
 

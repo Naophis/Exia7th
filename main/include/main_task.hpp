@@ -28,14 +28,14 @@ public:
   static void task_entry_point(void *task_instance);
 
   // read
-  sensing_entity_t *entity;
+  sensing_result_entity_t *entity_ro;
   ego_param_t *param;
   ego_entity_t *ego;
   PlanningTask *pt;
 
   // write
   tgt_entity_t *tgt;
-  void set_sensing_entity(sensing_entity_t *_entity);
+  void set_sensing_entity(sensing_result_entity_t *_entity);
   void set_ego_entity(ego_entity_t *_ego);
   void set_planning_task(PlanningTask *_pt);
   void set_tgt_entity(tgt_entity_t *_tgt);
@@ -44,13 +44,14 @@ public:
   void reset_gyro_ref();
   void reset_motion_tgt();
   void set_tgt_val(motion_tgt_val_t *_tgt) { tgt_val = _tgt; }
-  void dump1();
 
 private:
   xTaskHandle handle = 0;
   motion_tgt_val_t *tgt_val;
   UserInterface ui;
   MotionPlanning mp;
+  void dump1();
+  void operation();
 };
 
 #endif
