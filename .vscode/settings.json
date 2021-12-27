@@ -8,6 +8,9 @@
         "string": "cpp",
         "string_view": "cpp",
         "typeinfo": "cpp",
-        "bitset": "cpp"
+        "bitset": "cpp",
+        "random": "cpp",
+        "memory": "cpp",
+        "optional": "cpp"
     }
 }

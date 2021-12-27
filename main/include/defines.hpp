@@ -9,6 +9,8 @@
 #include "soc/adc_channel.h"
 #include "soc/ledc_periph.h"
 
+#define ABS(IN) ((IN) < 0 ? -(IN) : (IN))
+
 #define LED_R90 GPIO_NUM_9
 #define LED_R45 GPIO_NUM_10
 #define LED_F GPIO_NUM_13
@@ -46,7 +48,7 @@
 #define BATTERY ADC2_CHANNEL_9
 
 #define MOTOR_HZ 100000
-#define SUCTION_MOTOR_HZ 100000
+#define SUCTION_MOTOR_HZ 10000
 
 #define SUCTION_PWM GPIO_NUM_37
 
@@ -92,7 +94,7 @@ typedef struct {
 } sensing_entity_t;
 
 typedef struct {
-  double val;
+  double vel;
   double speed;
   double accl;
 } xva_t;
@@ -101,6 +103,12 @@ typedef struct {
   double right;
   double left;
 } rpm_t;
+
+typedef struct {
+  double duty_l;
+  double duty_r;
+  double duty_suction;
+} duty_t;
 
 typedef struct {
   double v_r;
@@ -112,6 +120,7 @@ typedef struct {
   double angle;
 
   rpm_t rpm;
+  duty_t duty;
 } ego_entity_t;
 
 typedef struct {
@@ -121,23 +130,53 @@ typedef struct {
 } pid_param_t;
 
 typedef struct {
+  double gyro_w_gain;
+} gyro_param_t;
+
+typedef struct {
   double tire;
   double dt;
-  double gyro_w_gain;
+  gyro_param_t gyro_param;
   pid_param_t motor_pid;
   pid_param_t gyro_pid;
 } ego_param_t;
 
 typedef struct {
-  double duty;
   double error_p;
   double error_i;
   double error_d;
-} target_t;
+} pid_error_t;
 
 typedef struct {
-  target_t right;
-  target_t left;
-} pid_calc_t;
+  pid_error_t v;
+  pid_error_t w;
+} pid_error_entity_t;
+
+// 指示速度
+typedef struct {
+  double v_max = 0;
+  double accl = 0;
+  double w_max = 0;
+  double alpha = 0;
+} motion_tgt_t;
+
+typedef struct {
+  int hz = 0;
+  int time = 0;
+  int timstamp = 0;
+} buzzer_t;
+
+typedef struct {
+  double gyro_zero_p_offset;
+  motion_tgt_t motion_tgt;
+  buzzer_t buzzer;
+} tgt_entity_t;
+
+typedef struct {
+  double v;
+  double accl;
+  double w;
+  double alpha;
+} motion_tgt_val_t;
 
 #endif

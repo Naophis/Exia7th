@@ -12,8 +12,8 @@
 #define LEDC_TIMER_10_BIT 10
 #define LEDC_TIMER_0 0
 #define LEDC_CHANNEL_0 0
-#define BATTERY_BUZZER_MAX_CNT 250
-#define LOW_BATTERY_TH 3.9
+#define BATTERY_BUZZER_MAX_CNT 25
+#define LOW_BATTERY_TH 3.95
 class PlanningTask {
 public:
   PlanningTask();
@@ -27,12 +27,19 @@ public:
   void set_sensing_entity(sensing_entity_t *_entity);
   void set_ego_entity(ego_entity_t *_ego);
   void set_ego_param_entity(ego_param_t *_param);
-
+  void set_tgt_entity(tgt_entity_t *_tgt);
+  void set_tgt_val(motion_tgt_val_t *_tgt) { tgt_val = _tgt; }
+  void buzzer(ledc_channel_config_t &buzzer_ch,
+              ledc_timer_config_t &buzzer_timer);
   static void task_entry_point(void *task_instance);
   virtual void task();
 
-  sensing_entity_t *entity;
-  ego_param_t *param;
+  // read only
+  sensing_entity_t *entity_ro;
+  ego_param_t *param_ro;
+  tgt_entity_t *tgt;
+
+  // read_write
   ego_entity_t *ego;
 
 private:
@@ -44,6 +51,13 @@ private:
   void set_next_duty(const double duty_l, const double duty_r,
                      const double duty_suction);
   void init_gpio();
+  void calc_tgt_duty();
+  void calc_next_tgt_val();
+  duty_t tgt_duty;
+  pid_error_entity_t error_entity;
+  motion_tgt_val_t *tgt_val;
+  int buzzer_time_cnt = 0;
+  int buzzer_timestamp = 0;
 };
 
 #endif

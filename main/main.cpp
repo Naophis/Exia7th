@@ -24,6 +24,7 @@
 // #include "VL53L0X.h"
 #include "esp_efuse_rtc_calib.h"
 
+#include "include/buzzer_task.hpp"
 #include "include/main_task.hpp"
 #include "include/planning_task.hpp"
 #include "include/sensing_task.hpp"
@@ -75,31 +76,43 @@ void init_gpio() {
 extern "C" void app_main() {
   // Adachi adachi;
 
-  ego_param_t param;
-  sensing_entity_t sensing_entity;
-  ego_entity_t ego;
-  SensingTask st;
-  PlanningTask pt;
-
+  ego_param_t param = {0};
+  sensing_entity_t sensing_entity = {0};
+  ego_entity_t ego = {0};
+  tgt_entity_t tgt = {0};
+  motion_tgt_val_t tgt_val = {0};
   init_gpio();
   init_uart();
 
   param.tire = 12.0;
   param.dt = 0.001;
-  param.gyro_w_gain = 0.00025;
+  param.motor_pid.p = 0.15;
+  param.motor_pid.i = 0.01;
+  param.gyro_pid.p = 0.5;
+  param.gyro_pid.i = 0.25;
 
+  param.gyro_param.gyro_w_gain = 0.00025;
+
+  SensingTask st ;
   st.set_sensing_entity(&sensing_entity);
   st.create_task(0);
 
+  PlanningTask pt;
   pt.set_sensing_entity(&sensing_entity);
   pt.set_ego_param_entity(&param);
   pt.set_ego_entity(&ego);
+  pt.set_tgt_entity(&tgt);
+  pt.set_tgt_val(&tgt_val);
   pt.create_task(0);
   // IntegratedEntity ie;
+
   MainTask mt;
   mt.set_sensing_entity(&sensing_entity);
   mt.set_ego_entity(&ego);
   mt.set_planning_task(&pt);
+  mt.set_tgt_entity(&tgt);
+  mt.set_tgt_val(&tgt_val);
+
   mt.create_task(1);
 
   /* Set the GPIO as a push/pull output */

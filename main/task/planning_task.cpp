@@ -33,36 +33,51 @@ void PlanningTask::task_entry_point(void *task_instance) {
   static_cast<PlanningTask *>(task_instance)->task();
 }
 void PlanningTask::set_sensing_entity(sensing_entity_t *_entity) {
-  entity = _entity; //
+  entity_ro = _entity; //
 }
 void PlanningTask::set_ego_entity(ego_entity_t *_ego) {
   ego = _ego; //
 }
 void PlanningTask::set_ego_param_entity(ego_param_t *_param) {
-  param = _param; //
+  param_ro = _param; //
+}
+void PlanningTask::set_tgt_entity(tgt_entity_t *_tgt) {
+  tgt = _tgt; //
+}
+void PlanningTask::buzzer(ledc_channel_config_t &buzzer_ch,
+                          ledc_timer_config_t &buzzer_timer) {
+  int duty = 0;
+  if (buzzer_timestamp != tgt->buzzer.timstamp) {
+    buzzer_time_cnt = 0;
+    buzzer_timestamp = tgt->buzzer.timstamp;
+  }
+  if (buzzer_time_cnt < tgt->buzzer.time) {
+    duty = 50;
+    buzzer_time_cnt++;
+    buzzer_timer.freq_hz = tgt->buzzer.hz;
+  }
+  ledc_set_duty(buzzer_ch.speed_mode, buzzer_ch.channel, duty);
+  ledc_update_duty(buzzer_ch.speed_mode, buzzer_ch.channel);
 }
 void PlanningTask::task() {
   const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
   init_gpio();
 
-  bool is_low_battery = false;
-  int battery_cnt = 0;
-  // buzzer IO
-  ledc_channel_config_t ledc_channel;
-  ledc_channel.channel = (ledc_channel_t)LEDC_CHANNEL_0;
-  ledc_channel.duty = 50;
-  ledc_channel.gpio_num = LED1;
-  ledc_channel.speed_mode = (ledc_mode_t)LEDC_HIGH_SPEED_MODE;
-  ledc_channel.timer_sel = (ledc_timer_t)LEDC_TIMER_0;
+  ledc_channel_config_t buzzer_ch;
+  ledc_timer_config_t buzzer_timer;
 
-  ledc_timer_config_t ledc_timer;
-  ledc_timer.duty_resolution = (ledc_timer_bit_t)LEDC_TIMER_10_BIT;
-  ledc_timer.freq_hz = 880;
-  ledc_timer.speed_mode = (ledc_mode_t)LEDC_HIGH_SPEED_MODE; // timer mode
-  ledc_timer.timer_num = (ledc_timer_t)LEDC_TIMER_0;         // timer index
+  buzzer_ch.channel = (ledc_channel_t)LEDC_CHANNEL_0;
+  buzzer_ch.duty = 0;
+  buzzer_ch.gpio_num = LED1;
+  buzzer_ch.speed_mode = (ledc_mode_t)LEDC_HIGH_SPEED_MODE;
+  buzzer_ch.timer_sel = (ledc_timer_t)LEDC_TIMER_0;
 
-  ledc_channel_config(&ledc_channel);
-  ledc_timer_config(&ledc_timer);
+  buzzer_timer.duty_resolution = (ledc_timer_bit_t)LEDC_TIMER_10_BIT;
+  buzzer_timer.freq_hz = 440;
+  buzzer_timer.speed_mode = (ledc_mode_t)LEDC_HIGH_SPEED_MODE; // timer mode
+  buzzer_timer.timer_num = (ledc_timer_t)LEDC_TIMER_0;         // timer index
+  ledc_channel_config(&buzzer_ch);
+  ledc_timer_config(&buzzer_timer);
 
   mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, A_PWM);
   mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM1A, B_PWM);
@@ -84,72 +99,57 @@ void PlanningTask::task() {
   suction_pwm_conf.duty_mode = MCPWM_DUTY_MODE_0; // アクティブハイ
   suction_pwm_conf.cmpr_a = 0; // デューティサイクルの初期値（0%）
   mcpwm_init(MCPWM_UNIT_1, MCPWM_TIMER_2, &suction_pwm_conf);
+  ego->angle = 0;
   while (1) {
     // 自己位置更新
     update_ego_motion();
-    float duty_r = 0;
-    float duty_l = 0;
-    float duty_suction = 99;
-    set_next_duty(duty_l, duty_r, duty_suction);
 
-    if (entity->battery.data <= LOW_BATTERY_TH) {
-      is_low_battery = true;
-    } else {
-      ledc_set_duty(ledc_channel.speed_mode, ledc_channel.channel, 0);
-      ledc_update_duty(ledc_channel.speed_mode, ledc_channel.channel);
-    }
+    calc_next_tgt_val();
+    calc_tgt_duty();
 
-    if (is_low_battery) {
-      battery_cnt++;
-    }
-
-    if (battery_cnt > 0 && battery_cnt < BATTERY_BUZZER_MAX_CNT) {
-      ledc_set_duty(ledc_channel.speed_mode, ledc_channel.channel, 50);
-    } else {
-      ledc_set_duty(ledc_channel.speed_mode, ledc_channel.channel, 0);
-    }
-    if (battery_cnt >= BATTERY_BUZZER_MAX_CNT * 2) {
-      is_low_battery = false;
-      battery_cnt = 0;
-    }
-    ledc_update_duty(ledc_channel.speed_mode, ledc_channel.channel);
-
+    set_next_duty(tgt_duty.duty_l, tgt_duty.duty_r, tgt_duty.duty_suction);
+    buzzer(buzzer_ch, buzzer_timer);
     vTaskDelay(xDelay);
   }
 }
 
 void PlanningTask::update_ego_motion() {
-  const double dt = param->dt;
-  const double tire = param->tire;
-  ego->v_r = (double)(PI * tire * entity->encoder.right / 4096.0 / dt / 1);
-  ego->v_l = (double)(PI * tire * entity->encoder.left / 4096.0 / dt / 1);
+  const double dt = param_ro->dt;
+  const double tire = param_ro->tire;
+  ego->v_r = (double)(PI * tire * entity_ro->encoder.right / 4096.0 / dt / 1);
+  ego->v_l = (double)(PI * tire * entity_ro->encoder.left / 4096.0 / dt / 1);
   ego->v_c = (ego->v_l + ego->v_r) / 2;
   ego->rpm.right = 30.0 * ego->v_r / (PI * tire / 2);
   ego->rpm.left = 30.0 * ego->v_l / (PI * tire / 2);
 
   ego->dist += ego->v_c * dt;
-  ego->w = param->gyro_w_gain * entity->gyro.raw;
+  ego->w = param_ro->gyro_param.gyro_w_gain *
+           (entity_ro->gyro.raw - tgt->gyro_zero_p_offset);
   ego->angle += ego->w * dt;
 }
 void PlanningTask::set_next_duty(const double duty_l, const double duty_r,
                                  const double duty_suction) {
   if (motor_en) {
-    if (duty_l >= 0)
+    if (duty_l >= 0) {
       gpio_set_level(A_CW_CCW, 1);
-    else
+    } else {
       gpio_set_level(A_CW_CCW, 0);
+    }
 
-    if (duty_r >= 0)
+    if (duty_r >= 0) {
       gpio_set_level(B_CW_CCW, 0);
-    else
+    } else {
       gpio_set_level(B_CW_CCW, 1);
+    }
 
-    mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A);
-    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, duty_r);
+    double tmp_duty_r = duty_r > 0 ? duty_r : -duty_r;
+    double tmp_duty_l = duty_l > 0 ? duty_l : -duty_l;
+    // mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A);
+    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, tmp_duty_l);
     mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A,
                         MCPWM_DUTY_MODE_0);
-    mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A);
-    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A, duty_l);
+    // mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A);
+    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A, tmp_duty_r);
     mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A,
                         MCPWM_DUTY_MODE_0);
   } else {
@@ -157,13 +157,14 @@ void PlanningTask::set_next_duty(const double duty_l, const double duty_r,
   }
   if (suction_en) {
     mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A);
-    mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A, duty_suction);
+    mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A, ABS(duty_suction));
     mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A,
                         MCPWM_DUTY_MODE_0);
   } else {
     suction_disable();
   }
 }
+
 void PlanningTask::init_gpio() {
   gpio_config_t io_conf;
   // 割り込みをしない
@@ -195,4 +196,34 @@ void PlanningTask::init_gpio() {
   // 設定をセットする
   gpio_config(&io_conf);
   // gpio_set_direction((gpio_num_t)GPIO_OUTPUT_IO_8,
+}
+void PlanningTask::calc_next_tgt_val() {
+  tgt_val->v += tgt_val->accl * dt; //
+}
+void PlanningTask::calc_tgt_duty() {
+
+  error_entity.v.error_p = tgt_val->v - ego->v_c;
+  error_entity.v.error_i += error_entity.v.error_p;
+
+  error_entity.w.error_p = tgt_val->w - ego->w;
+  // error_entity.w.error_p = 0; // tgt_val->w - ego->w;
+  error_entity.w.error_i += error_entity.w.error_p;
+
+  // error_entity.v.error_i = 0;
+
+  double duty_c = param_ro->motor_pid.p * error_entity.v.error_p +
+                  param_ro->motor_pid.i * error_entity.v.error_i;
+
+  double duty_roll = param_ro->gyro_pid.p * error_entity.w.error_p +
+                     param_ro->gyro_pid.i * error_entity.w.error_i;
+  // duty_roll = 0;
+  tgt_duty.duty_r = duty_c + duty_roll;
+  tgt_duty.duty_l = duty_c - duty_roll;
+
+  // tgt_duty.duty_l = 40;
+  // tgt_duty.duty_r = 40;
+
+  ego->duty.duty_r = tgt_duty.duty_r;
+  ego->duty.duty_l = tgt_duty.duty_l;
+  tgt_duty.duty_suction = 0;
 }
