@@ -70,7 +70,6 @@ void MainTask::dump1() {
     printf("SW1 %d \n", gpio_get_level(SW1));
 
     printf("gyro: %d\t(%0.3f)\n", entity_ro->gyro.raw, tgt->gyro_zero_p_offset);
-    printf("gyro: %d\n", entity_ro->gyro.raw);
     printf("battery: %0.3f\n", entity_ro->battery.data);
     printf("encoder: %d, %d\n", entity_ro->encoder.left,
            entity_ro->encoder.right);
@@ -123,6 +122,43 @@ void MainTask::operation() {
     vTaskDelay(xDelay);
   }
 }
+void MainTask::keep_pivot() {
+  const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
+  ui.motion_check();
+  pt->motor_enable();
+
+  tgt_val->v = 0;
+  tgt_val->accl = 0;
+  tgt_val->w = 0;
+  tgt_val->alpha = 0;
+
+  while (1) {
+    if (ui.button_state_hold())
+      break;
+    vTaskDelay(xDelay);
+  }
+}
+void MainTask::entity_to_json(nlohmann::json &j) {
+  j = nlohmann::json{
+      {"led_sen",
+       {{"right90", entity_ro->led_sen.right90.raw},
+        {"right45", entity_ro->led_sen.right45.raw},
+        {"front", entity_ro->led_sen.front.raw},
+        {"left45", entity_ro->led_sen.left45.raw},
+        {"left90", entity_ro->led_sen.left90.raw}}},
+      {"gyro", {{"raw", entity_ro->gyro.raw}, {"data", entity_ro->gyro.data}}},
+      {"battery",
+       {{"raw", entity_ro->battery.raw}, {"data", entity_ro->battery.data}}},
+      {"ego", {"angle", ego->angle}, {"dist", ego->dist}}};
+}
+void MainTask::echo_sensing_result_with_json() {
+  const TickType_t xDelay = 25 / portTICK_PERIOD_MS;
+  while (1) {
+    entity_to_json(json_instance);
+    printf("%s\n", json_instance.dump().c_str());
+    vTaskDelay(xDelay);
+  }
+}
 
 void MainTask::task() {
   const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
@@ -142,7 +178,22 @@ void MainTask::task() {
   tgt_val->accl = 0;
   tgt_val->w = 0;
   tgt_val->alpha = 0;
-  operation();
+  // operation();
+
+  ui.motion_check();
+  echo_sensing_result_with_json();
 
   dump1(); // taskの最終行に配置すること
+  while (1) {
+    vTaskDelay(xDelay);
+  }
+}
+
+void MainTask::recieve_data() {
+  // Read data from UART.
+  const uart_port_t uart_num = UART_NUM_2;
+  uint8_t data[128];
+  int length = 0;
+  ESP_ERROR_CHECK(uart_get_buffered_data_len(uart_num, (size_t *)&length));
+  length = uart_read_bytes(uart_num, data, length, 100);
 }

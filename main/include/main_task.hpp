@@ -3,6 +3,7 @@
 
 #include "defines.hpp"
 #include "driver/pcnt.h"
+#include "driver/uart.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "icm20689.hpp"
@@ -16,6 +17,8 @@
 #include "include/integrated_entity.hpp"
 #include "include/motion_planning.hpp"
 #include "include/ui.hpp"
+
+#include "libs/nlohmnn-json/json.hpp"
 constexpr int RESET_GYRO_LOOP_CNT = 100;
 class MainTask {
 public:
@@ -52,6 +55,11 @@ private:
   MotionPlanning mp;
   void dump1();
   void operation();
+  void keep_pivot();
+  void echo_sensing_result_with_json();
+  nlohmann::json json_instance;
+  void entity_to_json(nlohmann::json &j);
+  void recieve_data();
 };
 
 #endif
