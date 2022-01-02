@@ -27,6 +27,8 @@
 #define LED3 GPIO_NUM_45
 #define LED4 GPIO_NUM_8
 #define LED5 GPIO_NUM_21
+#define LED_R GPIO_NUM_8
+#define LED_L GPIO_NUM_21
 
 #define SW1 GPIO_NUM_38
 
@@ -66,7 +68,18 @@
 
 // constexpr double MOTION_CHECK_TH = 1000;
 #define MOTION_CHECK_TH 1000
-#define ENC_OPE_V_R_TH 200
+#define ENC_OPE_V_R_TH 175
+
+union LED_bit {
+  struct {
+    unsigned int b1 : 1;
+    unsigned int b2 : 1;
+    unsigned int b3 : 1;
+    unsigned int b4 : 1;
+    unsigned int b5 : 4;
+  };
+  uint8_t byte;
+};
 
 typedef struct {
   int16_t right;

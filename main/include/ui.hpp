@@ -3,7 +3,15 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "include/Music.hpp"
 #include "include/defines.hpp"
+
+enum class MODE : int {
+  SEARCH = 0,
+  SEARCH2 = 1,
+  FAST1 = 2,
+  FAST2 = 3,
+};
 
 class UserInterface {
 public:
@@ -20,9 +28,17 @@ public:
   void LED_off_all();
   void LED_on_all();
 
+  void LED(int byte, int state);
+  void LED_bit(int b1, int b2, int b3, int b4);
+  void LED_otherwise(int byte, int state);
+
   int encoder_operation();
   bool button_state();
   bool button_state_hold();
+  void music_async(MUSIC m, int time);
+  void music_sync(MUSIC m, int time);
+  void hello_exia();
+  void coin(int t);
 
 private:
   sensing_result_entity_t *entity_ro;

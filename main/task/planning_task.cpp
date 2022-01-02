@@ -50,13 +50,13 @@ void PlanningTask::buzzer(ledc_channel_config_t &buzzer_ch,
   if (buzzer_timestamp != tgt->buzzer.timstamp) {
     buzzer_time_cnt = 0;
     buzzer_timestamp = tgt->buzzer.timstamp;
+    buzzer_timer.freq_hz = tgt->buzzer.hz;
     ledc_channel_config(&buzzer_ch);
     ledc_timer_config(&buzzer_timer);
   }
   if (buzzer_time_cnt < tgt->buzzer.time) {
     duty = 50;
     buzzer_time_cnt++;
-    buzzer_timer.freq_hz = tgt->buzzer.hz;
   }
   ledc_set_duty(buzzer_ch.speed_mode, buzzer_ch.channel, duty);
   ledc_update_duty(buzzer_ch.speed_mode, buzzer_ch.channel);

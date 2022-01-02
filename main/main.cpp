@@ -5,6 +5,7 @@
 #include "driver/pcnt.h"
 #include "driver/spi_common.h"
 #include "driver/spi_master.h"
+#include "driver/timer.h"
 #include "driver/uart.h"
 #include "esp_adc_cal.h"
 #include "freertos/FreeRTOS.h"
@@ -28,6 +29,12 @@
 #include "include/main_task.hpp"
 #include "include/planning_task.hpp"
 #include "include/sensing_task.hpp"
+
+ego_param_t param = {0};
+sensing_result_entity_t sensing_entity = {0};
+ego_entity_t ego = {0};
+tgt_entity_t tgt = {0};
+motion_tgt_val_t tgt_val = {0};
 
 void init_uart() {
   uart_config_t uart_config;
@@ -72,17 +79,129 @@ void init_gpio() {
   gpio_config(&io_conf);
   // gpio_set_direction((gpio_num_t)GPIO_OUTPUT_IO_8,
 }
+#define TIMER_RESOLUTION_HZ 1000000 // 1MHz resolution
+bool itr_state = true;
+ICM20689 gyro_if;
+const adc_bits_width_t width = ADC_WIDTH_BIT_12;
+const adc_atten_t atten = ADC_ATTEN_DB_11;
+
+int isr_cnt = 0;
+
+void encoder_init(const pcnt_unit_t unit, const gpio_num_t pinA,
+                  const gpio_num_t pinB) {
+  pcnt_config_t pcnt_config_0 = {
+      .pulse_gpio_num = pinA,
+      .ctrl_gpio_num = pinB,
+      .lctrl_mode = PCNT_MODE_KEEP,
+      .hctrl_mode = PCNT_MODE_REVERSE,
+      .pos_mode = PCNT_COUNT_INC,
+      .neg_mode = PCNT_COUNT_DEC,
+      .counter_h_lim = ENCODER_H_LIM_VAL,
+      .counter_l_lim = ENCODER_L_LIM_VAL,
+      .unit = unit,
+      .channel = PCNT_CHANNEL_0,
+  };
+  pcnt_config_t pcnt_config_1 = {
+      .pulse_gpio_num = pinB,
+      .ctrl_gpio_num = pinA,
+      .lctrl_mode = PCNT_MODE_REVERSE,
+      .hctrl_mode = PCNT_MODE_KEEP,
+      .pos_mode = PCNT_COUNT_INC,
+      .neg_mode = PCNT_COUNT_DEC,
+      .counter_h_lim = ENCODER_H_LIM_VAL,
+      .counter_l_lim = ENCODER_L_LIM_VAL,
+      .unit = unit,
+      .channel = PCNT_CHANNEL_1,
+  };
+
+  pcnt_unit_config(&pcnt_config_0);
+  pcnt_unit_config(&pcnt_config_1);
+
+  pcnt_counter_pause(unit);
+  pcnt_counter_clear(unit);
+
+  pcnt_counter_resume(unit);
+}
+
+void init_sensing_device() {
+
+  // gyro_if.init();
+  // gyro_if.setup();
+
+  // sensing init
+  adc2_config_channel_atten(SEN_R90, atten);
+  adc2_config_channel_atten(SEN_R45, atten);
+  adc2_config_channel_atten(SEN_F, atten);
+  adc2_config_channel_atten(SEN_L45, atten);
+  adc2_config_channel_atten(SEN_L90, atten);
+  adc2_config_channel_atten(BATTERY, atten);
+  encoder_init(PCNT_UNIT_0, ENC_R_A, ENC_R_B);
+  encoder_init(PCNT_UNIT_1, ENC_L_A, ENC_L_B);
+}
+
+void isr_a() {
+  if (isr_cnt == 0) {
+    // adc2_get_raw(BATTERY, width, &sensing_entity.battery.raw);
+    gpio_set_level(LED3, 1);
+  } else if (isr_cnt == 1) {
+  } else if (isr_cnt == 2) {
+  } else if (isr_cnt == 3) {
+  } else if (isr_cnt == 4) {
+  }
+}
+void isr_b() {
+  if (isr_cnt == 0) {
+  } else if (isr_cnt == 1) {
+  } else if (isr_cnt == 2) {
+  } else if (isr_cnt == 3) {
+  } else if (isr_cnt == 4) {
+    gpio_set_level(LED3, 0);
+  }
+  isr_cnt++;
+  if (isr_cnt == 5) {
+    isr_cnt = 0;
+  }
+}
+
+void timer_isr(void *parameters) {
+  timer_group_clr_intr_status_in_isr(TIMER_GROUP_0, TIMER_0);
+  timer_group_enable_alarm_in_isr(TIMER_GROUP_0, TIMER_0);
+  if (itr_state) {
+    timer_set_alarm_value(TIMER_GROUP_0, TIMER_0, 2500); // 250 nsec
+    isr_a();
+  } else {
+    timer_set_alarm_value(TIMER_GROUP_0, TIMER_0, 7500); // 1000 nsec
+    isr_b();
+  }
+  itr_state ^= itr_state;
+}
+
+void init_sensing_timer() {
+  auto group = TIMER_GROUP_0;
+  auto timer = TIMER_0;
+
+  timer_config_t config;
+  config.alarm_en = TIMER_ALARM_EN;
+  config.counter_en = TIMER_PAUSE;
+  config.clk_src = TIMER_SRC_CLK_APB;
+  config.auto_reload = TIMER_AUTORELOAD_EN;
+  config.counter_dir = TIMER_COUNT_UP;
+  config.divider = 8; // 80Mhz / divider
+  timer_init(group, timer, &config);
+
+  timer_set_alarm_value(TIMER_GROUP_0, TIMER_0, 250); // 1000 nsec
+  timer_isr_register(TIMER_GROUP_0, TIMER_0, timer_isr, NULL, 0, NULL);
+  timer_enable_intr(TIMER_GROUP_0, TIMER_0);
+  timer_set_counter_value(TIMER_GROUP_0, TIMER_0, 0);
+  timer_start(TIMER_GROUP_0, TIMER_0);
+}
 
 extern "C" void app_main() {
   // Adachi adachi;
 
-  ego_param_t param = {0};
-  sensing_result_entity_t sensing_entity = {0};
-  ego_entity_t ego = {0};
-  tgt_entity_t tgt = {0};
-  motion_tgt_val_t tgt_val = {0};
   init_gpio();
   init_uart();
+  // init_sensing_device();
 
   param.tire = 12.0;
   param.dt = 0.001;
@@ -92,8 +211,8 @@ extern "C" void app_main() {
   param.gyro_pid.i = 0.25;
 
   param.gyro_param.gyro_w_gain = 0.00025;
-
-  SensingTask st ;
+  // init_sensing_timer();
+  SensingTask st;
   st.set_sensing_entity(&sensing_entity);
   st.create_task(0);
 
@@ -124,6 +243,9 @@ extern "C" void app_main() {
   gpio_set_level(LED5, 0);
 
   while (1) {
+    // printf("end\n");
+    // printf("%d\n", sensing_entity.battery.raw);
+
     vTaskDelay(100 / portTICK_RATE_MS);
   }
 }

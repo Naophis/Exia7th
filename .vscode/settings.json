@@ -13,6 +13,9 @@
         "memory": "cpp",
         "optional": "cpp",
         "functional": "cpp",
-        "numeric": "cpp"
-    }
+        "numeric": "cpp",
+        "complex": "cpp",
+        "cstddef": "cpp"
+    },
+    "idf.adapterTargetName": "esp32s3"
 }

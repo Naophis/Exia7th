@@ -54,7 +54,7 @@ private:
   UserInterface ui;
   MotionPlanning mp;
   void dump1();
-  void operation();
+  int select_mode();
   void keep_pivot();
   void echo_sensing_result_with_json();
   nlohmann::json json_instance;

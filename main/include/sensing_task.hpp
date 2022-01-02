@@ -3,6 +3,7 @@
 
 #include "defines.hpp"
 #include "driver/pcnt.h"
+#include "driver/timer.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "icm20689.hpp"
@@ -19,6 +20,8 @@ public:
 
   void create_task(const BaseType_t xCoreID);
   static void task_entry_point(void *task_instance);
+  static void IRAM_ATTR isr_entry_point(void *task_instance);
+  static void IRAM_ATTR timerCallback(void *arg);
 
   sensing_result_entity_t *entity;
   void set_sensing_entity(sensing_result_entity_t *_entity);
@@ -27,8 +30,16 @@ public:
 private:
   ICM20689 gyro_if;
   xTaskHandle handle = 0;
+  timer_isr_handle_t handle_isr;
   void encoder_init(const pcnt_unit_t unit, const gpio_num_t pinA,
                     const gpio_num_t pinB);
+  void timer_init_grp0_timer0();
+  void IRAM_ATTR timer_isr();
+  // void timer_isr(void *parameters);
+
+  bool itr_state = true;
+  int c = 0;
+  int d = 0;
 };
 
 #endif

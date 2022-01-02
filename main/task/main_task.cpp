@@ -34,12 +34,7 @@ void MainTask::check_battery() {
   if (entity_ro->battery.data > LOW_BATTERY_TH)
     return;
   while (1) {
-    tgt->buzzer.hz = 440;
-    tgt->buzzer.time = 250;
-    int buzzer_timestamp = tgt->buzzer.timstamp;
-    tgt->buzzer.timstamp = ++buzzer_timestamp;
-    vTaskDelay(tgt->buzzer.time / portTICK_PERIOD_MS);
-    // wait
+    ui.music_sync(MUSIC::G5, 250);
     vTaskDelay(tgt->buzzer.time / portTICK_PERIOD_MS);
   }
 }
@@ -103,24 +98,30 @@ void MainTask::dump1() {
   }
 }
 
-void MainTask::operation() {
+int MainTask::select_mode() {
   const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
   int mode_num = 0;
+  LED_bit lbit;
+  lbit.byte = 0;
   while (1) {
     int res = ui.encoder_operation();
     mode_num += res;
-    printf("%d %0.3f\n", mode_num, ego->v_r);
+    if (mode_num == -1) {
+      mode_num = 14;
+    } else if (mode_num == 15) {
+      mode_num = (int)(MODE::SEARCH);
+    }
+    lbit.byte = mode_num + 1;
+    ui.LED_bit(lbit.b1, lbit.b2, lbit.b3, lbit.b4);
     bool break_btn = ui.button_state_hold();
     if (break_btn) {
-      tgt->buzzer.hz = 880;
-      tgt->buzzer.time = 100;
-      int buzzer_timestamp = tgt->buzzer.timstamp;
-      tgt->buzzer.timstamp = ++buzzer_timestamp;
-      vTaskDelay(tgt->buzzer.time / portTICK_PERIOD_MS);
+      ui.coin(100);
       break;
     }
     vTaskDelay(xDelay);
   }
+
+  return mode_num;
 }
 void MainTask::keep_pivot() {
   const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
@@ -149,10 +150,10 @@ void MainTask::entity_to_json(nlohmann::json &j) {
       {"gyro", {{"raw", entity_ro->gyro.raw}, {"data", entity_ro->gyro.data}}},
       {"battery",
        {{"raw", entity_ro->battery.raw}, {"data", entity_ro->battery.data}}},
-      {"ego", {"angle", ego->angle}, {"dist", ego->dist}}};
+      {"ego", {{"angle", ego->angle}, {"dist", ego->dist}}}};
 }
 void MainTask::echo_sensing_result_with_json() {
-  const TickType_t xDelay = 25 / portTICK_PERIOD_MS;
+  const TickType_t xDelay = 50 / portTICK_PERIOD_MS;
   while (1) {
     entity_to_json(json_instance);
     printf("%s\n", json_instance.dump().c_str());
@@ -162,6 +163,8 @@ void MainTask::echo_sensing_result_with_json() {
 
 void MainTask::task() {
   const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
+
+  ui.coin(100);
 
   tgt_val->v = 0;
   tgt_val->accl = 0;
@@ -178,7 +181,7 @@ void MainTask::task() {
   tgt_val->accl = 0;
   tgt_val->w = 0;
   tgt_val->alpha = 0;
-  // operation();
+  int mode = select_mode();
 
   ui.motion_check();
   echo_sensing_result_with_json();
