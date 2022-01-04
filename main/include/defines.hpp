@@ -4,7 +4,8 @@
 
 #include "driver/gpio.h"
 #include "driver/ledc.h"
-#include "include/defines.hpp"
+#include "gen_code/bus.h"
+#include "include/maze_solver.hpp"
 #include "sdkconfig.h"
 #include "soc/adc_channel.h"
 #include "soc/ledc_periph.h"
@@ -17,10 +18,17 @@
 #define LED_L45 GPIO_NUM_16
 #define LED_L90 GPIO_NUM_18
 
+#define TXD GPIO_NUM_43
+#define RXD GPIO_NUM_44
+#define RTS GPIO_NUM_15
+#define CTS GPIO_NUM_16
+
 #define A_CW_CCW GPIO_NUM_39
 #define B_CW_CCW GPIO_NUM_41
 #define A_PWM GPIO_NUM_40
 #define B_PWM GPIO_NUM_42
+
+#define BUZZER GPIO_NUM_34
 
 #define LED1 GPIO_NUM_1
 #define LED2 GPIO_NUM_46
@@ -65,6 +73,7 @@
 #define ENCODER_L_LIM_VAL -32767
 #define READ_FLAG 0x80
 #define ESC 0x1B
+#define BUF_SIZE (1024)
 
 // constexpr double MOTION_CHECK_TH = 1000;
 #define MOTION_CHECK_TH 1000
@@ -72,11 +81,12 @@
 
 union LED_bit {
   struct {
+    unsigned int b0 : 1;
     unsigned int b1 : 1;
     unsigned int b2 : 1;
     unsigned int b3 : 1;
     unsigned int b4 : 1;
-    unsigned int b5 : 4;
+    unsigned int b5 : 3;
   };
   uint8_t byte;
 };
@@ -146,15 +156,26 @@ typedef struct {
 } pid_param_t;
 
 typedef struct {
-  double gyro_w_gain;
+  double gyro_w_gain_right;
+  double gyro_w_gain_left;
 } gyro_param_t;
 
 typedef struct {
-  double tire;
   double dt;
-  gyro_param_t gyro_param;
+  double tire;
+  double gear_a;
+  double gear_b;
+  double max_duty;
+  double Ke;
+  double Km;
+  double Resist;
+  double Mass;
+  double Lm;
   pid_param_t motor_pid;
   pid_param_t gyro_pid;
+  pid_param_t sensor_pid;
+  pid_param_t sensor_pid_dia;
+  gyro_param_t gyro_param;
 } ego_param_t;
 
 typedef struct {
@@ -184,15 +205,71 @@ typedef struct {
 
 typedef struct {
   double gyro_zero_p_offset;
-  motion_tgt_t motion_tgt;
+  // motion_tgt_t motion_tgt;
   buzzer_t buzzer;
 } tgt_entity_t;
 
 typedef struct {
-  double v;
-  double accl;
-  double w;
-  double alpha;
+  int time_stamp = 0;
+  int error_gyro_reset = 0;
+  int error_vel_reset = 0;
+} planning_req_t;
+
+typedef struct {
+  t_tgt tgt_in;
+  t_ego ego_in;
+  int32_t motion_mode;
+  planning_req_t pl_req;
 } motion_tgt_val_t;
+
+enum class RUN_MODE2 : int {
+  NONE_MODE = 0,
+  KEEP = 0,
+  SLAROM_RUN = 1,
+  PIVOT_TURN = 2,
+  ST_RUN = 3,
+  SLALOM_RUN2 = 4,
+};
+
+typedef struct {
+  double v_max;
+  double v_end;
+  double accl;
+  double decel;
+  double dist;
+} param_straight_t;
+
+typedef struct {
+  double w_max;
+  double w_end;
+  double alpha;
+  double ang;
+  TurnDirection RorL;
+} param_roll_t;
+
+typedef struct {
+  double radius;
+  double v_max;
+  double v_end;
+  double ang;
+  TurnDirection RorL;
+} param_normal_slalom_t;
+
+typedef struct {
+  double v_max;
+  double accl;
+  double decel;
+  double dist;
+  double w_max;
+  double alpha;
+  double ang;
+  int sla_type;
+} test_mode_t;
+
+typedef struct {
+  std::vector<point_t> goals;
+  int user_mode;
+  test_mode_t test_mode;
+} system_t;
 
 #endif

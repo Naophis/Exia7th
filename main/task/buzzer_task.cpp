@@ -42,6 +42,8 @@ void BuzzerTask::init_gpio() {
   io_conf.pin_bit_mask |= 1ULL << LED4;
   io_conf.pin_bit_mask |= 1ULL << LED5;
 
+  io_conf.pin_bit_mask |= 1ULL << BUZZER;
+
   io_conf.pin_bit_mask |= 1ULL << SUCTION_PWM;
 
   // 内部プルダウンしない
@@ -67,7 +69,7 @@ void BuzzerTask::task() {
 
   buzzer_ch.channel = (ledc_channel_t)LEDC_CHANNEL_0;
   buzzer_ch.duty = 50;
-  buzzer_ch.gpio_num = LED1;
+  buzzer_ch.gpio_num = BUZZER;
   buzzer_ch.speed_mode = (ledc_mode_t)LEDC_HIGH_SPEED_MODE;
   buzzer_ch.timer_sel = (ledc_timer_t)LEDC_TIMER_0;
 

@@ -14,11 +14,21 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "esp_system.h"
+#include "esp_vfs.h"
+#include "esp_vfs_fat.h"
+
+#include "gen_code/mpc_tgt_calc.h"
 #include "include/integrated_entity.hpp"
 #include "include/motion_planning.hpp"
 #include "include/ui.hpp"
 
 #include "libs/nlohmnn-json/json.hpp"
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+
 constexpr int RESET_GYRO_LOOP_CNT = 100;
 class MainTask {
 public:
@@ -46,20 +56,45 @@ public:
   void check_battery();
   void reset_gyro_ref();
   void reset_motion_tgt();
-  void set_tgt_val(motion_tgt_val_t *_tgt) { tgt_val = _tgt; }
+  void set_tgt_val(motion_tgt_val_t *_tgt);
+  void set_ego_param_entity(ego_param_t *_param);
 
 private:
   xTaskHandle handle = 0;
   motion_tgt_val_t *tgt_val;
   UserInterface ui;
   MotionPlanning mp;
+  nlohmann::json json_instance;
+
+  param_straight_t ps;
+  param_roll_t pr;
+  param_normal_slalom_t pns;
+  system_t sys;
+  
+  const char *base_path = "/spiflash";
+  esp_vfs_fat_mount_config_t mount_config;
+  wl_handle_t s_wl_handle = WL_INVALID_HANDLE;
+
   void dump1();
   int select_mode();
   void keep_pivot();
   void echo_sensing_result_with_json();
-  nlohmann::json json_instance;
   void entity_to_json(nlohmann::json &j);
   void recieve_data();
+  void test_run();
+
+  void reset_ego_data();
+  void reset_tgt_data();
+  void req_error_reset();
+  void test_turn();
+  void test_sla();
+  void rx_uart_json();
+
+  void save_json_data(std::string &str);
+  vector<string> split(const string &s, char delim);
+  void load_param();
+  void load_hw_param();
+  void load_sys_param();
 };
 
 #endif

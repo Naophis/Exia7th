@@ -15,7 +15,12 @@
         "functional": "cpp",
         "numeric": "cpp",
         "complex": "cpp",
-        "cstddef": "cpp"
+        "cstddef": "cpp",
+        "chrono": "cpp",
+        "istream": "cpp",
+        "ostream": "cpp",
+        "ratio": "cpp",
+        "utility": "cpp"
     },
     "idf.adapterTargetName": "esp32s3"
 }

@@ -29,7 +29,7 @@ public:
   void LED_on_all();
 
   void LED(int byte, int state);
-  void LED_bit(int b1, int b2, int b3, int b4);
+  void LED_bit(int b0, int b1, int b2, int b3, int b4);
   void LED_otherwise(int byte, int state);
 
   int encoder_operation();
@@ -39,6 +39,8 @@ public:
   void music_sync(MUSIC m, int time);
   void hello_exia();
   void coin(int t);
+
+  TurnDirection select_direction();
 
 private:
   sensing_result_entity_t *entity_ro;

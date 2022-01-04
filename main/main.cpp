@@ -30,6 +30,17 @@
 #include "include/planning_task.hpp"
 #include "include/sensing_task.hpp"
 
+#include "esp_system.h"
+#include "esp_vfs.h"
+#include "esp_vfs_fat.h"
+
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+
+#include "rom/uart.h"
+
 ego_param_t param = {0};
 sensing_result_entity_t sensing_entity = {0};
 ego_entity_t ego = {0};
@@ -42,9 +53,14 @@ void init_uart() {
   uart_config.data_bits = UART_DATA_8_BITS;
   uart_config.parity = UART_PARITY_DISABLE;
   uart_config.stop_bits = UART_STOP_BITS_1;
-  uart_config.flow_ctrl = UART_HW_FLOWCTRL_RTS;
-  uart_config.rx_flow_ctrl_thresh = 122;
-  ESP_ERROR_CHECK(uart_param_config(UART_NUM_0, &uart_config));
+  uart_config.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
+  // uart_config.rx_flow_ctrl_thresh = 122;
+  uart_config.source_clk = UART_SCLK_APB;
+  int intr_alloc_flags = 0;
+  uart_param_config(UART_NUM_0, &uart_config);
+  uart_driver_install(UART_NUM_0, BUF_SIZE * 2, 0, 0, NULL, intr_alloc_flags);
+  uart_param_config(UART_NUM_0, &uart_config);
+  uart_set_pin(UART_NUM_0, TXD, RXD, RTS, CTS);
 }
 
 void init_gpio() {
@@ -68,6 +84,8 @@ void init_gpio() {
   io_conf.pin_bit_mask |= 1ULL << LED3;
   io_conf.pin_bit_mask |= 1ULL << LED4;
   io_conf.pin_bit_mask |= 1ULL << LED5;
+
+  io_conf.pin_bit_mask |= 1ULL << BUZZER;
 
   io_conf.pin_bit_mask |= 1ULL << SUCTION_PWM;
 
@@ -195,6 +213,31 @@ void init_sensing_timer() {
   timer_set_counter_value(TIMER_GROUP_0, TIMER_0, 0);
   timer_start(TIMER_GROUP_0, TIMER_0);
 }
+void set_hardware_param(ego_param_t &ep) {
+  const char *base_path = "/spiflash";
+  esp_vfs_fat_mount_config_t mount_config;
+  wl_handle_t s_wl_handle = WL_INVALID_HANDLE;
+
+  mount_config.max_files = 8;
+  mount_config.format_if_mount_failed = true;
+  mount_config.allocation_unit_size = CONFIG_WL_SECTOR_SIZE;
+
+  esp_err_t err = esp_vfs_fat_spiflash_mount(base_path, "storage",
+                                             &mount_config, &s_wl_handle);
+  if (err != ESP_OK) {
+    printf("Failed to mount FATFS (%s)\n", esp_err_to_name(err));
+    return;
+  } else {
+    printf("mount OK\n");
+  }
+
+  FILE *f = fopen("/spiflash/hardware.txt", "rb");
+  char line[1024];
+  fgets(line, sizeof(line), f);
+  fclose(f);
+  std::string json = std::string(line);
+  printf("%s\n", json.c_str());
+}
 
 extern "C" void app_main() {
   // Adachi adachi;
@@ -202,16 +245,22 @@ extern "C" void app_main() {
   init_gpio();
   init_uart();
   // init_sensing_device();
-
+  // set_hardware_param(param);
   param.tire = 12.0;
   param.dt = 0.001;
-  param.motor_pid.p = 0.15;
-  param.motor_pid.i = 0.01;
-  param.gyro_pid.p = 0.5;
-  param.gyro_pid.i = 0.25;
+  param.motor_pid.p = 0.175;
+  param.motor_pid.i = 0.0175;
+  param.motor_pid.d = 0.0;
+  param.gyro_pid.p = 2.5;
+  param.gyro_pid.i = 0.75;
+  param.gyro_pid.d = 0.0;
+  tgt_val.ego_in.v = 0;
+  tgt_val.ego_in.w = 0;
+  param.gyro_param.gyro_w_gain_left = 0.0002645;
 
-  param.gyro_param.gyro_w_gain = 0.00025;
+  // xTaskCreate(echo_task, "uart_echo_task", 8192, NULL, 10, NULL);
   // init_sensing_timer();
+
   SensingTask st;
   st.set_sensing_entity(&sensing_entity);
   st.create_task(0);
@@ -227,6 +276,7 @@ extern "C" void app_main() {
 
   MainTask mt;
   mt.set_sensing_entity(&sensing_entity);
+  mt.set_ego_param_entity(&param);
   mt.set_ego_entity(&ego);
   mt.set_planning_task(&pt);
   mt.set_tgt_entity(&tgt);
@@ -243,9 +293,6 @@ extern "C" void app_main() {
   gpio_set_level(LED5, 0);
 
   while (1) {
-    // printf("end\n");
-    // printf("%d\n", sensing_entity.battery.raw);
-
     vTaskDelay(100 / portTICK_RATE_MS);
   }
 }

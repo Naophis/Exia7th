@@ -25,11 +25,11 @@ bool UserInterface::button_state_hold() {
 int UserInterface::encoder_operation() {
   double v_r = ego->v_r;
   if (v_r > ENC_OPE_V_R_TH) {
-    music_sync(MUSIC::G6, 75);
+    music_sync(MUSIC::G6_, 75);
     return 1;
   }
   if (v_r < -ENC_OPE_V_R_TH) {
-    music_sync(MUSIC::C6, 75);
+    music_sync(MUSIC::C6_, 75);
     return -1;
   }
   return 0;
@@ -57,7 +57,7 @@ void UserInterface::motion_check() {
     if (front_sensor_data > MOTION_CHECK_TH) {
       LED_off_all();
       for (int i = 0; i < 2; i++) {
-        music_sync(MUSIC::C6, 100);
+        music_sync(MUSIC::C6_, 100);
         vTaskDelay(tgt->buzzer.time / portTICK_PERIOD_MS);
       }
       break;
@@ -67,35 +67,35 @@ void UserInterface::motion_check() {
 }
 
 void UserInterface::coin(int time) {
-  music_sync(MUSIC::B5, time);
-  music_sync(MUSIC::E6, 2 * time);
+  music_sync(MUSIC::B5_, time);
+  music_sync(MUSIC::E6_, 2 * time);
 }
 
 void UserInterface::hello_exia() {
   int time = 120;
-  music_sync(MUSIC::A6, time);
+  music_sync(MUSIC::A6_, time);
   vTaskDelay(10 / portTICK_PERIOD_MS);
-  music_sync(MUSIC::A6, time);
+  music_sync(MUSIC::A6_, time);
   vTaskDelay(10 / portTICK_PERIOD_MS);
-  music_sync(MUSIC::A6, time);
+  music_sync(MUSIC::A6_, time);
   vTaskDelay(10 / portTICK_PERIOD_MS);
-  music_sync(MUSIC::A6, 3 * time);
+  music_sync(MUSIC::A6_, 3 * time);
   vTaskDelay(time / portTICK_PERIOD_MS);
-  music_sync(MUSIC::A6, time);
+  music_sync(MUSIC::A6_, time);
   vTaskDelay(10 / portTICK_PERIOD_MS);
-  music_sync(MUSIC::A6, time);
+  music_sync(MUSIC::A6_, time);
   vTaskDelay(10 / portTICK_PERIOD_MS);
-  music_sync(MUSIC::A6, time);
+  music_sync(MUSIC::A6_, time);
   vTaskDelay(10 / portTICK_PERIOD_MS);
-  music_sync(MUSIC::A6, time);
+  music_sync(MUSIC::A6_, time);
   vTaskDelay(10 / portTICK_PERIOD_MS);
-  music_sync(MUSIC::C7, 1.5 * time);
+  music_sync(MUSIC::C7_, 1.5 * time);
   vTaskDelay(time / 3 / portTICK_PERIOD_MS);
-  music_sync(MUSIC::G6, 2 * time);
+  music_sync(MUSIC::G6_, 2 * time);
   vTaskDelay(10 / portTICK_PERIOD_MS);
-  music_sync(MUSIC::F6, 2 * time);
+  music_sync(MUSIC::F6_, 2 * time);
   vTaskDelay(10 / portTICK_PERIOD_MS);
-  music_sync(MUSIC::G6, 2 * time);
+  music_sync(MUSIC::G6_, 2 * time);
   vTaskDelay(10 / portTICK_PERIOD_MS);
 }
 
@@ -103,7 +103,8 @@ void UserInterface::LED_on_off(gpio_num_t gpio_num, int state) {
   gpio_set_level(gpio_num, state);
 }
 
-void UserInterface::LED_bit(int b1, int b2, int b3, int b4) {
+void UserInterface::LED_bit(int b0, int b1, int b2, int b3, int b4) {
+  LED_on_off(LED1, (b0 == 1));
   LED_on_off(LED2, (b1 == 1));
   LED_on_off(LED3, (b2 == 1));
   LED_on_off(LED4, (b3 == 1));
@@ -120,6 +121,9 @@ void UserInterface::LED(int byte, int state) {
   int led3 = byte & 0x02;
   int led4 = byte & 0x03;
   int led5 = byte & 0x04;
+  if (led2) {
+    LED_on_off(LED2, state);
+  }
   if (led2) {
     LED_on_off(LED2, state);
   }
@@ -182,7 +186,7 @@ void UserInterface::LED_off(int byte) {
 }
 void UserInterface::LED_off_all() {
   const int state = 0;
-  // LED_on_off(LED1, state);
+  LED_on_off(LED1, state);
   LED_on_off(LED2, state);
   LED_on_off(LED3, state);
   LED_on_off(LED4, state);
@@ -190,9 +194,32 @@ void UserInterface::LED_off_all() {
 }
 void UserInterface::LED_on_all() {
   const int state = 1;
-  // LED_on_off(LED1, state);
+  LED_on_off(LED1, state);
   LED_on_off(LED2, state);
   LED_on_off(LED3, state);
   LED_on_off(LED4, state);
   LED_on_off(LED5, state);
+}
+
+TurnDirection UserInterface::select_direction() {
+  TurnDirection td = TurnDirection::None;
+  while (1) {
+    if (ego->v_r > ENC_OPE_V_R_TH) {
+      music_sync(MUSIC::G6_, 75);
+      td = TurnDirection::Right;
+      LED_bit(0, 0, 0, 1, 0);
+    }
+    if (ego->v_l > ENC_OPE_V_R_TH) {
+      music_sync(MUSIC::C6_, 75);
+      td = TurnDirection::Left;
+      LED_bit(0, 0, 0, 0, 1);
+    }
+
+    if (td != TurnDirection::None) {
+      if (button_state_hold()) {
+        coin(80);
+        return td;
+      }
+    }
+  }
 }

@@ -6,6 +6,7 @@
 #include "driver/mcpwm.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "gen_code/mpc_tgt_calc.h"
 #include "include/maze_solver.hpp"
 
 #define LEDC_HIGH_SPEED_MODE 0
@@ -42,6 +43,12 @@ public:
   // read_write
   ego_entity_t *ego;
 
+  t_tgt *mpc_tgt;
+  t_ego *mpc_now_ego;
+  int32_t mpc_mode;
+  int32_t mpc_step;
+  t_ego mpc_next_ego;
+
 private:
   xTaskHandle handle = 0;
   bool motor_en;
@@ -58,6 +65,10 @@ private:
   motion_tgt_val_t *tgt_val;
   int buzzer_time_cnt = 0;
   int buzzer_timestamp = 0;
+  int pid_req_timestamp = 0;
+  void reset_error();
+  void cp_tgt_val();
+  mpc_tgt_calcModelClass mpc_tgt_calc;
 };
 
 #endif
