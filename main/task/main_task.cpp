@@ -72,16 +72,15 @@ void MainTask::dump1() {
            entity_ro->led_sen.right45.raw, entity_ro->led_sen.right90.raw);
 
     printf("ego_v: %0.3f, %0.3f, %0.3f, %0.3f\n", ego->v_l, ego->v_c, ego->v_r,
-           ego->dist);
+           tgt_val->ego_in.dist);
     printf("calc_v: %0.3f, %0.3f\n", tgt_val->ego_in.v, tgt_val->ego_in.w);
 
-    printf("ego_w: %0.3f, %0.3f, %0.3f deg\n", ego->w, ego->angle,
-           ego->angle * 180 / PI);
+    printf("ego_w: %0.3f, %0.3f, %0.3f deg\n", ego->w, tgt_val->ego_in.ang,
+           tgt_val->ego_in.ang * 180 / PI);
     printf("duty: %0.3f, %0.3f\n", ego->duty.duty_l, ego->duty.duty_r);
 
     if (ui.button_state()) {
-      ego->angle = 0;
-      ego->dist = 0;
+      tgt_val->ego_in.ang = tgt_val->ego_in.dist = 0;
     }
 
     vTaskDelay(xDelay);
@@ -180,7 +179,8 @@ void MainTask::entity_to_json(nlohmann::json &j) {
       {"gyro", {{"raw", entity_ro->gyro.raw}, {"data", entity_ro->gyro.data}}},
       {"battery",
        {{"raw", entity_ro->battery.raw}, {"data", entity_ro->battery.data}}},
-      {"ego", {{"angle", ego->angle}, {"dist", ego->dist}}}};
+      {"ego",
+       {{"angle", tgt_val->ego_in.ang}, {"dist", tgt_val->ego_in.dist}}}};
 }
 void MainTask::echo_sensing_result_with_json() {
   const TickType_t xDelay = 50 / portTICK_PERIOD_MS;
@@ -289,6 +289,8 @@ void MainTask::load_sys_param() {
   sys.test.w_max = j["test"]["w_max"];
   sys.test.alpha = j["test"]["alpha"];
   sys.test.ang = j["test"]["ang"];
+  sys.test.suction_active = j["test"]["suction_active"];
+  sys.test.suction_duty = j["test"]["suction_duty"];
   sys.test.file_idx = j["test"]["file_idx"];
   sys.test.sla_type = j["test"]["sla_type"];
   sys.test.sla_return = j["test"]["sla_return"];
@@ -368,56 +370,20 @@ void MainTask::load_slalom_param() {
     // printf("%s\n", json_str.c_str());
     nlohmann::json j = nlohmann::json::parse(json_str);
     slalom_parameter_t sp;
+    sp.map.clear();
 
-    sp.normal.v = j["normal"]["v"];
-    sp.normal.ang = j["normal"]["ang"];
-    sp.normal.rad = j["normal"]["rad"];
-    sp.normal.front.right = j["normal"]["front"]["right"];
-    sp.normal.front.left = j["normal"]["front"]["left"];
-    sp.normal.back.right = j["normal"]["back"]["right"];
-    sp.normal.back.left = j["normal"]["back"]["left"];
-    sp.large.v = j["large"]["v"];
-    sp.large.ang = j["large"]["ang"];
-    sp.large.rad = j["large"]["rad"];
-    sp.large.front.right = j["large"]["front"]["right"];
-    sp.large.front.left = j["large"]["front"]["left"];
-    sp.large.back.right = j["large"]["back"]["right"];
-    sp.large.back.left = j["large"]["back"]["left"];
-    sp.dia45.v = j["dia45"]["v"];
-    sp.dia45.ang = j["dia45"]["ang"];
-    sp.dia45.rad = j["dia45"]["rad"];
-    sp.dia45.front.right = j["dia45"]["front"]["right"];
-    sp.dia45.front.left = j["dia45"]["front"]["left"];
-    sp.dia45.back.right = j["dia45"]["back"]["right"];
-    sp.dia45.back.left = j["dia45"]["back"]["left"];
-    sp.dia45_2.v = j["dia45_2"]["v"];
-    sp.dia45_2.ang = j["dia45_2"]["ang"];
-    sp.dia45_2.rad = j["dia45_2"]["rad"];
-    sp.dia45_2.front.right = j["dia45_2"]["front"]["right"];
-    sp.dia45_2.front.left = j["dia45_2"]["front"]["left"];
-    sp.dia45_2.back.right = j["dia45_2"]["back"]["right"];
-    sp.dia45_2.back.left = j["dia45_2"]["back"]["left"];
-    sp.dia135.v = j["dia135"]["v"];
-    sp.dia135.ang = j["dia135"]["ang"];
-    sp.dia135.rad = j["dia135"]["rad"];
-    sp.dia135.front.right = j["dia135"]["front"]["right"];
-    sp.dia135.front.left = j["dia135"]["front"]["left"];
-    sp.dia135.back.right = j["dia135"]["back"]["right"];
-    sp.dia135.back.left = j["dia135"]["back"]["left"];
-    sp.dia135_2.v = j["dia135_2"]["v"];
-    sp.dia135_2.ang = j["dia135_2"]["ang"];
-    sp.dia135_2.rad = j["dia135_2"]["rad"];
-    sp.dia135_2.front.right = j["dia135_2"]["front"]["right"];
-    sp.dia135_2.front.left = j["dia135_2"]["front"]["left"];
-    sp.dia135_2.back.right = j["dia135_2"]["back"]["right"];
-    sp.dia135_2.back.left = j["dia135_2"]["back"]["left"];
-    sp.dia90.v = j["dia90"]["v"];
-    sp.dia90.ang = j["dia90"]["ang"];
-    sp.dia90.rad = j["dia90"]["rad"];
-    sp.dia90.front.right = j["dia90"]["front"]["right"];
-    sp.dia90.front.left = j["dia90"]["front"]["left"];
-    sp.dia90.back.right = j["dia90"]["back"]["right"];
-    sp.dia90.back.left = j["dia90"]["back"]["left"];
+    for (const auto p : turn_name_list) {
+      slalom_param2_t sp2;
+      sp2.v = j[p.second]["v"];
+      sp2.ang = j[p.second]["ang"];
+      sp2.rad = j[p.second]["rad"];
+      sp2.front.right = j[p.second]["front"]["right"];
+      sp2.front.left = j[p.second]["front"]["left"];
+      sp2.back.right = j[p.second]["back"]["right"];
+      sp2.back.left = j[p.second]["back"]["left"];
+      sp.map[p.first] = sp2;
+    }
+
     turn_param_list.emplace_back(sp);
   }
 }
@@ -566,24 +532,18 @@ void MainTask::test_sla() {
     return;
   }
 
-  const auto sla_params = turn_param_list[file_idx];
-
-  auto sla_p = sla_params.normal;
-  if (sys.test.sla_type == 2) {
-    sla_p = sla_params.orval;
-  } else if (sys.test.sla_type == 3) {
-    sla_p = sla_params.large;
-  } else if (sys.test.sla_type == 4) {
-    sla_p = sla_params.dia45;
-  } else if (sys.test.sla_type == 5) {
-    sla_p = sla_params.dia135;
-  } else if (sys.test.sla_type == 6) {
-    sla_p = sla_params.dia90;
-  }
+  const auto sla_p =
+      turn_param_list[file_idx].map[static_cast<TurnType>(sys.test.sla_type)];
 
   TurnDirection rorl = ui.select_direction();
 
   reset_gyro_ref();
+
+  if (sys.test.suction_active) {
+    pt->suction_enable(sys.test.suction_duty);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+  }
+
   reset_tgt_data();
   reset_ego_data();
   pt->motor_enable();
@@ -612,6 +572,9 @@ void MainTask::test_sla() {
   mp.go_straight(ps);
 
   pt->motor_disable();
+
+  pt->suction_disable();
+  vTaskDelay(500 / portTICK_PERIOD_MS);
 
   ui.coin(120);
 }

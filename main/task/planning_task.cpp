@@ -13,8 +13,14 @@ void PlanningTask::motor_enable() {
   mcpwm_start(MCPWM_UNIT_0, MCPWM_TIMER_0);
   mcpwm_start(MCPWM_UNIT_0, MCPWM_TIMER_1);
 }
-void PlanningTask::suction_enable() {
+void PlanningTask::suction_enable(double duty) {
   suction_en = true;
+  tgt_duty.duty_suction = duty;
+  mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A);
+  mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A,
+                 ABS(tgt_duty.duty_suction));
+  mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A,
+                      MCPWM_DUTY_MODE_0);
   mcpwm_start(MCPWM_UNIT_1, MCPWM_TIMER_2);
 }
 void PlanningTask::motor_disable() {
@@ -26,6 +32,7 @@ void PlanningTask::motor_disable() {
 }
 void PlanningTask::suction_disable() {
   suction_en = false;
+  tgt_duty.duty_suction = 0;
   mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A);
   mcpwm_stop(MCPWM_UNIT_1, MCPWM_TIMER_2); //
 }
@@ -89,6 +96,7 @@ void PlanningTask::task() {
   motor_pwm_conf.cmpr_a = 0; // デューティサイクルの初期値（0%）
   mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_0, &motor_pwm_conf);
   mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_1, &motor_pwm_conf);
+
   mcpwm_config_t suction_pwm_conf;
   suction_pwm_conf.frequency = SUCTION_MOTOR_HZ; // PWM周波数= 10kHz,
   suction_pwm_conf.cmpr_a = 0; // デューティサイクルの初期値（0%）
@@ -97,7 +105,7 @@ void PlanningTask::task() {
   suction_pwm_conf.duty_mode = MCPWM_DUTY_MODE_0; // アクティブハイ
   suction_pwm_conf.cmpr_a = 0; // デューティサイクルの初期値（0%）
   mcpwm_init(MCPWM_UNIT_1, MCPWM_TIMER_2, &suction_pwm_conf);
-  ego->angle = 0;
+
   motor_en = false;
   set_next_duty(0, 0, 0);
   mpc_tgt_calc.initialize();
@@ -118,11 +126,7 @@ void PlanningTask::task() {
     // Duty計算
     calc_tgt_duty();
 
-    if (motor_en) {
-      set_next_duty(tgt_duty.duty_l, tgt_duty.duty_r, tgt_duty.duty_suction);
-    } else {
-      set_next_duty(0, 0, 0);
-    }
+    set_next_duty(tgt_duty.duty_l, tgt_duty.duty_r, tgt_duty.duty_suction);
 
     buzzer(buzzer_ch, buzzer_timer);
     vTaskDelay(xDelay);
@@ -139,18 +143,17 @@ void PlanningTask::update_ego_motion() {
   ego->rpm.right = 30.0 * ego->v_r / (PI * tire / 2);
   ego->rpm.left = 30.0 * ego->v_l / (PI * tire / 2);
 
-  ego->dist += ego->v_c * dt;
+  tgt_val->ego_in.dist += ego->v_c * dt;
   ego->w = param_ro->gyro_param.gyro_w_gain_right *
            (entity_ro->gyro.raw - tgt->gyro_zero_p_offset);
-  ego->angle += ego->w * dt;
+  tgt_val->ego_in.ang += ego->w * dt;
 
   // コピー
-  tgt_val->ego_in.ang = ego->angle;
-  tgt_val->ego_in.dist = ego->dist;
   tgt_val->ego_in.slip_point.w = ego->w;
 }
-void PlanningTask::set_next_duty(const double duty_l, const double duty_r,
-                                 const double duty_suction) {
+
+void PlanningTask::set_next_duty(double duty_l, double duty_r,
+                                 double duty_suction) {
   if (motor_en) {
     if (duty_l >= 0) {
       gpio_set_level(A_CW_CCW, 1);
@@ -178,8 +181,7 @@ void PlanningTask::set_next_duty(const double duty_l, const double duty_r,
     motor_disable();
   }
   if (suction_en) {
-    mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A);
-    mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A, ABS(duty_suction));
+    mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A, duty_suction);
     mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A,
                         MCPWM_DUTY_MODE_0);
   } else {
@@ -221,9 +223,7 @@ void PlanningTask::init_gpio() {
   gpio_config(&io_conf);
   // gpio_set_direction((gpio_num_t)GPIO_OUTPUT_IO_8,
 }
-void PlanningTask::calc_next_tgt_val() {
-  // tgt_val->v += tgt_val->accl * dt; //
-}
+void PlanningTask::calc_next_tgt_val() {}
 
 void PlanningTask::reset_error() {
   if (tgt_val->pl_req.time_stamp != pid_req_timestamp) {
@@ -259,29 +259,45 @@ void PlanningTask::calc_tgt_duty() {
   tgt_duty.duty_r = duty_c + duty_roll;
   tgt_duty.duty_l = duty_c - duty_roll;
 
-  // tgt_duty.duty_l = 40;
-  // tgt_duty.duty_r = 40;
-
   ego->duty.duty_r = tgt_duty.duty_r;
   ego->duty.duty_l = tgt_duty.duty_l;
-  tgt_duty.duty_suction = 0;
 }
 
 void PlanningTask::cp_tgt_val() {
+  // tgt_val->ego_in.accl = mpc_next_ego.accl;
+  // tgt_val->ego_in.alpha = mpc_next_ego.alpha;
+
+  // tgt_val->ego_in.pivot_state = mpc_next_ego.pivot_state;
+  // tgt_val->ego_in.state = mpc_next_ego.state;
+
+  // tgt_val->ego_in.v = mpc_next_ego.v;
+  // tgt_val->ego_in.w = mpc_next_ego.w;
+
+  // tgt_val->ego_in.sla_param.state = mpc_next_ego.sla_param.state;
+  // tgt_val->ego_in.sla_param.counter = mpc_next_ego.sla_param.counter;
+
+  // tgt_val->ego_in.img_ang = mpc_next_ego.img_ang;
+  // tgt_val->ego_in.img_dist = mpc_next_ego.img_dist;
+
+  // tgt_val->ego_in.slip_point.slip_angle = mpc_next_ego.slip_point.slip_angle;
+
+  ///////
   tgt_val->ego_in.accl = mpc_next_ego.accl;
   tgt_val->ego_in.alpha = mpc_next_ego.alpha;
-
   tgt_val->ego_in.pivot_state = mpc_next_ego.pivot_state;
+  tgt_val->ego_in.sla_param = mpc_next_ego.sla_param;
   tgt_val->ego_in.state = mpc_next_ego.state;
-
   tgt_val->ego_in.v = mpc_next_ego.v;
   tgt_val->ego_in.w = mpc_next_ego.w;
-
   tgt_val->ego_in.sla_param.state = mpc_next_ego.sla_param.state;
   tgt_val->ego_in.sla_param.counter = mpc_next_ego.sla_param.counter;
+  tgt_val->ego_in.sla_param.state = mpc_next_ego.sla_param.state;
 
   tgt_val->ego_in.img_ang = mpc_next_ego.img_ang;
   tgt_val->ego_in.img_dist = mpc_next_ego.img_dist;
 
   tgt_val->ego_in.slip_point.slip_angle = mpc_next_ego.slip_point.slip_angle;
+
+  tgt_val->ego_in.cnt_delay_accl_ratio = mpc_next_ego.cnt_delay_accl_ratio;
+  tgt_val->ego_in.cnt_delay_decel_ratio = mpc_next_ego.cnt_delay_decel_ratio;
 }

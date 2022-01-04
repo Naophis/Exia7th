@@ -21,7 +21,7 @@ public:
   virtual ~PlanningTask();
   void create_task(const BaseType_t xCoreID);
   void motor_enable();
-  void suction_enable();
+  void suction_enable(double duty);
   void motor_disable();
   void suction_disable();
 
@@ -55,8 +55,7 @@ private:
   bool suction_en;
 
   void update_ego_motion();
-  void set_next_duty(const double duty_l, const double duty_r,
-                     const double duty_suction);
+  void set_next_duty(double duty_l, double duty_r, double duty_suction);
   void init_gpio();
   void calc_tgt_duty();
   void calc_next_tgt_val();

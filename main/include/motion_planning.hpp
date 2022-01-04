@@ -22,6 +22,9 @@ public:
   void normal_slalom(param_normal_slalom_t &p, param_straight_t &p_str);
   void n_slalom(param_normal_slalom_t &p, param_straight_t &p_str);
 
+  int slalom(slalom_param2_t &sp, TurnDirection dir,
+             next_motionr_t &next_motion);
+
 private:
   tgt_entity_t *tgt;
   motion_tgt_val_t *tgt_val;

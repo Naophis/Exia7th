@@ -201,6 +201,7 @@ void UserInterface::LED_on_all() {
 
 TurnDirection UserInterface::select_direction() {
   TurnDirection td = TurnDirection::None;
+  bool b = true;
   while (1) {
     if (ego->v_r > ENC_OPE_V_R_TH) {
       music_sync(MUSIC::G6_, 75);
@@ -218,7 +219,11 @@ TurnDirection UserInterface::select_direction() {
         coin(80);
         return td;
       }
+    } else {
+      LED_bit(0, 0, 0, (int)b, (int)b);
+      b = b ? false : true;
     }
+    vTaskDelay(25 / portTICK_PERIOD_MS);
   }
 }
 void UserInterface::error() {

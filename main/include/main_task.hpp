@@ -98,7 +98,6 @@ private:
   void load_sys_param();
   void load_turn_param_profiles();
   void load_slalom_param();
-  // std::unordered_map<int, slalom_param2_t> turn_param_map;
   std::vector<slalom_parameter_t> turn_param_list;
 };
 

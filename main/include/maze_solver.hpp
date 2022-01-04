@@ -74,6 +74,8 @@ enum class TurnType : int {
   Dia135 = 5,
   Dia90 = 6,
   Kojima = 7,
+  Dia45_2 = 8,
+  Dia135_2 = 9,
   Finish = 255,
 };
 

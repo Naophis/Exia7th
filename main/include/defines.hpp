@@ -10,9 +10,11 @@
 #include "soc/adc_channel.h"
 #include "soc/ledc_periph.h"
 
+#include <initializer_list>
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #define ABS(IN) ((IN) < 0 ? -(IN) : (IN))
@@ -145,11 +147,9 @@ typedef struct {
   double v_r;
   double v_l;
   double v_c;
-  double dist;
-
   double w;
-  double angle;
-
+  // double dist;
+  // double angle;
   rpm_t rpm;
   duty_t duty;
 } ego_entity_t;
@@ -268,6 +268,8 @@ typedef struct {
   double w_max;
   double alpha;
   double ang;
+  int suction_active;
+  double suction_duty;
   int file_idx;
   int sla_type;
   int sla_return;
@@ -309,17 +311,32 @@ typedef struct {
   double rad;
   slalom_offset_t front;
   slalom_offset_t back;
+  int pow_n;
+  double time;
 } slalom_param2_t;
 
 typedef struct {
-  slalom_param2_t normal;
-  slalom_param2_t large;
-  slalom_param2_t orval;
-  slalom_param2_t dia45;
-  slalom_param2_t dia45_2;
-  slalom_param2_t dia135;
-  slalom_param2_t dia135_2;
-  slalom_param2_t dia90;
+  std::unordered_map<TurnType, slalom_param2_t> map;
 } slalom_parameter_t;
 
+typedef struct {
+  bool is_turn;
+  TurnType next_turn_type;
+  double v_max;
+  double v_end;
+  double accl;
+  double decel;
+} next_motionr_t;
+
+static std::initializer_list<std::pair<TurnType, std::string>> turn_name_list =
+    {
+        {TurnType::Normal, "normal"},    //
+        {TurnType::Large, "large"},      //
+        {TurnType::Orval, "orval"},      //
+        {TurnType::Dia45, "dia45"},      //
+        {TurnType::Dia135, "dia135"},    //
+        {TurnType::Dia90, "dia90"},      //
+        {TurnType::Dia45_2, "dia45_2"},  //
+        {TurnType::Dia135_2, "dia135_2"} //
+};
 #endif

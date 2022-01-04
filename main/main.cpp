@@ -97,155 +97,14 @@ void init_gpio() {
   gpio_config(&io_conf);
   // gpio_set_direction((gpio_num_t)GPIO_OUTPUT_IO_8,
 }
-#define TIMER_RESOLUTION_HZ 1000000 // 1MHz resolution
-bool itr_state = true;
-ICM20689 gyro_if;
-const adc_bits_width_t width = ADC_WIDTH_BIT_12;
-const adc_atten_t atten = ADC_ATTEN_DB_11;
-
-int isr_cnt = 0;
-
-void encoder_init(const pcnt_unit_t unit, const gpio_num_t pinA,
-                  const gpio_num_t pinB) {
-  pcnt_config_t pcnt_config_0 = {
-      .pulse_gpio_num = pinA,
-      .ctrl_gpio_num = pinB,
-      .lctrl_mode = PCNT_MODE_KEEP,
-      .hctrl_mode = PCNT_MODE_REVERSE,
-      .pos_mode = PCNT_COUNT_INC,
-      .neg_mode = PCNT_COUNT_DEC,
-      .counter_h_lim = ENCODER_H_LIM_VAL,
-      .counter_l_lim = ENCODER_L_LIM_VAL,
-      .unit = unit,
-      .channel = PCNT_CHANNEL_0,
-  };
-  pcnt_config_t pcnt_config_1 = {
-      .pulse_gpio_num = pinB,
-      .ctrl_gpio_num = pinA,
-      .lctrl_mode = PCNT_MODE_REVERSE,
-      .hctrl_mode = PCNT_MODE_KEEP,
-      .pos_mode = PCNT_COUNT_INC,
-      .neg_mode = PCNT_COUNT_DEC,
-      .counter_h_lim = ENCODER_H_LIM_VAL,
-      .counter_l_lim = ENCODER_L_LIM_VAL,
-      .unit = unit,
-      .channel = PCNT_CHANNEL_1,
-  };
-
-  pcnt_unit_config(&pcnt_config_0);
-  pcnt_unit_config(&pcnt_config_1);
-
-  pcnt_counter_pause(unit);
-  pcnt_counter_clear(unit);
-
-  pcnt_counter_resume(unit);
-}
-
-void init_sensing_device() {
-
-  // gyro_if.init();
-  // gyro_if.setup();
-
-  // sensing init
-  adc2_config_channel_atten(SEN_R90, atten);
-  adc2_config_channel_atten(SEN_R45, atten);
-  adc2_config_channel_atten(SEN_F, atten);
-  adc2_config_channel_atten(SEN_L45, atten);
-  adc2_config_channel_atten(SEN_L90, atten);
-  adc2_config_channel_atten(BATTERY, atten);
-  encoder_init(PCNT_UNIT_0, ENC_R_A, ENC_R_B);
-  encoder_init(PCNT_UNIT_1, ENC_L_A, ENC_L_B);
-}
-
-void isr_a() {
-  if (isr_cnt == 0) {
-    // adc2_get_raw(BATTERY, width, &sensing_entity.battery.raw);
-    gpio_set_level(LED3, 1);
-  } else if (isr_cnt == 1) {
-  } else if (isr_cnt == 2) {
-  } else if (isr_cnt == 3) {
-  } else if (isr_cnt == 4) {
-  }
-}
-void isr_b() {
-  if (isr_cnt == 0) {
-  } else if (isr_cnt == 1) {
-  } else if (isr_cnt == 2) {
-  } else if (isr_cnt == 3) {
-  } else if (isr_cnt == 4) {
-    gpio_set_level(LED3, 0);
-  }
-  isr_cnt++;
-  if (isr_cnt == 5) {
-    isr_cnt = 0;
-  }
-}
-
-void timer_isr(void *parameters) {
-  timer_group_clr_intr_status_in_isr(TIMER_GROUP_0, TIMER_0);
-  timer_group_enable_alarm_in_isr(TIMER_GROUP_0, TIMER_0);
-  if (itr_state) {
-    timer_set_alarm_value(TIMER_GROUP_0, TIMER_0, 2500); // 250 nsec
-    isr_a();
-  } else {
-    timer_set_alarm_value(TIMER_GROUP_0, TIMER_0, 7500); // 1000 nsec
-    isr_b();
-  }
-  itr_state ^= itr_state;
-}
-
-void init_sensing_timer() {
-  auto group = TIMER_GROUP_0;
-  auto timer = TIMER_0;
-
-  timer_config_t config;
-  config.alarm_en = TIMER_ALARM_EN;
-  config.counter_en = TIMER_PAUSE;
-  config.clk_src = TIMER_SRC_CLK_APB;
-  config.auto_reload = TIMER_AUTORELOAD_EN;
-  config.counter_dir = TIMER_COUNT_UP;
-  config.divider = 8; // 80Mhz / divider
-  timer_init(group, timer, &config);
-
-  timer_set_alarm_value(TIMER_GROUP_0, TIMER_0, 250); // 1000 nsec
-  timer_isr_register(TIMER_GROUP_0, TIMER_0, timer_isr, NULL, 0, NULL);
-  timer_enable_intr(TIMER_GROUP_0, TIMER_0);
-  timer_set_counter_value(TIMER_GROUP_0, TIMER_0, 0);
-  timer_start(TIMER_GROUP_0, TIMER_0);
-}
-void set_hardware_param(ego_param_t &ep) {
-  const char *base_path = "/spiflash";
-  esp_vfs_fat_mount_config_t mount_config;
-  wl_handle_t s_wl_handle = WL_INVALID_HANDLE;
-
-  mount_config.max_files = 8;
-  mount_config.format_if_mount_failed = true;
-  mount_config.allocation_unit_size = CONFIG_WL_SECTOR_SIZE;
-
-  esp_err_t err = esp_vfs_fat_spiflash_mount(base_path, "storage",
-                                             &mount_config, &s_wl_handle);
-  if (err != ESP_OK) {
-    printf("Failed to mount FATFS (%s)\n", esp_err_to_name(err));
-    return;
-  } else {
-    printf("mount OK\n");
-  }
-
-  FILE *f = fopen("/spiflash/hardware.txt", "rb");
-  char line[1024];
-  fgets(line, sizeof(line), f);
-  fclose(f);
-  std::string json = std::string(line);
-  printf("%s\n", json.c_str());
-}
 
 extern "C" void app_main() {
   // Adachi adachi;
 
   init_gpio();
   init_uart();
-  // init_sensing_device();
-  // set_hardware_param(param);
+
+  // gpio_set_level(SUCTION_PWM, 1);
   param.tire = 12.0;
   param.dt = 0.001;
   param.motor_pid.p = 0.175;
@@ -257,9 +116,6 @@ extern "C" void app_main() {
   tgt_val.ego_in.v = 0;
   tgt_val.ego_in.w = 0;
   param.gyro_param.gyro_w_gain_left = 0.0002645;
-
-  // xTaskCreate(echo_task, "uart_echo_task", 8192, NULL, 10, NULL);
-  // init_sensing_timer();
 
   SensingTask st;
   st.set_sensing_entity(&sensing_entity);
