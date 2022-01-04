@@ -12,8 +12,8 @@ large:
   back: { right: 10, left: 10 }
 orval:
   v: 300
-  ang: 90
-  rad: 60
+  ang: 180
+  rad: 80
   front: { right: 10, left: 10 }
   back: { right: 10, left: 10 }
 dia45:

@@ -27,3 +27,5 @@ sensor_pid_dia:
 gyro_param:
   gyro_w_gain_right: 0.0002645
   gyro_w_gain_left: 0.0002645
+  lp_delay: 0.01
+  

@@ -10,7 +10,16 @@ test: # テスト走行時に使用するパラメータ群
   w_max: 5.0
   alpha: 10
   ang: 180
+  suction_active: 1
+  suction_duty: 99.0
   file_idx: 1
-  sla_type: 1
+  # sla_type: 1 #normal
+  sla_type: 2 #orval
+  # sla_type: 3 #large
+  # sla_type: 4 #dia45
+  # sla_type: 5 #dia135
+  # sla_type: 6 #dia90
+  # sla_type: 8 #dia45_2
+  # sla_type: 9 #dia135_2
   sla_return: 0 # 往復フラグ
   sla_type2: 0 #復路ターン種類
