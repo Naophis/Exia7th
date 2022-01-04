@@ -97,7 +97,7 @@ void MotionPlanning::normal_slalom(param_normal_slalom_t &p,
     tgt_val->tgt_in.tgt_angle = p.ang;
   }
 
-  tgt_val->motion_mode = (int32_t)RUN_MODE2::PIVOT_TURN;
+  tgt_val->motion_mode = (int32_t)RUN_MODE2::SLALOM_RUN2;
 
   tgt_val->tgt_in.v_max = p.v_max;
   tgt_val->tgt_in.end_v = p.v_max;

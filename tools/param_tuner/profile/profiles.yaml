@@ -1,0 +1,19 @@
+list: [
+    "turn_300.txt", #0
+    "turn_400.txt", #1
+  ]
+
+profile_idx_size: 1
+profile_idx: [
+    {
+      # 探索パラメータindex
+      normal: 0,
+      large: 0,
+      orval: 0,
+      dia45: 0,
+      dia45_2: 0,
+      dia135: 0,
+      dia135_2: 0,
+      dia90: 0,
+    },
+  ]

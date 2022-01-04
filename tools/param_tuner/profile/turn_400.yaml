@@ -1,0 +1,48 @@
+normal:
+  v: 400
+  ang: 90
+  rad: 90
+  front: { right: 10, left: 10 }
+  back: { right: 10, left: 10 }
+large: 
+  v: 400
+  ang: 90
+  rad: 60
+  front: { right: 10, left: 10 }
+  back: { right: 10, left: 10 }
+orval: 
+  v: 400
+  ang: 90
+  rad: 60
+  front: { right: 10, left: 10 }
+  back: { right: 10, left: 10 }
+dia45: 
+  v: 400
+  ang: 90
+  rad: 60
+  front: { right: 10, left: 10 }
+  back: { right: 10, left: 10 }
+dia45_2: 
+  v: 400
+  ang: 90
+  rad: 60
+  front: { right: 10, left: 10 }
+  back: { right: 10, left: 10 }
+dia135: 
+  v: 400
+  ang: 90
+  rad: 60
+  front: { right: 10, left: 10 }
+  back: { right: 10, left: 10 }
+dia135_2: 
+  v: 400
+  ang: 90
+  rad: 60
+  front: { right: 10, left: 10 }
+  back: { right: 10, left: 10 }
+dia90: 
+  v: 400
+  ang: 90
+  rad: 60
+  front: { right: 10, left: 10 }
+  back: { right: 10, left: 10 }

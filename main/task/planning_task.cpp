@@ -33,13 +33,11 @@ void PlanningTask::task_entry_point(void *task_instance) {
   static_cast<PlanningTask *>(task_instance)->task();
 }
 void PlanningTask::set_sensing_entity(sensing_result_entity_t *_entity) {
-  entity_ro = _entity; //
+  entity_ro = _entity;
 }
-void PlanningTask::set_ego_entity(ego_entity_t *_ego) {
-  ego = _ego; //
-}
+void PlanningTask::set_ego_entity(ego_entity_t *_ego) { ego = _ego; }
 void PlanningTask::set_ego_param_entity(ego_param_t *_param) {
-  param_ro = _param; //
+  param_ro = _param;
 }
 void PlanningTask::set_tgt_entity(tgt_entity_t *_tgt) { tgt = _tgt; }
 void PlanningTask::buzzer(ledc_channel_config_t &buzzer_ch,
@@ -103,6 +101,7 @@ void PlanningTask::task() {
   motor_en = false;
   set_next_duty(0, 0, 0);
   mpc_tgt_calc.initialize();
+
   while (1) {
     // 自己位置更新
     update_ego_motion();
@@ -112,6 +111,7 @@ void PlanningTask::task() {
     // 物理量ベース計算
     mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in, tgt_val->motion_mode,
                       mpc_step, &mpc_next_ego);
+
     // 算出結果をコピー
     cp_tgt_val();
 

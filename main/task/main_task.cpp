@@ -56,8 +56,6 @@ void MainTask::reset_gyro_ref() {
   tgt->gyro_zero_p_offset = gyro_raw_data_sum / RESET_GYRO_LOOP_CNT;
 }
 
-void MainTask::reset_motion_tgt() {}
-
 void MainTask::dump1() {
   const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
   while (1) {
@@ -81,20 +79,9 @@ void MainTask::dump1() {
            ego->angle * 180 / PI);
     printf("duty: %0.3f, %0.3f\n", ego->duty.duty_l, ego->duty.duty_r);
 
-    if (gpio_get_level(SW1)) {
-      gpio_set_level(A_CW_CCW, 1);
-      gpio_set_level(B_CW_CCW, 1);
-      gpio_set_level(SUCTION_PWM, 0);
-      pt->suction_disable();
-
-    } else {
-      gpio_set_level(A_CW_CCW, 0);
-      gpio_set_level(B_CW_CCW, 0);
-      gpio_set_level(SUCTION_PWM, 1);
+    if (ui.button_state()) {
       ego->angle = 0;
       ego->dist = 0;
-      pt->suction_enable();
-      pt->motor_disable();
     }
 
     vTaskDelay(xDelay);
@@ -116,14 +103,12 @@ int MainTask::select_mode() {
     }
     lbit.byte = mode_num + 1;
     ui.LED_bit(lbit.b0, lbit.b1, lbit.b2, lbit.b3, lbit.b4);
-    bool break_btn = ui.button_state_hold();
-    if (break_btn) {
+    if (ui.button_state_hold()) {
       ui.coin(100);
       break;
     }
     vTaskDelay(xDelay);
   }
-
   return mode_num;
 }
 
@@ -236,7 +221,7 @@ void MainTask::save_json_data(std::string &str) {
   // 書き込み&ファイルclose
   fprintf(f, res[1].c_str());
   fclose(f);
-
+  // printf("%s\n", str.c_str());
   ui.coin(25);
 }
 void MainTask::set_ego_param_entity(ego_param_t *_param) {
@@ -297,19 +282,151 @@ void MainTask::load_sys_param() {
   }
 
   sys.user_mode = j["mode"];
-  sys.test_mode.v_max = j["test"]["v_max"];
-  sys.test_mode.accl = j["test"]["accl"];
-  sys.test_mode.decel = j["test"]["decel"];
-  sys.test_mode.dist = j["test"]["dist"];
-  sys.test_mode.w_max = j["test"]["w_max"];
-  sys.test_mode.alpha = j["test"]["alpha"];
-  sys.test_mode.ang = j["test"]["ang"];
-  sys.test_mode.sla_type = j["test"]["sla_type"];
+  sys.test.v_max = j["test"]["v_max"];
+  sys.test.accl = j["test"]["accl"];
+  sys.test.decel = j["test"]["decel"];
+  sys.test.dist = j["test"]["dist"];
+  sys.test.w_max = j["test"]["w_max"];
+  sys.test.alpha = j["test"]["alpha"];
+  sys.test.ang = j["test"]["ang"];
+  sys.test.file_idx = j["test"]["file_idx"];
+  sys.test.sla_type = j["test"]["sla_type"];
+  sys.test.sla_return = j["test"]["sla_return"];
+  sys.test.sla_type2 = j["test"]["sla_type2"];
+}
+
+void MainTask::load_turn_param_profiles() {
+  FILE *f = fopen("/spiflash/profiles.txt", "rb");
+  if (f == NULL)
+    return;
+
+  char line[1024];
+  fgets(line, sizeof(line), f);
+  fclose(f);
+
+  std::string json_str = std::string(line);
+  printf("%s\n", json_str.c_str());
+  nlohmann::json j = nlohmann::json::parse(json_str);
+  tpp.file_list.clear();
+  printf("profile_list\n");
+  for (std::string ele : j["list"]) {
+    tpp.file_list.push_back(ele);
+    printf("- %s\n", ele.c_str());
+    tpp.file_list_size++;
+  }
+  printf("tpp.file_list.size() = %d\n", tpp.file_list.size());
+
+  tpp.profile_idx_size = j["profile_idx_size"];
+  printf("tpp.profile_idx_size= %d\n", tpp.profile_idx_size);
+
+  tpp.profile_list.clear();
+  for (auto ele : j["profile_idx"]) {
+    profile_idx_t p_idx;
+    for (auto it = ele.begin(); it != ele.end(); ++it) {
+      std::string key = std::string(it.key());
+      int idx = static_cast<int>(it.value());
+
+      // プロファイルの数以上を指定した場合、頭打ちさせる
+      if (idx >= tpp.file_list_size)
+        idx = tpp.file_list_size - 1;
+
+      if (key == "normal")
+        p_idx.normal = idx;
+      else if (key == "large")
+        p_idx.large = idx;
+      else if (key == "orval")
+        p_idx.orval = idx;
+      else if (key == "dia45")
+        p_idx.dia45 = idx;
+      else if (key == "dia45_2")
+        p_idx.dia45_2 = idx;
+      else if (key == "dia135")
+        p_idx.dia135 = idx;
+      else if (key == "dia135_2")
+        p_idx.dia135_2 = idx;
+      else if (key == "dia90")
+        p_idx.dia90 = idx;
+    }
+    tpp.profile_list.emplace_back(p_idx);
+  }
+}
+void MainTask::load_slalom_param() {
+  char line[2048];
+  turn_param_list.clear();
+  for (const auto file_name : tpp.file_list) {
+    const auto path = std::string("/spiflash/" + file_name);
+
+    FILE *f = fopen(path.c_str(), "rb");
+    if (f == NULL) {
+      return;
+    }
+    printf("%s\n", path.c_str());
+    fgets(line, sizeof(line), f);
+    fclose(f);
+
+    std::string json_str = std::string(line);
+    // printf("%s\n", json_str.c_str());
+    nlohmann::json j = nlohmann::json::parse(json_str);
+    slalom_parameter_t sp;
+
+    sp.normal.v = j["normal"]["v"];
+    sp.normal.ang = j["normal"]["ang"];
+    sp.normal.rad = j["normal"]["rad"];
+    sp.normal.front.right = j["normal"]["front"]["right"];
+    sp.normal.front.left = j["normal"]["front"]["left"];
+    sp.normal.back.right = j["normal"]["back"]["right"];
+    sp.normal.back.left = j["normal"]["back"]["left"];
+    sp.large.v = j["large"]["v"];
+    sp.large.ang = j["large"]["ang"];
+    sp.large.rad = j["large"]["rad"];
+    sp.large.front.right = j["large"]["front"]["right"];
+    sp.large.front.left = j["large"]["front"]["left"];
+    sp.large.back.right = j["large"]["back"]["right"];
+    sp.large.back.left = j["large"]["back"]["left"];
+    sp.dia45.v = j["dia45"]["v"];
+    sp.dia45.ang = j["dia45"]["ang"];
+    sp.dia45.rad = j["dia45"]["rad"];
+    sp.dia45.front.right = j["dia45"]["front"]["right"];
+    sp.dia45.front.left = j["dia45"]["front"]["left"];
+    sp.dia45.back.right = j["dia45"]["back"]["right"];
+    sp.dia45.back.left = j["dia45"]["back"]["left"];
+    sp.dia45_2.v = j["dia45_2"]["v"];
+    sp.dia45_2.ang = j["dia45_2"]["ang"];
+    sp.dia45_2.rad = j["dia45_2"]["rad"];
+    sp.dia45_2.front.right = j["dia45_2"]["front"]["right"];
+    sp.dia45_2.front.left = j["dia45_2"]["front"]["left"];
+    sp.dia45_2.back.right = j["dia45_2"]["back"]["right"];
+    sp.dia45_2.back.left = j["dia45_2"]["back"]["left"];
+    sp.dia135.v = j["dia135"]["v"];
+    sp.dia135.ang = j["dia135"]["ang"];
+    sp.dia135.rad = j["dia135"]["rad"];
+    sp.dia135.front.right = j["dia135"]["front"]["right"];
+    sp.dia135.front.left = j["dia135"]["front"]["left"];
+    sp.dia135.back.right = j["dia135"]["back"]["right"];
+    sp.dia135.back.left = j["dia135"]["back"]["left"];
+    sp.dia135_2.v = j["dia135_2"]["v"];
+    sp.dia135_2.ang = j["dia135_2"]["ang"];
+    sp.dia135_2.rad = j["dia135_2"]["rad"];
+    sp.dia135_2.front.right = j["dia135_2"]["front"]["right"];
+    sp.dia135_2.front.left = j["dia135_2"]["front"]["left"];
+    sp.dia135_2.back.right = j["dia135_2"]["back"]["right"];
+    sp.dia135_2.back.left = j["dia135_2"]["back"]["left"];
+    sp.dia90.v = j["dia90"]["v"];
+    sp.dia90.ang = j["dia90"]["ang"];
+    sp.dia90.rad = j["dia90"]["rad"];
+    sp.dia90.front.right = j["dia90"]["front"]["right"];
+    sp.dia90.front.left = j["dia90"]["front"]["left"];
+    sp.dia90.back.right = j["dia90"]["back"]["right"];
+    sp.dia90.back.left = j["dia90"]["back"]["left"];
+    turn_param_list.emplace_back(sp);
+  }
 }
 
 void MainTask::load_param() {
   load_hw_param(); //
   load_sys_param();
+  load_turn_param_profiles();
+  load_slalom_param();
 }
 void MainTask::rx_uart_json() {
 
@@ -331,7 +448,7 @@ void MainTask::rx_uart_json() {
   ui.coin(40);
   while (1) {
     int len = uart_read_bytes(UART_NUM_0, data, (BUF_SIZE - 1),
-                              200 / portTICK_RATE_MS);
+                              250 / portTICK_RATE_MS);
     uart_write_bytes(UART_NUM_0, (const char *)data, len);
     if (len) {
       data[len] = '\0';
@@ -343,7 +460,7 @@ void MainTask::rx_uart_json() {
     }
   }
   free(data);
-  ui.coin(40);
+  ui.coin(100);
   vTaskDelay(100 / portTICK_PERIOD_MS);
 }
 void MainTask::task() {
@@ -355,7 +472,6 @@ void MainTask::task() {
   rx_uart_json(); // uartでファイルを受け取る
   reset_tgt_data();
   reset_ego_data();
-  reset_motion_tgt();
 
   if (sys.user_mode != 0) {
     if (sys.user_mode == 1) {
@@ -401,11 +517,11 @@ void MainTask::test_run() {
 
   req_error_reset();
 
-  ps.v_max = sys.test_mode.v_max;
+  ps.v_max = sys.test.v_max;
   ps.v_end = 30;
-  ps.dist = sys.test_mode.dist;
-  ps.accl = sys.test_mode.accl;
-  ps.decel = sys.test_mode.decel;
+  ps.dist = sys.test.dist;
+  ps.accl = sys.test.accl;
+  ps.decel = sys.test.decel;
 
   int res = mp.go_straight(ps);
   reset_tgt_data();
@@ -426,10 +542,10 @@ void MainTask::test_turn() {
 
   req_error_reset();
 
-  pr.w_max = sys.test_mode.w_max;
-  pr.alpha = sys.test_mode.alpha;
+  pr.w_max = sys.test.w_max;
+  pr.alpha = sys.test.alpha;
   pr.w_end = 0;
-  pr.ang = sys.test_mode.ang * PI / 180;
+  pr.ang = sys.test.ang * PI / 180;
   pr.RorL = rorl;
 
   for (int i = 0; i < 4; i++) {
@@ -443,6 +559,28 @@ void MainTask::test_turn() {
 
 void MainTask::test_sla() {
 
+  int file_idx = sys.test.file_idx;
+
+  if (file_idx >= tpp.file_list_size) {
+    ui.error();
+    return;
+  }
+
+  const auto sla_params = turn_param_list[file_idx];
+
+  auto sla_p = sla_params.normal;
+  if (sys.test.sla_type == 2) {
+    sla_p = sla_params.orval;
+  } else if (sys.test.sla_type == 3) {
+    sla_p = sla_params.large;
+  } else if (sys.test.sla_type == 4) {
+    sla_p = sla_params.dia45;
+  } else if (sys.test.sla_type == 5) {
+    sla_p = sla_params.dia135;
+  } else if (sys.test.sla_type == 6) {
+    sla_p = sla_params.dia90;
+  }
+
   TurnDirection rorl = ui.select_direction();
 
   reset_gyro_ref();
@@ -452,25 +590,25 @@ void MainTask::test_sla() {
 
   req_error_reset();
 
-  ps.v_max = 300;
-  ps.v_end = 300;
+  ps.v_max = sla_p.v;
+  ps.v_end = sla_p.v;
   ps.dist = 90;
-  ps.accl = 2000;
-  ps.decel = -1500;
+  ps.accl = sys.test.accl;
+  ps.decel = sys.test.decel;
   mp.go_straight(ps);
 
-  pns.ang = 90 * PI / 180;
-  pns.radius = 90;
+  pns.ang = sla_p.ang * PI / 180;
+  pns.radius = sla_p.rad;
   pns.RorL = rorl;
-  pns.v_end = 300;
-  pns.v_max = 300;
+  pns.v_end = sla_p.v;
+  pns.v_max = sla_p.v;
   mp.normal_slalom(pns, ps);
 
-  ps.v_max = 300;
+  ps.v_max = sla_p.v;
   ps.v_end = 30;
   ps.dist = 90;
-  ps.accl = 2000;
-  ps.decel = -1500;
+  ps.accl = sys.test.accl;
+  ps.decel = sys.test.decel;
   mp.go_straight(ps);
 
   pt->motor_disable();

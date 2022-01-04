@@ -70,7 +70,8 @@ private:
   param_roll_t pr;
   param_normal_slalom_t pns;
   system_t sys;
-  
+  turn_param_profile_t tpp;
+
   const char *base_path = "/spiflash";
   esp_vfs_fat_mount_config_t mount_config;
   wl_handle_t s_wl_handle = WL_INVALID_HANDLE;
@@ -95,6 +96,10 @@ private:
   void load_param();
   void load_hw_param();
   void load_sys_param();
+  void load_turn_param_profiles();
+  void load_slalom_param();
+  // std::unordered_map<int, slalom_param2_t> turn_param_map;
+  std::vector<slalom_parameter_t> turn_param_list;
 };
 
 #endif

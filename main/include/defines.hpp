@@ -10,6 +10,11 @@
 #include "soc/adc_channel.h"
 #include "soc/ledc_periph.h"
 
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+
 #define ABS(IN) ((IN) < 0 ? -(IN) : (IN))
 
 #define LED_R90 GPIO_NUM_9
@@ -73,7 +78,7 @@
 #define ENCODER_L_LIM_VAL -32767
 #define READ_FLAG 0x80
 #define ESC 0x1B
-#define BUF_SIZE (1024)
+#define BUF_SIZE (4096)
 
 // constexpr double MOTION_CHECK_TH = 1000;
 #define MOTION_CHECK_TH 1000
@@ -263,13 +268,58 @@ typedef struct {
   double w_max;
   double alpha;
   double ang;
+  int file_idx;
   int sla_type;
+  int sla_return;
+  int sla_type2;
 } test_mode_t;
 
 typedef struct {
   std::vector<point_t> goals;
   int user_mode;
-  test_mode_t test_mode;
+  test_mode_t test;
 } system_t;
+
+typedef struct {
+  int normal;
+  int large;
+  int orval;
+  int dia45;
+  int dia45_2;
+  int dia135;
+  int dia135_2;
+  int dia90;
+} profile_idx_t;
+
+typedef struct {
+  std::vector<std::string> file_list;
+  int file_list_size;
+  int profile_idx_size;
+  std::vector<profile_idx_t> profile_list;
+} turn_param_profile_t;
+
+typedef struct {
+  double right;
+  double left;
+} slalom_offset_t;
+
+typedef struct {
+  double v;
+  double ang;
+  double rad;
+  slalom_offset_t front;
+  slalom_offset_t back;
+} slalom_param2_t;
+
+typedef struct {
+  slalom_param2_t normal;
+  slalom_param2_t large;
+  slalom_param2_t orval;
+  slalom_param2_t dia45;
+  slalom_param2_t dia45_2;
+  slalom_param2_t dia135;
+  slalom_param2_t dia135_2;
+  slalom_param2_t dia90;
+} slalom_parameter_t;
 
 #endif

@@ -8,9 +8,7 @@ void UserInterface::set_tgt_entity(tgt_entity_t *_tgt) { tgt = _tgt; }
 
 void UserInterface::set_ego_entity(ego_entity_t *_ego) { ego = _ego; }
 
-bool UserInterface::button_state() {
-  return !gpio_get_level(SW1); //
-}
+bool UserInterface::button_state() { return !gpio_get_level(SW1); }
 
 bool UserInterface::button_state_hold() {
   if (!gpio_get_level(SW1)) {
@@ -222,4 +220,9 @@ TurnDirection UserInterface::select_direction() {
       }
     }
   }
+}
+void UserInterface::error() {
+  int time = 120;
+  for (int i = 0; i < 4; i++)
+    music_sync(MUSIC::C4_, time);
 }

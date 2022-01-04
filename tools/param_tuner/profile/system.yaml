@@ -1,0 +1,16 @@
+goals: [[7, 7], [7, 8], [8, 7], [8, 8]]
+# goals: [[1, 0]]
+maze_size: 32
+mode: 1 # モード選択
+test: # テスト走行時に使用するパラメータ群
+  v_max: 300
+  accl: 1000
+  decel: -1000
+  dist: 270
+  w_max: 5.0
+  alpha: 10
+  ang: 180
+  file_idx: 1
+  sla_type: 1
+  sla_return: 0 # 往復フラグ
+  sla_type2: 0 #復路ターン種類

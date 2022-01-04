@@ -1,0 +1,14 @@
+normal:
+  ref:
+    right45: 1000
+    left45: 1000
+  exist:
+    right45: 70
+    left45: 70
+dia:
+  ref:
+    right45: 1000
+    left45: 1000
+  exist:
+    right45: 70
+    left45: 70

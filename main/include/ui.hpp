@@ -39,7 +39,8 @@ public:
   void music_sync(MUSIC m, int time);
   void hello_exia();
   void coin(int t);
-
+  void error();
+  
   TurnDirection select_direction();
 
 private:
