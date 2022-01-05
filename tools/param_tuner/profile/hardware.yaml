@@ -13,8 +13,8 @@ motor_pid:
   i: 0.0175
   d: 0.001
 gyro_pid:
-  p: 2.5
-  i: 0.75
+  p: 1.75
+  i: 0.5
   d: 0
 sensor_pid:
   p: 0.1
@@ -27,5 +27,8 @@ sensor_pid_dia:
 gyro_param:
   gyro_w_gain_right: 0.0002645
   gyro_w_gain_left: 0.0002645
-  lp_delay: 0.01
-  
+  lp_delay: 0.25
+battery_param:
+  lp_delay: 0.25
+led_param:
+  lp_delay: 0.25

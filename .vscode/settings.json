@@ -53,7 +53,8 @@
         "ctime": "cpp",
         "cwctype": "cpp",
         "deque": "cpp",
-        "fstream": "cpp"
+        "fstream": "cpp",
+        "iostream": "cpp"
     },
     "idf.adapterTargetName": "esp32s3"
 }

@@ -21,7 +21,7 @@ bool UserInterface::button_state_hold() {
 }
 
 int UserInterface::encoder_operation() {
-  double v_r = ego->v_r;
+  float v_r = ego->v_r;
   if (v_r > ENC_OPE_V_R_TH) {
     music_sync(MUSIC::G6_, 75);
     return 1;
@@ -51,7 +51,7 @@ void UserInterface::motion_check() {
     } else {
       LED_off_all();
     }
-    double front_sensor_data = entity_ro->led_sen.front.raw;
+    float front_sensor_data = entity_ro->led_sen.front.raw;
     if (front_sensor_data > MOTION_CHECK_TH) {
       LED_off_all();
       for (int i = 0; i < 2; i++) {

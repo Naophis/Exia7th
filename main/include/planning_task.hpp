@@ -21,7 +21,7 @@ public:
   virtual ~PlanningTask();
   void create_task(const BaseType_t xCoreID);
   void motor_enable();
-  void suction_enable(double duty);
+  void suction_enable(float duty);
   void motor_disable();
   void suction_disable();
 
@@ -34,6 +34,10 @@ public:
               ledc_timer_config_t &buzzer_timer);
   static void task_entry_point(void *task_instance);
   virtual void task();
+
+  void active_logging();
+  void inactive_logging();
+  void dump_log();
 
   // read only
   sensing_result_entity_t *entity_ro;
@@ -55,19 +59,26 @@ private:
   bool suction_en;
 
   void update_ego_motion();
-  void set_next_duty(double duty_l, double duty_r, double duty_suction);
+  void set_next_duty(float duty_l, float duty_r, float duty_suction);
   void init_gpio();
   void calc_tgt_duty();
-  void calc_next_tgt_val();
   duty_t tgt_duty;
   pid_error_entity_t error_entity;
   motion_tgt_val_t *tgt_val;
   int buzzer_time_cnt = 0;
   int buzzer_timestamp = 0;
   int pid_req_timestamp = 0;
-  void reset_error();
+  void pl_req_activate();
   void cp_tgt_val();
+  void set_log_data();
   mpc_tgt_calcModelClass mpc_tgt_calc;
+
+  log_t tmp_d;
+  std::vector<log_t> log_list;
+
+  bool log_active = false;
+  // log_t log_list2[10];
+  int log_list2_size = 0;
 };
 
 #endif

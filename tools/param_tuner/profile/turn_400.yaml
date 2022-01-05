@@ -2,47 +2,63 @@ normal:
   v: 400
   ang: 90
   rad: 90
+  pow_n: 4
+  time: 0.13721875
   front: { right: 10, left: 10 }
   back: { right: 10, left: 10 }
-large: 
+large:
   v: 400
   ang: 90
   rad: 60
+  pow_n: 4
+  time: 0.13721875
   front: { right: 10, left: 10 }
   back: { right: 10, left: 10 }
-orval: 
+orval:
   v: 400
   ang: 180
   rad: 90
+  pow_n: 4
+  time: 0.13721875
   front: { right: 10, left: 10 }
   back: { right: 10, left: 10 }
-dia45: 
+dia45:
   v: 400
   ang: 90
   rad: 60
+  pow_n: 4
+  time: 0.13721875
   front: { right: 10, left: 10 }
   back: { right: 10, left: 10 }
-dia45_2: 
+dia45_2:
   v: 400
   ang: 90
   rad: 60
+  pow_n: 4
+  time: 0.13721875
   front: { right: 10, left: 10 }
   back: { right: 10, left: 10 }
-dia135: 
+dia135:
   v: 400
   ang: 90
   rad: 60
+  pow_n: 4
+  time: 0.13721875
   front: { right: 10, left: 10 }
   back: { right: 10, left: 10 }
-dia135_2: 
+dia135_2:
   v: 400
   ang: 90
   rad: 60
+  pow_n: 4
+  time: 0.13721875
   front: { right: 10, left: 10 }
   back: { right: 10, left: 10 }
-dia90: 
+dia90:
   v: 400
   ang: 90
   rad: 60
+  pow_n: 4
+  time: 0.13721875
   front: { right: 10, left: 10 }
   back: { right: 10, left: 10 }

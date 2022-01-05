@@ -37,7 +37,7 @@ void MainTask::set_tgt_val(motion_tgt_val_t *_tgt) {
 void MainTask::check_battery() {
   vTaskDelay(1000 / portTICK_PERIOD_MS); //他モジュールの起動待ち
 
-  if (entity_ro->battery.data > LOW_BATTERY_TH)
+  if (entity_ro->battery.raw > LOW_BATTERY_TH)
     return;
   while (1) {
     ui.music_sync(MUSIC::G5_, 250);
@@ -46,7 +46,7 @@ void MainTask::check_battery() {
 }
 void MainTask::reset_gyro_ref() {
   const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
-  double gyro_raw_data_sum = 0;
+  float gyro_raw_data_sum = 0;
 
   ui.motion_check();
   for (int i = 0; i < RESET_GYRO_LOOP_CNT; i++) {
@@ -64,7 +64,7 @@ void MainTask::dump1() {
     printf("SW1 %d \n", gpio_get_level(SW1));
 
     printf("gyro: %d\t(%0.3f)\n", entity_ro->gyro.raw, tgt->gyro_zero_p_offset);
-    printf("battery: %0.3f\n", entity_ro->battery.data);
+    printf("battery: %0.3f\n", ego->battery_lp);
     printf("encoder: %d, %d\n", entity_ro->encoder.left,
            entity_ro->encoder.right);
     printf("sensor: %d, %d, %d, %d, %d\n", entity_ro->led_sen.left90.raw,
@@ -75,8 +75,8 @@ void MainTask::dump1() {
            tgt_val->ego_in.dist);
     printf("calc_v: %0.3f, %0.3f\n", tgt_val->ego_in.v, tgt_val->ego_in.w);
 
-    printf("ego_w: %0.3f, %0.3f, %0.3f deg\n", ego->w, tgt_val->ego_in.ang,
-           tgt_val->ego_in.ang * 180 / PI);
+    printf("ego_w: %0.3f, %0.3f, %0.3f, %0.3f deg\n", ego->w_raw, ego->w_lp,
+           tgt_val->ego_in.ang, tgt_val->ego_in.ang * 180 / PI);
     printf("duty: %0.3f, %0.3f\n", ego->duty.duty_l, ego->duty.duty_r);
 
     if (ui.button_state()) {
@@ -171,19 +171,19 @@ void MainTask::keep_pivot() {
 void MainTask::entity_to_json(nlohmann::json &j) {
   j = nlohmann::json{
       {"led_sen",
-       {{"right90", entity_ro->led_sen.right90.raw},
-        {"right45", entity_ro->led_sen.right45.raw},
-        {"front", entity_ro->led_sen.front.raw},
-        {"left45", entity_ro->led_sen.left45.raw},
-        {"left90", entity_ro->led_sen.left90.raw}}},
-      {"gyro", {{"raw", entity_ro->gyro.raw}, {"data", entity_ro->gyro.data}}},
-      {"battery",
-       {{"raw", entity_ro->battery.raw}, {"data", entity_ro->battery.data}}},
+       {{"right90", {{"raw", ego->right90_raw}, {"lp", ego->right90_lp}}},
+        {"right45", {{"raw", ego->right45_raw}, {"lp", ego->right45_lp}}},
+        {"front", {{"raw", ego->front_raw}, {"lp", ego->front_lp}}},
+        {"left45", {{"raw", ego->left45_raw}, {"lp", ego->left45_lp}}},
+        {"left90", {{"raw", ego->left90_raw}, {"lp", ego->left90_lp}}}}},
+      {"gyro", {{"raw", ego->w_raw}, {"lp", ego->w_lp}}},
+      {"battery", {{"raw", ego->battery_raw}, {"lp", ego->battery_lp}}},
       {"ego",
        {{"angle", tgt_val->ego_in.ang}, {"dist", tgt_val->ego_in.dist}}}};
 }
 void MainTask::echo_sensing_result_with_json() {
   const TickType_t xDelay = 50 / portTICK_PERIOD_MS;
+  reset_gyro_ref();
   while (1) {
     entity_to_json(json_instance);
     printf("%s\n", json_instance.dump().c_str());
@@ -258,6 +258,9 @@ void MainTask::load_hw_param() {
   param->gyro_pid.d = j["gyro_pid"]["d"];
   param->gyro_param.gyro_w_gain_right = j["gyro_param"]["gyro_w_gain_right"];
   param->gyro_param.gyro_w_gain_left = j["gyro_param"]["gyro_w_gain_left"];
+  param->gyro_param.lp_delay = j["gyro_param"]["lp_delay"];
+  param->battery_param.lp_delay = j["battery_param"]["lp_delay"];
+  param->led_param.lp_delay = j["led_param"]["lp_delay"];
 }
 
 void MainTask::load_sys_param() {
@@ -295,6 +298,7 @@ void MainTask::load_sys_param() {
   sys.test.sla_type = j["test"]["sla_type"];
   sys.test.sla_return = j["test"]["sla_return"];
   sys.test.sla_type2 = j["test"]["sla_type2"];
+  sys.test.sla_dist = j["test"]["sla_dist"];
 }
 
 void MainTask::load_turn_param_profiles() {
@@ -327,11 +331,9 @@ void MainTask::load_turn_param_profiles() {
     for (auto it = ele.begin(); it != ele.end(); ++it) {
       std::string key = std::string(it.key());
       int idx = static_cast<int>(it.value());
-
       // プロファイルの数以上を指定した場合、頭打ちさせる
       if (idx >= tpp.file_list_size)
         idx = tpp.file_list_size - 1;
-
       if (key == "normal")
         p_idx.normal = idx;
       else if (key == "large")
@@ -376,7 +378,10 @@ void MainTask::load_slalom_param() {
       slalom_param2_t sp2;
       sp2.v = j[p.second]["v"];
       sp2.ang = j[p.second]["ang"];
+      sp2.ang = PI * sp2.ang / 180;
       sp2.rad = j[p.second]["rad"];
+      sp2.pow_n = j[p.second]["pow_n"];
+      sp2.time = j[p.second]["time"];
       sp2.front.right = j[p.second]["front"]["right"];
       sp2.front.left = j[p.second]["front"]["left"];
       sp2.back.right = j[p.second]["back"]["right"];
@@ -446,6 +451,8 @@ void MainTask::task() {
       test_run();
     } else if (sys.user_mode == 3) {
       test_turn();
+    } else if (sys.user_mode == 15) {
+      echo_sensing_result_with_json();
     }
   } else {
     ui.hello_exia();
@@ -482,6 +489,7 @@ void MainTask::test_run() {
   pt->motor_enable();
 
   req_error_reset();
+  pt->active_logging();
 
   ps.v_max = sys.test.v_max;
   ps.v_end = 30;
@@ -495,7 +503,9 @@ void MainTask::test_run() {
   vTaskDelay(250 / portTICK_RATE_MS);
   pt->motor_disable();
 
+  pt->inactive_logging();
   ui.coin(120);
+  dump_log();
 }
 
 void MainTask::test_turn() {
@@ -508,6 +518,7 @@ void MainTask::test_turn() {
 
   req_error_reset();
 
+  pt->active_logging();
   pr.w_max = sys.test.w_max;
   pr.alpha = sys.test.alpha;
   pr.w_end = 0;
@@ -520,7 +531,9 @@ void MainTask::test_turn() {
   }
   pt->motor_disable();
 
+  pt->inactive_logging();
   ui.coin(120);
+  dump_log();
 }
 
 void MainTask::test_sla() {
@@ -532,8 +545,10 @@ void MainTask::test_sla() {
     return;
   }
 
-  const auto sla_p =
+  auto sla_p =
       turn_param_list[file_idx].map[static_cast<TurnType>(sys.test.sla_type)];
+
+  printf("%d %f\n", sla_p.pow_n, sla_p.time);
 
   TurnDirection rorl = ui.select_direction();
 
@@ -550,19 +565,30 @@ void MainTask::test_sla() {
 
   req_error_reset();
 
+  pt->active_logging();
+
   ps.v_max = sla_p.v;
   ps.v_end = sla_p.v;
-  ps.dist = 90;
+  ps.dist = sys.test.sla_dist;
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
   mp.go_straight(ps);
 
-  pns.ang = sla_p.ang * PI / 180;
-  pns.radius = sla_p.rad;
-  pns.RorL = rorl;
-  pns.v_end = sla_p.v;
-  pns.v_max = sla_p.v;
-  mp.normal_slalom(pns, ps);
+  // pns.ang = sla_p.ang * PI / 180;
+  // pns.radius = sla_p.rad;
+  // pns.RorL = rorl;
+  // pns.v_end = sla_p.v;
+  // pns.v_max = sla_p.v;
+  // mp.normal_slalom(pns, ps);
+
+  next_motionr_t nm;
+  nm.v_max = sla_p.v;
+  nm.v_end = sla_p.v;
+  nm.accl = sys.test.accl;
+  nm.decel = sys.test.decel;
+  nm.is_turn = false;
+
+  mp.slalom(sla_p, rorl, nm);
 
   ps.v_max = sla_p.v;
   ps.v_end = 30;
@@ -574,7 +600,27 @@ void MainTask::test_sla() {
   pt->motor_disable();
 
   pt->suction_disable();
+  pt->inactive_logging();
   vTaskDelay(500 / portTICK_PERIOD_MS);
 
   ui.coin(120);
+
+  dump_log();
+}
+
+void MainTask::dump_log() {
+
+  while (1) {
+    if (ui.button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
+  printf("load\n");
+  pt->dump_log();
+
+  while (1) {
+    if (ui.button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
 }

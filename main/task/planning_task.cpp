@@ -13,7 +13,7 @@ void PlanningTask::motor_enable() {
   mcpwm_start(MCPWM_UNIT_0, MCPWM_TIMER_0);
   mcpwm_start(MCPWM_UNIT_0, MCPWM_TIMER_1);
 }
-void PlanningTask::suction_enable(double duty) {
+void PlanningTask::suction_enable(float duty) {
   suction_en = true;
   tgt_duty.duty_suction = duty;
   mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A);
@@ -47,6 +47,12 @@ void PlanningTask::set_ego_param_entity(ego_param_t *_param) {
   param_ro = _param;
 }
 void PlanningTask::set_tgt_entity(tgt_entity_t *_tgt) { tgt = _tgt; }
+void PlanningTask::active_logging() {
+  log_active = true;
+  log_list.clear();
+  log_list2_size = 0;
+}
+void PlanningTask::inactive_logging() { log_active = false; }
 void PlanningTask::buzzer(ledc_channel_config_t &buzzer_ch,
                           ledc_timer_config_t &buzzer_timer) {
   int duty = 0;
@@ -123,37 +129,91 @@ void PlanningTask::task() {
     // 算出結果をコピー
     cp_tgt_val();
 
+    pl_req_activate();
+
     // Duty計算
     calc_tgt_duty();
 
     set_next_duty(tgt_duty.duty_l, tgt_duty.duty_r, tgt_duty.duty_suction);
 
     buzzer(buzzer_ch, buzzer_timer);
+
+    set_log_data();
+
     vTaskDelay(xDelay);
   }
 }
+void PlanningTask::set_log_data() {
+  if (!log_active)
+    return;
+  if (log_list2_size >= LOG_SIZE)
+    return;
+  log_list2[log_list2_size].ideal.accl = tgt_val->ego_in.accl;
+  log_list2[log_list2_size].ideal.v = tgt_val->ego_in.v;
+  log_list2[log_list2_size].ideal.dist = tgt_val->ego_in.img_dist;
+  log_list2[log_list2_size].ideal.alpha = tgt_val->ego_in.alpha;
+  log_list2[log_list2_size].ideal.w = tgt_val->ego_in.w;
+  log_list2[log_list2_size].ideal.ang = tgt_val->ego_in.img_ang;
+
+  log_list2[log_list2_size].real.accl = 0;
+  log_list2[log_list2_size].real.v = ego->v_c;
+  log_list2[log_list2_size].real.dist = tgt_val->ego_in.dist;
+  log_list2[log_list2_size].real.alpha = 0;
+  log_list2[log_list2_size].real.w = ego->w_lp;
+  log_list2[log_list2_size].real.ang = tgt_val->ego_in.ang;
+  log_list2_size++;
+  // log_list.emplace_back(tmp_d);
+}
 
 void PlanningTask::update_ego_motion() {
-  const double dt = param_ro->dt;
-  const double tire = param_ro->tire;
+  const float dt = param_ro->dt;
+  const float tire = param_ro->tire;
   // エンコーダ、ジャイロから速度、角速度、距離、角度更新
-  ego->v_r = (double)(PI * tire * entity_ro->encoder.right / 4096.0 / dt / 1);
-  ego->v_l = (double)(PI * tire * entity_ro->encoder.left / 4096.0 / dt / 1);
+  ego->v_r = (float)(PI * tire * entity_ro->encoder.right / 4096.0 / dt / 1);
+  ego->v_l = (float)(PI * tire * entity_ro->encoder.left / 4096.0 / dt / 1);
   ego->v_c = (ego->v_l + ego->v_r) / 2;
+
   ego->rpm.right = 30.0 * ego->v_r / (PI * tire / 2);
   ego->rpm.left = 30.0 * ego->v_l / (PI * tire / 2);
 
   tgt_val->ego_in.dist += ego->v_c * dt;
-  ego->w = param_ro->gyro_param.gyro_w_gain_right *
-           (entity_ro->gyro.raw - tgt->gyro_zero_p_offset);
-  tgt_val->ego_in.ang += ego->w * dt;
+  ego->w_raw = param_ro->gyro_param.gyro_w_gain_right *
+               (entity_ro->gyro.raw - tgt->gyro_zero_p_offset);
+
+  ego->w_lp = ego->w_lp * (1 - param_ro->gyro_param.lp_delay) +
+              ego->w_raw * param_ro->gyro_param.lp_delay;
+
+  ego->battery_raw = entity_ro->battery.data;
+
+  ego->battery_lp = ego->battery_lp * (1 - param_ro->battery_param.lp_delay) +
+                    ego->battery_raw * param_ro->battery_param.lp_delay;
+
+  tgt_val->ego_in.ang += ego->w_lp * dt;
+
+  ego->right90_raw = entity_ro->led_sen.right90.raw;
+  ego->right90_lp = ego->right90_lp * (1 - param_ro->led_param.lp_delay) +
+                    ego->right90_raw * param_ro->led_param.lp_delay;
+  ego->right45_raw = entity_ro->led_sen.right45.raw;
+  ego->right45_lp = ego->right45_lp * (1 - param_ro->led_param.lp_delay) +
+                    ego->right45_raw * param_ro->led_param.lp_delay;
+
+  ego->front_raw = entity_ro->led_sen.front.raw;
+  ego->front_lp = ego->front_lp * (1 - param_ro->led_param.lp_delay) +
+                  ego->front_raw * param_ro->led_param.lp_delay;
+
+  ego->left45_raw = entity_ro->led_sen.left45.raw;
+  ego->left45_lp = ego->left45_lp * (1 - param_ro->led_param.lp_delay) +
+                   ego->left45_raw * param_ro->led_param.lp_delay;
+  ego->left90_raw = entity_ro->led_sen.left90.raw;
+  ego->left90_lp = ego->left90_lp * (1 - param_ro->led_param.lp_delay) +
+                   ego->left90_raw * param_ro->led_param.lp_delay;
 
   // コピー
-  tgt_val->ego_in.slip_point.w = ego->w;
+  tgt_val->ego_in.slip_point.w = ego->w_lp;
 }
 
-void PlanningTask::set_next_duty(double duty_l, double duty_r,
-                                 double duty_suction) {
+void PlanningTask::set_next_duty(float duty_l, float duty_r,
+                                 float duty_suction) {
   if (motor_en) {
     if (duty_l >= 0) {
       gpio_set_level(A_CW_CCW, 1);
@@ -167,8 +227,8 @@ void PlanningTask::set_next_duty(double duty_l, double duty_r,
       gpio_set_level(B_CW_CCW, 1);
     }
 
-    double tmp_duty_r = duty_r > 0 ? duty_r : -duty_r;
-    double tmp_duty_l = duty_l > 0 ? duty_l : -duty_l;
+    float tmp_duty_r = duty_r > 0 ? duty_r : -duty_r;
+    float tmp_duty_l = duty_l > 0 ? duty_l : -duty_l;
     // mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A);
     mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, tmp_duty_l);
     mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A,
@@ -223,9 +283,8 @@ void PlanningTask::init_gpio() {
   gpio_config(&io_conf);
   // gpio_set_direction((gpio_num_t)GPIO_OUTPUT_IO_8,
 }
-void PlanningTask::calc_next_tgt_val() {}
 
-void PlanningTask::reset_error() {
+void PlanningTask::pl_req_activate() {
   if (tgt_val->pl_req.time_stamp != pid_req_timestamp) {
     if (tgt_val->pl_req.error_gyro_reset == 1) {
       error_entity.v.error_i = 0;
@@ -233,6 +292,15 @@ void PlanningTask::reset_error() {
     if (tgt_val->pl_req.error_vel_reset == 1) {
       error_entity.w.error_i = 0;
     }
+    if (tgt_val->pl_req.error_led_reset == 1) {
+      // error_entity.led.error_i = 0;
+    }
+    // if (tgt_val->pl_req.log_start == 1) {
+    //   log_active = true;
+    // }
+    // if (tgt_val->pl_req.log_end == 1) {
+    //   log_active = false;
+    // }
     pid_req_timestamp = tgt_val->pl_req.time_stamp;
   }
 }
@@ -240,15 +308,15 @@ void PlanningTask::reset_error() {
 void PlanningTask::calc_tgt_duty() {
 
   error_entity.v.error_p = tgt_val->ego_in.v - ego->v_c;
-  error_entity.w.error_p = tgt_val->ego_in.w - ego->w;
+  error_entity.w.error_p = tgt_val->ego_in.w - ego->w_lp;
 
   error_entity.v.error_i += error_entity.v.error_p;
   error_entity.w.error_i += error_entity.w.error_p;
 
-  double duty_c = param_ro->motor_pid.p * error_entity.v.error_p +
+  float duty_c = param_ro->motor_pid.p * error_entity.v.error_p +
                   param_ro->motor_pid.i * error_entity.v.error_i;
 
-  double duty_roll = param_ro->gyro_pid.p * error_entity.w.error_p +
+  float duty_roll = param_ro->gyro_pid.p * error_entity.w.error_p +
                      param_ro->gyro_pid.i * error_entity.w.error_i;
   if (!motor_en) {
     duty_c = 0;
@@ -264,24 +332,6 @@ void PlanningTask::calc_tgt_duty() {
 }
 
 void PlanningTask::cp_tgt_val() {
-  // tgt_val->ego_in.accl = mpc_next_ego.accl;
-  // tgt_val->ego_in.alpha = mpc_next_ego.alpha;
-
-  // tgt_val->ego_in.pivot_state = mpc_next_ego.pivot_state;
-  // tgt_val->ego_in.state = mpc_next_ego.state;
-
-  // tgt_val->ego_in.v = mpc_next_ego.v;
-  // tgt_val->ego_in.w = mpc_next_ego.w;
-
-  // tgt_val->ego_in.sla_param.state = mpc_next_ego.sla_param.state;
-  // tgt_val->ego_in.sla_param.counter = mpc_next_ego.sla_param.counter;
-
-  // tgt_val->ego_in.img_ang = mpc_next_ego.img_ang;
-  // tgt_val->ego_in.img_dist = mpc_next_ego.img_dist;
-
-  // tgt_val->ego_in.slip_point.slip_angle = mpc_next_ego.slip_point.slip_angle;
-
-  ///////
   tgt_val->ego_in.accl = mpc_next_ego.accl;
   tgt_val->ego_in.alpha = mpc_next_ego.alpha;
   tgt_val->ego_in.pivot_state = mpc_next_ego.pivot_state;
@@ -300,4 +350,12 @@ void PlanningTask::cp_tgt_val() {
 
   tgt_val->ego_in.cnt_delay_accl_ratio = mpc_next_ego.cnt_delay_accl_ratio;
   tgt_val->ego_in.cnt_delay_decel_ratio = mpc_next_ego.cnt_delay_decel_ratio;
+}
+
+void PlanningTask::dump_log() {
+  for (int i = 0; i < log_list2_size; i++) {
+    printf("%d,%f,%f,%f,%f\n", i, log_list2[i].ideal.v, log_list2[i].real.v,
+           log_list2[i].ideal.dist, log_list2[i].real.dist);
+    i++;
+  }
 }

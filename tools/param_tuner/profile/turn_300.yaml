@@ -1,48 +1,64 @@
 normal:
   v: 300
   ang: 90
-  rad: 90
+  rad: 40
+  pow_n: 4
+  time: 0.13721875
   front: { right: 10, left: 10 }
   back: { right: 10, left: 10 }
 large:
-  v: 300
+  v: 500
   ang: 90
-  rad: 60
+  rad: 65
+  pow_n: 4
+  time: 0.13378125
   front: { right: 10, left: 10 }
   back: { right: 10, left: 10 }
 orval:
   v: 300
   ang: 180
-  rad: 80
+  rad: 90
+  pow_n: 4
+  time: 0.13721875
   front: { right: 10, left: 10 }
   back: { right: 10, left: 10 }
 dia45:
   v: 300
   ang: 90
   rad: 60
+  pow_n: 4
+  time: 0.13721875
   front: { right: 10, left: 10 }
   back: { right: 10, left: 10 }
 dia45_2:
   v: 300
   ang: 90
   rad: 60
+  pow_n: 4
+  time: 0.13721875
   front: { right: 10, left: 10 }
   back: { right: 10, left: 10 }
 dia135:
   v: 300
   ang: 90
   rad: 60
+  pow_n: 4
+  time: 0.13721875
   front: { right: 10, left: 10 }
   back: { right: 10, left: 10 }
 dia135_2:
   v: 300
   ang: 90
   rad: 60
+  pow_n: 4
+  time: 0.13721875
   front: { right: 10, left: 10 }
   back: { right: 10, left: 10 }
 dia90:
   v: 300
   ang: 90
   rad: 60
+  pow_n: 4
+  time: 0.13721875
   front: { right: 10, left: 10 }
   back: { right: 10, left: 10 }

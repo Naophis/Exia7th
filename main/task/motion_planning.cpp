@@ -96,7 +96,7 @@ int MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   tgt_val->tgt_in.v_max = sp.v;
   tgt_val->tgt_in.w_max = 0;
 
-  double alphaTemp = ((td == TurnDirection::Right) ? -1 : 1) * (sp.v / sp.rad);
+  float alphaTemp = ((td == TurnDirection::Right) ? -1 : 1) * (sp.v / sp.rad);
 
   tgt_val->ego_in.sla_param.base_alpha = alphaTemp;
   tgt_val->ego_in.sla_param.base_time = sp.time;
@@ -140,7 +140,7 @@ int MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
 }
 void MotionPlanning::normal_slalom(param_normal_slalom_t &p,
                                    param_straight_t &p_str) {
-  double alpha = (2 * p.v_max * p.v_max / (p.radius * p.radius * p.ang / 2));
+  float alpha = (2 * p.v_max * p.v_max / (p.radius * p.radius * p.ang / 2));
 
   if (p.RorL == TurnDirection::Left) {
     tgt_val->tgt_in.w_max = 200000;

@@ -1,18 +1,21 @@
 % ego
 dt = 0.001/4;
-Large = 1; Orval = 2; Dia45 = 3; Dia135 = 4; Dia90 = 5; Dia180 = 6;
+Normal = 0;Large = 1; Orval = 2; Dia45 = 3; Dia135 = 4; Dia90 = 5; Dia180 = 6;
 
-ego_v = 1500;
+ego_v = 500;
 turn_mode = Large;
 
 is_dia_mode = false;
 slip_gain = -495;
 
-wall_off_offset = 6;
-wall_off_offset_dia = 6 * sqrt(2);
+wall_off_offset = 0;
+wall_off_offset_dia = 0 * sqrt(2);
 
-if turn_mode == Large
-    radius = 130; sla.pow_n = 4;
+if turn_mode == Normal
+    radius = 40; sla.pow_n = 4;
+    target_angle = 90, is_dia_mode = false, turn_mode_str = 'Normal';
+elseif turn_mode == Large
+    radius = 65; sla.pow_n = 4;
     target_angle = 90, is_dia_mode = false, turn_mode_str = 'Large';
 elseif turn_mode == Orval
     radius = 86.30025; sla.pow_n = 4;

@@ -151,7 +151,7 @@ public:
 
   void set_param4() {
     // cell_size = 1;
-    // double tmp = 5;
+    // float tmp = 5;
     // Dia = cell_size * 1.41421356 / tmp;
     // Dia2 = cell_size * 1.41421356 / tmp;
     // Dia3 = cell_size * 1.41421356 / tmp;
@@ -172,8 +172,8 @@ public:
 
   void set_param5() {
     cell_size = 1;
-    double tmp = 1;
-    double tmp2 = 2;
+    float tmp = 1;
+    float tmp2 = 2;
     Dia = cell_size * 1.41421356 / tmp;
     Dia2 = cell_size * 1.41421356 / tmp;
     Dia3 = cell_size * 1.41421356 / tmp;

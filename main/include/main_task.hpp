@@ -98,7 +98,9 @@ private:
   void load_sys_param();
   void load_turn_param_profiles();
   void load_slalom_param();
+  void dump_log();
   std::vector<slalom_parameter_t> turn_param_list;
+
 };
 
 #endif

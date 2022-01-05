@@ -82,7 +82,7 @@
 #define ESC 0x1B
 #define BUF_SIZE (4096)
 
-// constexpr double MOTION_CHECK_TH = 1000;
+// constexpr float MOTION_CHECK_TH = 1000;
 #define MOTION_CHECK_TH 1000
 #define ENC_OPE_V_R_TH 175
 
@@ -105,7 +105,7 @@ typedef struct {
 
 typedef struct {
   int raw;
-  double data;
+  float data;
 } sensing_data_t;
 
 typedef struct {
@@ -127,66 +127,86 @@ typedef struct {
 } sensing_result_entity_t;
 
 typedef struct {
-  double vel;
-  double speed;
-  double accl;
+  float vel;
+  float speed;
+  float accl;
 } xva_t;
 
 typedef struct {
-  double right;
-  double left;
+  float right;
+  float left;
 } rpm_t;
 
 typedef struct {
-  double duty_l;
-  double duty_r;
-  double duty_suction;
+  float duty_l;
+  float duty_r;
+  float duty_suction;
 } duty_t;
 
 typedef struct {
-  double v_r;
-  double v_l;
-  double v_c;
-  double w;
-  // double dist;
-  // double angle;
+  float v_r;
+  float v_l;
+  float v_c;
+  float w_raw;
+  float w_lp;
+  float battery_raw;
+  float battery_lp;
+
+  float right90_raw;
+  float right90_lp;
+  float right45_raw;
+  float right45_lp;
+  float front_raw;
+  float front_lp;
+  float left45_raw;
+  float left45_lp;
+  float left90_raw;
+  float left90_lp;
+
   rpm_t rpm;
   duty_t duty;
 } ego_entity_t;
 
 typedef struct {
-  double p;
-  double i;
-  double d;
+  float p;
+  float i;
+  float d;
 } pid_param_t;
 
 typedef struct {
-  double gyro_w_gain_right;
-  double gyro_w_gain_left;
+  float gyro_w_gain_right;
+  float gyro_w_gain_left;
+  float lp_delay;
 } gyro_param_t;
 
 typedef struct {
-  double dt;
-  double tire;
-  double gear_a;
-  double gear_b;
-  double max_duty;
-  double Ke;
-  double Km;
-  double Resist;
-  double Mass;
-  double Lm;
+  float lp_delay;
+} sen_param_t;
+
+typedef struct {
+  float dt;
+  float tire;
+  float gear_a;
+  float gear_b;
+  float max_duty;
+  float Ke;
+  float Km;
+  float Resist;
+  float Mass;
+  float Lm;
   pid_param_t motor_pid;
   pid_param_t gyro_pid;
   pid_param_t sensor_pid;
   pid_param_t sensor_pid_dia;
   gyro_param_t gyro_param;
+  sen_param_t battery_param;
+  sen_param_t led_param;
 } ego_param_t;
 
 typedef struct {
-  double error_p;
-  double error_i;
-  double error_d;
+  float error_p;
+  float error_i;
+  float error_d;
 } pid_error_t;
 
 typedef struct {
@@ -196,10 +216,10 @@ typedef struct {
 
 // 指示速度
 typedef struct {
-  double v_max = 0;
-  double accl = 0;
-  double w_max = 0;
-  double alpha = 0;
+  float v_max = 0;
+  float accl = 0;
+  float w_max = 0;
+  float alpha = 0;
 } motion_tgt_t;
 
 typedef struct {
@@ -209,7 +229,7 @@ typedef struct {
 } buzzer_t;
 
 typedef struct {
-  double gyro_zero_p_offset;
+  float gyro_zero_p_offset;
   // motion_tgt_t motion_tgt;
   buzzer_t buzzer;
 } tgt_entity_t;
@@ -218,6 +238,9 @@ typedef struct {
   int time_stamp = 0;
   int error_gyro_reset = 0;
   int error_vel_reset = 0;
+  int error_led_reset = 0;
+  // int log_start = 0;
+  // int log_end = 0;
 } planning_req_t;
 
 typedef struct {
@@ -237,39 +260,40 @@ enum class RUN_MODE2 : int {
 };
 
 typedef struct {
-  double v_max;
-  double v_end;
-  double accl;
-  double decel;
-  double dist;
+  float v_max;
+  float v_end;
+  float accl;
+  float decel;
+  float dist;
 } param_straight_t;
 
 typedef struct {
-  double w_max;
-  double w_end;
-  double alpha;
-  double ang;
+  float w_max;
+  float w_end;
+  float alpha;
+  float ang;
   TurnDirection RorL;
 } param_roll_t;
 
 typedef struct {
-  double radius;
-  double v_max;
-  double v_end;
-  double ang;
+  float radius;
+  float v_max;
+  float v_end;
+  float ang;
   TurnDirection RorL;
 } param_normal_slalom_t;
 
 typedef struct {
-  double v_max;
-  double accl;
-  double decel;
-  double dist;
-  double w_max;
-  double alpha;
-  double ang;
+  float v_max;
+  float accl;
+  float decel;
+  float dist;
+  float w_max;
+  float alpha;
+  float ang;
   int suction_active;
-  double suction_duty;
+  float suction_duty;
+  float sla_dist;
   int file_idx;
   int sla_type;
   int sla_return;
@@ -301,18 +325,18 @@ typedef struct {
 } turn_param_profile_t;
 
 typedef struct {
-  double right;
-  double left;
+  float right;
+  float left;
 } slalom_offset_t;
 
 typedef struct {
-  double v;
-  double ang;
-  double rad;
+  float v;
+  float ang;
+  float rad;
   slalom_offset_t front;
   slalom_offset_t back;
   int pow_n;
-  double time;
+  float time;
 } slalom_param2_t;
 
 typedef struct {
@@ -322,10 +346,10 @@ typedef struct {
 typedef struct {
   bool is_turn;
   TurnType next_turn_type;
-  double v_max;
-  double v_end;
-  double accl;
-  double decel;
+  float v_max;
+  float v_end;
+  float accl;
+  float decel;
 } next_motionr_t;
 
 static std::initializer_list<std::pair<TurnType, std::string>> turn_name_list =
@@ -339,4 +363,32 @@ static std::initializer_list<std::pair<TurnType, std::string>> turn_name_list =
         {TurnType::Dia45_2, "dia45_2"},  //
         {TurnType::Dia135_2, "dia135_2"} //
 };
+
+typedef struct {
+  float accl;
+  float v;
+  float dist;
+  float alpha;
+  float w;
+  float ang;
+  // float accl2;
+  // float v2;
+  // float dist2;
+  // float alpha2;
+  // float w2;
+  // float ang2;
+  // float accl3;
+  // float v3;
+  // float dist3;
+  // float alpha3;
+  // float w3;
+  // float ang3;
+} log_data_t;
+
+typedef struct {
+  log_data_t ideal;
+  log_data_t real;
+} log_t;
+#define LOG_SIZE 1500
+static log_t log_list2[LOG_SIZE];
 #endif

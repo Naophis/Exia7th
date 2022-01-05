@@ -75,7 +75,7 @@ end
 
 if test_mode == 1
     % tgt
-    v_max = 1000;
+    v_max = 300;
     end_v = v_max;
     accl = 28000;
     decel = -20000;
