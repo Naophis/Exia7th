@@ -33,11 +33,14 @@ void MainTask::set_tgt_val(motion_tgt_val_t *_tgt) {
   tgt_val = _tgt;
   mp.set_tgt_val(_tgt);
 }
-
+void MainTask::set_logging_task(LoggingTask *_lt) { //
+  lt = _lt;
+}
 void MainTask::check_battery() {
   vTaskDelay(1000 / portTICK_PERIOD_MS); //他モジュールの起動待ち
 
-  if (entity_ro->battery.raw > LOW_BATTERY_TH)
+  printf("battery= %f\n", ego->battery_raw);
+  if (ego->battery_raw > LOW_BATTERY_TH)
     return;
   while (1) {
     ui.music_sync(MUSIC::G5_, 250);
@@ -168,25 +171,25 @@ void MainTask::keep_pivot() {
     vTaskDelay(xDelay);
   }
 }
-void MainTask::entity_to_json(nlohmann::json &j) {
-  j = nlohmann::json{
-      {"led_sen",
-       {{"right90", {{"raw", ego->right90_raw}, {"lp", ego->right90_lp}}},
-        {"right45", {{"raw", ego->right45_raw}, {"lp", ego->right45_lp}}},
-        {"front", {{"raw", ego->front_raw}, {"lp", ego->front_lp}}},
-        {"left45", {{"raw", ego->left45_raw}, {"lp", ego->left45_lp}}},
-        {"left90", {{"raw", ego->left90_raw}, {"lp", ego->left90_lp}}}}},
-      {"gyro", {{"raw", ego->w_raw}, {"lp", ego->w_lp}}},
-      {"battery", {{"raw", ego->battery_raw}, {"lp", ego->battery_lp}}},
-      {"ego",
-       {{"angle", tgt_val->ego_in.ang}, {"dist", tgt_val->ego_in.dist}}}};
-}
+// void MainTask::entity_to_json(nlohmann::json &j) {
+//   // j = nlohmann::json{
+//   //     {"led_sen",
+//   //      {{"right90", {{"raw", ego->right90_raw}, {"lp", ego->right90_lp}}},
+//   //       {"right45", {{"raw", ego->right45_raw}, {"lp", ego->right45_lp}}},
+//   //       {"front", {{"raw", ego->front_raw}, {"lp", ego->front_lp}}},
+//   //       {"left45", {{"raw", ego->left45_raw}, {"lp", ego->left45_lp}}},
+//   //       {"left90", {{"raw", ego->left90_raw}, {"lp", ego->left90_lp}}}}},
+//   //     {"gyro", {{"raw", ego->w_raw}, {"lp", ego->w_lp}}},
+//   //     {"battery", {{"raw", ego->battery_raw}, {"lp", ego->battery_lp}}},
+//   //     {"ego",
+//   //      {{"angle", tgt_val->ego_in.ang}, {"dist", tgt_val->ego_in.dist}}}};
+// }
 void MainTask::echo_sensing_result_with_json() {
   const TickType_t xDelay = 50 / portTICK_PERIOD_MS;
   reset_gyro_ref();
   while (1) {
-    entity_to_json(json_instance);
-    printf("%s\n", json_instance.dump().c_str());
+    // entity_to_json(json_instance);
+    // printf("%s\n", json_instance.dump().c_str());
     vTaskDelay(xDelay);
     bool break_btn = ui.button_state_hold();
     if (break_btn) {
@@ -233,34 +236,58 @@ void MainTask::load_hw_param() {
   if (f == NULL) {
     return;
   }
-  char line[1024];
-  fgets(line, sizeof(line), f);
+  fgets(line_buf, sizeof(line_buf), f);
   fclose(f);
 
-  std::string json_str = std::string(line);
-  printf("%s\n", json_str.c_str());
-  nlohmann::json j = nlohmann::json::parse(json_str);
-  param->dt = j["dt"];
-  param->tire = j["tire"];
-  param->gear_a = j["gear_a"];
-  param->gear_b = j["gear_b"];
-  param->max_duty = j["max_duty"];
-  param->Ke = j["Ke"];
-  param->Km = j["Km"];
-  param->Resist = j["Resist"];
-  param->Mass = j["Mass"];
-  param->Lm = j["Lm"];
-  param->motor_pid.p = j["motor_pid"]["p"];
-  param->motor_pid.i = j["motor_pid"]["i"];
-  param->motor_pid.d = j["motor_pid"]["d"];
-  param->gyro_pid.p = j["gyro_pid"]["p"];
-  param->gyro_pid.i = j["gyro_pid"]["i"];
-  param->gyro_pid.d = j["gyro_pid"]["d"];
-  param->gyro_param.gyro_w_gain_right = j["gyro_param"]["gyro_w_gain_right"];
-  param->gyro_param.gyro_w_gain_left = j["gyro_param"]["gyro_w_gain_left"];
-  param->gyro_param.lp_delay = j["gyro_param"]["lp_delay"];
-  param->battery_param.lp_delay = j["battery_param"]["lp_delay"];
-  param->led_param.lp_delay = j["led_param"]["lp_delay"];
+  printf("%s\n", line_buf);
+
+  cJSON *root = cJSON_CreateObject(), *motor_pid, *gyro_pid, *gyro_param,
+        *battery_param, *led_param;
+  root = cJSON_Parse(line_buf);
+
+  param->dt = cJSON_GetObjectItem(root, "dt")->valuedouble;
+  param->tire = cJSON_GetObjectItem(root, "tire")->valuedouble;
+  param->gear_a = cJSON_GetObjectItem(root, "gear_a")->valuedouble;
+  param->gear_b = cJSON_GetObjectItem(root, "gear_b")->valuedouble;
+  param->max_duty = cJSON_GetObjectItem(root, "max_duty")->valuedouble;
+  param->Ke = cJSON_GetObjectItem(root, "Ke")->valuedouble;
+  param->Km = cJSON_GetObjectItem(root, "Km")->valuedouble;
+  param->Resist = cJSON_GetObjectItem(root, "Resist")->valuedouble;
+  param->Mass = cJSON_GetObjectItem(root, "Mass")->valuedouble;
+  param->Lm = cJSON_GetObjectItem(root, "Lm")->valuedouble;
+
+  motor_pid = cJSON_GetObjectItem(root, "motor_pid");
+  param->motor_pid.p = cJSON_GetObjectItem(motor_pid, "p")->valuedouble;
+  param->motor_pid.i = cJSON_GetObjectItem(motor_pid, "i")->valuedouble;
+  param->motor_pid.d = cJSON_GetObjectItem(motor_pid, "d")->valuedouble;
+
+  gyro_pid = cJSON_GetObjectItem(root, "gyro_pid");
+  param->gyro_pid.p = cJSON_GetObjectItem(gyro_pid, "p")->valuedouble;
+  param->gyro_pid.i = cJSON_GetObjectItem(gyro_pid, "i")->valuedouble;
+  param->gyro_pid.d = cJSON_GetObjectItem(gyro_pid, "d")->valuedouble;
+
+  gyro_param = cJSON_GetObjectItem(root, "gyro_param");
+  param->gyro_param.gyro_w_gain_right =
+      cJSON_GetObjectItem(gyro_param, "gyro_w_gain_right")->valuedouble;
+  param->gyro_param.gyro_w_gain_left =
+      cJSON_GetObjectItem(gyro_param, "gyro_w_gain_left")->valuedouble;
+  param->gyro_param.lp_delay =
+      cJSON_GetObjectItem(gyro_param, "lp_delay")->valuedouble;
+
+  battery_param = cJSON_GetObjectItem(root, "battery_param");
+  param->battery_param.lp_delay =
+      cJSON_GetObjectItem(battery_param, "lp_delay")->valuedouble;
+
+  led_param = cJSON_GetObjectItem(root, "led_param");
+  param->led_param.lp_delay =
+      cJSON_GetObjectItem(led_param, "lp_delay")->valuedouble;
+
+  cJSON_free(root);
+  cJSON_free(motor_pid);
+  cJSON_free(gyro_pid);
+  cJSON_free(gyro_param);
+  cJSON_free(battery_param);
+  cJSON_free(led_param);
 }
 
 void MainTask::load_sys_param() {
@@ -268,37 +295,49 @@ void MainTask::load_sys_param() {
   if (f == NULL) {
     return;
   }
-  char line[1024];
-  fgets(line, sizeof(line), f);
+  char buf[LOG_BUF_SIZE];
+  fgets(line_buf, sizeof(line_buf), f);
   fclose(f);
 
-  std::string json_str = std::string(line);
-  printf("%s\n", json_str.c_str());
-  nlohmann::json j = nlohmann::json::parse(json_str);
+  printf("%s\n", line_buf);
+
+  cJSON *root = cJSON_CreateObject(), *test, *goals;
+  root = cJSON_Parse(line_buf);
+
   sys.goals.clear();
-  for (auto ele : j["goals"]) {
+  goals = cJSON_GetObjectItem(root, "goals");
+  int goal_size = cJSON_GetArraySize(goals);
+  for (int i = 0; i < goal_size; i++) {
     point_t pt;
-    pt.x = ele[0];
-    pt.y = ele[1];
+    pt.x = cJSON_GetArrayItem(cJSON_GetArrayItem(goals, i), 0)->valueint;
+    pt.y = cJSON_GetArrayItem(cJSON_GetArrayItem(goals, i), 1)->valueint;
     sys.goals.emplace_back(pt);
     printf("%u %u\n", pt.x, pt.y);
   }
 
-  sys.user_mode = j["mode"];
-  sys.test.v_max = j["test"]["v_max"];
-  sys.test.accl = j["test"]["accl"];
-  sys.test.decel = j["test"]["decel"];
-  sys.test.dist = j["test"]["dist"];
-  sys.test.w_max = j["test"]["w_max"];
-  sys.test.alpha = j["test"]["alpha"];
-  sys.test.ang = j["test"]["ang"];
-  sys.test.suction_active = j["test"]["suction_active"];
-  sys.test.suction_duty = j["test"]["suction_duty"];
-  sys.test.file_idx = j["test"]["file_idx"];
-  sys.test.sla_type = j["test"]["sla_type"];
-  sys.test.sla_return = j["test"]["sla_return"];
-  sys.test.sla_type2 = j["test"]["sla_type2"];
-  sys.test.sla_dist = j["test"]["sla_dist"];
+  sys.user_mode = cJSON_GetObjectItem(root, "mode")->valueint;
+  test = cJSON_GetObjectItem(root, "test");
+
+  sys.test.v_max = cJSON_GetObjectItem(test, "v_max")->valuedouble;
+  sys.test.accl = cJSON_GetObjectItem(test, "accl")->valuedouble;
+  sys.test.decel = cJSON_GetObjectItem(test, "decel")->valuedouble;
+  sys.test.dist = cJSON_GetObjectItem(test, "dist")->valuedouble;
+  sys.test.w_max = cJSON_GetObjectItem(test, "w_max")->valuedouble;
+  sys.test.alpha = cJSON_GetObjectItem(test, "alpha")->valuedouble;
+  sys.test.ang = cJSON_GetObjectItem(test, "ang")->valuedouble;
+  sys.test.suction_active =
+      cJSON_GetObjectItem(test, "suction_active")->valueint;
+  sys.test.suction_duty =
+      cJSON_GetObjectItem(test, "suction_duty")->valuedouble;
+  sys.test.file_idx = cJSON_GetObjectItem(test, "file_idx")->valueint;
+  sys.test.sla_type = cJSON_GetObjectItem(test, "sla_type")->valueint;
+  sys.test.sla_return = cJSON_GetObjectItem(test, "sla_return")->valueint;
+  sys.test.sla_type2 = cJSON_GetObjectItem(test, "sla_type2")->valueint;
+  sys.test.sla_dist = cJSON_GetObjectItem(test, "sla_dist")->valuedouble;
+
+  cJSON_free(root);
+  cJSON_free(goals);
+  cJSON_free(test);
 }
 
 void MainTask::load_turn_param_profiles() {
@@ -306,56 +345,63 @@ void MainTask::load_turn_param_profiles() {
   if (f == NULL)
     return;
 
-  char line[1024];
-  fgets(line, sizeof(line), f);
+  fgets(line_buf, sizeof(line_buf), f);
   fclose(f);
 
-  std::string json_str = std::string(line);
-  printf("%s\n", json_str.c_str());
-  nlohmann::json j = nlohmann::json::parse(json_str);
+  cJSON *root = cJSON_CreateObject(), *profile_list, *profile_idx;
+  root = cJSON_Parse(line_buf);
+
   tpp.file_list.clear();
+  profile_list = cJSON_GetObjectItem(root, "list");
+  int profile_list_size = cJSON_GetArraySize(profile_list);
   printf("profile_list\n");
-  for (std::string ele : j["list"]) {
-    tpp.file_list.push_back(ele);
-    printf("- %s\n", ele.c_str());
+  for (int i = 0; i < profile_list_size; i++) {
+    tpp.file_list.push_back(cJSON_GetArrayItem(profile_list, i)->valuestring);
     tpp.file_list_size++;
   }
   printf("tpp.file_list.size() = %d\n", tpp.file_list.size());
 
-  tpp.profile_idx_size = j["profile_idx_size"];
+  tpp.profile_idx_size =
+      cJSON_GetObjectItem(root, "profile_idx_size")->valueint;
   printf("tpp.profile_idx_size= %d\n", tpp.profile_idx_size);
 
   tpp.profile_list.clear();
-  for (auto ele : j["profile_idx"]) {
-    profile_idx_t p_idx;
-    for (auto it = ele.begin(); it != ele.end(); ++it) {
-      std::string key = std::string(it.key());
-      int idx = static_cast<int>(it.value());
-      // プロファイルの数以上を指定した場合、頭打ちさせる
-      if (idx >= tpp.file_list_size)
-        idx = tpp.file_list_size - 1;
-      if (key == "normal")
-        p_idx.normal = idx;
-      else if (key == "large")
-        p_idx.large = idx;
-      else if (key == "orval")
-        p_idx.orval = idx;
-      else if (key == "dia45")
-        p_idx.dia45 = idx;
-      else if (key == "dia45_2")
-        p_idx.dia45_2 = idx;
-      else if (key == "dia135")
-        p_idx.dia135 = idx;
-      else if (key == "dia135_2")
-        p_idx.dia135_2 = idx;
-      else if (key == "dia90")
-        p_idx.dia90 = idx;
-    }
+  profile_idx = cJSON_GetObjectItem(root, "profile_idx");
+  int profile_idx_size = cJSON_GetArraySize(profile_idx);
+
+  profile_idx_t p_idx;
+  for (int i = 0; i < profile_idx_size; i++) {
+    p_idx.normal =
+        cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "normal")
+            ->valueint;
+    p_idx.large =
+        cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "large")
+            ->valueint;
+    p_idx.orval =
+        cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "orval")
+            ->valueint;
+    p_idx.dia45 =
+        cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "dia45")
+            ->valueint;
+    p_idx.dia45_2 =
+        cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "dia45_2")
+            ->valueint;
+    p_idx.dia135 =
+        cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "dia135")
+            ->valueint;
+    p_idx.dia135_2 =
+        cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "dia135_2")
+            ->valueint;
+    p_idx.dia90 =
+        cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "dia90")
+            ->valueint;
     tpp.profile_list.emplace_back(p_idx);
   }
+  cJSON_free(root);
+  cJSON_free(profile_list);
+  cJSON_free(profile_idx);
 }
 void MainTask::load_slalom_param() {
-  char line[2048];
   turn_param_list.clear();
   for (const auto file_name : tpp.file_list) {
     const auto path = std::string("/spiflash/" + file_name);
@@ -365,54 +411,77 @@ void MainTask::load_slalom_param() {
       return;
     }
     printf("%s\n", path.c_str());
-    fgets(line, sizeof(line), f);
+    fgets(line_buf, sizeof(line_buf), f);
     fclose(f);
 
-    std::string json_str = std::string(line);
-    // printf("%s\n", json_str.c_str());
-    nlohmann::json j = nlohmann::json::parse(json_str);
+    cJSON *root = cJSON_CreateObject();
+    root = cJSON_Parse(line_buf);
+
     slalom_parameter_t sp;
     sp.map.clear();
 
+    slalom_param2_t sp2;
     for (const auto p : turn_name_list) {
-      slalom_param2_t sp2;
-      sp2.v = j[p.second]["v"];
-      sp2.ang = j[p.second]["ang"];
+      sp2.v =
+          cJSON_GetObjectItem(cJSON_GetObjectItem(root, p.second.c_str()), "v")
+              ->valuedouble;
+      sp2.ang = cJSON_GetObjectItem(cJSON_GetObjectItem(root, p.second.c_str()),
+                                    "ang")
+                    ->valuedouble;
       sp2.ang = PI * sp2.ang / 180;
-      sp2.rad = j[p.second]["rad"];
-      sp2.pow_n = j[p.second]["pow_n"];
-      sp2.time = j[p.second]["time"];
-      sp2.front.right = j[p.second]["front"]["right"];
-      sp2.front.left = j[p.second]["front"]["left"];
-      sp2.back.right = j[p.second]["back"]["right"];
-      sp2.back.left = j[p.second]["back"]["left"];
+
+      sp2.rad = cJSON_GetObjectItem(cJSON_GetObjectItem(root, p.second.c_str()),
+                                    "rad")
+                    ->valuedouble;
+      sp2.pow_n = cJSON_GetObjectItem(
+                      cJSON_GetObjectItem(root, p.second.c_str()), "pow_n")
+                      ->valueint;
+      sp2.time = cJSON_GetObjectItem(
+                     cJSON_GetObjectItem(root, p.second.c_str()), "time")
+                     ->valuedouble;
+      sp2.front.right =
+          cJSON_GetObjectItem(
+              cJSON_GetObjectItem(cJSON_GetObjectItem(root, p.second.c_str()),
+                                  "front"),
+              "right")
+              ->valuedouble;
+      sp2.front.left =
+          cJSON_GetObjectItem(
+              cJSON_GetObjectItem(cJSON_GetObjectItem(root, p.second.c_str()),
+                                  "front"),
+              "left")
+              ->valuedouble;
+      sp2.back.right =
+          cJSON_GetObjectItem(
+              cJSON_GetObjectItem(cJSON_GetObjectItem(root, p.second.c_str()),
+                                  "back"),
+              "right")
+              ->valuedouble;
+      sp2.back.left =
+          cJSON_GetObjectItem(
+              cJSON_GetObjectItem(cJSON_GetObjectItem(root, p.second.c_str()),
+                                  "back"),
+              "left")
+              ->valuedouble;
+
       sp.map[p.first] = sp2;
     }
 
     turn_param_list.emplace_back(sp);
+    cJSON_free(root);
   }
 }
 
 void MainTask::load_param() {
-  load_hw_param(); //
+  load_hw_param();
   load_sys_param();
   load_turn_param_profiles();
   load_slalom_param();
+
+  printf("%p\n", &log_list2);
 }
 void MainTask::rx_uart_json() {
 
-  mount_config.max_files = 8;
-  mount_config.format_if_mount_failed = true;
-  mount_config.allocation_unit_size = CONFIG_WL_SECTOR_SIZE;
-
-  esp_err_t err = esp_vfs_fat_spiflash_mount(base_path, "storage",
-                                             &mount_config, &s_wl_handle);
-  if (err != ESP_OK) {
-    printf("Failed to mount FATFS (%s)\n", esp_err_to_name(err));
-    return;
-  } else {
-    printf("mount OK\n");
-  }
   load_param();
 
   uint8_t *data = (uint8_t *)malloc(BUF_SIZE);
@@ -489,7 +558,8 @@ void MainTask::test_run() {
   pt->motor_enable();
 
   req_error_reset();
-  pt->active_logging();
+  lt->start_slalom_log();
+  // pt->active_logging(_f);
 
   ps.v_max = sys.test.v_max;
   ps.v_end = 30;
@@ -497,15 +567,27 @@ void MainTask::test_run() {
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
 
-  int res = mp.go_straight(ps);
+  mp.go_straight(ps);
   reset_tgt_data();
   reset_ego_data();
   vTaskDelay(250 / portTICK_RATE_MS);
   pt->motor_disable();
 
-  pt->inactive_logging();
+  lt->stop_slalom_log();
   ui.coin(120);
-  dump_log();
+
+  lt->save(slalom_log_file);
+  while (1) {
+    if (ui.button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
+  lt->dump_log(slalom_log_file);
+  while (1) {
+    if (ui.button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
 }
 
 void MainTask::test_turn() {
@@ -518,7 +600,7 @@ void MainTask::test_turn() {
 
   req_error_reset();
 
-  pt->active_logging();
+  // pt->active_logging();
   pr.w_max = sys.test.w_max;
   pr.alpha = sys.test.alpha;
   pr.w_end = 0;
@@ -533,7 +615,8 @@ void MainTask::test_turn() {
 
   pt->inactive_logging();
   ui.coin(120);
-  dump_log();
+  // dump_log();
+  lt->dump_log(slalom_log_file);
 }
 
 void MainTask::test_sla() {
@@ -565,7 +648,7 @@ void MainTask::test_sla() {
 
   req_error_reset();
 
-  pt->active_logging();
+  // pt->active_logging();
 
   ps.v_max = sla_p.v;
   ps.v_end = sla_p.v;
@@ -615,8 +698,27 @@ void MainTask::dump_log() {
       break;
     vTaskDelay(10 / portTICK_RATE_MS);
   }
-  printf("load\n");
-  pt->dump_log();
+  printf("dump_log!!\n");
+  FILE *f = fopen(slalom_log_file.c_str(), "rb");
+  if (f == NULL) {
+    printf("log_file_error\n");
+    return;
+  }
+  printf("f != null\n");
+
+  while (fgets(line_buf, sizeof(line_buf), f) != NULL)
+    printf("%s\n", line_buf);
+  fclose(f);
+
+  // auto *f2 = fopen(slalom_log_file.c_str(), "wb");
+  // if (f == NULL) {
+  //   printf("null!\n");
+  //   return;
+  // }
+  // std::string str = "hello world\n";
+  // // 書き込み&ファイルclose
+  // fprintf(f2, str.c_str());
+  // fclose(f2);
 
   while (1) {
     if (ui.button_state_hold())

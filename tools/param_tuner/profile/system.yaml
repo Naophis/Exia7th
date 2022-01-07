@@ -3,10 +3,10 @@ goals: [[7, 7], [7, 8], [8, 7], [8, 8]]
 maze_size: 32
 mode: 2 # モード選択
 test: # テスト走行時に使用するパラメータ群
-  v_max: 1500
-  accl: 2000
-  decel: -2000
-  dist: 360
+  v_max: 300
+  accl: 1500
+  decel: -1500
+  dist: 180
   w_max: 5.0
   alpha: 10
   ang: 180

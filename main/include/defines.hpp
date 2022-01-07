@@ -14,6 +14,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -99,13 +100,13 @@ union LED_bit {
 };
 
 typedef struct {
-  int16_t right;
-  int16_t left;
+  int16_t right = 0;
+  int16_t left = 0;
 } encoder_data_t;
 
 typedef struct {
-  int raw;
-  float data;
+  int raw = 0;
+  float data = 0;
 } sensing_data_t;
 
 typedef struct {
@@ -127,73 +128,73 @@ typedef struct {
 } sensing_result_entity_t;
 
 typedef struct {
-  float vel;
-  float speed;
-  float accl;
+  float vel = 0;
+  float speed = 0;
+  float accl = 0;
 } xva_t;
 
 typedef struct {
-  float right;
-  float left;
+  float right = 0;
+  float left = 0;
 } rpm_t;
 
 typedef struct {
-  float duty_l;
-  float duty_r;
-  float duty_suction;
+  float duty_l = 0;
+  float duty_r = 0;
+  float duty_suction = 0;
 } duty_t;
 
 typedef struct {
-  float v_r;
-  float v_l;
-  float v_c;
-  float w_raw;
-  float w_lp;
-  float battery_raw;
-  float battery_lp;
+  float v_r = 0;
+  float v_l = 0;
+  float v_c = 0;
+  float w_raw = 0;
+  float w_lp = 0;
+  float battery_raw = 0;
+  float battery_lp = 0;
 
-  float right90_raw;
-  float right90_lp;
-  float right45_raw;
-  float right45_lp;
-  float front_raw;
-  float front_lp;
-  float left45_raw;
-  float left45_lp;
-  float left90_raw;
-  float left90_lp;
+  float right90_raw = 0;
+  float right90_lp = 0;
+  float right45_raw = 0;
+  float right45_lp = 0;
+  float front_raw = 0;
+  float front_lp = 0;
+  float left45_raw = 0;
+  float left45_lp = 0;
+  float left90_raw = 0;
+  float left90_lp = 0;
 
   rpm_t rpm;
   duty_t duty;
 } ego_entity_t;
 
 typedef struct {
-  float p;
-  float i;
-  float d;
+  float p = 0;
+  float i = 0;
+  float d = 0;
 } pid_param_t;
 
 typedef struct {
-  float gyro_w_gain_right;
-  float gyro_w_gain_left;
-  float lp_delay;
+  float gyro_w_gain_right = 0;
+  float gyro_w_gain_left = 0;
+  float lp_delay = 0;
 } gyro_param_t;
 
 typedef struct {
-  float lp_delay;
+  float lp_delay = 0;
 } sen_param_t;
 
 typedef struct {
-  float dt;
-  float tire;
-  float gear_a;
-  float gear_b;
-  float max_duty;
-  float Ke;
-  float Km;
-  float Resist;
-  float Mass;
-  float Lm;
+  float dt = 0.001;
+  float tire = 12;
+  float gear_a = 37;
+  float gear_b = 8;
+  float max_duty = 99;
+  float Ke = 0;
+  float Km = 0;
+  float Resist = 0;
+  float Mass = 0;
+  float Lm = 0;
   pid_param_t motor_pid;
   pid_param_t gyro_pid;
   pid_param_t sensor_pid;
@@ -229,7 +230,7 @@ typedef struct {
 } buzzer_t;
 
 typedef struct {
-  float gyro_zero_p_offset;
+  float gyro_zero_p_offset = 0;
   // motion_tgt_t motion_tgt;
   buzzer_t buzzer;
 } tgt_entity_t;
@@ -365,30 +366,46 @@ static std::initializer_list<std::pair<TurnType, std::string>> turn_name_list =
 };
 
 typedef struct {
+  // int idx;
+  float img_v;
+  float v_l;
+  float v_c;
+  float v_r;
   float accl;
-  float v;
-  float dist;
+  float img_w;
+  float w_lp;
   float alpha;
-  float w;
+
+  float img_dist;
+  float dist;
+  float img_ang;
   float ang;
-  // float accl2;
-  // float v2;
-  // float dist2;
-  // float alpha2;
-  // float w2;
-  // float ang2;
-  // float accl3;
-  // float v3;
-  // float dist3;
-  // float alpha3;
-  // float w3;
-  // float ang3;
+
+  float duty_l;
+  float duty_r;
+
+  float left90_lp;
+  float left45_lp;
+  float front_lp;
+  float right45_lp;
+  float right90_lp;
+  float battery_lp;
 } log_data_t;
 
-typedef struct {
-  log_data_t ideal;
-  log_data_t real;
-} log_t;
-#define LOG_SIZE 1500
-static log_t log_list2[LOG_SIZE];
+#define LOG_SIZE 1200
+static log_data_t log_list2[LOG_SIZE];
+
+enum class LogFileType : int {
+  SLALOM = 0,
+  STRAIGHT = 1,
+};
+#define LOG_BUF_SIZE 1500
+static char line_buf[LOG_BUF_SIZE];
+
+static const std::string slalom_log_file("/spiflash/sla.log");
+
+static const std::string format1("%d,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
+static const std::string format2("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
+static const std::string format3("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f\n");
+
 #endif

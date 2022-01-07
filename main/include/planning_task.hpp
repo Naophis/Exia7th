@@ -9,6 +9,10 @@
 #include "gen_code/mpc_tgt_calc.h"
 #include "include/maze_solver.hpp"
 
+#include "esp_system.h"
+#include "esp_vfs.h"
+#include "esp_vfs_fat.h"
+
 #define LEDC_HIGH_SPEED_MODE 0
 #define LEDC_TIMER_10_BIT 10
 #define LEDC_TIMER_0 0
@@ -35,7 +39,7 @@ public:
   static void task_entry_point(void *task_instance);
   virtual void task();
 
-  void active_logging();
+  void active_logging(FILE *_f);
   void inactive_logging();
   void dump_log();
 
@@ -73,12 +77,11 @@ private:
   void set_log_data();
   mpc_tgt_calcModelClass mpc_tgt_calc;
 
-  log_t tmp_d;
-  std::vector<log_t> log_list;
-
   bool log_active = false;
   // log_t log_list2[10];
   int log_list2_size = 0;
+  char line[1024];
+  FILE *f;
 };
 
 #endif

@@ -47,12 +47,17 @@ void PlanningTask::set_ego_param_entity(ego_param_t *_param) {
   param_ro = _param;
 }
 void PlanningTask::set_tgt_entity(tgt_entity_t *_tgt) { tgt = _tgt; }
-void PlanningTask::active_logging() {
+void PlanningTask::active_logging(FILE *_f) {
   log_active = true;
-  log_list.clear();
+  // *f = *_f;
+  // log_list.clear();
   log_list2_size = 0;
 }
-void PlanningTask::inactive_logging() { log_active = false; }
+void PlanningTask::inactive_logging() {
+  log_active = false;
+  // *f = NULL;
+  // fclose(f);
+}
 void PlanningTask::buzzer(ledc_channel_config_t &buzzer_ch,
                           ledc_timer_config_t &buzzer_timer) {
   int duty = 0;
@@ -144,24 +149,31 @@ void PlanningTask::task() {
   }
 }
 void PlanningTask::set_log_data() {
-  if (!log_active)
-    return;
-  if (log_list2_size >= LOG_SIZE)
-    return;
-  log_list2[log_list2_size].ideal.accl = tgt_val->ego_in.accl;
-  log_list2[log_list2_size].ideal.v = tgt_val->ego_in.v;
-  log_list2[log_list2_size].ideal.dist = tgt_val->ego_in.img_dist;
-  log_list2[log_list2_size].ideal.alpha = tgt_val->ego_in.alpha;
-  log_list2[log_list2_size].ideal.w = tgt_val->ego_in.w;
-  log_list2[log_list2_size].ideal.ang = tgt_val->ego_in.img_ang;
+  if (log_active) {
+    if (f == NULL) {
+      return;
+    }
+    // fprintf(f, "idx=%d\n", log_list2_size);
+    // log_list2_size++;
+  }
+  // if (!log_active)
+  //   return;
+  // if (log_list2_size >= LOG_SIZE)
+  //   return;
+  // log_list2[log_list2_size].ideal.accl = tgt_val->ego_in.accl;
+  // log_list2[log_list2_size].ideal.v = tgt_val->ego_in.v;
+  // log_list2[log_list2_size].ideal.dist = tgt_val->ego_in.img_dist;
+  // log_list2[log_list2_size].ideal.alpha = tgt_val->ego_in.alpha;
+  // log_list2[log_list2_size].ideal.w = tgt_val->ego_in.w;
+  // log_list2[log_list2_size].ideal.ang = tgt_val->ego_in.img_ang;
 
-  log_list2[log_list2_size].real.accl = 0;
-  log_list2[log_list2_size].real.v = ego->v_c;
-  log_list2[log_list2_size].real.dist = tgt_val->ego_in.dist;
-  log_list2[log_list2_size].real.alpha = 0;
-  log_list2[log_list2_size].real.w = ego->w_lp;
-  log_list2[log_list2_size].real.ang = tgt_val->ego_in.ang;
-  log_list2_size++;
+  // log_list2[log_list2_size].real.accl = 0;
+  // log_list2[log_list2_size].real.v = ego->v_c;
+  // log_list2[log_list2_size].real.dist = tgt_val->ego_in.dist;
+  // log_list2[log_list2_size].real.alpha = 0;
+  // log_list2[log_list2_size].real.w = ego->w_lp;
+  // log_list2[log_list2_size].real.ang = tgt_val->ego_in.ang;
+  // log_list2_size++;
   // log_list.emplace_back(tmp_d);
 }
 
@@ -314,10 +326,10 @@ void PlanningTask::calc_tgt_duty() {
   error_entity.w.error_i += error_entity.w.error_p;
 
   float duty_c = param_ro->motor_pid.p * error_entity.v.error_p +
-                  param_ro->motor_pid.i * error_entity.v.error_i;
+                 param_ro->motor_pid.i * error_entity.v.error_i;
 
   float duty_roll = param_ro->gyro_pid.p * error_entity.w.error_p +
-                     param_ro->gyro_pid.i * error_entity.w.error_i;
+                    param_ro->gyro_pid.i * error_entity.w.error_i;
   if (!motor_en) {
     duty_c = 0;
     duty_roll = 0;
@@ -353,9 +365,9 @@ void PlanningTask::cp_tgt_val() {
 }
 
 void PlanningTask::dump_log() {
-  for (int i = 0; i < log_list2_size; i++) {
-    printf("%d,%f,%f,%f,%f\n", i, log_list2[i].ideal.v, log_list2[i].real.v,
-           log_list2[i].ideal.dist, log_list2[i].real.dist);
-    i++;
-  }
+  // for (int i = 0; i < log_list2_size; i++) {
+  //   printf("%d,%f,%f,%f,%f\n", i, log_list2[i].ideal.v, log_list2[i].real.v,
+  //          log_list2[i].ideal.dist, log_list2[i].real.dist);
+  //   i++;
+  // }
 }

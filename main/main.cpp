@@ -26,6 +26,7 @@
 #include "esp_efuse_rtc_calib.h"
 
 #include "include/buzzer_task.hpp"
+#include "include/logging_task.hpp"
 #include "include/main_task.hpp"
 #include "include/planning_task.hpp"
 #include "include/sensing_task.hpp"
@@ -41,11 +42,11 @@
 
 #include "rom/uart.h"
 
-ego_param_t param = {0};
-sensing_result_entity_t sensing_entity = {0};
-ego_entity_t ego = {0};
-tgt_entity_t tgt = {0};
-motion_tgt_val_t tgt_val = {0};
+ego_param_t param;
+sensing_result_entity_t sensing_entity;
+ego_entity_t ego;
+tgt_entity_t tgt;
+motion_tgt_val_t tgt_val;
 
 void init_uart() {
   uart_config_t uart_config;
@@ -104,7 +105,24 @@ extern "C" void app_main() {
   init_gpio();
   init_uart();
 
-  // gpio_set_level(SUCTION_PWM, 1);
+  esp_vfs_fat_mount_config_t mount_config;
+  mount_config.max_files = 8;
+  mount_config.format_if_mount_failed = true;
+  mount_config.allocation_unit_size = CONFIG_WL_SECTOR_SIZE;
+  const char *base_path = "/spiflash";
+  wl_handle_t s_wl_handle = WL_INVALID_HANDLE;
+
+  printf("storage0: try mount\n");
+  esp_err_t err = esp_vfs_fat_spiflash_mount(base_path, "storage0",
+                                             &mount_config, &s_wl_handle);
+  if (err != ESP_OK) {
+    printf("storage0: Failed to mount FATFS (%s)\n", esp_err_to_name(err));
+    return;
+  } else {
+    printf("storage0: mount OK\n");
+  }
+
+  gpio_set_level(SUCTION_PWM, 1);
   param.tire = 12.0;
   param.dt = 0.001;
   param.motor_pid.p = 0.175;
@@ -130,6 +148,14 @@ extern "C" void app_main() {
   pt.create_task(0);
   // IntegratedEntity ie;
 
+  LoggingTask lt;
+  lt.set_sensing_entity(&sensing_entity);
+  lt.set_ego_param_entity(&param);
+  lt.set_ego_entity(&ego);
+  lt.set_tgt_entity(&tgt);
+  lt.set_tgt_val(&tgt_val);
+  lt.create_task(1);
+
   MainTask mt;
   mt.set_sensing_entity(&sensing_entity);
   mt.set_ego_param_entity(&param);
@@ -137,6 +163,7 @@ extern "C" void app_main() {
   mt.set_planning_task(&pt);
   mt.set_tgt_entity(&tgt);
   mt.set_tgt_val(&tgt_val);
+  mt.set_logging_task(&lt);
 
   mt.create_task(1);
 

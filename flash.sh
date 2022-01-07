@@ -1,3 +1,4 @@
+#!/bin/bash
 
 binary=`find ./build -maxdepth 1 | grep bin$ `
 partition=`find ./build/partition_table -maxdepth 1 | grep bin$ `
