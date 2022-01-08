@@ -1,14 +1,15 @@
 #include "include/motion_planning.hpp"
 
-void MotionPlanning::set_tgt_entity(tgt_entity_t *_tgt) { //
-  tgt = _tgt;
-}
-void MotionPlanning::set_tgt_val(motion_tgt_val_t *_tgt) { //
-  tgt_val = _tgt;
-}
-void MotionPlanning::set_ego_entity(ego_entity_t *_ego) { //
+void MotionPlanning::set_ego_entity(std::shared_ptr<ego_entity_t> &_ego) {
   ego = _ego;
 }
+void MotionPlanning::set_tgt_entity(std::shared_ptr<tgt_entity_t> &_tgt) {
+  tgt = _tgt;
+}
+void MotionPlanning::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
+  tgt_val = _tgt_val;
+}
+
 int MotionPlanning::go_straight(param_straight_t &p) {
   tgt_val->tgt_in.v_max = p.v_max;
   tgt_val->tgt_in.end_v = p.v_end;

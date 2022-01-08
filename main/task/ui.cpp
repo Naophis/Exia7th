@@ -1,12 +1,15 @@
 #include "include/ui.hpp"
 
-void UserInterface::set_sensing_entity(sensing_result_entity_t *_entity) {
-  entity_ro = _entity;
+void UserInterface::set_sensing_entity(
+    std::shared_ptr<sensing_result_entity_t> &_entity_ro) {
+  entity_ro = _entity_ro;
 }
-
-void UserInterface::set_tgt_entity(tgt_entity_t *_tgt) { tgt = _tgt; }
-
-void UserInterface::set_ego_entity(ego_entity_t *_ego) { ego = _ego; }
+void UserInterface::set_ego_entity(std::shared_ptr<ego_entity_t> &_ego) {
+  ego = _ego;
+}
+void UserInterface::set_tgt_entity(std::shared_ptr<tgt_entity_t> &_tgt) {
+  tgt = _tgt;
+}
 
 bool UserInterface::button_state() { return !gpio_get_level(SW1); }
 

@@ -39,14 +39,25 @@ void PlanningTask::suction_disable() {
 void PlanningTask::task_entry_point(void *task_instance) {
   static_cast<PlanningTask *>(task_instance)->task();
 }
-void PlanningTask::set_sensing_entity(sensing_result_entity_t *_entity) {
-  entity_ro = _entity;
+
+void PlanningTask::set_sensing_entity(
+    std::shared_ptr<sensing_result_entity_t> &_entity_ro) {
+  entity_ro = _entity_ro;
 }
-void PlanningTask::set_ego_entity(ego_entity_t *_ego) { ego = _ego; }
-void PlanningTask::set_ego_param_entity(ego_param_t *_param) {
-  param_ro = _param;
+void PlanningTask::set_ego_param_entity(
+    std::shared_ptr<ego_param_t> &_param_ro) {
+  param_ro = _param_ro;
 }
-void PlanningTask::set_tgt_entity(tgt_entity_t *_tgt) { tgt = _tgt; }
+void PlanningTask::set_ego_entity(std::shared_ptr<ego_entity_t> &_ego) {
+  ego = _ego;
+}
+void PlanningTask::set_tgt_entity(std::shared_ptr<tgt_entity_t> &_tgt) {
+  tgt = _tgt;
+}
+void PlanningTask::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
+  tgt_val = _tgt_val;
+}
+
 void PlanningTask::active_logging(FILE *_f) {
   log_active = true;
   // *f = *_f;

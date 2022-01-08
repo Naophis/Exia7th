@@ -11,30 +11,33 @@ void MainTask::create_task(const BaseType_t xCoreID) {
 void MainTask::task_entry_point(void *task_instance) {
   static_cast<MainTask *>(task_instance)->task();
 }
-
-void MainTask::set_sensing_entity(sensing_result_entity_t *_entity) {
-  entity_ro = _entity;
-  ui.set_sensing_entity(_entity);
+void MainTask::set_sensing_entity(
+    std::shared_ptr<sensing_result_entity_t> &_entity_ro) {
+  entity_ro = _entity_ro;
+  ui.set_sensing_entity(_entity_ro);
 }
-void MainTask::set_ego_entity(ego_entity_t *_ego) {
+void MainTask::set_ego_param_entity(std::shared_ptr<ego_param_t> &_param) {
+  param = _param;
+}
+void MainTask::set_ego_entity(std::shared_ptr<ego_entity_t> &_ego) {
   ego = _ego;
   ui.set_ego_entity(_ego);
   mp.set_ego_entity(_ego);
 }
-void MainTask::set_planning_task(PlanningTask *_pt) { //
-  pt = _pt;
-}
-void MainTask::set_tgt_entity(tgt_entity_t *_tgt) {
+void MainTask::set_tgt_entity(std::shared_ptr<tgt_entity_t> &_tgt) {
   tgt = _tgt;
   ui.set_tgt_entity(_tgt);
   mp.set_tgt_entity(_tgt);
 }
-void MainTask::set_tgt_val(motion_tgt_val_t *_tgt) {
-  tgt_val = _tgt;
-  mp.set_tgt_val(_tgt);
+void MainTask::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
+  tgt_val = _tgt_val;
+  mp.set_tgt_val(_tgt_val);
 }
-void MainTask::set_logging_task(LoggingTask *_lt) { //
-  lt = _lt;
+void MainTask::set_planning_task(std::shared_ptr<PlanningTask> &_pt) {
+  pt = _pt;
+}
+void MainTask::set_logging_task(std::shared_ptr<LoggingTask> &_lt) {
+  lt = _lt; //
 }
 void MainTask::check_battery() {
   vTaskDelay(1000 / portTICK_PERIOD_MS); //他モジュールの起動待ち
@@ -115,6 +118,7 @@ int MainTask::select_mode() {
 }
 
 void MainTask::reset_tgt_data() {
+  printf("reset_tgt_data\n");
   tgt_val->tgt_in.v_max = 0;
   tgt_val->tgt_in.end_v = 0;
   tgt_val->tgt_in.accl = 0;
@@ -132,6 +136,7 @@ void MainTask::reset_tgt_data() {
 }
 
 void MainTask::reset_ego_data() {
+  printf("reset_ego_data\n");
   tgt_val->ego_in.accl = 0;
   tgt_val->ego_in.alpha = 0;
   tgt_val->ego_in.ang = 0;
@@ -226,9 +231,6 @@ void MainTask::save_json_data(std::string &str) {
   fclose(f);
   // printf("%s\n", str.c_str());
   ui.coin(25);
-}
-void MainTask::set_ego_param_entity(ego_param_t *_param) {
-  param = _param; //
 }
 
 void MainTask::load_hw_param() {
@@ -477,8 +479,6 @@ void MainTask::load_param() {
   load_sys_param();
   load_turn_param_profiles();
   load_slalom_param();
-
-  printf("%p\n", &log_list2);
 }
 void MainTask::rx_uart_json() {
 
@@ -500,6 +500,7 @@ void MainTask::rx_uart_json() {
     }
   }
   free(data);
+
   ui.coin(100);
   vTaskDelay(100 / portTICK_PERIOD_MS);
 }
@@ -507,6 +508,7 @@ void MainTask::task() {
   const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
   pt->motor_disable();
   check_battery();
+  // ui.init();
 
   ui.coin(80);
   rx_uart_json(); // uartでファイルを受け取る

@@ -43,24 +43,15 @@ public:
   void create_task(const BaseType_t xCoreID);
   static void task_entry_point(void *task_instance);
 
-  // read
-  sensing_result_entity_t *entity_ro;
-  ego_param_t *param;
-  ego_entity_t *ego;
-  tgt_entity_t *tgt;
-  motion_tgt_val_t *tgt_val;
-  PlanningTask *pt;
-  LoggingTask *lt;
-
   // write
-  void set_sensing_entity(sensing_result_entity_t *_entity);
-  void set_ego_param_entity(ego_param_t *_param);
-  void set_ego_entity(ego_entity_t *_ego);
-  void set_tgt_entity(tgt_entity_t *_tgt);
-  void set_tgt_val(motion_tgt_val_t *_tgt);
+  void set_sensing_entity(std::shared_ptr<sensing_result_entity_t> &_entity);
+  void set_ego_param_entity(std::shared_ptr<ego_param_t> &_param);
+  void set_ego_entity(std::shared_ptr<ego_entity_t> &_ego);
+  void set_tgt_entity(std::shared_ptr<tgt_entity_t> &_tgt);
+  void set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val);
 
-  void set_planning_task(PlanningTask *_pt);
-  void set_logging_task(LoggingTask *_lt);
+  void set_planning_task(std::shared_ptr<PlanningTask> &pt);
+  void set_logging_task(std::shared_ptr<LoggingTask> &lt);
 
   virtual void task();
   void check_battery();
@@ -71,7 +62,15 @@ private:
   xTaskHandle handle = 0;
   UserInterface ui;
   MotionPlanning mp;
-  // nlohmann::json json_instance;
+
+  std::shared_ptr<PlanningTask> pt;
+  std::shared_ptr<LoggingTask> lt;
+
+  std::shared_ptr<sensing_result_entity_t> entity_ro;
+  std::shared_ptr<ego_param_t> param;
+  std::shared_ptr<ego_entity_t> ego;
+  std::shared_ptr<tgt_entity_t> tgt;
+  std::shared_ptr<motion_tgt_val_t> tgt_val;
 
   param_straight_t ps;
   param_roll_t pr;

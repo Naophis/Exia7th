@@ -72,6 +72,7 @@ let ready = function () {
     comport,
     {
       baudRate: 2000000,
+      // baudRate: 115200,
     },
     (e) => {
       if (e) {

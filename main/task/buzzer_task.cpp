@@ -17,9 +17,7 @@ void BuzzerTask::set_sensing_entity(sensing_result_entity_t *_entity) {
 void BuzzerTask::set_ego_entity(ego_entity_t *_ego) {
   ego = _ego; //
 }
-void BuzzerTask::set_planning_task(PlanningTask *_pt) { //
-  pt = _pt;
-}
+
 void BuzzerTask::init_gpio() {
   gpio_config_t io_conf;
   // 割り込みをしない

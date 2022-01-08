@@ -17,6 +17,7 @@
 #include <string_view>
 #include <unordered_map>
 #include <vector>
+#include <memory>
 
 #define ABS(IN) ((IN) < 0 ? -(IN) : (IN))
 

@@ -42,12 +42,6 @@
 
 #include "rom/uart.h"
 
-ego_param_t param;
-sensing_result_entity_t sensing_entity;
-ego_entity_t ego;
-tgt_entity_t tgt;
-motion_tgt_val_t tgt_val;
-
 void init_uart() {
   uart_config_t uart_config;
   uart_config.baud_rate = 2 * 1000 * 1000;
@@ -102,6 +96,14 @@ void init_gpio() {
 extern "C" void app_main() {
   // Adachi adachi;
 
+  std::shared_ptr<ego_param_t> param = std::make_shared<ego_param_t>();
+  std::shared_ptr<sensing_result_entity_t> sensing_entity =
+      std::make_shared<sensing_result_entity_t>();
+  std::shared_ptr<ego_entity_t> ego = std::make_shared<ego_entity_t>();
+  std::shared_ptr<tgt_entity_t> tgt = std::make_shared<tgt_entity_t>();
+  std::shared_ptr<motion_tgt_val_t> tgt_val =
+      std::make_shared<motion_tgt_val_t>();
+
   init_gpio();
   init_uart();
 
@@ -123,47 +125,46 @@ extern "C" void app_main() {
   }
 
   gpio_set_level(SUCTION_PWM, 1);
-  param.tire = 12.0;
-  param.dt = 0.001;
-  param.motor_pid.p = 0.175;
-  param.motor_pid.i = 0.0175;
-  param.motor_pid.d = 0.0;
-  param.gyro_pid.p = 2.5;
-  param.gyro_pid.i = 0.75;
-  param.gyro_pid.d = 0.0;
-  tgt_val.ego_in.v = 0;
-  tgt_val.ego_in.w = 0;
-  param.gyro_param.gyro_w_gain_left = 0.0002645;
+  param->tire = 12.0;
+  param->dt = 0.001;
+  param->motor_pid.p = 0.175;
+  param->motor_pid.i = 0.0175;
+  param->motor_pid.d = 0.0;
+  param->gyro_pid.p = 2.5;
+  param->gyro_pid.i = 0.75;
+  param->gyro_pid.d = 0.0;
+  tgt_val->ego_in.v = 0;
+  tgt_val->ego_in.w = 0;
+  param->gyro_param.gyro_w_gain_left = 0.0002645;
 
   SensingTask st;
-  st.set_sensing_entity(&sensing_entity);
+  st.set_sensing_entity(sensing_entity);
   st.create_task(0);
 
-  PlanningTask pt;
-  pt.set_sensing_entity(&sensing_entity);
-  pt.set_ego_param_entity(&param);
-  pt.set_ego_entity(&ego);
-  pt.set_tgt_entity(&tgt);
-  pt.set_tgt_val(&tgt_val);
-  pt.create_task(0);
-  // IntegratedEntity ie;
+  std::shared_ptr<PlanningTask> pt = std::make_shared<PlanningTask>();
+  pt->set_sensing_entity(sensing_entity);
+  pt->set_ego_param_entity(param);
+  pt->set_ego_entity(ego);
+  pt->set_tgt_entity(tgt);
+  pt->set_tgt_val(tgt_val);
+  pt->create_task(0);
 
-  LoggingTask lt;
-  lt.set_sensing_entity(&sensing_entity);
-  lt.set_ego_param_entity(&param);
-  lt.set_ego_entity(&ego);
-  lt.set_tgt_entity(&tgt);
-  lt.set_tgt_val(&tgt_val);
-  lt.create_task(1);
+  std::shared_ptr<LoggingTask> lt = std::make_shared<LoggingTask>();
+  lt->set_sensing_entity(sensing_entity);
+  lt->set_ego_param_entity(param);
+  lt->set_ego_entity(ego);
+  lt->set_tgt_entity(tgt);
+  lt->set_tgt_val(tgt_val);
+  lt->create_task(1);
 
   MainTask mt;
-  mt.set_sensing_entity(&sensing_entity);
-  mt.set_ego_param_entity(&param);
-  mt.set_ego_entity(&ego);
-  mt.set_planning_task(&pt);
-  mt.set_tgt_entity(&tgt);
-  mt.set_tgt_val(&tgt_val);
-  mt.set_logging_task(&lt);
+  mt.set_sensing_entity(sensing_entity);
+  mt.set_ego_param_entity(param);
+  mt.set_ego_entity(ego);
+  mt.set_tgt_entity(tgt);
+  mt.set_tgt_val(tgt_val);
+  mt.set_planning_task(pt);
+  mt.set_logging_task(lt);
 
   mt.create_task(1);
 

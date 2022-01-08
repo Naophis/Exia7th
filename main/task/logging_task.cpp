@@ -8,20 +8,21 @@ void LoggingTask::task_entry_point(void *task_instance) {
   static_cast<LoggingTask *>(task_instance)->task();
 }
 
-void LoggingTask::set_sensing_entity(sensing_result_entity_t *_entity) {
+void LoggingTask::set_sensing_entity(
+    std::shared_ptr<sensing_result_entity_t> &_entity) {
   sensing_result = _entity;
 }
-void LoggingTask::set_ego_param_entity(ego_param_t *_param) {
-  param = _param; //
+void LoggingTask::set_ego_param_entity(std::shared_ptr<ego_param_t> &_param) {
+  param = _param;
 }
-void LoggingTask::set_ego_entity(ego_entity_t *_ego) {
-  ego = _ego; //
+void LoggingTask::set_ego_entity(std::shared_ptr<ego_entity_t> &_ego) {
+  ego = _ego;
 }
-void LoggingTask::set_tgt_entity(tgt_entity_t *_tgt) {
-  tgt = _tgt; //
+void LoggingTask::set_tgt_entity(std::shared_ptr<tgt_entity_t> &_tgt) {
+  tgt = _tgt;
 }
-void LoggingTask::set_tgt_val(motion_tgt_val_t *_tgt) {
-  tgt_val = _tgt; ///
+void LoggingTask::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
+  tgt_val = _tgt_val;
 }
 
 void LoggingTask::start_slalom_log() {
