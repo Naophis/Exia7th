@@ -12,12 +12,12 @@
 
 #include <initializer_list>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <string_view>
 #include <unordered_map>
 #include <vector>
-#include <memory>
 
 #define ABS(IN) ((IN) < 0 ? -(IN) : (IN))
 
@@ -287,6 +287,7 @@ typedef struct {
 
 typedef struct {
   float v_max;
+  float end_v;
   float accl;
   float decel;
   float dist;
@@ -391,22 +392,22 @@ typedef struct {
   float right45_lp;
   float right90_lp;
   float battery_lp;
+
 } log_data_t;
 
-#define LOG_SIZE 1200
-static log_data_t log_list2[LOG_SIZE];
+#define LOG_SIZE 2000
 
 enum class LogFileType : int {
   SLALOM = 0,
   STRAIGHT = 1,
 };
 #define LOG_BUF_SIZE 1500
-static char line_buf[LOG_BUF_SIZE];
 
 static const std::string slalom_log_file("/spiflash/sla.log");
 
 static const std::string format1("%d,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
 static const std::string format2("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
-static const std::string format3("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f\n");
+static const std::string
+    format3("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f\n");
 
 #endif

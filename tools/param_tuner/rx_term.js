@@ -20,7 +20,6 @@ function resolveAfter2Seconds(str) {
 async function f1(str) {
   var x = await resolveAfter2Seconds(str);
 }
-
 let ready = function () {
   port = new SerialPort(
     comport,
@@ -41,8 +40,47 @@ let ready = function () {
       delimiter: "\r\n",
     })
   );
+  function getNowYMD() {
+    var dt = new Date();
+    var y = dt.getFullYear();
+    var m = ("00" + (dt.getMonth() + 1)).slice(-2);
+    var d = ("00" + dt.getDate()).slice(-2);
+    var h = ("00" + dt.getHours()).slice(-2);
+    var M = ("00" + dt.getMinutes()).slice(-2);
+    var s = ("00" + dt.getSeconds()).slice(-2);
+    return `${y}${m}${d}_${h}${M}_${s}.csv`;
+  }
+  let dump_to_csv = false;
+  let file_name = "";
+
   parser.on("data", function (data) {
     console.log(data);
+
+    if (data.match(/^end___/)) {
+      dump_to_csv = false;
+      fs.copyFile(
+        `${__dirname}/logs/${file_name}`,
+        `${__dirname}/logs/latest.csv`,
+        (err) => {
+          if (err) {
+            console.log(err.stack);
+          } else {
+            console.log("Copy Done.");
+          }
+        }
+      );
+    }
+    if (dump_to_csv) {
+      fs.appendFileSync(`${__dirname}/logs/${file_name}`, `${data}\n`, {
+        flag: "a",
+      });
+    }
+
+    if (data.match(/^start___/)) {
+      dump_to_csv = true;
+      file_name = getNowYMD();
+      console.log(file_name);
+    }
   });
 };
 

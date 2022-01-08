@@ -4,6 +4,7 @@ maze_size: 32
 mode: 2 # モード選択
 test: # テスト走行時に使用するパラメータ群
   v_max: 300
+  end_v: 5
   accl: 1500
   decel: -1500
   dist: 180

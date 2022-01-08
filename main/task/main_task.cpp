@@ -118,7 +118,6 @@ int MainTask::select_mode() {
 }
 
 void MainTask::reset_tgt_data() {
-  printf("reset_tgt_data\n");
   tgt_val->tgt_in.v_max = 0;
   tgt_val->tgt_in.end_v = 0;
   tgt_val->tgt_in.accl = 0;
@@ -136,7 +135,6 @@ void MainTask::reset_tgt_data() {
 }
 
 void MainTask::reset_ego_data() {
-  printf("reset_ego_data\n");
   tgt_val->ego_in.accl = 0;
   tgt_val->ego_in.alpha = 0;
   tgt_val->ego_in.ang = 0;
@@ -238,6 +236,7 @@ void MainTask::load_hw_param() {
   if (f == NULL) {
     return;
   }
+  char line_buf[LOG_BUF_SIZE];
   fgets(line_buf, sizeof(line_buf), f);
   fclose(f);
 
@@ -297,7 +296,7 @@ void MainTask::load_sys_param() {
   if (f == NULL) {
     return;
   }
-  char buf[LOG_BUF_SIZE];
+  char line_buf[LOG_BUF_SIZE];
   fgets(line_buf, sizeof(line_buf), f);
   fclose(f);
 
@@ -321,6 +320,7 @@ void MainTask::load_sys_param() {
   test = cJSON_GetObjectItem(root, "test");
 
   sys.test.v_max = cJSON_GetObjectItem(test, "v_max")->valuedouble;
+  sys.test.end_v = cJSON_GetObjectItem(test, "end_v")->valuedouble;
   sys.test.accl = cJSON_GetObjectItem(test, "accl")->valuedouble;
   sys.test.decel = cJSON_GetObjectItem(test, "decel")->valuedouble;
   sys.test.dist = cJSON_GetObjectItem(test, "dist")->valuedouble;
@@ -346,7 +346,7 @@ void MainTask::load_turn_param_profiles() {
   FILE *f = fopen("/spiflash/profiles.txt", "rb");
   if (f == NULL)
     return;
-
+  char line_buf[LOG_BUF_SIZE];
   fgets(line_buf, sizeof(line_buf), f);
   fclose(f);
 
@@ -413,6 +413,7 @@ void MainTask::load_slalom_param() {
       return;
     }
     printf("%s\n", path.c_str());
+    char line_buf[LOG_BUF_SIZE];
     fgets(line_buf, sizeof(line_buf), f);
     fclose(f);
 
@@ -527,7 +528,7 @@ void MainTask::task() {
     }
   } else {
     ui.hello_exia();
-    int mode = select_mode();
+    // int mode = select_mode();
   }
 
   // echo_sensing_result_with_json();
@@ -564,7 +565,7 @@ void MainTask::test_run() {
   // pt->active_logging(_f);
 
   ps.v_max = sys.test.v_max;
-  ps.v_end = 30;
+  ps.v_end = sys.test.end_v;
   ps.dist = sys.test.dist;
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
@@ -576,9 +577,11 @@ void MainTask::test_run() {
   pt->motor_disable();
 
   lt->stop_slalom_log();
+  reset_tgt_data();
+  reset_ego_data();
+  lt->save(slalom_log_file);
   ui.coin(120);
 
-  lt->save(slalom_log_file);
   while (1) {
     if (ui.button_state_hold())
       break;
@@ -614,6 +617,8 @@ void MainTask::test_turn() {
     vTaskDelay(250 / portTICK_RATE_MS);
   }
   pt->motor_disable();
+  reset_tgt_data();
+  reset_ego_data();
 
   pt->inactive_logging();
   ui.coin(120);
@@ -676,13 +681,15 @@ void MainTask::test_sla() {
   mp.slalom(sla_p, rorl, nm);
 
   ps.v_max = sla_p.v;
-  ps.v_end = 30;
+  ps.v_end =  sys.test.end_v;
   ps.dist = 90;
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
   mp.go_straight(ps);
 
   pt->motor_disable();
+  reset_tgt_data();
+  reset_ego_data();
 
   pt->suction_disable();
   pt->inactive_logging();
@@ -700,27 +707,15 @@ void MainTask::dump_log() {
       break;
     vTaskDelay(10 / portTICK_RATE_MS);
   }
-  printf("dump_log!!\n");
   FILE *f = fopen(slalom_log_file.c_str(), "rb");
   if (f == NULL) {
     printf("log_file_error\n");
     return;
   }
-  printf("f != null\n");
-
+  char line_buf[LOG_BUF_SIZE];
   while (fgets(line_buf, sizeof(line_buf), f) != NULL)
     printf("%s\n", line_buf);
   fclose(f);
-
-  // auto *f2 = fopen(slalom_log_file.c_str(), "wb");
-  // if (f == NULL) {
-  //   printf("null!\n");
-  //   return;
-  // }
-  // std::string str = "hello world\n";
-  // // 書き込み&ファイルclose
-  // fprintf(f2, str.c_str());
-  // fclose(f2);
 
   while (1) {
     if (ui.button_state_hold())

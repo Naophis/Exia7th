@@ -28,6 +28,7 @@ void LoggingTask::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
 void LoggingTask::start_slalom_log() {
   active_slalom_log = true; //
   idx_slalom_log = 0;
+  log_vec.clear();
 }
 void LoggingTask::stop_slalom_log() {
   active_slalom_log = false; //
@@ -36,40 +37,40 @@ void LoggingTask::stop_slalom_log() {
 void LoggingTask::task() {
   const TickType_t xDelay_fast = 1 / portTICK_PERIOD_MS;
   const TickType_t xDelay2 = 100 / portTICK_PERIOD_MS;
-  // const char *f1 = format1.c_str();
-  // const char *f2 = format2.c_str();
-  // const char *f3 = format3.c_str();
   while (1) {
     logging_active = active_slalom_log;
     if (logging_active) {
       if (active_slalom_log && idx_slalom_log <= LOG_SIZE) {
-        log_list2[idx_slalom_log].img_v = tgt_val->ego_in.v;
-        log_list2[idx_slalom_log].v_l = ego->v_l;
-        log_list2[idx_slalom_log].v_c = ego->v_c;
-        log_list2[idx_slalom_log].v_r = ego->v_r;
-        log_list2[idx_slalom_log].accl = tgt_val->ego_in.accl;
+        auto ld = std::make_shared<log_data_t>();
+        ld->img_v = tgt_val->ego_in.v;
+        ld->v_l = ego->v_l;
+        ld->v_c = ego->v_c;
+        ld->v_r = ego->v_r;
+        ld->accl = tgt_val->ego_in.accl;
 
-        log_list2[idx_slalom_log].img_w = tgt_val->ego_in.w;
-        log_list2[idx_slalom_log].w_lp = ego->w_lp;
-        log_list2[idx_slalom_log].alpha = tgt_val->ego_in.alpha;
+        ld->img_w = tgt_val->ego_in.w;
+        ld->w_lp = ego->w_lp;
+        ld->alpha = tgt_val->ego_in.alpha;
 
-        log_list2[idx_slalom_log].img_dist = tgt_val->ego_in.img_dist;
-        log_list2[idx_slalom_log].dist = tgt_val->ego_in.dist;
+        ld->img_dist = tgt_val->ego_in.img_dist;
+        ld->dist = tgt_val->ego_in.dist;
 
-        log_list2[idx_slalom_log].img_ang = tgt_val->ego_in.img_ang * 180 / PI;
-        log_list2[idx_slalom_log].ang = tgt_val->ego_in.ang * 180 / PI;
+        ld->img_ang = tgt_val->ego_in.img_ang * 180 / PI;
+        ld->ang = tgt_val->ego_in.ang * 180 / PI;
 
-        log_list2[idx_slalom_log].duty_l = ego->duty.duty_l;
-        log_list2[idx_slalom_log].duty_r = ego->duty.duty_r;
+        ld->duty_l = ego->duty.duty_l;
+        ld->duty_r = ego->duty.duty_r;
 
-        log_list2[idx_slalom_log].left90_lp = ego->left90_lp;
-        log_list2[idx_slalom_log].left45_lp = ego->left45_lp;
-        log_list2[idx_slalom_log].front_lp = ego->front_lp;
-        log_list2[idx_slalom_log].right45_lp = ego->right45_lp;
-        log_list2[idx_slalom_log].right90_lp = ego->right90_lp;
+        ld->left90_lp = ego->left90_lp;
+        ld->left45_lp = ego->left45_lp;
+        ld->front_lp = ego->front_lp;
+        ld->right45_lp = ego->right45_lp;
+        ld->right90_lp = ego->right90_lp;
 
-        log_list2[idx_slalom_log].battery_lp = ego->battery_lp;
-
+        ld->battery_lp = ego->battery_lp;
+        ld->duty_l = ego->duty.duty_l;
+        ld->duty_r = ego->duty.duty_r;
+        log_vec.push_back(ld);
         idx_slalom_log++;
       }
       vTaskDelay(xDelay_fast);
@@ -80,7 +81,6 @@ void LoggingTask::task() {
 }
 
 void LoggingTask::save(std::string file_name) {
-  const TickType_t xDelay_fast = 1 / portTICK_PERIOD_MS;
   printf("usefile: %s\n", slalom_log_file.c_str());
   f_slalom_log = fopen(slalom_log_file.c_str(), "wb");
   if (f_slalom_log == NULL)
@@ -89,25 +89,18 @@ void LoggingTask::save(std::string file_name) {
   const char *f1 = format1.c_str();
   const char *f2 = format2.c_str();
   const char *f3 = format3.c_str();
-  for (int i = 0; i < idx_slalom_log; i++) {
-    fprintf(f_slalom_log, f1,      // "%d,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,", i, //
-            i, log_list2[i].img_v, //
-            log_list2[i].v_c, log_list2[i].v_l, log_list2[i].v_r, // v
-            log_list2[i].accl);
-    vTaskDelay(xDelay_fast);
 
+  int i = 0;
+
+  for (const auto ld : log_vec) {
+    fprintf(f_slalom_log, f1, // "%d,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,", i,
+            i++, ld->img_v, ld->v_c, ld->v_l, ld->v_r, ld->accl);
     fprintf(f_slalom_log, f2, //"%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,", //
-            log_list2[i].img_w, log_list2[i].w_lp, log_list2[i].alpha,
-            log_list2[i].img_dist, log_list2[i].dist, log_list2[i].img_ang,
-            log_list2[i].ang);
-
-    vTaskDelay(xDelay_fast);
-
+            ld->img_w, ld->w_lp, ld->alpha, ld->img_dist, ld->dist, ld->img_ang,
+            ld->ang);
     fprintf(f_slalom_log, f3, //"%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f\n", //
-            log_list2[i].left90_lp, log_list2[i].left45_lp,
-            log_list2[i].front_lp, log_list2[i].right45_lp,
-            log_list2[i].right90_lp, log_list2[i].battery_lp);
-    vTaskDelay(xDelay_fast);
+            ld->left90_lp, ld->left45_lp, ld->front_lp, ld->right45_lp,
+            ld->right90_lp, ld->battery_lp, ld->duty_l, ld->duty_r);
   }
 
   if (f_slalom_log != NULL) {
@@ -121,9 +114,13 @@ void LoggingTask::dump_log(std::string file_name) {
   FILE *f = fopen(file_name.c_str(), "rb");
   if (f == NULL)
     return;
-
+  char line_buf[LOG_BUF_SIZE];
+  printf("start___\n"); // csvファイル作成トリガー
+  printf("index,ideal_v,v_c,v_l,v_r,accl,ideal_w,w_lp,alpha,ideal_dist,dist,"
+         "ideal_ang,ang,left90,left45,front,right45,right90,battery,duty_l,duty_r\n");
   while (fgets(line_buf, sizeof(line_buf), f) != NULL)
     printf("%s\n", line_buf);
+  printf("end___\n"); // csvファイル追記終了トリガー
 
   fclose(f);
 }

@@ -60,7 +60,6 @@ private:
   int pid_req_timestamp = 0;
   void pl_req_activate();
   void cp_tgt_val();
-  void set_log_data();
   mpc_tgt_calcModelClass mpc_tgt_calc;
 
   bool log_active = false;
@@ -74,7 +73,7 @@ private:
   std::shared_ptr<ego_entity_t> ego;
   std::shared_ptr<tgt_entity_t> tgt;
   std::shared_ptr<motion_tgt_val_t> tgt_val;
-  
+
   t_tgt *mpc_tgt;
   t_ego *mpc_now_ego;
   int32_t mpc_mode;

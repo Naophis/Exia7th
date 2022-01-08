@@ -25,7 +25,6 @@
 // #include "VL53L0X.h"
 #include "esp_efuse_rtc_calib.h"
 
-#include "include/buzzer_task.hpp"
 #include "include/logging_task.hpp"
 #include "include/main_task.hpp"
 #include "include/planning_task.hpp"

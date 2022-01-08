@@ -154,38 +154,8 @@ void PlanningTask::task() {
 
     buzzer(buzzer_ch, buzzer_timer);
 
-    set_log_data();
-
     vTaskDelay(xDelay);
   }
-}
-void PlanningTask::set_log_data() {
-  if (log_active) {
-    if (f == NULL) {
-      return;
-    }
-    // fprintf(f, "idx=%d\n", log_list2_size);
-    // log_list2_size++;
-  }
-  // if (!log_active)
-  //   return;
-  // if (log_list2_size >= LOG_SIZE)
-  //   return;
-  // log_list2[log_list2_size].ideal.accl = tgt_val->ego_in.accl;
-  // log_list2[log_list2_size].ideal.v = tgt_val->ego_in.v;
-  // log_list2[log_list2_size].ideal.dist = tgt_val->ego_in.img_dist;
-  // log_list2[log_list2_size].ideal.alpha = tgt_val->ego_in.alpha;
-  // log_list2[log_list2_size].ideal.w = tgt_val->ego_in.w;
-  // log_list2[log_list2_size].ideal.ang = tgt_val->ego_in.img_ang;
-
-  // log_list2[log_list2_size].real.accl = 0;
-  // log_list2[log_list2_size].real.v = ego->v_c;
-  // log_list2[log_list2_size].real.dist = tgt_val->ego_in.dist;
-  // log_list2[log_list2_size].real.alpha = 0;
-  // log_list2[log_list2_size].real.w = ego->w_lp;
-  // log_list2[log_list2_size].real.ang = tgt_val->ego_in.ang;
-  // log_list2_size++;
-  // log_list.emplace_back(tmp_d);
 }
 
 void PlanningTask::update_ego_motion() {
@@ -373,12 +343,4 @@ void PlanningTask::cp_tgt_val() {
 
   tgt_val->ego_in.cnt_delay_accl_ratio = mpc_next_ego.cnt_delay_accl_ratio;
   tgt_val->ego_in.cnt_delay_decel_ratio = mpc_next_ego.cnt_delay_decel_ratio;
-}
-
-void PlanningTask::dump_log() {
-  // for (int i = 0; i < log_list2_size; i++) {
-  //   printf("%d,%f,%f,%f,%f\n", i, log_list2[i].ideal.v, log_list2[i].real.v,
-  //          log_list2[i].ideal.dist, log_list2[i].real.dist);
-  //   i++;
-  // }
 }
