@@ -47,8 +47,8 @@ async function callerFun() {
 
   const files = fs.readdirSync(__dirname + "/profile");
 
-  for (const file of files) //
-  {
+  for (const file of files) {
+    //
     // let file = "turn_300.yaml";
     // let file = "turn_400.yaml";
     // let file = "profiles.yaml";
@@ -88,8 +88,41 @@ let ready = function () {
       delimiter: "\r\n",
     })
   );
+  function getNowYMD() {
+    var dt = new Date();
+    var y = dt.getFullYear();
+    var m = ("00" + (dt.getMonth() + 1)).slice(-2);
+    var d = ("00" + dt.getDate()).slice(-2);
+    var h = ("00" + dt.getHours()).slice(-2);
+    var M = ("00" + dt.getMinutes()).slice(-2);
+    var s = ("00" + dt.getSeconds()).slice(-2);
+    return `${y}${m}${d}_${h}${M}_${s}.csv`;
+  }
+  let dump_to_csv = false;
+  let file_name = getNowYMD();
+
   parser.on("data", function (data) {
     console.log(data);
+
+    if (data.match(/^end___/)) {
+      dump_to_csv = false;
+      console.log(`${__dirname}/logs/${file_name}`);
+      fs.copyFileSync(
+        `${__dirname}/logs/${file_name}`,
+        `${__dirname}/logs/latest.csv`
+      );
+    }
+    if (dump_to_csv) {
+      fs.appendFileSync(`${__dirname}/logs/${file_name}`, `${data}\n`, {
+        flag: "a",
+      });
+    }
+
+    if (data.match(/^start___/)) {
+      dump_to_csv = true;
+      file_name = getNowYMD();
+      console.log(file_name);
+    }
   });
 };
 

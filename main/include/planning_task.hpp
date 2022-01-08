@@ -49,10 +49,13 @@ private:
   bool motor_en;
   bool suction_en;
 
+  void check_fail_safe();
   void update_ego_motion();
   void set_next_duty(float duty_l, float duty_r, float duty_suction);
   void init_gpio();
   void calc_tgt_duty();
+
+
   duty_t tgt_duty;
   pid_error_entity_t error_entity;
   int buzzer_time_cnt = 0;
@@ -79,6 +82,8 @@ private:
   int32_t mpc_mode;
   int32_t mpc_step;
   t_ego mpc_next_ego;
+
+  fail_safe_t fail_safe;
 };
 
 #endif

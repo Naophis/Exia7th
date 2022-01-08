@@ -58,16 +58,10 @@ let ready = function () {
 
     if (data.match(/^end___/)) {
       dump_to_csv = false;
-      fs.copyFile(
+      console.log(`${__dirname}/logs/${file_name}`);
+      fs.copyFileSync(
         `${__dirname}/logs/${file_name}`,
-        `${__dirname}/logs/latest.csv`,
-        (err) => {
-          if (err) {
-            console.log(err.stack);
-          } else {
-            console.log("Copy Done.");
-          }
-        }
+        `${__dirname}/logs/latest.csv`
       );
     }
     if (dump_to_csv) {

@@ -10,7 +10,7 @@ void MotionPlanning::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
   tgt_val = _tgt_val;
 }
 
-int MotionPlanning::go_straight(param_straight_t &p) {
+MotionResult MotionPlanning::go_straight(param_straight_t &p) {
   tgt_val->tgt_in.v_max = p.v_max;
   tgt_val->tgt_in.end_v = p.v_end;
   tgt_val->tgt_in.accl = p.accl;
@@ -34,11 +34,14 @@ int MotionPlanning::go_straight(param_straight_t &p) {
     if (tgt_val->ego_in.dist > p.dist) {
       break;
     }
+    if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
+      return MotionResult::ERROR;
+    }
     vTaskDelay(1 / portTICK_RATE_MS);
   }
-  return 0;
+  return MotionResult::NONE;
 }
-int MotionPlanning::pivot_turn(param_roll_t &p) {
+MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
   if (p.RorL == TurnDirection::Left) {
     tgt_val->tgt_in.w_max = p.w_max;
     tgt_val->tgt_in.end_w = p.w_end;
@@ -71,13 +74,16 @@ int MotionPlanning::pivot_turn(param_roll_t &p) {
     if (ABS(tgt_val->ego_in.ang) > ABS(p.ang)) {
       break;
     }
+    if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
+      return MotionResult::ERROR;
+    }
     vTaskDelay(1 / portTICK_RATE_MS);
   }
-  return 0;
+  return MotionResult::NONE;
 }
 
-int MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
-                           next_motionr_t &next_motion) {
+MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
+                                    next_motionr_t &next_motion) {
 
   param_straight_t ps_front;
   ps_front.v_max = sp.v;
@@ -86,7 +92,9 @@ int MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   ps_front.decel = next_motion.decel;
   ps_front.dist = (td == TurnDirection::Right) ? sp.front.right : sp.front.left;
   auto res_f = go_straight(ps_front);
-
+  if (res_f != MotionResult::NONE) {
+    return MotionResult::ERROR;
+  }
   tgt_val->tgt_in.accl = next_motion.accl;
   tgt_val->tgt_in.alpha = 0;
   tgt_val->tgt_in.decel = next_motion.decel;
@@ -118,6 +126,9 @@ int MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
       tgt_val->ego_in.w = 0;
       break;
     }
+    if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
+      return MotionResult::ERROR;
+    }
     // if (type != Dia90) {
     //   if (!fail) {
     //     alphaMode = 0;
@@ -137,7 +148,10 @@ int MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   ps_back.dist = (td == TurnDirection::Right) ? sp.back.right : sp.back.left;
 
   auto res_b = go_straight(ps_back);
-  return 0;
+  if (res_b != MotionResult::NONE) {
+    return MotionResult::ERROR;
+  }
+  return MotionResult::NONE;
 }
 void MotionPlanning::normal_slalom(param_normal_slalom_t &p,
                                    param_straight_t &p_str) {

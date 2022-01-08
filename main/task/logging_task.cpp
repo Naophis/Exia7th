@@ -111,13 +111,16 @@ void LoggingTask::save(std::string file_name) {
 
 void LoggingTask::dump_log(std::string file_name) {
 
+  const TickType_t xDelay2 = 100 / portTICK_PERIOD_MS;
   FILE *f = fopen(file_name.c_str(), "rb");
   if (f == NULL)
     return;
   char line_buf[LOG_BUF_SIZE];
   printf("start___\n"); // csvファイル作成トリガー
+  vTaskDelay(xDelay2);
   printf("index,ideal_v,v_c,v_l,v_r,accl,ideal_w,w_lp,alpha,ideal_dist,dist,"
-         "ideal_ang,ang,left90,left45,front,right45,right90,battery,duty_l,duty_r\n");
+         "ideal_ang,ang,left90,left45,front,right45,right90,battery,duty_l,"
+         "duty_r\n");
   while (fgets(line_buf, sizeof(line_buf), f) != NULL)
     printf("%s\n", line_buf);
   printf("end___\n"); // csvファイル追記終了トリガー

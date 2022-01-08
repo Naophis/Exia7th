@@ -246,10 +246,15 @@ typedef struct {
 } planning_req_t;
 
 typedef struct {
+  int error;
+} fail_safe_state_t;
+
+typedef struct {
   t_tgt tgt_in;
   t_ego ego_in;
   int32_t motion_mode;
   planning_req_t pl_req;
+  fail_safe_state_t fss;
 } motion_tgt_val_t;
 
 enum class RUN_MODE2 : int {
@@ -410,4 +415,17 @@ static const std::string format2("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
 static const std::string
     format3("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f\n");
 
+typedef struct {
+  int invalid_duty_r_cnt;
+  int invalid_duty_l_cnt;
+} fail_safe_t;
+
+enum class FailSafe : int {
+  NONE = 0,
+  ERROR = 1,
+};
+enum class MotionResult : int {
+  NONE = 0,
+  ERROR = 1,
+};
 #endif

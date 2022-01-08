@@ -525,6 +525,13 @@ void MainTask::task() {
       test_turn();
     } else if (sys.user_mode == 15) {
       echo_sensing_result_with_json();
+    } else if (sys.user_mode == 16) {
+      lt->dump_log(slalom_log_file);
+      while (1) {
+        if (ui.button_state_hold())
+          break;
+        vTaskDelay(10 / portTICK_RATE_MS);
+      }
     }
   } else {
     ui.hello_exia();
@@ -605,6 +612,7 @@ void MainTask::test_turn() {
 
   req_error_reset();
 
+  lt->start_slalom_log();
   // pt->active_logging();
   pr.w_max = sys.test.w_max;
   pr.alpha = sys.test.alpha;
@@ -612,18 +620,26 @@ void MainTask::test_turn() {
   pr.ang = sys.test.ang * PI / 180;
   pr.RorL = rorl;
 
-  for (int i = 0; i < 4; i++) {
-    mp.pivot_turn(pr);
-    vTaskDelay(250 / portTICK_RATE_MS);
-  }
+  mp.pivot_turn(pr);
   pt->motor_disable();
+
+  lt->stop_slalom_log();
   reset_tgt_data();
   reset_ego_data();
-
-  pt->inactive_logging();
+  lt->save(slalom_log_file);
   ui.coin(120);
-  // dump_log();
+
+  while (1) {
+    if (ui.button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
   lt->dump_log(slalom_log_file);
+  while (1) {
+    if (ui.button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
 }
 
 void MainTask::test_sla() {
@@ -681,7 +697,7 @@ void MainTask::test_sla() {
   mp.slalom(sla_p, rorl, nm);
 
   ps.v_max = sla_p.v;
-  ps.v_end =  sys.test.end_v;
+  ps.v_end = sys.test.end_v;
   ps.dist = 90;
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;

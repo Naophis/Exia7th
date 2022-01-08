@@ -150,6 +150,8 @@ void PlanningTask::task() {
     // Duty計算
     calc_tgt_duty();
 
+    check_fail_safe();
+
     set_next_duty(tgt_duty.duty_l, tgt_duty.duty_r, tgt_duty.duty_suction);
 
     buzzer(buzzer_ch, buzzer_timer);
@@ -343,4 +345,25 @@ void PlanningTask::cp_tgt_val() {
 
   tgt_val->ego_in.cnt_delay_accl_ratio = mpc_next_ego.cnt_delay_accl_ratio;
   tgt_val->ego_in.cnt_delay_decel_ratio = mpc_next_ego.cnt_delay_decel_ratio;
+}
+
+void PlanningTask::check_fail_safe() {
+  bool no_problem = true;
+  if (motor_en) {
+    if (ABS(ego->duty.duty_l) > 80) {
+      fail_safe.invalid_duty_r_cnt++;
+      no_problem = true;
+    }
+  }
+
+  if (no_problem) {
+    fail_safe.invalid_duty_r_cnt = 0;
+    fail_safe.invalid_duty_l_cnt = 0;
+    tgt_val->fss.error = 0;
+  } else {
+    if (ABS(fail_safe.invalid_duty_r_cnt) > 10 ||
+        ABS(fail_safe.invalid_duty_l_cnt) > 10) {
+      tgt_val->fss.error = 1;
+    }
+  }
 }
