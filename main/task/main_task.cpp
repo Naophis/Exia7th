@@ -236,7 +236,7 @@ void MainTask::load_hw_param() {
   if (f == NULL) {
     return;
   }
-  char line_buf[LOG_BUF_SIZE];
+  char line_buf[LINE_BUF_SIZE];
   fgets(line_buf, sizeof(line_buf), f);
   fclose(f);
 
@@ -296,7 +296,7 @@ void MainTask::load_sys_param() {
   if (f == NULL) {
     return;
   }
-  char line_buf[LOG_BUF_SIZE];
+  char line_buf[LINE_BUF_SIZE];
   fgets(line_buf, sizeof(line_buf), f);
   fclose(f);
 
@@ -346,7 +346,7 @@ void MainTask::load_turn_param_profiles() {
   FILE *f = fopen("/spiflash/profiles.txt", "rb");
   if (f == NULL)
     return;
-  char line_buf[LOG_BUF_SIZE];
+  char line_buf[LINE_BUF_SIZE];
   fgets(line_buf, sizeof(line_buf), f);
   fclose(f);
 
@@ -413,7 +413,7 @@ void MainTask::load_slalom_param() {
       return;
     }
     printf("%s\n", path.c_str());
-    char line_buf[LOG_BUF_SIZE];
+    char line_buf[LINE_BUF_SIZE];
     fgets(line_buf, sizeof(line_buf), f);
     fclose(f);
 
@@ -741,7 +741,7 @@ void MainTask::dump_log() {
     printf("log_file_error\n");
     return;
   }
-  char line_buf[LOG_BUF_SIZE];
+  char line_buf[LINE_BUF_SIZE];
   while (fgets(line_buf, sizeof(line_buf), f) != NULL)
     printf("%s\n", line_buf);
   fclose(f);

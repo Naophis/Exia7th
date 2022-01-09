@@ -119,7 +119,7 @@ void LoggingTask::dump_log(std::string file_name) {
   FILE *f = fopen(file_name.c_str(), "rb");
   if (f == NULL)
     return;
-  char line_buf[LOG_BUF_SIZE];
+  char line_buf[LINE_BUF_SIZE];
   printf("start___\n"); // csvファイル作成トリガー
   vTaskDelay(xDelay2);
   printf("index,ideal_v,v_c,v_l,v_r,accl,ideal_w,w_lp,alpha,ideal_dist,dist,"
