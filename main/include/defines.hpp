@@ -96,6 +96,7 @@ constexpr float LOW_BATTERY_TH = 3.95;
 
 static const std::initializer_list<std::pair<TurnType, std::string>>
     turn_name_list = {
+        {TurnType::None, "straight"},    //
         {TurnType::Normal, "normal"},    //
         {TurnType::Large, "large"},      //
         {TurnType::Orval, "orval"},      //
@@ -104,6 +105,13 @@ static const std::initializer_list<std::pair<TurnType, std::string>>
         {TurnType::Dia90, "dia90"},      //
         {TurnType::Dia45_2, "dia45_2"},  //
         {TurnType::Dia135_2, "dia135_2"} //
+};
+
+static const std::initializer_list<std::pair<StraightType, std::string>>
+    straight_name_list = {
+        {StraightType::Search, "search"},          //
+        {StraightType::FastRun, "fast_run"},       //
+        {StraightType::FastRunDia, "fast_run_dia"} //
 };
 
 static const std::string slalom_log_file("/spiflash/sla.log");

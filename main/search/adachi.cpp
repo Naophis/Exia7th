@@ -1,16 +1,17 @@
 #include "adachi.hpp"
 
-Adachi::Adachi(/* args */) {}
+Adachi::Adachi() {}
 
 Adachi::~Adachi() {}
 
-void Adachi::set_logic(MazeSolverBaseLgc *_logic) { lgc = _logic; }
+void Adachi::set_logic(std::shared_ptr<MazeSolverBaseLgc> &_lgc) {
+  lgc = _lgc; //
+}
 
-void Adachi::set_ego(ego_t *_ego) { ego = _ego; }
+void Adachi::set_ego(std::shared_ptr<ego_t> &_ego) { ego = _ego; }
 
 void Adachi::setNextDirection(int x2, int y2, Direction dir,
                               Direction &next_dir, int &val) {
-
   bool isWall = lgc->existWall(ego->x, ego->y, dir);
   bool step = lgc->isStep(x2, y2, dir);
   unsigned int dist = lgc->get_dist_val(x2, y2);
@@ -41,7 +42,6 @@ void Adachi::setNextDirection(int x2, int y2, Direction dir,
 }
 void Adachi::setNextDirection2(int x2, int y2, Direction dir,
                                Direction &next_dir, int &val) {
-
   bool isWall = lgc->existWall(ego->x, ego->y, dir);
   bool step = lgc->isStep(x2, y2, dir);
   unsigned int dist = lgc->get_dist_val(x2, y2);
@@ -237,7 +237,8 @@ bool Adachi::is_goaled() {
 //   }
 // }
 
-int Adachi::exec(path_type &path) {
+// int Adachi::exec(path_type &path) {
+Motion Adachi::exec() {
   int calc_cnt = 0;
 
   goaled = is_goaled();
@@ -319,7 +320,7 @@ int Adachi::exec(path_type &path) {
       calc_cnt += lgc->searchGoalPosition(false, subgoal_list);
       lgc->update_dist_map(1, false); // search
       cost_mode = 3;
-      return 0;
+      return Motion::NONE;
     }
 
   Direction next_dir = detect_next_direction();
@@ -330,5 +331,6 @@ int Adachi::exec(path_type &path) {
   // create_path(path, next_motion);
   // ROS_INFO("calc_cnt = %d", calc_cnt);
 
-  return static_cast<int>(next_motion);
+  // return static_cast<int>(next_motion);
+  return next_motion;
 }

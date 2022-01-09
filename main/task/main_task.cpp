@@ -407,7 +407,7 @@ void MainTask::load_turn_param_profiles() {
   cJSON_free(profile_idx);
 }
 void MainTask::load_slalom_param() {
-  turn_param_list.clear();
+  paramset_list.clear();
   for (const auto file_name : tpp.file_list) {
     const auto path = std::string("/spiflash/" + file_name);
 
@@ -423,11 +423,48 @@ void MainTask::load_slalom_param() {
     cJSON *root = cJSON_CreateObject();
     root = cJSON_Parse(line_buf);
 
-    slalom_parameter_t sp;
+    param_set_t sp;
     sp.map.clear();
 
+    straight_param_t str_p;
     slalom_param2_t sp2;
     for (const auto p : turn_name_list) {
+      if (p.first == TurnType::None) {
+        for (const auto p2 : straight_name_list) {
+          str_p.v_max = cJSON_GetObjectItem(
+                            cJSON_GetObjectItem(
+                                cJSON_GetObjectItem(root, p.second.c_str()),
+                                p2.second.c_str()),
+                            "v_max")
+                            ->valuedouble;
+          str_p.accl = cJSON_GetObjectItem(
+                           cJSON_GetObjectItem(
+                               cJSON_GetObjectItem(root, p.second.c_str()),
+                               p2.second.c_str()),
+                           "accl")
+                           ->valuedouble;
+          str_p.decel = cJSON_GetObjectItem(
+                            cJSON_GetObjectItem(
+                                cJSON_GetObjectItem(root, p.second.c_str()),
+                                p2.second.c_str()),
+                            "decel")
+                            ->valuedouble;
+          str_p.w_max = cJSON_GetObjectItem(
+                            cJSON_GetObjectItem(
+                                cJSON_GetObjectItem(root, p.second.c_str()),
+                                p2.second.c_str()),
+                            "w_max")
+                            ->valuedouble;
+          str_p.alpha = cJSON_GetObjectItem(
+                            cJSON_GetObjectItem(
+                                cJSON_GetObjectItem(root, p.second.c_str()),
+                                p2.second.c_str()),
+                            "alpha")
+                            ->valuedouble;
+          sp.str_map[p2.first] = str_p;
+        }
+        continue;
+      }
       sp2.v =
           cJSON_GetObjectItem(cJSON_GetObjectItem(root, p.second.c_str()), "v")
               ->valuedouble;
@@ -473,7 +510,7 @@ void MainTask::load_slalom_param() {
       sp.map[p.first] = sp2;
     }
 
-    turn_param_list.emplace_back(sp);
+    paramset_list.emplace_back(sp);
     cJSON_free(root);
   }
 }
@@ -537,8 +574,13 @@ void MainTask::task() {
       }
     }
   } else {
+    lgc = std::make_shared<MazeSolverBaseLgc>();
+    seach_ctrl = std::make_shared<SearchController>();
+    seach_ctrl->set_lgc(lgc);
+    seach_ctrl->set_motion_plannning(mp);
     ui->hello_exia();
-    // int mode = select_mode();
+    int mode_num = select_mode();
+    const auto param_set = paramset_list[mode_num];
   }
 
   // echo_sensing_result_with_json();
@@ -664,7 +706,7 @@ void MainTask::test_sla() {
   }
 
   auto sla_p =
-      turn_param_list[file_idx].map[static_cast<TurnType>(sys.test.sla_type)];
+      paramset_list[file_idx].map[static_cast<TurnType>(sys.test.sla_type)];
 
   printf("%d %f\n", sla_p.pow_n, sla_p.time);
 

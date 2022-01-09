@@ -19,8 +19,11 @@
 #include "esp_vfs_fat.h"
 
 #include "gen_code/mpc_tgt_calc.h"
+#include "include/adachi.hpp"
 #include "include/integrated_entity.hpp"
+#include "include/logic.hpp"
 #include "include/motion_planning.hpp"
+#include "include/search_controller.hpp"
 #include "include/ui.hpp"
 
 // #include "libs/nlohmnn-json/json.hpp"
@@ -106,7 +109,11 @@ private:
   void load_turn_param_profiles();
   void load_slalom_param();
   void dump_log();
-  std::vector<slalom_parameter_t> turn_param_list;
+  std::vector<param_set_t> paramset_list;
+
+  std::shared_ptr<MazeSolverBaseLgc> lgc;
+  std::shared_ptr<Adachi> adachi;
+  std::shared_ptr<SearchController> seach_ctrl;
 };
 
 #endif

@@ -268,8 +268,17 @@ typedef struct {
 } slalom_param2_t;
 
 typedef struct {
+  float v_max;
+  float accl;
+  float decel;
+  float w_max;
+  float alpha;
+} straight_param_t;
+
+typedef struct {
   std::unordered_map<TurnType, slalom_param2_t> map;
-} slalom_parameter_t;
+  std::unordered_map<StraightType, straight_param_t> str_map;
+} param_set_t;
 
 typedef struct {
   bool is_turn;

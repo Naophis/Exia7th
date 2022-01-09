@@ -1,3 +1,22 @@
+straight:
+  search:
+    v_max: 300
+    accl: 1000
+    decel: -1000
+    w_max: 5
+    alpha: 10
+  fast_run:
+    v_max: 300
+    accl: 1000
+    decel: -1000
+    w_max: 5
+    alpha: 10
+  fast_run_dia:
+    v_max: 300
+    accl: 1000
+    decel: -1000
+    w_max: 5
+    alpha: 10
 normal:
   v: 300
   ang: 90

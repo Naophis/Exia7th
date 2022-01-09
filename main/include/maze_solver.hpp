@@ -2,8 +2,8 @@
 #define MAZE_SOLVER_H
 
 #include "stdio.h"
-#include <vector>
 #include <cmath>
+#include <vector>
 
 using namespace std;
 constexpr unsigned char MAX_MAZE_SIZE = 32;
@@ -65,6 +65,12 @@ enum class PathMotion : int {
   End = 255,
 };
 
+enum class StraightType : int {
+  Search = 0,
+  FastRun = 1,
+  FastRunDia = 2,
+};
+
 enum class TurnType : int {
   None = 0,
   Normal = 1,
@@ -98,15 +104,15 @@ typedef struct {
 } dir_pt_t;
 
 typedef struct {
-  unsigned char x;
-  unsigned char y;
+  uint8_t x;
+  uint8_t y;
   Direction dir;
-  unsigned char prev_motion;
+  uint8_t prev_motion;
 } ego_t;
 
 typedef struct {
   float s;
-  unsigned char t;
+  uint8_t t;
 } path_element;
 
 typedef struct {

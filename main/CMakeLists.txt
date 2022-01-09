@@ -19,6 +19,7 @@ set(COMPONENT_SRCS
     "task/sensing_task.cpp"
     "search/adachi.cpp"
     "search/logic.cpp"
+    "search/search_controller.cpp"
     "gen_code/mpc_tgt_calc_data.cpp"
     "gen_code/mpc_tgt_calc.cpp"
     "gen_code/rt_nonfinite.cpp"
