@@ -7,7 +7,6 @@ SensingTask::~SensingTask() {}
 void SensingTask::create_task(const BaseType_t xCoreID) {
   xTaskCreatePinnedToCore(task_entry_point, "sensing_task", 8192, this, 2,
                           &handle, xCoreID);
-  // timer_init_grp0_timer0();
 }
 
 void SensingTask::task_entry_point(void *task_instance) {

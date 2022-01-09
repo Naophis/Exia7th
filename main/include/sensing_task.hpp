@@ -12,7 +12,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define BATTERY_GAIN 2.97324
 class SensingTask {
 public:
   SensingTask();

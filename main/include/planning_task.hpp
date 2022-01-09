@@ -13,12 +13,6 @@
 #include "esp_vfs.h"
 #include "esp_vfs_fat.h"
 
-#define LEDC_HIGH_SPEED_MODE 0
-#define LEDC_TIMER_10_BIT 10
-#define LEDC_TIMER_0 0
-#define LEDC_CHANNEL_0 0
-#define BATTERY_BUZZER_MAX_CNT 25
-#define LOW_BATTERY_TH 3.95
 class PlanningTask {
 public:
   PlanningTask();
