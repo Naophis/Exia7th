@@ -136,7 +136,7 @@
     <default time_axis=""/>
    </plugin>
   </fileInfo>
-  <fileInfo prefix="" filename="/home/naoto/Desktop/Exia7th/tools/param_tuner/logs/latest.csv">
+  <fileInfo prefix="" filename="./tools/param_tuner/logs/latest.csv">
    <selected_datasources value=""/>
    <plugin ID="DataLoad CSV">
     <default time_axis="index"/>
