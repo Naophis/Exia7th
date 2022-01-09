@@ -26,7 +26,6 @@ public:
   void set_sensing_entity(std::shared_ptr<sensing_result_entity_t> &_entity_ro);
   void set_ego_param_entity(std::shared_ptr<ego_param_t> &_param_ro);
   void set_ego_entity(std::shared_ptr<ego_entity_t> &_ego);
-  void set_tgt_entity(std::shared_ptr<tgt_entity_t> &_tgt);
   void set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val);
 
   void buzzer(ledc_channel_config_t &buzzer_ch,
@@ -49,7 +48,6 @@ private:
   void init_gpio();
   void calc_tgt_duty();
 
-
   duty_t tgt_duty;
   pid_error_entity_t error_entity;
   int buzzer_time_cnt = 0;
@@ -68,7 +66,6 @@ private:
   std::shared_ptr<sensing_result_entity_t> entity_ro;
   std::shared_ptr<ego_param_t> param_ro;
   std::shared_ptr<ego_entity_t> ego;
-  std::shared_ptr<tgt_entity_t> tgt;
   std::shared_ptr<motion_tgt_val_t> tgt_val;
 
   t_tgt *mpc_tgt;

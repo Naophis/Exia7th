@@ -94,6 +94,8 @@ constexpr float BATTERY_GAIN = 2.97324;
 constexpr uint8_t LEDC_HIGH_SPEED_MODE = 0;
 constexpr float LOW_BATTERY_TH = 3.95;
 
+constexpr uint16_t RESET_GYRO_LOOP_CNT = 100;
+
 static const std::initializer_list<std::pair<TurnType, std::string>>
     turn_name_list = {
         {TurnType::None, "straight"},    //

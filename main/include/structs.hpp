@@ -158,12 +158,6 @@ typedef struct {
 } buzzer_t;
 
 typedef struct {
-  float gyro_zero_p_offset = 0;
-  // motion_tgt_t motion_tgt;
-  buzzer_t buzzer;
-} tgt_entity_t;
-
-typedef struct {
   int time_stamp = 0;
   int error_gyro_reset = 0;
   int error_vel_reset = 0;
@@ -183,6 +177,8 @@ typedef struct {
   MotionType motion_type;
   planning_req_t pl_req;
   fail_safe_state_t fss;
+  float gyro_zero_p_offset = 0;
+  buzzer_t buzzer;
 } motion_tgt_val_t;
 
 typedef struct {

@@ -24,23 +24,50 @@ void SearchController::reset() {
 }
 MotionResult SearchController::go_straight_wrapper(param_set_t &p_set) {
   param_straight_t p;
-  p.v_max = p_set.str_map[StraightType::Search].v_max;
-  p.v_end = p.v_max;
+  p.v_max = p.v_end = p_set.str_map[StraightType::Search].v_max;
   p.accl = p_set.str_map[StraightType::Search].accl;
   p.decel = p_set.str_map[StraightType::Search].decel;
   p.dist = 90;
+  p.motion_type = MotionType::NONE;
   return mp->go_straight(p);
 }
 MotionResult SearchController::slalom(param_set_t &p_set,
                                       const TurnDirection td) {
-  slalom_param2_t sp;
+  slalom_param2_t sp = p_set.map[TurnType::Normal];
+
   next_motionr_t nm;
+  nm.v_max = p_set.map[TurnType::Normal].v;
+  nm.v_end = p_set.map[TurnType::Normal].v;
+  nm.accl = p_set.str_map[StraightType::Search].accl;
+  nm.decel = p_set.str_map[StraightType::Search].decel;
+  nm.is_turn = false;
 
   return mp->slalom(sp, td, nm);
 }
 MotionResult SearchController::pivot(param_set_t &p_set) {
+  param_straight_t p;
+  p.v_max = p_set.str_map[StraightType::Search].v_max;
+  p.v_end = 0;
+  p.accl = p_set.str_map[StraightType::Search].accl;
+  p.decel = p_set.str_map[StraightType::Search].decel;
+  p.dist = 45;
+  p.motion_type = MotionType::NONE;
+  mp->go_straight(p);
+  // TODO wait hold
   param_roll_t pr;
-  return mp->pivot_turn(pr);
+  pr.w_max = p_set.str_map[StraightType::Search].w_max;
+  pr.alpha = p_set.str_map[StraightType::Search].alpha;
+  pr.w_end = 0;
+  pr.ang = PI / 2;
+  pr.RorL = TurnDirection::Right;
+  mp->pivot_turn(pr);
+  // TODO wait hold
+  p.v_max = p.v_end = p_set.str_map[StraightType::Search].v_max;
+  p.accl = p_set.str_map[StraightType::Search].accl;
+  p.decel = p_set.str_map[StraightType::Search].decel;
+  p.dist = 45;
+  p.motion_type = MotionType::NONE;
+  return mp->go_straight(p);
 }
 MotionResult SearchController::finish(param_set_t &p_set) {
   param_straight_t p;

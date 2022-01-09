@@ -18,22 +18,20 @@ void MainTask::set_sensing_entity(
     std::shared_ptr<sensing_result_entity_t> &_entity_ro) {
   entity_ro = _entity_ro;
   ui->set_sensing_entity(_entity_ro);
+  mp->set_sensing_entity(_entity_ro);
 }
 void MainTask::set_ego_param_entity(std::shared_ptr<ego_param_t> &_param) {
   param = _param;
+  mp->set_ego_param_entity(_param);
 }
 void MainTask::set_ego_entity(std::shared_ptr<ego_entity_t> &_ego) {
   ego = _ego;
   ui->set_ego_entity(_ego);
   mp->set_ego_entity(_ego);
 }
-void MainTask::set_tgt_entity(std::shared_ptr<tgt_entity_t> &_tgt) {
-  tgt = _tgt;
-  ui->set_tgt_entity(_tgt);
-  mp->set_tgt_entity(_tgt);
-}
 void MainTask::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
   tgt_val = _tgt_val;
+  ui->set_tgt_val(_tgt_val);
   mp->set_tgt_val(_tgt_val);
 }
 void MainTask::set_planning_task(std::shared_ptr<PlanningTask> &_pt) {
@@ -50,19 +48,8 @@ void MainTask::check_battery() {
     return;
   while (1) {
     ui->music_sync(MUSIC::G5_, 250);
-    vTaskDelay(tgt->buzzer.time / portTICK_PERIOD_MS);
+    vTaskDelay(tgt_val->buzzer.time / portTICK_PERIOD_MS);
   }
-}
-void MainTask::reset_gyro_ref() {
-  const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
-  float gyro_raw_data_sum = 0;
-
-  ui->motion_check();
-  for (int i = 0; i < RESET_GYRO_LOOP_CNT; i++) {
-    gyro_raw_data_sum += entity_ro->gyro.raw;
-    vTaskDelay(xDelay); //他モジュールの起動待ち
-  }
-  tgt->gyro_zero_p_offset = gyro_raw_data_sum / RESET_GYRO_LOOP_CNT;
 }
 
 void MainTask::dump1() {
@@ -72,7 +59,8 @@ void MainTask::dump1() {
     printf("%c[0;0H", ESC); /* 戦闘戻す*/
     printf("SW1 %d \n", gpio_get_level(SW1));
 
-    printf("gyro: %d\t(%0.3f)\n", entity_ro->gyro.raw, tgt->gyro_zero_p_offset);
+    printf("gyro: %d\t(%0.3f)\n", entity_ro->gyro.raw,
+           tgt_val->gyro_zero_p_offset);
     printf("battery: %0.3f\n", ego->battery_lp);
     printf("encoder: %d, %d\n", entity_ro->encoder.left,
            entity_ro->encoder.right);
@@ -120,43 +108,20 @@ int MainTask::select_mode() {
   return mode_num;
 }
 
-void MainTask::reset_tgt_data() {
-  tgt_val->tgt_in.v_max = 0;
-  tgt_val->tgt_in.end_v = 0;
-  tgt_val->tgt_in.accl = 0;
-  tgt_val->tgt_in.decel = 0;
-  tgt_val->tgt_in.w_max = 0;
-  tgt_val->tgt_in.end_w = 0;
-  tgt_val->tgt_in.alpha = 0;
-  tgt_val->tgt_in.tgt_dist = 0;
-  tgt_val->tgt_in.tgt_angle = 0;
+void MainTask::reset_tgt_data() { mp->reset_tgt_data(); }
 
-  tgt_val->motion_mode = 0;
+void MainTask::reset_ego_data() { mp->reset_ego_data(); }
 
-  tgt_val->tgt_in.accl_param.limit = 2500;
-  tgt_val->tgt_in.accl_param.n = 4;
-}
+void MainTask::reset_gyro_ref() {
+  const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
+  float gyro_raw_data_sum = 0;
 
-void MainTask::reset_ego_data() {
-  tgt_val->ego_in.accl = 0;
-  tgt_val->ego_in.alpha = 0;
-  tgt_val->ego_in.ang = 0;
-  tgt_val->ego_in.dist = 0;
-  tgt_val->ego_in.pivot_state = 0;
-  tgt_val->ego_in.sla_param.base_alpha = 0;
-  tgt_val->ego_in.sla_param.base_time = 0;
-  tgt_val->ego_in.sla_param.counter = 0;
-  tgt_val->ego_in.sla_param.limit_time_count = 0;
-  tgt_val->ego_in.sla_param.pow_n = 0;
-  tgt_val->ego_in.sla_param.state = 0;
-  tgt_val->ego_in.state = 0;
-  tgt_val->ego_in.img_ang = 0;
-  tgt_val->ego_in.img_dist = 0;
-
-  tgt_val->ego_in.v = 0;
-  tgt_val->ego_in.w = 0;
-
-  tgt_val->motion_mode = 0;
+  ui->motion_check();
+  for (int i = 0; i < RESET_GYRO_LOOP_CNT; i++) {
+    gyro_raw_data_sum += entity_ro->gyro.raw;
+    vTaskDelay(xDelay); //他モジュールの起動待ち
+  }
+  tgt_val->gyro_zero_p_offset = gyro_raw_data_sum / RESET_GYRO_LOOP_CNT;
 }
 
 void MainTask::keep_pivot() {
@@ -547,6 +512,7 @@ void MainTask::rx_uart_json() {
 }
 void MainTask::task() {
   const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
+  mp->set_userinterface(ui);
   pt->motor_disable();
   check_battery();
   // ui->init();
@@ -576,11 +542,13 @@ void MainTask::task() {
   } else {
     lgc = std::make_shared<MazeSolverBaseLgc>();
     seach_ctrl = std::make_shared<SearchController>();
+    lgc->init(32, 1023);
+    lgc->set_goal_pos(sys.goals);
     seach_ctrl->set_lgc(lgc);
     seach_ctrl->set_motion_plannning(mp);
     ui->hello_exia();
     int mode_num = select_mode();
-    const auto param_set = paramset_list[mode_num];
+    seach_ctrl->exec(paramset_list[mode_num]);
   }
 
   // echo_sensing_result_with_json();

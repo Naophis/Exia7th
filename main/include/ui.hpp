@@ -20,8 +20,8 @@ public:
 
   void motion_check();
   void set_sensing_entity(std::shared_ptr<sensing_result_entity_t> &_entity);
-  void set_tgt_entity(std::shared_ptr<tgt_entity_t> &_tgt);
   void set_ego_entity(std::shared_ptr<ego_entity_t> &_ego);
+  void set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val);
 
   void LED_on(int byte);
   void LED_off(int byte);
@@ -45,8 +45,8 @@ public:
 
 private:
   std::shared_ptr<sensing_result_entity_t> entity_ro;
-  std::shared_ptr<tgt_entity_t> tgt;
   std::shared_ptr<ego_entity_t> ego;
+  std::shared_ptr<motion_tgt_val_t> tgt_val;
 
   void LED_on_off(gpio_num_t gpio_num, int on_off);
 };

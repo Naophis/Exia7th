@@ -18,9 +18,6 @@ void LoggingTask::set_ego_param_entity(std::shared_ptr<ego_param_t> &_param) {
 void LoggingTask::set_ego_entity(std::shared_ptr<ego_entity_t> &_ego) {
   ego = _ego;
 }
-void LoggingTask::set_tgt_entity(std::shared_ptr<tgt_entity_t> &_tgt) {
-  tgt = _tgt;
-}
 void LoggingTask::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
   tgt_val = _tgt_val;
 }

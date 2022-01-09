@@ -51,9 +51,6 @@ void PlanningTask::set_ego_param_entity(
 void PlanningTask::set_ego_entity(std::shared_ptr<ego_entity_t> &_ego) {
   ego = _ego;
 }
-void PlanningTask::set_tgt_entity(std::shared_ptr<tgt_entity_t> &_tgt) {
-  tgt = _tgt;
-}
 void PlanningTask::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
   tgt_val = _tgt_val;
 }
@@ -72,14 +69,14 @@ void PlanningTask::inactive_logging() {
 void PlanningTask::buzzer(ledc_channel_config_t &buzzer_ch,
                           ledc_timer_config_t &buzzer_timer) {
   int duty = 0;
-  if (buzzer_timestamp != tgt->buzzer.timstamp) {
+  if (buzzer_timestamp != tgt_val->buzzer.timstamp) {
     buzzer_time_cnt = 0;
-    buzzer_timestamp = tgt->buzzer.timstamp;
-    buzzer_timer.freq_hz = tgt->buzzer.hz;
+    buzzer_timestamp = tgt_val->buzzer.timstamp;
+    buzzer_timer.freq_hz = tgt_val->buzzer.hz;
     ledc_channel_config(&buzzer_ch);
     ledc_timer_config(&buzzer_timer);
   }
-  if (buzzer_time_cnt < tgt->buzzer.time) {
+  if (buzzer_time_cnt < tgt_val->buzzer.time) {
     duty = 50;
     buzzer_time_cnt++;
   }
@@ -173,7 +170,7 @@ void PlanningTask::update_ego_motion() {
 
   tgt_val->ego_in.dist += ego->v_c * dt;
   ego->w_raw = param_ro->gyro_param.gyro_w_gain_right *
-               (entity_ro->gyro.raw - tgt->gyro_zero_p_offset);
+               (entity_ro->gyro.raw - tgt_val->gyro_zero_p_offset);
 
   ego->w_lp = ego->w_lp * (1 - param_ro->gyro_param.lp_delay) +
               ego->w_raw * param_ro->gyro_param.lp_delay;

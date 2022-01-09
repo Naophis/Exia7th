@@ -3,11 +3,23 @@
 void MotionPlanning::set_ego_entity(std::shared_ptr<ego_entity_t> &_ego) {
   ego = _ego;
 }
-void MotionPlanning::set_tgt_entity(std::shared_ptr<tgt_entity_t> &_tgt) {
-  tgt = _tgt;
-}
+
 void MotionPlanning::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
   tgt_val = _tgt_val;
+}
+
+void MotionPlanning::set_ego_param_entity(
+    std::shared_ptr<ego_param_t> &_param) {
+  param = _param;
+}
+
+void MotionPlanning::set_sensing_entity(
+    std::shared_ptr<sensing_result_entity_t> &_entity) {
+  entity_ro = _entity;
+}
+
+void MotionPlanning::set_userinterface(std::shared_ptr<UserInterface> &_ui) {
+  ui = _ui;
 }
 
 MotionResult MotionPlanning::go_straight(param_straight_t &p) {
@@ -27,7 +39,7 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p) {
   tgt_val->ego_in.ang = 0;
   tgt_val->ego_in.dist = 0;
   tgt_val->ego_in.state = 0;
-  
+
   tgt_val->motion_mode = (int32_t)RUN_MODE2::ST_RUN;
   tgt_val->motion_type = MotionType::STRAIGHT;
 
@@ -218,4 +230,54 @@ void MotionPlanning::normal_slalom(param_normal_slalom_t &p,
     //   }
     // }
   }
+}
+
+void MotionPlanning::reset_tgt_data() {
+  tgt_val->tgt_in.v_max = 0;
+  tgt_val->tgt_in.end_v = 0;
+  tgt_val->tgt_in.accl = 0;
+  tgt_val->tgt_in.decel = 0;
+  tgt_val->tgt_in.w_max = 0;
+  tgt_val->tgt_in.end_w = 0;
+  tgt_val->tgt_in.alpha = 0;
+  tgt_val->tgt_in.tgt_dist = 0;
+  tgt_val->tgt_in.tgt_angle = 0;
+
+  tgt_val->motion_mode = 0;
+
+  tgt_val->tgt_in.accl_param.limit = 2500;
+  tgt_val->tgt_in.accl_param.n = 4;
+}
+
+void MotionPlanning::reset_ego_data() {
+  tgt_val->ego_in.accl = 0;
+  tgt_val->ego_in.alpha = 0;
+  tgt_val->ego_in.ang = 0;
+  tgt_val->ego_in.dist = 0;
+  tgt_val->ego_in.pivot_state = 0;
+  tgt_val->ego_in.sla_param.base_alpha = 0;
+  tgt_val->ego_in.sla_param.base_time = 0;
+  tgt_val->ego_in.sla_param.counter = 0;
+  tgt_val->ego_in.sla_param.limit_time_count = 0;
+  tgt_val->ego_in.sla_param.pow_n = 0;
+  tgt_val->ego_in.sla_param.state = 0;
+  tgt_val->ego_in.state = 0;
+  tgt_val->ego_in.img_ang = 0;
+  tgt_val->ego_in.img_dist = 0;
+
+  tgt_val->ego_in.v = 0;
+  tgt_val->ego_in.w = 0;
+
+  tgt_val->motion_mode = 0;
+}
+
+void MotionPlanning::reset_gyro_ref() {
+  const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
+  float gyro_raw_data_sum = 0;
+
+  for (int i = 0; i < RESET_GYRO_LOOP_CNT; i++) {
+    gyro_raw_data_sum += entity_ro->gyro.raw;
+    vTaskDelay(xDelay); //他モジュールの起動待ち
+  }
+  tgt_val->gyro_zero_p_offset = gyro_raw_data_sum / RESET_GYRO_LOOP_CNT;
 }

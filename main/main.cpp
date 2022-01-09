@@ -99,7 +99,6 @@ extern "C" void app_main() {
   std::shared_ptr<sensing_result_entity_t> sensing_entity =
       std::make_shared<sensing_result_entity_t>();
   std::shared_ptr<ego_entity_t> ego = std::make_shared<ego_entity_t>();
-  std::shared_ptr<tgt_entity_t> tgt = std::make_shared<tgt_entity_t>();
   std::shared_ptr<motion_tgt_val_t> tgt_val =
       std::make_shared<motion_tgt_val_t>();
 
@@ -144,7 +143,6 @@ extern "C" void app_main() {
   pt->set_sensing_entity(sensing_entity);
   pt->set_ego_param_entity(param);
   pt->set_ego_entity(ego);
-  pt->set_tgt_entity(tgt);
   pt->set_tgt_val(tgt_val);
   pt->create_task(0);
 
@@ -152,7 +150,6 @@ extern "C" void app_main() {
   lt->set_sensing_entity(sensing_entity);
   lt->set_ego_param_entity(param);
   lt->set_ego_entity(ego);
-  lt->set_tgt_entity(tgt);
   lt->set_tgt_val(tgt_val);
   lt->create_task(1);
 
@@ -160,7 +157,6 @@ extern "C" void app_main() {
   mt.set_sensing_entity(sensing_entity);
   mt.set_ego_param_entity(param);
   mt.set_ego_entity(ego);
-  mt.set_tgt_entity(tgt);
   mt.set_tgt_val(tgt_val);
   mt.set_planning_task(pt);
   mt.set_logging_task(lt);

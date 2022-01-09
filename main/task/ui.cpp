@@ -4,11 +4,13 @@ void UserInterface::set_sensing_entity(
     std::shared_ptr<sensing_result_entity_t> &_entity_ro) {
   entity_ro = _entity_ro;
 }
+
 void UserInterface::set_ego_entity(std::shared_ptr<ego_entity_t> &_ego) {
   ego = _ego;
 }
-void UserInterface::set_tgt_entity(std::shared_ptr<tgt_entity_t> &_tgt) {
-  tgt = _tgt;
+
+void UserInterface::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
+  tgt_val = _tgt_val;
 }
 
 bool UserInterface::button_state() { return !gpio_get_level(SW1); }
@@ -36,10 +38,10 @@ int UserInterface::encoder_operation() {
   return 0;
 }
 void UserInterface::music_async(MUSIC m, int time) {
-  tgt->buzzer.hz = (int)m;
-  tgt->buzzer.time = time;
-  int buzzer_timestamp = tgt->buzzer.timstamp;
-  tgt->buzzer.timstamp = ++buzzer_timestamp;
+  tgt_val->buzzer.hz = (int)m;
+  tgt_val->buzzer.time = time;
+  int buzzer_timestamp = tgt_val->buzzer.timstamp;
+  tgt_val->buzzer.timstamp = ++buzzer_timestamp;
 }
 void UserInterface::music_sync(MUSIC m, int time) {
   music_async(m, time);
@@ -59,7 +61,7 @@ void UserInterface::motion_check() {
       LED_off_all();
       for (int i = 0; i < 2; i++) {
         music_sync(MUSIC::C6_, 100);
-        vTaskDelay(tgt->buzzer.time / portTICK_PERIOD_MS);
+        vTaskDelay(tgt_val->buzzer.time / portTICK_PERIOD_MS);
       }
       break;
     }
