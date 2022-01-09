@@ -167,6 +167,7 @@ typedef struct {
 
   rpm_t rpm;
   duty_t duty;
+  char motion_type = 0;
 } ego_entity_t;
 
 typedef struct {
@@ -249,14 +250,6 @@ typedef struct {
   int error;
 } fail_safe_state_t;
 
-typedef struct {
-  t_tgt tgt_in;
-  t_ego ego_in;
-  int32_t motion_mode;
-  planning_req_t pl_req;
-  fail_safe_state_t fss;
-} motion_tgt_val_t;
-
 enum class RUN_MODE2 : int {
   NONE_MODE = 0,
   KEEP = 0,
@@ -265,6 +258,24 @@ enum class RUN_MODE2 : int {
   ST_RUN = 3,
   SLALOM_RUN2 = 4,
 };
+enum class MotionType : char {
+  NONE = 0,
+  STRAIGHT = 1,
+  PIVOT = 2,
+  SLA_FRONT_STR = 3,
+  SLALOM = 4,
+  SLA_BACK_STR = 5,
+  WALL_OFF = 6,
+};
+
+typedef struct {
+  t_tgt tgt_in;
+  t_ego ego_in;
+  int32_t motion_mode;
+  MotionType motion_type;
+  planning_req_t pl_req;
+  fail_safe_state_t fss;
+} motion_tgt_val_t;
 
 typedef struct {
   float v_max;
@@ -272,6 +283,7 @@ typedef struct {
   float accl;
   float decel;
   float dist;
+  MotionType motion_type;
 } param_straight_t;
 
 typedef struct {
@@ -398,6 +410,8 @@ typedef struct {
   float right90_lp;
   float battery_lp;
 
+  char motion_type;
+
 } log_data_t;
 
 #define LOG_SIZE 2000
@@ -413,7 +427,7 @@ static const std::string slalom_log_file("/spiflash/sla.log");
 static const std::string format1("%d,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
 static const std::string format2("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
 static const std::string
-    format3("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f\n");
+    format3("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%d\n");
 
 typedef struct {
   int invalid_duty_r_cnt;

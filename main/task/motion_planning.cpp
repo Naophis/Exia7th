@@ -17,8 +17,6 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p) {
   tgt_val->tgt_in.decel = p.decel;
   tgt_val->tgt_in.tgt_dist = p.dist;
 
-  tgt_val->motion_mode = (int32_t)RUN_MODE2::ST_RUN;
-
   tgt_val->tgt_in.w_max = 0;
   tgt_val->tgt_in.end_w = 0;
   tgt_val->tgt_in.alpha = 0;
@@ -29,6 +27,13 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p) {
   tgt_val->ego_in.ang = 0;
   tgt_val->ego_in.dist = 0;
   tgt_val->ego_in.state = 0;
+  
+  tgt_val->motion_mode = (int32_t)RUN_MODE2::ST_RUN;
+  tgt_val->motion_type = MotionType::STRAIGHT;
+
+  if (p.motion_type != MotionType::NONE) {
+    tgt_val->motion_type = p.motion_type;
+  }
 
   while (1) {
     if (tgt_val->ego_in.dist > p.dist) {
@@ -55,6 +60,7 @@ MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
   }
 
   tgt_val->motion_mode = (int32_t)RUN_MODE2::PIVOT_TURN;
+  tgt_val->motion_type = MotionType::PIVOT;
 
   tgt_val->tgt_in.v_max = 0;
   tgt_val->tgt_in.end_v = 0;
@@ -91,10 +97,12 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   ps_front.accl = next_motion.accl;
   ps_front.decel = next_motion.decel;
   ps_front.dist = (td == TurnDirection::Right) ? sp.front.right : sp.front.left;
+  ps_front.motion_type = MotionType::SLA_FRONT_STR;
   auto res_f = go_straight(ps_front);
   if (res_f != MotionResult::NONE) {
     return MotionResult::ERROR;
   }
+
   tgt_val->tgt_in.accl = next_motion.accl;
   tgt_val->tgt_in.alpha = 0;
   tgt_val->tgt_in.decel = next_motion.decel;
@@ -119,6 +127,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   tgt_val->ego_in.img_dist = 0;
 
   tgt_val->motion_mode = (int32_t)RUN_MODE2::SLAROM_RUN;
+  ps_front.motion_type = MotionType::SLALOM;
 
   while (1) {
     if (tgt_val->ego_in.sla_param.counter >=
@@ -146,7 +155,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   ps_back.accl = next_motion.accl;
   ps_back.decel = next_motion.decel;
   ps_back.dist = (td == TurnDirection::Right) ? sp.back.right : sp.back.left;
-
+  ps_back.motion_type = MotionType::SLA_BACK_STR;
   auto res_b = go_straight(ps_back);
   if (res_b != MotionResult::NONE) {
     return MotionResult::ERROR;

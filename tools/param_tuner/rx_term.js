@@ -50,30 +50,38 @@ let ready = function () {
     var s = ("00" + dt.getSeconds()).slice(-2);
     return `${y}${m}${d}_${h}${M}_${s}.csv`;
   }
-  let dump_to_csv = false;
-  let file_name = "";
+  let obj = {
+    dump_to_csv: false,
+    file_name: getNowYMD(),
+    record: "",
+  };
 
   parser.on("data", function (data) {
     console.log(data);
 
     if (data.match(/^end___/)) {
-      dump_to_csv = false;
-      console.log(`${__dirname}/logs/${file_name}`);
+      obj.dump_to_csv = false;
+
+      console.log(`${__dirname}/logs/${obj.file_name}`);
+
+      fs.writeFileSync(`${__dirname}/logs/${obj.file_name}`, `${obj.record}`, {
+        flag: "w+",
+      });
+
       fs.copyFileSync(
-        `${__dirname}/logs/${file_name}`,
+        `${__dirname}/logs/${obj.file_name}`,
         `${__dirname}/logs/latest.csv`
       );
     }
-    if (dump_to_csv) {
-      fs.appendFileSync(`${__dirname}/logs/${file_name}`, `${data}\n`, {
-        flag: "a",
-      });
+    if (obj.dump_to_csv) {
+      obj.record += `${data}\n`;
     }
 
     if (data.match(/^start___/)) {
-      dump_to_csv = true;
-      file_name = getNowYMD();
-      console.log(file_name);
+      obj.dump_to_csv = true;
+      obj.file_name = getNowYMD();
+      obj.record = "";
+      console.log(obj);
     }
   });
 };

@@ -70,6 +70,9 @@ void LoggingTask::task() {
         ld->battery_lp = ego->battery_lp;
         ld->duty_l = ego->duty.duty_l;
         ld->duty_r = ego->duty.duty_r;
+
+        ld->motion_type = static_cast<char>(tgt_val->motion_type);
+
         log_vec.push_back(ld);
         idx_slalom_log++;
       }
@@ -100,7 +103,8 @@ void LoggingTask::save(std::string file_name) {
             ld->ang);
     fprintf(f_slalom_log, f3, //"%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f\n", //
             ld->left90_lp, ld->left45_lp, ld->front_lp, ld->right45_lp,
-            ld->right90_lp, ld->battery_lp, ld->duty_l, ld->duty_r);
+            ld->right90_lp, ld->battery_lp, ld->duty_l, ld->duty_r,
+            ld->motion_type);
   }
 
   if (f_slalom_log != NULL) {
@@ -120,7 +124,7 @@ void LoggingTask::dump_log(std::string file_name) {
   vTaskDelay(xDelay2);
   printf("index,ideal_v,v_c,v_l,v_r,accl,ideal_w,w_lp,alpha,ideal_dist,dist,"
          "ideal_ang,ang,left90,left45,front,right45,right90,battery,duty_l,"
-         "duty_r\n");
+         "duty_r,motion_state\n");
   while (fgets(line_buf, sizeof(line_buf), f) != NULL)
     printf("%s\n", line_buf);
   printf("end___\n"); // csvファイル追記終了トリガー

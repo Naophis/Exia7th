@@ -563,6 +563,12 @@ void MainTask::req_error_reset() {
 
 void MainTask::test_run() {
   reset_gyro_ref();
+
+  if (sys.test.suction_active) {
+    pt->suction_enable(sys.test.suction_duty);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+  }
+
   reset_tgt_data();
   reset_ego_data();
   pt->motor_enable();
@@ -580,8 +586,9 @@ void MainTask::test_run() {
   mp.go_straight(ps);
   reset_tgt_data();
   reset_ego_data();
-  vTaskDelay(250 / portTICK_RATE_MS);
+  vTaskDelay(10 / portTICK_RATE_MS);
   pt->motor_disable();
+  pt->suction_disable();
 
   lt->stop_slalom_log();
   reset_tgt_data();
@@ -621,7 +628,9 @@ void MainTask::test_turn() {
   pr.RorL = rorl;
 
   mp.pivot_turn(pr);
+  vTaskDelay(10 / portTICK_RATE_MS);
   pt->motor_disable();
+  pt->suction_disable();
 
   lt->stop_slalom_log();
   reset_tgt_data();
@@ -671,7 +680,7 @@ void MainTask::test_sla() {
 
   req_error_reset();
 
-  // pt->active_logging();
+  lt->start_slalom_log();
 
   ps.v_max = sla_p.v;
   ps.v_end = sla_p.v;
@@ -679,13 +688,6 @@ void MainTask::test_sla() {
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
   mp.go_straight(ps);
-
-  // pns.ang = sla_p.ang * PI / 180;
-  // pns.radius = sla_p.rad;
-  // pns.RorL = rorl;
-  // pns.v_end = sla_p.v;
-  // pns.v_max = sla_p.v;
-  // mp.normal_slalom(pns, ps);
 
   next_motionr_t nm;
   nm.v_max = sla_p.v;
@@ -703,17 +705,28 @@ void MainTask::test_sla() {
   ps.decel = sys.test.decel;
   mp.go_straight(ps);
 
-  pt->motor_disable();
   reset_tgt_data();
   reset_ego_data();
-
+  vTaskDelay(10 / portTICK_RATE_MS);
+  pt->motor_disable();
   pt->suction_disable();
-  pt->inactive_logging();
-  vTaskDelay(500 / portTICK_PERIOD_MS);
 
+  reset_tgt_data();
+  reset_ego_data();
+  lt->save(slalom_log_file);
   ui.coin(120);
 
-  dump_log();
+  while (1) {
+    if (ui.button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
+  lt->dump_log(slalom_log_file);
+  while (1) {
+    if (ui.button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
 }
 
 void MainTask::dump_log() {
