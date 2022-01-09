@@ -1,6 +1,9 @@
 #include "include/main_task.hpp"
 
-MainTask::MainTask() {}
+MainTask::MainTask() {
+  ui = std::make_shared<UserInterface>();
+  mp = std::make_shared<MotionPlanning>();
+}
 
 MainTask::~MainTask() {}
 
@@ -14,24 +17,24 @@ void MainTask::task_entry_point(void *task_instance) {
 void MainTask::set_sensing_entity(
     std::shared_ptr<sensing_result_entity_t> &_entity_ro) {
   entity_ro = _entity_ro;
-  ui.set_sensing_entity(_entity_ro);
+  ui->set_sensing_entity(_entity_ro);
 }
 void MainTask::set_ego_param_entity(std::shared_ptr<ego_param_t> &_param) {
   param = _param;
 }
 void MainTask::set_ego_entity(std::shared_ptr<ego_entity_t> &_ego) {
   ego = _ego;
-  ui.set_ego_entity(_ego);
-  mp.set_ego_entity(_ego);
+  ui->set_ego_entity(_ego);
+  mp->set_ego_entity(_ego);
 }
 void MainTask::set_tgt_entity(std::shared_ptr<tgt_entity_t> &_tgt) {
   tgt = _tgt;
-  ui.set_tgt_entity(_tgt);
-  mp.set_tgt_entity(_tgt);
+  ui->set_tgt_entity(_tgt);
+  mp->set_tgt_entity(_tgt);
 }
 void MainTask::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
   tgt_val = _tgt_val;
-  mp.set_tgt_val(_tgt_val);
+  mp->set_tgt_val(_tgt_val);
 }
 void MainTask::set_planning_task(std::shared_ptr<PlanningTask> &_pt) {
   pt = _pt;
@@ -46,7 +49,7 @@ void MainTask::check_battery() {
   if (ego->battery_raw > LOW_BATTERY_TH)
     return;
   while (1) {
-    ui.music_sync(MUSIC::G5_, 250);
+    ui->music_sync(MUSIC::G5_, 250);
     vTaskDelay(tgt->buzzer.time / portTICK_PERIOD_MS);
   }
 }
@@ -54,7 +57,7 @@ void MainTask::reset_gyro_ref() {
   const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
   float gyro_raw_data_sum = 0;
 
-  ui.motion_check();
+  ui->motion_check();
   for (int i = 0; i < RESET_GYRO_LOOP_CNT; i++) {
     gyro_raw_data_sum += entity_ro->gyro.raw;
     vTaskDelay(xDelay); //他モジュールの起動待ち
@@ -85,7 +88,7 @@ void MainTask::dump1() {
            tgt_val->ego_in.ang, tgt_val->ego_in.ang * 180 / PI);
     printf("duty: %0.3f, %0.3f\n", ego->duty.duty_l, ego->duty.duty_r);
 
-    if (ui.button_state()) {
+    if (ui->button_state()) {
       tgt_val->ego_in.ang = tgt_val->ego_in.dist = 0;
     }
 
@@ -99,7 +102,7 @@ int MainTask::select_mode() {
   LED_bit lbit;
   lbit.byte = 0;
   while (1) {
-    int res = ui.encoder_operation();
+    int res = ui->encoder_operation();
     mode_num += res;
     if (mode_num == -1) {
       mode_num = 14;
@@ -107,9 +110,9 @@ int MainTask::select_mode() {
       mode_num = (int)(MODE::SEARCH);
     }
     lbit.byte = mode_num + 1;
-    ui.LED_bit(lbit.b0, lbit.b1, lbit.b2, lbit.b3, lbit.b4);
-    if (ui.button_state_hold()) {
-      ui.coin(100);
+    ui->LED_bit(lbit.b0, lbit.b1, lbit.b2, lbit.b3, lbit.b4);
+    if (ui->button_state_hold()) {
+      ui->coin(100);
       break;
     }
     vTaskDelay(xDelay);
@@ -161,7 +164,7 @@ void MainTask::keep_pivot() {
   reset_tgt_data();
   reset_ego_data();
 
-  ui.motion_check();
+  ui->motion_check();
   pt->motor_enable();
 
   req_error_reset();
@@ -169,7 +172,7 @@ void MainTask::keep_pivot() {
   tgt_val->motion_mode = (int32_t)RUN_MODE2::KEEP;
 
   while (1) {
-    if (ui.button_state_hold())
+    if (ui->button_state_hold())
       break;
     vTaskDelay(xDelay);
   }
@@ -194,9 +197,9 @@ void MainTask::echo_sensing_result_with_json() {
     // entity_to_json(json_instance);
     // printf("%s\n", json_instance.dump().c_str());
     vTaskDelay(xDelay);
-    bool break_btn = ui.button_state_hold();
+    bool break_btn = ui->button_state_hold();
     if (break_btn) {
-      ui.coin(100);
+      ui->coin(100);
       break;
     }
   }
@@ -228,7 +231,7 @@ void MainTask::save_json_data(std::string &str) {
   fprintf(f, res[1].c_str());
   fclose(f);
   // printf("%s\n", str.c_str());
-  ui.coin(25);
+  ui->coin(25);
 }
 
 void MainTask::load_hw_param() {
@@ -486,7 +489,7 @@ void MainTask::rx_uart_json() {
   load_param();
 
   uint8_t *data = (uint8_t *)malloc(BUF_SIZE);
-  ui.coin(40);
+  ui->coin(40);
   while (1) {
     int len = uart_read_bytes(UART_NUM_0, data, (BUF_SIZE - 1),
                               250 / portTICK_RATE_MS);
@@ -496,22 +499,22 @@ void MainTask::rx_uart_json() {
       std::string str = std::string((const char *)data);
       save_json_data(str);
     }
-    if (ui.button_state_hold()) {
+    if (ui->button_state_hold()) {
       break;
     }
   }
   free(data);
 
-  ui.coin(100);
+  ui->coin(100);
   vTaskDelay(100 / portTICK_PERIOD_MS);
 }
 void MainTask::task() {
   const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
   pt->motor_disable();
   check_battery();
-  // ui.init();
+  // ui->init();
 
-  ui.coin(80);
+  ui->coin(80);
   rx_uart_json(); // uartでファイルを受け取る
   reset_tgt_data();
   reset_ego_data();
@@ -528,13 +531,13 @@ void MainTask::task() {
     } else if (sys.user_mode == 16) {
       lt->dump_log(slalom_log_file);
       while (1) {
-        if (ui.button_state_hold())
+        if (ui->button_state_hold())
           break;
         vTaskDelay(10 / portTICK_RATE_MS);
       }
     }
   } else {
-    ui.hello_exia();
+    ui->hello_exia();
     // int mode = select_mode();
   }
 
@@ -583,7 +586,7 @@ void MainTask::test_run() {
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
 
-  mp.go_straight(ps);
+  mp->go_straight(ps);
   reset_tgt_data();
   reset_ego_data();
   vTaskDelay(10 / portTICK_RATE_MS);
@@ -594,23 +597,23 @@ void MainTask::test_run() {
   reset_tgt_data();
   reset_ego_data();
   lt->save(slalom_log_file);
-  ui.coin(120);
+  ui->coin(120);
 
   while (1) {
-    if (ui.button_state_hold())
+    if (ui->button_state_hold())
       break;
     vTaskDelay(10 / portTICK_RATE_MS);
   }
   lt->dump_log(slalom_log_file);
   while (1) {
-    if (ui.button_state_hold())
+    if (ui->button_state_hold())
       break;
     vTaskDelay(10 / portTICK_RATE_MS);
   }
 }
 
 void MainTask::test_turn() {
-  TurnDirection rorl = ui.select_direction();
+  TurnDirection rorl = ui->select_direction();
 
   reset_gyro_ref();
   reset_tgt_data();
@@ -627,7 +630,7 @@ void MainTask::test_turn() {
   pr.ang = sys.test.ang * PI / 180;
   pr.RorL = rorl;
 
-  mp.pivot_turn(pr);
+  mp->pivot_turn(pr);
   vTaskDelay(10 / portTICK_RATE_MS);
   pt->motor_disable();
   pt->suction_disable();
@@ -636,16 +639,16 @@ void MainTask::test_turn() {
   reset_tgt_data();
   reset_ego_data();
   lt->save(slalom_log_file);
-  ui.coin(120);
+  ui->coin(120);
 
   while (1) {
-    if (ui.button_state_hold())
+    if (ui->button_state_hold())
       break;
     vTaskDelay(10 / portTICK_RATE_MS);
   }
   lt->dump_log(slalom_log_file);
   while (1) {
-    if (ui.button_state_hold())
+    if (ui->button_state_hold())
       break;
     vTaskDelay(10 / portTICK_RATE_MS);
   }
@@ -656,7 +659,7 @@ void MainTask::test_sla() {
   int file_idx = sys.test.file_idx;
 
   if (file_idx >= tpp.file_list_size) {
-    ui.error();
+    ui->error();
     return;
   }
 
@@ -665,7 +668,7 @@ void MainTask::test_sla() {
 
   printf("%d %f\n", sla_p.pow_n, sla_p.time);
 
-  TurnDirection rorl = ui.select_direction();
+  TurnDirection rorl = ui->select_direction();
 
   reset_gyro_ref();
 
@@ -687,7 +690,7 @@ void MainTask::test_sla() {
   ps.dist = sys.test.sla_dist;
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
-  mp.go_straight(ps);
+  mp->go_straight(ps);
 
   next_motionr_t nm;
   nm.v_max = sla_p.v;
@@ -696,14 +699,14 @@ void MainTask::test_sla() {
   nm.decel = sys.test.decel;
   nm.is_turn = false;
 
-  mp.slalom(sla_p, rorl, nm);
+  mp->slalom(sla_p, rorl, nm);
 
   ps.v_max = sla_p.v;
   ps.v_end = sys.test.end_v;
   ps.dist = 90;
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
-  mp.go_straight(ps);
+  mp->go_straight(ps);
 
   reset_tgt_data();
   reset_ego_data();
@@ -714,16 +717,16 @@ void MainTask::test_sla() {
   reset_tgt_data();
   reset_ego_data();
   lt->save(slalom_log_file);
-  ui.coin(120);
+  ui->coin(120);
 
   while (1) {
-    if (ui.button_state_hold())
+    if (ui->button_state_hold())
       break;
     vTaskDelay(10 / portTICK_RATE_MS);
   }
   lt->dump_log(slalom_log_file);
   while (1) {
-    if (ui.button_state_hold())
+    if (ui->button_state_hold())
       break;
     vTaskDelay(10 / portTICK_RATE_MS);
   }
@@ -732,7 +735,7 @@ void MainTask::test_sla() {
 void MainTask::dump_log() {
 
   while (1) {
-    if (ui.button_state_hold())
+    if (ui->button_state_hold())
       break;
     vTaskDelay(10 / portTICK_RATE_MS);
   }
@@ -747,7 +750,7 @@ void MainTask::dump_log() {
   fclose(f);
 
   while (1) {
-    if (ui.button_state_hold())
+    if (ui->button_state_hold())
       break;
     vTaskDelay(10 / portTICK_RATE_MS);
   }

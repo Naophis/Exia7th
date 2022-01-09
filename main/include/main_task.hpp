@@ -60,8 +60,9 @@ public:
 
 private:
   xTaskHandle handle = 0;
-  UserInterface ui;
-  MotionPlanning mp;
+
+  std::shared_ptr<UserInterface> ui;
+  std::shared_ptr<MotionPlanning> mp;
 
   std::shared_ptr<PlanningTask> pt;
   std::shared_ptr<LoggingTask> lt;
