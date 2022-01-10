@@ -22,7 +22,7 @@ public:
   static void IRAM_ATTR isr_entry_point(void *task_instance);
   static void IRAM_ATTR timerCallback(void *arg);
 
-  std::shared_ptr<sensing_result_entity_t> entity;
+  std::shared_ptr<sensing_result_entity_t> sensing_result;
   void set_sensing_entity(std::shared_ptr<sensing_result_entity_t> &_entity);
   virtual void task();
 

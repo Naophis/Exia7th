@@ -27,11 +27,6 @@ void MainTask::set_input_param_entity(std::shared_ptr<input_param_t> &_param) {
   param = _param;
   mp->set_input_param_entity(_param);
 }
-void MainTask::set_ego_entity(std::shared_ptr<ego_entity_t> &_ego) {
-  ego = _ego;
-  ui->set_ego_entity(_ego);
-  mp->set_ego_entity(_ego);
-}
 void MainTask::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
   tgt_val = _tgt_val;
   ui->set_tgt_val(_tgt_val);
@@ -47,8 +42,8 @@ void MainTask::set_logging_task(std::shared_ptr<LoggingTask> &_lt) {
 void MainTask::check_battery() {
   vTaskDelay(1500 / portTICK_PERIOD_MS); //他モジュールの起動待ち
 
-  printf("battery= %f\n", ego->battery_raw);
-  if (ego->battery_raw > LOW_BATTERY_TH)
+  printf("battery= %f\n", sensing_result->ego.battery_raw);
+  if (sensing_result->ego.battery_raw > LOW_BATTERY_TH)
     return;
   while (1) {
     ui->music_sync(MUSIC::G5_, 250);
@@ -65,7 +60,7 @@ void MainTask::dump1() {
 
     printf("gyro: %d\t(%0.3f)\n", sensing_result->gyro.raw,
            tgt_val->gyro_zero_p_offset);
-    printf("battery: %0.3f\n", ego->battery_lp);
+    printf("battery: %0.3f\n", sensing_result->ego.battery_lp);
     printf("encoder: %d, %d\n", sensing_result->encoder.left,
            sensing_result->encoder.right);
     printf("sensor: %d, %d, %d, %d, %d\n", sensing_result->led_sen.left90.raw,
@@ -74,13 +69,16 @@ void MainTask::dump1() {
            sensing_result->led_sen.right45.raw,
            sensing_result->led_sen.right90.raw);
 
-    printf("ego_v: %0.3f, %0.3f, %0.3f, %0.3f\n", ego->v_l, ego->v_c, ego->v_r,
+    printf("ego_v: %0.3f, %0.3f, %0.3f, %0.3f\n", sensing_result->ego.v_l,
+           sensing_result->ego.v_c, sensing_result->ego.v_r,
            tgt_val->ego_in.dist);
     printf("calc_v: %0.3f, %0.3f\n", tgt_val->ego_in.v, tgt_val->ego_in.w);
 
-    printf("ego_w: %0.3f, %0.3f, %0.3f, %0.3f deg\n", ego->w_raw, ego->w_lp,
-           tgt_val->ego_in.ang, tgt_val->ego_in.ang * 180 / PI);
-    printf("duty: %0.3f, %0.3f\n", ego->duty.duty_l, ego->duty.duty_r);
+    printf("ego_w: %0.3f, %0.3f, %0.3f, %0.3f deg\n", sensing_result->ego.w_raw,
+           sensing_result->ego.w_lp, tgt_val->ego_in.ang,
+           tgt_val->ego_in.ang * 180 / PI);
+    printf("duty: %0.3f, %0.3f\n", sensing_result->ego.duty.duty_l,
+           sensing_result->ego.duty.duty_r);
 
     if (ui->button_state()) {
       tgt_val->ego_in.ang = tgt_val->ego_in.dist = 0;
@@ -128,24 +126,26 @@ void MainTask::keep_pivot() {
 
   req_error_reset();
 
-  tgt_val->motion_mode = (int32_t)RUN_MODE2::KEEP;
-
-  while (1) {
-    if (ui->button_state_hold())
-      break;
-    vTaskDelay(xDelay);
-  }
+  mp->keep();
+  pt->motor_disable();
 }
 // void MainTask::entity_to_json(nlohmann::json &j) {
 //   // j = nlohmann::json{
 //   //     {"led_sen",
-//   //      {{"right90", {{"raw", ego->right90_raw}, {"lp", ego->right90_lp}}},
-//   //       {"right45", {{"raw", ego->right45_raw}, {"lp", ego->right45_lp}}},
-//   //       {"front", {{"raw", ego->front_raw}, {"lp", ego->front_lp}}},
-//   //       {"left45", {{"raw", ego->left45_raw}, {"lp", ego->left45_lp}}},
-//   //       {"left90", {{"raw", ego->left90_raw}, {"lp", ego->left90_lp}}}}},
-//   //     {"gyro", {{"raw", ego->w_raw}, {"lp", ego->w_lp}}},
-//   //     {"battery", {{"raw", ego->battery_raw}, {"lp", ego->battery_lp}}},
+//   //      {{"right90", {{"raw", sensing_result->ego.right90_raw}, {"lp",
+//   sensing_result->ego.right90_lp}}},
+//   //       {"right45", {{"raw", sensing_result->ego.right45_raw}, {"lp",
+//   sensing_result->ego.right45_lp}}},
+//   //       {"front", {{"raw", sensing_result->ego.front_raw}, {"lp",
+//   sensing_result->ego.front_lp}}},
+//   //       {"left45", {{"raw", sensing_result->ego.left45_raw}, {"lp",
+//   sensing_result->ego.left45_lp}}},
+//   //       {"left90", {{"raw", sensing_result->ego.left90_raw}, {"lp",
+//   sensing_result->ego.left90_lp}}}}},
+//   //     {"gyro", {{"raw", sensing_result->ego.w_raw}, {"lp",
+//   sensing_result->ego.w_lp}}},
+//   //     {"battery", {{"raw", sensing_result->ego.battery_raw}, {"lp",
+//   sensing_result->ego.battery_lp}}},
 //   //     {"ego",
 //   //      {{"angle", tgt_val->ego_in.ang}, {"dist", tgt_val->ego_in.dist}}}};
 // }
@@ -523,6 +523,8 @@ void MainTask::task() {
       test_run();
     } else if (sys.user_mode == 3) {
       test_turn();
+    } else if (sys.user_mode == 14) {
+      keep_pivot();
     } else if (sys.user_mode == 15) {
       echo_sensing_result_with_json();
     } else if (sys.user_mode == 16) {

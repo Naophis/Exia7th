@@ -21,14 +21,12 @@ public:
   void set_planning_task(std::shared_ptr<PlanningTask> &_pt);
   void set_sensing_entity(std::shared_ptr<sensing_result_entity_t> &_entity);
 
-  void set_param();
-
 private:
   std::shared_ptr<MotionPlanning> mp;
   std::shared_ptr<MazeSolverBaseLgc> lgc;
   std::shared_ptr<PlanningTask> pt;
-
   std::shared_ptr<Adachi> adachi;
+
   std::shared_ptr<ego_t> ego;
   std::shared_ptr<sensing_result_entity_t> sensing_result;
 
@@ -36,6 +34,8 @@ private:
   MotionResult slalom(param_set_t &p_set, const TurnDirection td);
   MotionResult pivot(param_set_t &p_set);
   MotionResult finish(param_set_t &p_set);
+
+  void judge_wall();
 };
 
 #endif

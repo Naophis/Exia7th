@@ -122,6 +122,7 @@ void SearchController::exec(param_set_t &p_set) {
   mp->go_straight(p);
 
   while (1) {
+    // sensing(ego);
     auto next_motion = adachi->exec();
     if (next_motion == Motion::Straight) {
       go_straight_wrapper(p_set);
@@ -147,4 +148,15 @@ void SearchController::exec(param_set_t &p_set) {
 
   pt->motor_disable();
   mp->coin();
+}
+void SearchController::judge_wall() {
+
+  if (ego->dir == Direction::North) {
+
+  } else if (ego->dir == Direction::East) {
+
+  } else if (ego->dir == Direction::West) {
+
+  } else if (ego->dir == Direction::South) {
+  }
 }

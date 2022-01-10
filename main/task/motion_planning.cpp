@@ -1,9 +1,5 @@
 #include "include/motion_planning.hpp"
 
-void MotionPlanning::set_ego_entity(std::shared_ptr<ego_entity_t> &_ego) {
-  ego = _ego;
-}
-
 void MotionPlanning::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
   tgt_val = _tgt_val;
 }
@@ -101,38 +97,22 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
 
   float alphaTemp = ((td == TurnDirection::Right) ? -1 : 1) * (sp.v / sp.rad);
 
-  // tgt_val->ego_in.sla_param.base_alpha = alphaTemp;
-  // tgt_val->ego_in.sla_param.base_time = sp.time;
-  // tgt_val->ego_in.sla_param.limit_time_count = sp.time * 2 / dt;
-  // tgt_val->ego_in.sla_param.pow_n = sp.pow_n;
-  // tgt_val->ego_in.sla_param.counter = 1;
-  // tgt_val->ego_in.sla_param.state = 0;
-
-  // tgt_val->ego_in.state = 0;
-  // tgt_val->ego_in.img_ang = 0;
-  // tgt_val->ego_in.img_dist = 0;
-
-  // tgt_val->motion_mode = (int32_t)RUN_MODE2::SLAROM_RUN;
-  // ps_front.motion_type = MotionType::SLALOM;
-
-  {
-    tgt_val->nmr.v_max = sp.v;
-    tgt_val->nmr.v_end = sp.v;
-    tgt_val->nmr.accl = next_motion.accl;
-    tgt_val->nmr.decel = next_motion.decel;
-    tgt_val->nmr.dist = 180 * 1000;
-    tgt_val->nmr.w_max = 0;
-    tgt_val->nmr.w_end = 0;
-    tgt_val->nmr.alpha = 0;
-    tgt_val->nmr.ang = 0;
-    tgt_val->nmr.sla_alpha = alphaTemp;
-    tgt_val->nmr.sla_time = sp.time;
-    tgt_val->nmr.sla_pow_n = sp.pow_n;
-    tgt_val->nmr.motion_mode = RUN_MODE2::SLAROM_RUN;
-    tgt_val->nmr.motion_type = MotionType::SLALOM;
-    tgt_val->nmr.timstamp++;
-    tgt_val->ego_in.sla_param.counter = 1;
-  }
+  tgt_val->nmr.v_max = sp.v;
+  tgt_val->nmr.v_end = sp.v;
+  tgt_val->nmr.accl = next_motion.accl;
+  tgt_val->nmr.decel = next_motion.decel;
+  tgt_val->nmr.dist = 180 * 1000;
+  tgt_val->nmr.w_max = 0;
+  tgt_val->nmr.w_end = 0;
+  tgt_val->nmr.alpha = 0;
+  tgt_val->nmr.ang = 0;
+  tgt_val->nmr.sla_alpha = alphaTemp;
+  tgt_val->nmr.sla_time = sp.time;
+  tgt_val->nmr.sla_pow_n = sp.pow_n;
+  tgt_val->nmr.motion_mode = RUN_MODE2::SLAROM_RUN;
+  tgt_val->nmr.motion_type = MotionType::SLALOM;
+  tgt_val->nmr.timstamp++;
+  tgt_val->ego_in.sla_param.counter = 1;
 
   while (1) {
     vTaskDelay(1 / portTICK_RATE_MS);
@@ -201,6 +181,7 @@ void MotionPlanning::normal_slalom(param_normal_slalom_t &p,
   tgt_val->ego_in.dist = 0;
 
   while (1) {
+    vTaskDelay(1 / portTICK_RATE_MS);
     if (tgt_val->ego_in.pivot_state == 3) {
       tgt_val->ego_in.w = 0;
       break;
@@ -281,3 +262,29 @@ void MotionPlanning::reset_gyro_ref_with_check() {
 }
 
 void MotionPlanning::coin() { ui->coin(120); }
+
+void MotionPlanning::keep() {
+  tgt_val->nmr.v_max = 0;
+  tgt_val->nmr.v_end = 0;
+  tgt_val->nmr.accl = 0;
+  tgt_val->nmr.decel = 0;
+  tgt_val->nmr.dist = 0;
+  tgt_val->nmr.w_max = 0;
+  tgt_val->nmr.w_end = 0;
+  tgt_val->nmr.alpha = 0;
+  tgt_val->nmr.ang = 0;
+  tgt_val->nmr.sla_alpha = 0;
+  tgt_val->nmr.sla_time = 0;
+  tgt_val->nmr.sla_pow_n = 0;
+  tgt_val->nmr.motion_mode = RUN_MODE2::KEEP;
+  tgt_val->nmr.motion_type = MotionType::NONE;
+  tgt_val->nmr.timstamp++;
+  tgt_val->ego_in.sla_param.counter = 1;
+
+  while (1) {
+    vTaskDelay(1 / portTICK_RATE_MS);
+    if (ui->button_state_hold()) {
+      break;
+    }
+  }
+}

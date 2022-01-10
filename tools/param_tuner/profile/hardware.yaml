@@ -10,11 +10,11 @@ Mass: 0.015
 Lm: 0.00025
 motor_pid:
   p: 0.175
-  i: 0.0175
+  i: 0.04
   d: 0.001
 gyro_pid:
   p: 10.0
-  i: 0.1
+  i: 0.25
   d: 0
 sensor_pid:
   p: 0.1

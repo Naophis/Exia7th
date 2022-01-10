@@ -4,6 +4,7 @@ void LoggingTask::create_task(const BaseType_t xCoreID) {
   xTaskCreatePinnedToCore(task_entry_point, "logging_task", 8192, this, 1,
                           &handle, xCoreID);
 }
+
 void LoggingTask::task_entry_point(void *task_instance) {
   static_cast<LoggingTask *>(task_instance)->task();
 }
@@ -12,12 +13,11 @@ void LoggingTask::set_sensing_entity(
     std::shared_ptr<sensing_result_entity_t> &_entity) {
   sensing_result = _entity;
 }
-void LoggingTask::set_input_param_entity(std::shared_ptr<input_param_t> &_param) {
+void LoggingTask::set_input_param_entity(
+    std::shared_ptr<input_param_t> &_param) {
   param = _param;
 }
-void LoggingTask::set_ego_entity(std::shared_ptr<ego_entity_t> &_ego) {
-  ego = _ego;
-}
+
 void LoggingTask::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
   tgt_val = _tgt_val;
 }
@@ -27,26 +27,27 @@ void LoggingTask::start_slalom_log() {
   idx_slalom_log = 0;
   log_vec.clear();
 }
+
 void LoggingTask::stop_slalom_log() {
   active_slalom_log = false; //
 }
 
 void LoggingTask::task() {
   const TickType_t xDelay_fast = 1 / portTICK_PERIOD_MS;
-  const TickType_t xDelay2 = 100 / portTICK_PERIOD_MS;
+  const TickType_t xDelay2 = 1 / portTICK_PERIOD_MS;
   while (1) {
     logging_active = active_slalom_log;
     if (logging_active) {
       if (active_slalom_log && idx_slalom_log <= LOG_SIZE) {
         auto ld = std::make_shared<log_data_t>();
         ld->img_v = tgt_val->ego_in.v;
-        ld->v_l = ego->v_l;
-        ld->v_c = ego->v_c;
-        ld->v_r = ego->v_r;
+        ld->v_l = sensing_result->ego.v_l;
+        ld->v_c = sensing_result->ego.v_c;
+        ld->v_r = sensing_result->ego.v_r;
         ld->accl = tgt_val->ego_in.accl;
 
         ld->img_w = tgt_val->ego_in.w;
-        ld->w_lp = ego->w_lp;
+        ld->w_lp = sensing_result->ego.w_lp;
         ld->alpha = tgt_val->ego_in.alpha;
 
         ld->img_dist = tgt_val->ego_in.img_dist;
@@ -55,18 +56,18 @@ void LoggingTask::task() {
         ld->img_ang = tgt_val->ego_in.img_ang * 180 / PI;
         ld->ang = tgt_val->ego_in.ang * 180 / PI;
 
-        ld->duty_l = ego->duty.duty_l;
-        ld->duty_r = ego->duty.duty_r;
+        ld->duty_l = sensing_result->ego.duty.duty_l;
+        ld->duty_r = sensing_result->ego.duty.duty_r;
 
-        ld->left90_lp = ego->left90_lp;
-        ld->left45_lp = ego->left45_lp;
-        ld->front_lp = ego->front_lp;
-        ld->right45_lp = ego->right45_lp;
-        ld->right90_lp = ego->right90_lp;
+        ld->left90_lp = sensing_result->ego.left90_lp;
+        ld->left45_lp = sensing_result->ego.left45_lp;
+        ld->front_lp = sensing_result->ego.front_lp;
+        ld->right45_lp = sensing_result->ego.right45_lp;
+        ld->right90_lp = sensing_result->ego.right90_lp;
 
-        ld->battery_lp = ego->battery_lp;
-        ld->duty_l = ego->duty.duty_l;
-        ld->duty_r = ego->duty.duty_r;
+        ld->battery_lp = sensing_result->ego.battery_lp;
+        ld->duty_l = sensing_result->ego.duty.duty_l;
+        ld->duty_r = sensing_result->ego.duty.duty_r;
 
         ld->motion_type = static_cast<char>(tgt_val->motion_type);
 

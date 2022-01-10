@@ -14,7 +14,6 @@ public:
   MotionPlanning() {}
   virtual ~MotionPlanning() {}
 
-  void set_ego_entity(std::shared_ptr<ego_entity_t> &_ego);
   void set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val);
 
   void set_sensing_entity(std::shared_ptr<sensing_result_entity_t> &_entity);
@@ -34,11 +33,11 @@ public:
   void reset_gyro_ref();
   void reset_gyro_ref_with_check();
   void coin();
+  void keep();
 
 private:
   std::shared_ptr<UserInterface> ui;
 
-  std::shared_ptr<ego_entity_t> ego;
   std::shared_ptr<motion_tgt_val_t> tgt_val;
 
   std::shared_ptr<sensing_result_entity_t> sensing_result;

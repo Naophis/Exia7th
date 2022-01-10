@@ -45,22 +45,6 @@ typedef struct {
 } led_sensor_t;
 
 typedef struct {
-  led_sensor_t led_sen;
-  led_sensor_t led_sen_after;
-  led_sensor_t led_sen_before;
-  sensing_data_t gyro;
-  sensing_data_t battery;
-  encoder_data_t encoder_raw;
-  encoder_data_t encoder;
-} sensing_result_entity_t;
-
-typedef struct {
-  float vel = 0;
-  float speed = 0;
-  float accl = 0;
-} xva_t;
-
-typedef struct {
   float right = 0;
   float left = 0;
 } rpm_t;
@@ -95,6 +79,23 @@ typedef struct {
   duty_t duty;
   char motion_type = 0;
 } ego_entity_t;
+
+typedef struct {
+  led_sensor_t led_sen;
+  led_sensor_t led_sen_after;
+  led_sensor_t led_sen_before;
+  sensing_data_t gyro;
+  sensing_data_t battery;
+  encoder_data_t encoder_raw;
+  encoder_data_t encoder;
+  ego_entity_t ego;
+} sensing_result_entity_t;
+
+typedef struct {
+  float vel = 0;
+  float speed = 0;
+  float accl = 0;
+} xva_t;
 
 typedef struct {
   float p = 0;

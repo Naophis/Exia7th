@@ -5,10 +5,6 @@ void UserInterface::set_sensing_entity(
   sensing_result = _sensing_result;
 }
 
-void UserInterface::set_ego_entity(std::shared_ptr<ego_entity_t> &_ego) {
-  ego = _ego;
-}
-
 void UserInterface::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
   tgt_val = _tgt_val;
 }
@@ -26,7 +22,7 @@ bool UserInterface::button_state_hold() {
 }
 
 int UserInterface::encoder_operation() {
-  float v_r = ego->v_r;
+  float v_r = sensing_result->ego.v_r;
   if (v_r > ENC_OPE_V_R_TH) {
     music_sync(MUSIC::G6_, 75);
     return 1;
@@ -208,12 +204,12 @@ TurnDirection UserInterface::select_direction() {
   TurnDirection td = TurnDirection::None;
   bool b = true;
   while (1) {
-    if (ego->v_r > ENC_OPE_V_R_TH) {
+    if (sensing_result->ego.v_r > ENC_OPE_V_R_TH) {
       music_sync(MUSIC::G6_, 75);
       td = TurnDirection::Right;
       LED_bit(0, 0, 0, 1, 0);
     }
-    if (ego->v_l > ENC_OPE_V_R_TH) {
+    if (sensing_result->ego.v_l > ENC_OPE_V_R_TH) {
       music_sync(MUSIC::C6_, 75);
       td = TurnDirection::Left;
       LED_bit(0, 0, 0, 0, 1);

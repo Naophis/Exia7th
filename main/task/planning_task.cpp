@@ -44,13 +44,12 @@ void PlanningTask::set_sensing_entity(
     std::shared_ptr<sensing_result_entity_t> &_sensing_result) {
   sensing_result = _sensing_result;
 }
+
 void PlanningTask::set_input_param_entity(
     std::shared_ptr<input_param_t> &_param_ro) {
   param_ro = _param_ro;
 }
-void PlanningTask::set_ego_entity(std::shared_ptr<ego_entity_t> &_ego) {
-  ego = _ego;
-}
+
 void PlanningTask::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
   tgt_val = _tgt_val;
 }
@@ -162,63 +161,82 @@ void PlanningTask::task() {
 void PlanningTask::update_ego_motion() {
   const float dt = param_ro->dt;
   const float tire = param_ro->tire;
+
+  if (!motor_en) {
+    tgt_val->ego_in.v = 0;
+    tgt_val->ego_in.w = 0;
+  }
+
   // エンコーダ、ジャイロから速度、角速度、距離、角度更新
-  ego->v_r = (float)(PI * tire * sensing_result->encoder.right / 4096.0 / dt / 1);
-  ego->v_l = (float)(PI * tire * sensing_result->encoder.left / 4096.0 / dt / 1);
-  ego->v_c = (ego->v_l + ego->v_r) / 2;
+  sensing_result->ego.v_r =
+      (float)(PI * tire * sensing_result->encoder.right / 4096.0 / dt / 1);
+  sensing_result->ego.v_l =
+      (float)(PI * tire * sensing_result->encoder.left / 4096.0 / dt / 1);
+  sensing_result->ego.v_c =
+      (sensing_result->ego.v_l + sensing_result->ego.v_r) / 2;
 
-  ego->rpm.right = 30.0 * ego->v_r / (PI * tire / 2);
-  ego->rpm.left = 30.0 * ego->v_l / (PI * tire / 2);
+  sensing_result->ego.rpm.right =
+      30.0 * sensing_result->ego.v_r / (PI * tire / 2);
+  sensing_result->ego.rpm.left =
+      30.0 * sensing_result->ego.v_l / (PI * tire / 2);
 
-  tgt_val->ego_in.dist += ego->v_c * dt;
-  ego->w_raw = param_ro->gyro_param.gyro_w_gain_right *
-               (sensing_result->gyro.raw - tgt_val->gyro_zero_p_offset);
+  tgt_val->ego_in.dist += sensing_result->ego.v_c * dt;
+  sensing_result->ego.w_raw =
+      param_ro->gyro_param.gyro_w_gain_right *
+      (sensing_result->gyro.raw - tgt_val->gyro_zero_p_offset);
 
-  ego->w_lp = ego->w_lp * (1 - param_ro->gyro_param.lp_delay) +
-              ego->w_raw * param_ro->gyro_param.lp_delay;
+  sensing_result->ego.w_lp =
+      sensing_result->ego.w_lp * (1 - param_ro->gyro_param.lp_delay) +
+      sensing_result->ego.w_raw * param_ro->gyro_param.lp_delay;
 
-  ego->battery_raw = sensing_result->battery.data;
+  sensing_result->ego.battery_raw = sensing_result->battery.data;
 
-  ego->battery_lp = ego->battery_lp * (1 - param_ro->battery_param.lp_delay) +
-                    ego->battery_raw * param_ro->battery_param.lp_delay;
+  sensing_result->ego.battery_lp =
+      sensing_result->ego.battery_lp * (1 - param_ro->battery_param.lp_delay) +
+      sensing_result->ego.battery_raw * param_ro->battery_param.lp_delay;
 
-  tgt_val->ego_in.ang += ego->w_lp * dt;
+  tgt_val->ego_in.ang += sensing_result->ego.w_lp * dt;
 
-  ego->right90_raw = sensing_result->led_sen.right90.raw;
-  ego->right90_lp = ego->right90_lp * (1 - param_ro->led_param.lp_delay) +
-                    ego->right90_raw * param_ro->led_param.lp_delay;
-  ego->right45_raw = sensing_result->led_sen.right45.raw;
-  ego->right45_lp = ego->right45_lp * (1 - param_ro->led_param.lp_delay) +
-                    ego->right45_raw * param_ro->led_param.lp_delay;
+  sensing_result->ego.right90_raw = sensing_result->led_sen.right90.raw;
+  sensing_result->ego.right90_lp =
+      sensing_result->ego.right90_lp * (1 - param_ro->led_param.lp_delay) +
+      sensing_result->ego.right90_raw * param_ro->led_param.lp_delay;
+  sensing_result->ego.right45_raw = sensing_result->led_sen.right45.raw;
+  sensing_result->ego.right45_lp =
+      sensing_result->ego.right45_lp * (1 - param_ro->led_param.lp_delay) +
+      sensing_result->ego.right45_raw * param_ro->led_param.lp_delay;
 
-  ego->front_raw = sensing_result->led_sen.front.raw;
-  ego->front_lp = ego->front_lp * (1 - param_ro->led_param.lp_delay) +
-                  ego->front_raw * param_ro->led_param.lp_delay;
+  sensing_result->ego.front_raw = sensing_result->led_sen.front.raw;
+  sensing_result->ego.front_lp =
+      sensing_result->ego.front_lp * (1 - param_ro->led_param.lp_delay) +
+      sensing_result->ego.front_raw * param_ro->led_param.lp_delay;
 
-  ego->left45_raw = sensing_result->led_sen.left45.raw;
-  ego->left45_lp = ego->left45_lp * (1 - param_ro->led_param.lp_delay) +
-                   ego->left45_raw * param_ro->led_param.lp_delay;
-  ego->left90_raw = sensing_result->led_sen.left90.raw;
-  ego->left90_lp = ego->left90_lp * (1 - param_ro->led_param.lp_delay) +
-                   ego->left90_raw * param_ro->led_param.lp_delay;
+  sensing_result->ego.left45_raw = sensing_result->led_sen.left45.raw;
+  sensing_result->ego.left45_lp =
+      sensing_result->ego.left45_lp * (1 - param_ro->led_param.lp_delay) +
+      sensing_result->ego.left45_raw * param_ro->led_param.lp_delay;
+  sensing_result->ego.left90_raw = sensing_result->led_sen.left90.raw;
+  sensing_result->ego.left90_lp =
+      sensing_result->ego.left90_lp * (1 - param_ro->led_param.lp_delay) +
+      sensing_result->ego.left90_raw * param_ro->led_param.lp_delay;
 
   // コピー
-  tgt_val->ego_in.slip_point.w = ego->w_lp;
+  tgt_val->ego_in.slip_point.w = sensing_result->ego.w_lp;
 }
 
 void PlanningTask::set_next_duty(float duty_l, float duty_r,
                                  float duty_suction) {
   if (motor_en) {
     if (duty_l >= 0) {
-      gpio_set_level(A_CW_CCW, 1);
-    } else {
       gpio_set_level(A_CW_CCW, 0);
+    } else {
+      gpio_set_level(A_CW_CCW, 1);
     }
 
     if (duty_r >= 0) {
-      gpio_set_level(B_CW_CCW, 0);
-    } else {
       gpio_set_level(B_CW_CCW, 1);
+    } else {
+      gpio_set_level(B_CW_CCW, 0);
     }
 
     float tmp_duty_r = duty_r > 0 ? duty_r : -duty_r;
@@ -301,8 +319,8 @@ void PlanningTask::pl_req_activate() {
 
 void PlanningTask::calc_tgt_duty() {
 
-  error_entity.v.error_p = tgt_val->ego_in.v - ego->v_c;
-  error_entity.w.error_p = tgt_val->ego_in.w - ego->w_lp;
+  error_entity.v.error_p = tgt_val->ego_in.v - sensing_result->ego.v_c;
+  error_entity.w.error_p = tgt_val->ego_in.w - sensing_result->ego.w_lp;
 
   error_entity.v.error_i += error_entity.v.error_p;
   error_entity.w.error_i += error_entity.w.error_p;
@@ -321,8 +339,8 @@ void PlanningTask::calc_tgt_duty() {
   tgt_duty.duty_r = duty_c + duty_roll;
   tgt_duty.duty_l = duty_c - duty_roll;
 
-  ego->duty.duty_r = tgt_duty.duty_r;
-  ego->duty.duty_l = tgt_duty.duty_l;
+  sensing_result->ego.duty.duty_r = tgt_duty.duty_r;
+  sensing_result->ego.duty.duty_l = tgt_duty.duty_l;
 }
 
 void PlanningTask::cp_tgt_val() {
@@ -349,7 +367,7 @@ void PlanningTask::cp_tgt_val() {
 void PlanningTask::check_fail_safe() {
   bool no_problem = true;
   if (motor_en) {
-    if (ABS(ego->duty.duty_l) > 80) {
+    if (ABS(sensing_result->ego.duty.duty_l) > 80) {
       fail_safe.invalid_duty_r_cnt++;
       no_problem = true;
     }
