@@ -23,7 +23,7 @@ public:
   void motor_disable();
   void suction_disable();
 
-  void set_sensing_entity(std::shared_ptr<sensing_result_entity_t> &_entity_ro);
+  void set_sensing_entity(std::shared_ptr<sensing_result_entity_t> &_sensing_result);
   void set_ego_param_entity(std::shared_ptr<ego_param_t> &_param_ro);
   void set_ego_entity(std::shared_ptr<ego_entity_t> &_ego);
   void set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val);
@@ -66,7 +66,7 @@ private:
   char line[1024];
   FILE *f;
 
-  std::shared_ptr<sensing_result_entity_t> entity_ro;
+  std::shared_ptr<sensing_result_entity_t> sensing_result;
   std::shared_ptr<ego_param_t> param_ro;
   std::shared_ptr<ego_entity_t> ego;
   std::shared_ptr<motion_tgt_val_t> tgt_val;

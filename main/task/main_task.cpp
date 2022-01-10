@@ -17,10 +17,10 @@ void MainTask::task_entry_point(void *task_instance) {
   static_cast<MainTask *>(task_instance)->task();
 }
 void MainTask::set_sensing_entity(
-    std::shared_ptr<sensing_result_entity_t> &_entity_ro) {
-  entity_ro = _entity_ro;
-  ui->set_sensing_entity(_entity_ro);
-  mp->set_sensing_entity(_entity_ro);
+    std::shared_ptr<sensing_result_entity_t> &_sensing_result) {
+  sensing_result = _sensing_result;
+  ui->set_sensing_entity(_sensing_result);
+  mp->set_sensing_entity(_sensing_result);
 }
 void MainTask::set_ego_param_entity(std::shared_ptr<ego_param_t> &_param) {
   param = _param;
@@ -62,14 +62,14 @@ void MainTask::dump1() {
     printf("%c[0;0H", ESC); /* 戦闘戻す*/
     printf("SW1 %d \n", gpio_get_level(SW1));
 
-    printf("gyro: %d\t(%0.3f)\n", entity_ro->gyro.raw,
+    printf("gyro: %d\t(%0.3f)\n", sensing_result->gyro.raw,
            tgt_val->gyro_zero_p_offset);
     printf("battery: %0.3f\n", ego->battery_lp);
-    printf("encoder: %d, %d\n", entity_ro->encoder.left,
-           entity_ro->encoder.right);
-    printf("sensor: %d, %d, %d, %d, %d\n", entity_ro->led_sen.left90.raw,
-           entity_ro->led_sen.left45.raw, entity_ro->led_sen.front.raw,
-           entity_ro->led_sen.right45.raw, entity_ro->led_sen.right90.raw);
+    printf("encoder: %d, %d\n", sensing_result->encoder.left,
+           sensing_result->encoder.right);
+    printf("sensor: %d, %d, %d, %d, %d\n", sensing_result->led_sen.left90.raw,
+           sensing_result->led_sen.left45.raw, sensing_result->led_sen.front.raw,
+           sensing_result->led_sen.right45.raw, sensing_result->led_sen.right90.raw);
 
     printf("ego_v: %0.3f, %0.3f, %0.3f, %0.3f\n", ego->v_l, ego->v_c, ego->v_r,
            tgt_val->ego_in.dist);

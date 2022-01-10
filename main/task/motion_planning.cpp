@@ -15,7 +15,7 @@ void MotionPlanning::set_ego_param_entity(
 
 void MotionPlanning::set_sensing_entity(
     std::shared_ptr<sensing_result_entity_t> &_entity) {
-  entity_ro = _entity;
+  sensing_result = _entity;
 }
 
 void MotionPlanning::set_userinterface(std::shared_ptr<UserInterface> &_ui) {
@@ -272,7 +272,7 @@ void MotionPlanning::reset_gyro_ref() {
   float gyro_raw_data_sum = 0;
 
   for (int i = 0; i < RESET_GYRO_LOOP_CNT; i++) {
-    gyro_raw_data_sum += entity_ro->gyro.raw;
+    gyro_raw_data_sum += sensing_result->gyro.raw;
     vTaskDelay(xDelay); //他モジュールの起動待ち
   }
   tgt_val->gyro_zero_p_offset = gyro_raw_data_sum / RESET_GYRO_LOOP_CNT;

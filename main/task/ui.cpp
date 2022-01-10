@@ -1,8 +1,8 @@
 #include "include/ui.hpp"
 
 void UserInterface::set_sensing_entity(
-    std::shared_ptr<sensing_result_entity_t> &_entity_ro) {
-  entity_ro = _entity_ro;
+    std::shared_ptr<sensing_result_entity_t> &_sensing_result) {
+  sensing_result = _sensing_result;
 }
 
 void UserInterface::set_ego_entity(std::shared_ptr<ego_entity_t> &_ego) {
@@ -56,7 +56,7 @@ void UserInterface::motion_check() {
     } else {
       LED_off_all();
     }
-    float front_sensor_data = entity_ro->led_sen.front.raw;
+    float front_sensor_data = sensing_result->led_sen.front.raw;
     if (front_sensor_data > MOTION_CHECK_TH) {
       LED_off_all();
       for (int i = 0; i < 2; i++) {

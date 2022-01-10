@@ -41,7 +41,7 @@ private:
   std::shared_ptr<ego_entity_t> ego;
   std::shared_ptr<motion_tgt_val_t> tgt_val;
 
-  std::shared_ptr<sensing_result_entity_t> entity_ro;
+  std::shared_ptr<sensing_result_entity_t> sensing_result;
   std::shared_ptr<ego_param_t> param;
 };
 #endif

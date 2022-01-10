@@ -41,8 +41,8 @@ void PlanningTask::task_entry_point(void *task_instance) {
 }
 
 void PlanningTask::set_sensing_entity(
-    std::shared_ptr<sensing_result_entity_t> &_entity_ro) {
-  entity_ro = _entity_ro;
+    std::shared_ptr<sensing_result_entity_t> &_sensing_result) {
+  sensing_result = _sensing_result;
 }
 void PlanningTask::set_ego_param_entity(
     std::shared_ptr<ego_param_t> &_param_ro) {
@@ -163,8 +163,8 @@ void PlanningTask::update_ego_motion() {
   const float dt = param_ro->dt;
   const float tire = param_ro->tire;
   // エンコーダ、ジャイロから速度、角速度、距離、角度更新
-  ego->v_r = (float)(PI * tire * entity_ro->encoder.right / 4096.0 / dt / 1);
-  ego->v_l = (float)(PI * tire * entity_ro->encoder.left / 4096.0 / dt / 1);
+  ego->v_r = (float)(PI * tire * sensing_result->encoder.right / 4096.0 / dt / 1);
+  ego->v_l = (float)(PI * tire * sensing_result->encoder.left / 4096.0 / dt / 1);
   ego->v_c = (ego->v_l + ego->v_r) / 2;
 
   ego->rpm.right = 30.0 * ego->v_r / (PI * tire / 2);
@@ -172,33 +172,33 @@ void PlanningTask::update_ego_motion() {
 
   tgt_val->ego_in.dist += ego->v_c * dt;
   ego->w_raw = param_ro->gyro_param.gyro_w_gain_right *
-               (entity_ro->gyro.raw - tgt_val->gyro_zero_p_offset);
+               (sensing_result->gyro.raw - tgt_val->gyro_zero_p_offset);
 
   ego->w_lp = ego->w_lp * (1 - param_ro->gyro_param.lp_delay) +
               ego->w_raw * param_ro->gyro_param.lp_delay;
 
-  ego->battery_raw = entity_ro->battery.data;
+  ego->battery_raw = sensing_result->battery.data;
 
   ego->battery_lp = ego->battery_lp * (1 - param_ro->battery_param.lp_delay) +
                     ego->battery_raw * param_ro->battery_param.lp_delay;
 
   tgt_val->ego_in.ang += ego->w_lp * dt;
 
-  ego->right90_raw = entity_ro->led_sen.right90.raw;
+  ego->right90_raw = sensing_result->led_sen.right90.raw;
   ego->right90_lp = ego->right90_lp * (1 - param_ro->led_param.lp_delay) +
                     ego->right90_raw * param_ro->led_param.lp_delay;
-  ego->right45_raw = entity_ro->led_sen.right45.raw;
+  ego->right45_raw = sensing_result->led_sen.right45.raw;
   ego->right45_lp = ego->right45_lp * (1 - param_ro->led_param.lp_delay) +
                     ego->right45_raw * param_ro->led_param.lp_delay;
 
-  ego->front_raw = entity_ro->led_sen.front.raw;
+  ego->front_raw = sensing_result->led_sen.front.raw;
   ego->front_lp = ego->front_lp * (1 - param_ro->led_param.lp_delay) +
                   ego->front_raw * param_ro->led_param.lp_delay;
 
-  ego->left45_raw = entity_ro->led_sen.left45.raw;
+  ego->left45_raw = sensing_result->led_sen.left45.raw;
   ego->left45_lp = ego->left45_lp * (1 - param_ro->led_param.lp_delay) +
                    ego->left45_raw * param_ro->led_param.lp_delay;
-  ego->left90_raw = entity_ro->led_sen.left90.raw;
+  ego->left90_raw = sensing_result->led_sen.left90.raw;
   ego->left90_lp = ego->left90_lp * (1 - param_ro->led_param.lp_delay) +
                    ego->left90_raw * param_ro->led_param.lp_delay;
 
