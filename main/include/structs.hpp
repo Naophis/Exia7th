@@ -130,7 +130,7 @@ typedef struct {
   gyro_param_t gyro_param;
   sen_param_t battery_param;
   sen_param_t led_param;
-} ego_param_t;
+} input_param_t;
 
 typedef struct {
   float error_p;

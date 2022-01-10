@@ -12,7 +12,7 @@ void LoggingTask::set_sensing_entity(
     std::shared_ptr<sensing_result_entity_t> &_entity) {
   sensing_result = _entity;
 }
-void LoggingTask::set_ego_param_entity(std::shared_ptr<ego_param_t> &_param) {
+void LoggingTask::set_input_param_entity(std::shared_ptr<input_param_t> &_param) {
   param = _param;
 }
 void LoggingTask::set_ego_entity(std::shared_ptr<ego_entity_t> &_ego) {

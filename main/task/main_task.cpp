@@ -23,9 +23,9 @@ void MainTask::set_sensing_entity(
   mp->set_sensing_entity(_sensing_result);
   search_ctrl->set_sensing_entity(_sensing_result);
 }
-void MainTask::set_ego_param_entity(std::shared_ptr<ego_param_t> &_param) {
+void MainTask::set_input_param_entity(std::shared_ptr<input_param_t> &_param) {
   param = _param;
-  mp->set_ego_param_entity(_param);
+  mp->set_input_param_entity(_param);
 }
 void MainTask::set_ego_entity(std::shared_ptr<ego_entity_t> &_ego) {
   ego = _ego;

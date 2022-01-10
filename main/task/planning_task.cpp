@@ -44,8 +44,8 @@ void PlanningTask::set_sensing_entity(
     std::shared_ptr<sensing_result_entity_t> &_sensing_result) {
   sensing_result = _sensing_result;
 }
-void PlanningTask::set_ego_param_entity(
-    std::shared_ptr<ego_param_t> &_param_ro) {
+void PlanningTask::set_input_param_entity(
+    std::shared_ptr<input_param_t> &_param_ro) {
   param_ro = _param_ro;
 }
 void PlanningTask::set_ego_entity(std::shared_ptr<ego_entity_t> &_ego) {

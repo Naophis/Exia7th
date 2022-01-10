@@ -8,8 +8,8 @@ void MotionPlanning::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
   tgt_val = _tgt_val;
 }
 
-void MotionPlanning::set_ego_param_entity(
-    std::shared_ptr<ego_param_t> &_param) {
+void MotionPlanning::set_input_param_entity(
+    std::shared_ptr<input_param_t> &_param) {
   param = _param;
 }
 
