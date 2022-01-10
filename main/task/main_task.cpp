@@ -4,7 +4,7 @@ MainTask::MainTask() {
   ui = std::make_shared<UserInterface>();
   mp = std::make_shared<MotionPlanning>();
   lgc = std::make_shared<MazeSolverBaseLgc>();
-  seach_ctrl = std::make_shared<SearchController>();
+  search_ctrl = std::make_shared<SearchController>();
 }
 
 MainTask::~MainTask() {}
@@ -21,6 +21,7 @@ void MainTask::set_sensing_entity(
   sensing_result = _sensing_result;
   ui->set_sensing_entity(_sensing_result);
   mp->set_sensing_entity(_sensing_result);
+  search_ctrl->set_sensing_entity(_sensing_result);
 }
 void MainTask::set_ego_param_entity(std::shared_ptr<ego_param_t> &_param) {
   param = _param;
@@ -38,7 +39,7 @@ void MainTask::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
 }
 void MainTask::set_planning_task(std::shared_ptr<PlanningTask> &_pt) {
   pt = _pt;
-  seach_ctrl->set_planning_task(_pt);
+  search_ctrl->set_planning_task(_pt);
 }
 void MainTask::set_logging_task(std::shared_ptr<LoggingTask> &_lt) {
   lt = _lt; //
@@ -68,8 +69,10 @@ void MainTask::dump1() {
     printf("encoder: %d, %d\n", sensing_result->encoder.left,
            sensing_result->encoder.right);
     printf("sensor: %d, %d, %d, %d, %d\n", sensing_result->led_sen.left90.raw,
-           sensing_result->led_sen.left45.raw, sensing_result->led_sen.front.raw,
-           sensing_result->led_sen.right45.raw, sensing_result->led_sen.right90.raw);
+           sensing_result->led_sen.left45.raw,
+           sensing_result->led_sen.front.raw,
+           sensing_result->led_sen.right45.raw,
+           sensing_result->led_sen.right90.raw);
 
     printf("ego_v: %0.3f, %0.3f, %0.3f, %0.3f\n", ego->v_l, ego->v_c, ego->v_r,
            tgt_val->ego_in.dist);
@@ -535,13 +538,13 @@ void MainTask::task() {
 
     lgc->init(32, 1023);
     lgc->set_goal_pos(sys.goals);
-    seach_ctrl->set_lgc(lgc);
-    seach_ctrl->set_motion_plannning(mp);
+    search_ctrl->set_lgc(lgc);
+    search_ctrl->set_motion_plannning(mp);
 
     int mode_num = select_mode();
     printf("%d\n", mode_num);
     if (mode_num == 0) {
-      seach_ctrl->exec(paramset_list[mode_num]);
+      search_ctrl->exec(paramset_list[mode_num]);
     }
   }
 

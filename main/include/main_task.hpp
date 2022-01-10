@@ -108,7 +108,7 @@ private:
 
   std::shared_ptr<MazeSolverBaseLgc> lgc;
   std::shared_ptr<Adachi> adachi;
-  std::shared_ptr<SearchController> seach_ctrl;
+  std::shared_ptr<SearchController> search_ctrl;
 };
 
 #endif

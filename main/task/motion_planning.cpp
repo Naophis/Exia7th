@@ -47,12 +47,10 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p) {
     if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
       return MotionResult::ERROR;
     }
-    // printf("v_max=%0.3f %0.3f %0.3f %d %0.3f %0.3f\n", tgt_val->tgt_in.v_max,
-    //        tgt_val->ego_in.v, tgt_val->ego_in.accl, tgt_val->ego_in.state,
-    //        p.v_max, p.accl);
   }
   return MotionResult::NONE;
 }
+
 MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
   tgt_val->nmr.v_max = 0;
   tgt_val->nmr.v_end = 0;

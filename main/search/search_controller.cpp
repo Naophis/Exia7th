@@ -21,6 +21,11 @@ void SearchController::set_planning_task(std::shared_ptr<PlanningTask> &_pt) {
   pt = _pt;
 }
 
+void SearchController::set_sensing_entity(
+    std::shared_ptr<sensing_result_entity_t> &_entity) {
+  sensing_result = _entity;
+}
+
 void SearchController::reset() {
   ego->dir = Direction::North;
   ego->x = 0;
