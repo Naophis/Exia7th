@@ -3,6 +3,8 @@
 MainTask::MainTask() {
   ui = std::make_shared<UserInterface>();
   mp = std::make_shared<MotionPlanning>();
+  lgc = std::make_shared<MazeSolverBaseLgc>();
+  seach_ctrl = std::make_shared<SearchController>();
 }
 
 MainTask::~MainTask() {}
@@ -36,12 +38,13 @@ void MainTask::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
 }
 void MainTask::set_planning_task(std::shared_ptr<PlanningTask> &_pt) {
   pt = _pt;
+  seach_ctrl->set_planning_task(_pt);
 }
 void MainTask::set_logging_task(std::shared_ptr<LoggingTask> &_lt) {
   lt = _lt; //
 }
 void MainTask::check_battery() {
-  vTaskDelay(1000 / portTICK_PERIOD_MS); //他モジュールの起動待ち
+  vTaskDelay(1500 / portTICK_PERIOD_MS); //他モジュールの起動待ち
 
   printf("battery= %f\n", ego->battery_raw);
   if (ego->battery_raw > LOW_BATTERY_TH)
@@ -112,18 +115,6 @@ void MainTask::reset_tgt_data() { mp->reset_tgt_data(); }
 
 void MainTask::reset_ego_data() { mp->reset_ego_data(); }
 
-void MainTask::reset_gyro_ref() {
-  const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
-  float gyro_raw_data_sum = 0;
-
-  ui->motion_check();
-  for (int i = 0; i < RESET_GYRO_LOOP_CNT; i++) {
-    gyro_raw_data_sum += entity_ro->gyro.raw;
-    vTaskDelay(xDelay); //他モジュールの起動待ち
-  }
-  tgt_val->gyro_zero_p_offset = gyro_raw_data_sum / RESET_GYRO_LOOP_CNT;
-}
-
 void MainTask::keep_pivot() {
   const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
   reset_tgt_data();
@@ -157,7 +148,7 @@ void MainTask::keep_pivot() {
 // }
 void MainTask::echo_sensing_result_with_json() {
   const TickType_t xDelay = 50 / portTICK_PERIOD_MS;
-  reset_gyro_ref();
+  mp->reset_gyro_ref_with_check();
   while (1) {
     // entity_to_json(json_instance);
     // printf("%s\n", json_instance.dump().c_str());
@@ -540,20 +531,23 @@ void MainTask::task() {
       }
     }
   } else {
-    lgc = std::make_shared<MazeSolverBaseLgc>();
-    seach_ctrl = std::make_shared<SearchController>();
+    ui->hello_exia();
+
     lgc->init(32, 1023);
     lgc->set_goal_pos(sys.goals);
     seach_ctrl->set_lgc(lgc);
     seach_ctrl->set_motion_plannning(mp);
-    ui->hello_exia();
+
     int mode_num = select_mode();
-    seach_ctrl->exec(paramset_list[mode_num]);
+    printf("%d\n", mode_num);
+    if (mode_num == 0) {
+      seach_ctrl->exec(paramset_list[mode_num]);
+    }
   }
 
   // echo_sensing_result_with_json();
 
-  dump1(); // taskの最終行に配置すること
+  // dump1(); // taskの最終行に配置すること
   while (1) {
     vTaskDelay(xDelay);
   }
@@ -575,7 +569,7 @@ void MainTask::req_error_reset() {
 }
 
 void MainTask::test_run() {
-  reset_gyro_ref();
+  mp->reset_gyro_ref_with_check();
 
   if (sys.test.suction_active) {
     pt->suction_enable(sys.test.suction_duty);
@@ -625,7 +619,7 @@ void MainTask::test_run() {
 void MainTask::test_turn() {
   TurnDirection rorl = ui->select_direction();
 
-  reset_gyro_ref();
+  mp->reset_gyro_ref_with_check();
   reset_tgt_data();
   reset_ego_data();
   pt->motor_enable();
@@ -680,7 +674,7 @@ void MainTask::test_sla() {
 
   TurnDirection rorl = ui->select_direction();
 
-  reset_gyro_ref();
+  mp->reset_gyro_ref_with_check();
 
   if (sys.test.suction_active) {
     pt->suction_enable(sys.test.suction_duty);

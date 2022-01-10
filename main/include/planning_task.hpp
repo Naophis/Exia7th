@@ -48,10 +48,13 @@ private:
   void init_gpio();
   void calc_tgt_duty();
 
+  void cp_request();
+
   duty_t tgt_duty;
   pid_error_entity_t error_entity;
   int buzzer_time_cnt = 0;
   int buzzer_timestamp = 0;
+  int motion_req_timestamp = 0;
   int pid_req_timestamp = 0;
   void pl_req_activate();
   void cp_tgt_val();

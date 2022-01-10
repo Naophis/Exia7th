@@ -135,6 +135,8 @@ void PlanningTask::task() {
 
     mpc_step = 1;
 
+    cp_request();
+
     // 物理量ベース計算
     mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in, tgt_val->motion_mode,
                       mpc_step, &mpc_next_ego);
@@ -362,5 +364,39 @@ void PlanningTask::check_fail_safe() {
         ABS(fail_safe.invalid_duty_l_cnt) > 10) {
       tgt_val->fss.error = 1;
     }
+  }
+}
+
+void PlanningTask::cp_request() {
+  if (motion_req_timestamp != tgt_val->nmr.timstamp) {
+    float dt = param_ro->dt;
+    motion_req_timestamp = tgt_val->nmr.timstamp;
+
+    tgt_val->tgt_in.v_max = tgt_val->nmr.v_max;
+    tgt_val->tgt_in.end_v = tgt_val->nmr.v_end;
+    tgt_val->tgt_in.accl = tgt_val->nmr.accl;
+    tgt_val->tgt_in.decel = tgt_val->nmr.decel;
+    tgt_val->tgt_in.w_max = tgt_val->nmr.w_max;
+    tgt_val->tgt_in.end_w = tgt_val->nmr.w_end;
+    tgt_val->tgt_in.alpha = tgt_val->nmr.alpha;
+
+    tgt_val->tgt_in.tgt_dist = tgt_val->nmr.dist;
+    tgt_val->tgt_in.tgt_angle = tgt_val->nmr.ang;
+
+    tgt_val->motion_mode = (int)(tgt_val->nmr.motion_mode);
+    tgt_val->motion_type = tgt_val->nmr.motion_type;
+
+    tgt_val->ego_in.sla_param.base_alpha = tgt_val->nmr.sla_alpha;
+    tgt_val->ego_in.sla_param.base_time = tgt_val->nmr.sla_time;
+    tgt_val->ego_in.sla_param.limit_time_count = tgt_val->nmr.sla_time * 2 / dt;
+    tgt_val->ego_in.sla_param.pow_n = tgt_val->nmr.sla_pow_n;
+
+    tgt_val->ego_in.state = 0;
+    tgt_val->ego_in.img_ang = 0;
+    tgt_val->ego_in.img_dist = 0;
+    tgt_val->ego_in.ang = 0;
+    tgt_val->ego_in.dist = 0;
+    tgt_val->ego_in.sla_param.counter = 1;
+    tgt_val->ego_in.sla_param.state = 0;
   }
 }

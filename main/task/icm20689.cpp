@@ -58,13 +58,13 @@ uint8_t ICM20689::read1byte(const uint8_t address) {
 void ICM20689::setup() {
   // uint8_t whoami = mpu9250_read1byte(spi, 0x75);
   write1byte(0x6B, 0x80); //スリープ解除?
-  vTaskDelay(100 / portTICK_PERIOD_MS);
+  vTaskDelay(250 / portTICK_PERIOD_MS);
   write1byte(0x68, 0x04); //ジャイロリセット
-  vTaskDelay(100 / portTICK_PERIOD_MS);
+  vTaskDelay(250 / portTICK_PERIOD_MS);
   write1byte(0x6A, 0x10); // uercontrol i2c=disable
-  vTaskDelay(100 / portTICK_PERIOD_MS);
+  vTaskDelay(250 / portTICK_PERIOD_MS);
   write1byte(0x1B, 0x18); // 2000
-  vTaskDelay(100 / portTICK_PERIOD_MS);
+  vTaskDelay(250 / portTICK_PERIOD_MS);
 }
 int ICM20689::read_gyro_z() {
   return (signed short)(read1byte(0x47) << 8 | read1byte(0x48));

@@ -32,6 +32,8 @@ public:
   void reset_tgt_data();
   void reset_ego_data();
   void reset_gyro_ref();
+  void reset_gyro_ref_with_check();
+  void coin();
 
 private:
   std::shared_ptr<UserInterface> ui;

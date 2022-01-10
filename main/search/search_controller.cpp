@@ -11,14 +11,20 @@ void SearchController::set_lgc(std::shared_ptr<MazeSolverBaseLgc> &_lgc) {
   lgc = _lgc;
   adachi->set_logic(_lgc);
 }
+
 void SearchController::set_motion_plannning(
     std::shared_ptr<MotionPlanning> &_mp) {
   mp = _mp;
 }
+
+void SearchController::set_planning_task(std::shared_ptr<PlanningTask> &_pt) {
+  pt = _pt;
+}
+
 void SearchController::reset() {
   ego->dir = Direction::North;
   ego->x = 0;
-  ego->y = 0;
+  ego->y = 1;
   ego->prev_motion = 0; // not use
   lgc->set_default_wall_data();
 }
@@ -53,15 +59,30 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
   p.dist = 45;
   p.motion_type = MotionType::NONE;
   mp->go_straight(p);
-  // TODO wait hold
+
+  mp->reset_tgt_data();
+  mp->reset_ego_data();
+  vTaskDelay(100 / portTICK_RATE_MS);
+  pt->motor_disable();
+
   param_roll_t pr;
   pr.w_max = p_set.str_map[StraightType::Search].w_max;
   pr.alpha = p_set.str_map[StraightType::Search].alpha;
   pr.w_end = 0;
-  pr.ang = PI / 2;
+  pr.ang = PI;
   pr.RorL = TurnDirection::Right;
+  pt->motor_enable();
   mp->pivot_turn(pr);
-  // TODO wait hold
+  mp->reset_tgt_data();
+  mp->reset_ego_data();
+  pt->motor_disable();
+  vTaskDelay(100 / portTICK_RATE_MS);
+
+  mp->reset_gyro_ref();
+
+  mp->reset_tgt_data();
+  mp->reset_ego_data();
+  pt->motor_enable();
   p.v_max = p.v_end = p_set.str_map[StraightType::Search].v_max;
   p.accl = p_set.str_map[StraightType::Search].accl;
   p.decel = p_set.str_map[StraightType::Search].decel;
@@ -80,9 +101,23 @@ MotionResult SearchController::finish(param_set_t &p_set) {
 }
 void SearchController::exec(param_set_t &p_set) {
 
+  mp->reset_gyro_ref_with_check();
+  reset();
+
+  param_straight_t p;
+  p.v_max = p.v_end = p_set.str_map[StraightType::Search].v_max;
+  p.accl = p_set.str_map[StraightType::Search].accl;
+  p.decel = p_set.str_map[StraightType::Search].decel;
+  p.dist = 45;
+  p.motion_type = MotionType::NONE;
+
+  pt->motor_enable();
+  mp->reset_tgt_data();
+  mp->reset_ego_data();
+  mp->go_straight(p);
+
   while (1) {
     auto next_motion = adachi->exec();
-    // int motion_result = 0;
     if (next_motion == Motion::Straight) {
       go_straight_wrapper(p_set);
     } else if (next_motion == Motion::TurnRight) {
@@ -95,5 +130,16 @@ void SearchController::exec(param_set_t &p_set) {
       finish(p_set);
       break;
     }
+    break;
   }
+
+  p.v_max = p.v_end = p_set.str_map[StraightType::Search].v_max;
+  p.accl = 0;
+  p.decel = p_set.str_map[StraightType::Search].decel;
+  p.dist = 45;
+  p.motion_type = MotionType::NONE;
+  mp->go_straight(p);
+
+  pt->motor_disable();
+  mp->coin();
 }

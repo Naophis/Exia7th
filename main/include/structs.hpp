@@ -171,6 +171,25 @@ typedef struct {
 } fail_safe_state_t;
 
 typedef struct {
+  float v_max;
+  float v_end;
+  float accl;
+  float decel;
+  float dist;
+  float w_max;
+  float w_end;
+  float alpha;
+  float ang;
+  float sla_alpha;
+  float sla_time;
+  float sla_pow_n;
+  RUN_MODE2 motion_mode;
+  MotionType motion_type;
+
+  int timstamp = 0;
+} new_motion_req_t;
+
+typedef struct {
   t_tgt tgt_in;
   t_ego ego_in;
   int32_t motion_mode;
@@ -179,6 +198,7 @@ typedef struct {
   fail_safe_state_t fss;
   float gyro_zero_p_offset = 0;
   buzzer_t buzzer;
+  new_motion_req_t nmr;
 } motion_tgt_val_t;
 
 typedef struct {

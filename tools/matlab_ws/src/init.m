@@ -94,7 +94,7 @@ if test_mode == 1
     ego_state = int8(0);
 
     % radius = 90.5;
-    radius = 125;
+    radius = 45;
     alphaTemp = (ego_v / radius);
     sla.base_alpha = alphaTemp;
     % sla.base_time = 0.18627166748046875;

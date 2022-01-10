@@ -56,8 +56,6 @@ public:
 
   virtual void task();
   void check_battery();
-  void reset_gyro_ref();
-  void reset_motion_tgt();
 
 private:
   xTaskHandle handle = 0;

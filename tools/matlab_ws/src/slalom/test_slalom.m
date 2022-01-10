@@ -2,8 +2,8 @@
 dt = 0.001/4;
 Normal = 0;Large = 1; Orval = 2; Dia45 = 3; Dia135 = 4; Dia90 = 5; Dia180 = 6;
 
-ego_v = 500;
-turn_mode = Large;
+ego_v = 300;
+turn_mode = Normal;
 
 is_dia_mode = false;
 slip_gain = -495;
@@ -12,7 +12,7 @@ wall_off_offset = 0;
 wall_off_offset_dia = 0 * sqrt(2);
 
 if turn_mode == Normal
-    radius = 40; sla.pow_n = 4;
+    radius = 32; sla.pow_n = 4;
     target_angle = 90, is_dia_mode = false, turn_mode_str = 'Normal';
 elseif turn_mode == Large
     radius = 65; sla.pow_n = 4;
