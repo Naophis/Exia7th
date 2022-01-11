@@ -6,6 +6,7 @@
 #include "driver/spi_master.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include <cstring>
 #include <string.h>
 
 class ICM20689 {
@@ -14,8 +15,9 @@ public:
   virtual ~ICM20689();
 
   void init();
-  void write1byte(const uint8_t address, const uint8_t data);
+  uint8_t write1byte(const uint8_t address, const uint8_t data);
   uint8_t read1byte(const uint8_t address);
+  int16_t read2byte(const uint8_t address);
   void setup();
   int read_gyro_z();
 

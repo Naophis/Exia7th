@@ -27,25 +27,33 @@ void ICM20689::init() {
   ret = spi_bus_add_device(SPI2_HOST, &devcfg, &spi);
   ESP_ERROR_CHECK(ret);
 }
-void ICM20689::write1byte(const uint8_t address, const uint8_t data) {
+uint8_t ICM20689::write1byte(const uint8_t address, const uint8_t data) {
   esp_err_t ret;
   spi_transaction_t t;
   memset(&t, 0, sizeof(t)); // Zero out the transaction
-  t.length = 16;            // SPI_ADDRESS(8bit) + SPI_DATA(8bit)
-  t.flags = SPI_TRANS_USE_RXDATA;
-  uint16_t tx_data = (address) << 8 | (0x0f & data);
-  tx_data = SPI_SWAP_DATA_TX(tx_data, 16);
-  t.tx_buffer = &tx_data;
+
+  // printf("%2x, %2x\n", address, data);
+  // printf("%2x, %2x\n", address, 0x0f & data);
+  t.length = 24; // SPI_ADDRESS(8bit) + SPI_DATA(8bit)
+  t.flags = SPI_TRANS_USE_TXDATA | SPI_TRANS_USE_RXDATA;
+  t.tx_data[0] = address;
+  t.tx_data[1] = (uint8_t)(0xff & data);
+  t.tx_data[2] = 0;
+
+  // uint16_t tx_data = (address) << 8 | (0xff & data);
+  // tx_data = SPI_SWAP_DATA_TX(tx_data, 16);
+  // t.tx_buffer = &(t.tx_data);
   ret = spi_device_polling_transmit(spi, &t); // Transmit!
   assert(ret == ESP_OK);                      // Should have had no issues.
+  return 0;
 }
 
 uint8_t ICM20689::read1byte(const uint8_t address) {
   esp_err_t ret;
   spi_transaction_t t;
   memset(&t, 0, sizeof(t)); // Zero out the transaction
-  t.length = 16;            // SPI_ADDRESS(8bit) + SPI_DATA(8bit)
   t.flags = SPI_TRANS_USE_RXDATA;
+  t.length = 16; // SPI_ADDRESS(8bit) + SPI_DATA(8bit)
   uint16_t tx_data = (address | READ_FLAG) << 8;
   tx_data = SPI_SWAP_DATA_TX(tx_data, 16);
   t.tx_buffer = &tx_data;
@@ -55,17 +63,38 @@ uint8_t ICM20689::read1byte(const uint8_t address) {
       SPI_SWAP_DATA_RX(*(uint16_t *)t.rx_data, 16) & 0x00FF; // FF + Data
   return data;
 }
+
+int16_t ICM20689::read2byte(const uint8_t address) {
+  esp_err_t ret;
+  spi_transaction_t t;
+  memset(&t, 0, sizeof(t)); // Zero out the transaction
+  t.flags = SPI_TRANS_USE_TXDATA | SPI_TRANS_USE_RXDATA;
+  t.length = 24; // SPI_ADDRESS(8bit) + SPI_DATA(8bit)
+
+  t.tx_data[0] = (address | READ_FLAG);
+  t.tx_data[1] = 0;
+  t.tx_data[2] = 0;
+
+  ret = spi_device_polling_transmit(spi, &t); // Transmit!
+  assert(ret == ESP_OK);                      // Should have had no issues.
+
+  return (signed short)((((unsigned short)(t.rx_data[1] & 0xff)) << 8) |
+                        ((unsigned short)(t.rx_data[2] & 0xff)));
+}
+
 void ICM20689::setup() {
-  // uint8_t whoami = mpu9250_read1byte(spi, 0x75);
+  // uint8_t whoami = read1byte(0x75);
+  // printf("%d\n", whoami);
   write1byte(0x6B, 0x80); //スリープ解除?
-  vTaskDelay(250 / portTICK_PERIOD_MS);
+  vTaskDelay(10 / portTICK_PERIOD_MS);
   write1byte(0x68, 0x04); //ジャイロリセット
-  vTaskDelay(250 / portTICK_PERIOD_MS);
+  vTaskDelay(10 / portTICK_PERIOD_MS);
   write1byte(0x6A, 0x10); // uercontrol i2c=disable
-  vTaskDelay(250 / portTICK_PERIOD_MS);
+  vTaskDelay(10 / portTICK_PERIOD_MS);
   write1byte(0x1B, 0x18); // 2000
-  vTaskDelay(250 / portTICK_PERIOD_MS);
+  vTaskDelay(10 / portTICK_PERIOD_MS);
 }
 int ICM20689::read_gyro_z() {
+  // return read2byte(0x47);
   return (signed short)(read1byte(0x47) << 8 | read1byte(0x48));
 }
