@@ -597,13 +597,14 @@ void MainTask::test_run() {
   mp->go_straight(ps);
   reset_tgt_data();
   reset_ego_data();
-  vTaskDelay(300 / portTICK_RATE_MS);
+  vTaskDelay(100 / portTICK_RATE_MS);
   pt->motor_disable();
   pt->suction_disable();
 
   lt->stop_slalom_log();
   reset_tgt_data();
   reset_ego_data();
+  req_error_reset();
   lt->save(slalom_log_file);
   ui->coin(120);
 
@@ -639,13 +640,14 @@ void MainTask::test_turn() {
   pr.RorL = rorl;
 
   mp->pivot_turn(pr);
-  vTaskDelay(300 / portTICK_RATE_MS);
+  vTaskDelay(100 / portTICK_RATE_MS);
   pt->motor_disable();
   pt->suction_disable();
 
   lt->stop_slalom_log();
   reset_tgt_data();
   reset_ego_data();
+  req_error_reset();
   lt->save(slalom_log_file);
   ui->coin(120);
 
@@ -712,6 +714,18 @@ void MainTask::test_sla() {
   nm.is_turn = false;
 
   mp->slalom(sla_p, rorl, nm);
+  for (int i = 0; i < 3; i++) {
+
+  mp->slalom(sla_p, rorl, nm);
+    // mp->slalom(sla_p,
+    //            rorl == TurnDirection::Right ? (TurnDirection::Left)
+    //                                         : (TurnDirection::Right),
+    //            nm);
+    // mp->slalom(sla_p,
+    //            rorl == TurnDirection::Right ? (TurnDirection::Right)
+    //                                         : (TurnDirection::Left),
+    //            nm);
+  }
 
   ps.v_max = sla_p.v;
   ps.v_end = sys.test.end_v;
@@ -722,7 +736,8 @@ void MainTask::test_sla() {
 
   reset_tgt_data();
   reset_ego_data();
-  vTaskDelay(300 / portTICK_RATE_MS);
+  req_error_reset();
+  vTaskDelay(100 / portTICK_RATE_MS);
   pt->motor_disable();
   pt->suction_disable();
   lt->stop_slalom_log();

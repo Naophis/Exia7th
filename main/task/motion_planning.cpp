@@ -30,6 +30,7 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p) {
   tgt_val->nmr.ang = 0;
   tgt_val->nmr.motion_mode = RUN_MODE2::ST_RUN;
   tgt_val->nmr.motion_type = MotionType::STRAIGHT;
+  tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
   if (p.motion_type != MotionType::NONE) {
     tgt_val->motion_type = p.motion_type;
   }
@@ -58,11 +59,13 @@ MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
     tgt_val->nmr.w_end = p.w_end;
     tgt_val->nmr.alpha = p.alpha;
     tgt_val->nmr.ang = p.ang;
+    tgt_val->nmr.motion_dir = MotionDirection::LEFT;
   } else {
     tgt_val->nmr.w_max = -p.w_max;
     tgt_val->nmr.w_end = -p.w_end;
     tgt_val->nmr.alpha = -p.alpha;
     tgt_val->nmr.ang = p.ang;
+    tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
   }
   tgt_val->nmr.motion_mode = RUN_MODE2::PIVOT_TURN;
   tgt_val->nmr.motion_type = MotionType::PIVOT;
@@ -96,6 +99,10 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   }
 
   float alphaTemp = ((td == TurnDirection::Right) ? -1 : 1) * (sp.v / sp.rad);
+
+  tgt_val->nmr.motion_dir = (td == TurnDirection::Left)
+                                ? MotionDirection::LEFT
+                                : MotionDirection::RIGHT;
 
   tgt_val->nmr.v_max = sp.v;
   tgt_val->nmr.v_end = sp.v;

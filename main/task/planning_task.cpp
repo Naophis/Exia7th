@@ -24,20 +24,34 @@ void PlanningTask::suction_enable(float duty) {
   mcpwm_start(MCPWM_UNIT_1, MCPWM_TIMER_2);
 }
 void PlanningTask::motor_disable() {
-  gpio_set_level(A_PWM, 0);
-  gpio_set_level(B_PWM, 0);
+  // gpio_set_level(A_PWM, 0);
+  // gpio_set_level(B_PWM, 0);
   motor_en = false;
   mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A);
   mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A);
   mcpwm_stop(MCPWM_UNIT_0, MCPWM_TIMER_0);
   mcpwm_stop(MCPWM_UNIT_0, MCPWM_TIMER_1);
+  mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_B, 0);
+  mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_B,
+                      MCPWM_DUTY_MODE_0);
+  mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_B, 0);
+  mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_B,
+                      MCPWM_DUTY_MODE_0);
+
+  // gpio_set_level(A_PWM, 0);
+  // gpio_set_level(B_PWM, 0);
 }
 void PlanningTask::suction_disable() {
-  gpio_set_level(SUCTION_PWM, 0);
+  // gpio_set_level(SUCTION_PWM, 0);
   suction_en = false;
   tgt_duty.duty_suction = 0;
   mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A);
-  mcpwm_stop(MCPWM_UNIT_1, MCPWM_TIMER_2); //
+  mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_B);
+  // mcpwm_stop(MCPWM_UNIT_1, MCPWM_TIMER_2); //
+  mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_B, 0);
+  mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_B,
+                      MCPWM_DUTY_MODE_0);
+  // gpio_set_level(SUCTION_PWM, 0);
 }
 void PlanningTask::task_entry_point(void *task_instance) {
   static_cast<PlanningTask *>(task_instance)->task();
@@ -59,15 +73,10 @@ void PlanningTask::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
 
 void PlanningTask::active_logging(FILE *_f) {
   log_active = true;
-  // *f = *_f;
-  // log_list.clear();
   log_list2_size = 0;
 }
-void PlanningTask::inactive_logging() {
-  log_active = false;
-  // *f = NULL;
-  // fclose(f);
-}
+void PlanningTask::inactive_logging() { log_active = false; }
+
 void PlanningTask::buzzer(ledc_channel_config_t &buzzer_ch,
                           ledc_timer_config_t &buzzer_timer) {
   int duty = 0;
@@ -91,7 +100,8 @@ void PlanningTask::task() {
 
   ledc_channel_config_t buzzer_ch;
   ledc_timer_config_t buzzer_timer;
-
+  memset(&buzzer_ch, 0, sizeof(buzzer_ch));
+  memset(&buzzer_timer, 0, sizeof(buzzer_timer));
   buzzer_ch.channel = (ledc_channel_t)LEDC_CHANNEL_0;
   buzzer_ch.duty = 0;
   buzzer_ch.gpio_num = BUZZER;
@@ -109,6 +119,7 @@ void PlanningTask::task() {
   mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM1A, B_PWM);
   mcpwm_gpio_init(MCPWM_UNIT_1, MCPWM2A, SUCTION_PWM);
   mcpwm_config_t motor_pwm_conf;
+  memset(&motor_pwm_conf, 0, sizeof(motor_pwm_conf));
   motor_pwm_conf.frequency = MOTOR_HZ; // PWM周波数= 10kHz,
   motor_pwm_conf.cmpr_a = 0; // デューティサイクルの初期値（0%）
   motor_pwm_conf.cmpr_b = 0; // デューティサイクルの初期値（0%）
@@ -119,6 +130,7 @@ void PlanningTask::task() {
   mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_1, &motor_pwm_conf);
 
   mcpwm_config_t suction_pwm_conf;
+  memset(&suction_pwm_conf, 0, sizeof(suction_pwm_conf));
   suction_pwm_conf.frequency = SUCTION_MOTOR_HZ; // PWM周波数= 10kHz,
   suction_pwm_conf.cmpr_a = 0; // デューティサイクルの初期値（0%）
   suction_pwm_conf.cmpr_b = 0; // デューティサイクルの初期値（0%）
@@ -185,9 +197,16 @@ void PlanningTask::update_ego_motion() {
       30.0 * sensing_result->ego.v_l / (PI * tire / 2);
 
   tgt_val->ego_in.dist += sensing_result->ego.v_c * dt;
-  sensing_result->ego.w_raw =
-      param_ro->gyro_param.gyro_w_gain_right *
-      (sensing_result->gyro.raw - tgt_val->gyro_zero_p_offset);
+
+  if (tgt_val->motion_dir == MotionDirection::LEFT) {
+    sensing_result->ego.w_raw =
+        param_ro->gyro_param.gyro_w_gain_left *
+        (sensing_result->gyro.raw - tgt_val->gyro_zero_p_offset);
+  } else {
+    sensing_result->ego.w_raw =
+        param_ro->gyro_param.gyro_w_gain_right *
+        (sensing_result->gyro.raw - tgt_val->gyro_zero_p_offset);
+  }
 
   sensing_result->ego.w_lp =
       sensing_result->ego.w_lp * (1 - param_ro->gyro_param.lp_delay) +
@@ -257,6 +276,7 @@ void PlanningTask::set_next_duty(float duty_l, float duty_r,
     motor_disable();
   }
   if (suction_en) {
+    // mcpwm_set_signal_high(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A);
     mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A, duty_suction);
     mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A,
                         MCPWM_DUTY_MODE_0);
@@ -287,9 +307,9 @@ void PlanningTask::init_gpio() {
   io_conf.pin_bit_mask |= 1ULL << LED4;
   io_conf.pin_bit_mask |= 1ULL << LED5;
 
-  io_conf.pin_bit_mask |= 1ULL << BUZZER;
+  // io_conf.pin_bit_mask |= 1ULL << BUZZER;
 
-  io_conf.pin_bit_mask |= 1ULL << SUCTION_PWM;
+  // io_conf.pin_bit_mask |= 1ULL << SUCTION_PWM;
 
   // 内部プルダウンしない
   io_conf.pull_down_en = (gpio_pulldown_t)0;
@@ -297,6 +317,7 @@ void PlanningTask::init_gpio() {
   io_conf.pull_up_en = (gpio_pullup_t)0;
   // 設定をセットする
   gpio_config(&io_conf);
+  gpio_set_level(SUCTION_PWM, 0);
   // gpio_set_direction((gpio_num_t)GPIO_OUTPUT_IO_8,
 }
 
@@ -334,15 +355,15 @@ void PlanningTask::calc_tgt_duty() {
 
   float duty_roll = param_ro->gyro_pid.p * error_entity.w.error_p +
                     param_ro->gyro_pid.i * error_entity.w.error_i;
+
+  tgt_duty.duty_r = duty_c + duty_roll;
+  tgt_duty.duty_l = duty_c - duty_roll;
   if (!motor_en) {
     duty_c = 0;
     duty_roll = 0;
-    error_entity.v.error_i = 0;
-    error_entity.w.error_i = 0;
+    error_entity.v.error_i = error_entity.w.error_i = 0;
+    tgt_duty.duty_r = tgt_duty.duty_l = 0;
   }
-  tgt_duty.duty_r = duty_c + duty_roll;
-  tgt_duty.duty_l = duty_c - duty_roll;
-
   sensing_result->ego.duty.duty_r = tgt_duty.duty_r;
   sensing_result->ego.duty.duty_l = tgt_duty.duty_l;
 }
@@ -420,5 +441,7 @@ void PlanningTask::cp_request() {
     tgt_val->ego_in.dist = 0;
     tgt_val->ego_in.sla_param.counter = 1;
     tgt_val->ego_in.sla_param.state = 0;
+
+    tgt_val->motion_dir = tgt_val->nmr.motion_dir;
   }
 }

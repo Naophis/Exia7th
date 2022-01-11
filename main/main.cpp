@@ -79,9 +79,9 @@ void init_gpio() {
   io_conf.pin_bit_mask |= 1ULL << LED4;
   io_conf.pin_bit_mask |= 1ULL << LED5;
 
-  io_conf.pin_bit_mask |= 1ULL << BUZZER;
+  // io_conf.pin_bit_mask |= 1ULL << BUZZER;
 
-  io_conf.pin_bit_mask |= 1ULL << SUCTION_PWM;
+  // io_conf.pin_bit_mask |= 1ULL << SUCTION_PWM;
 
   // 内部プルダウンしない
   io_conf.pull_down_en = (gpio_pulldown_t)0;
@@ -89,6 +89,7 @@ void init_gpio() {
   io_conf.pull_up_en = (gpio_pullup_t)0;
   // 設定をセットする
   gpio_config(&io_conf);
+  gpio_set_level(SUCTION_PWM, 0);
   // gpio_set_direction((gpio_num_t)GPIO_OUTPUT_IO_8,
 }
 

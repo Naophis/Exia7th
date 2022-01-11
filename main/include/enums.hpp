@@ -34,4 +34,10 @@ enum class MotionResult : int {
   ERROR = 1,
 };
 
+enum class MotionDirection : int {
+  NONE = 0,
+  RIGHT = 1,
+  LEFT = 2,
+};
+
 #endif

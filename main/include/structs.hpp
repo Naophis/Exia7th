@@ -131,6 +131,7 @@ typedef struct {
   gyro_param_t gyro_param;
   sen_param_t battery_param;
   sen_param_t led_param;
+  MotionDirection motion_dir;
 } input_param_t;
 
 typedef struct {
@@ -188,6 +189,7 @@ typedef struct {
   MotionType motion_type;
 
   int timstamp = 0;
+  MotionDirection motion_dir;
 } new_motion_req_t;
 
 typedef struct {
@@ -195,6 +197,7 @@ typedef struct {
   t_ego ego_in;
   int32_t motion_mode;
   MotionType motion_type;
+  MotionDirection motion_dir;
   planning_req_t pl_req;
   fail_safe_state_t fss;
   float gyro_zero_p_offset = 0;
