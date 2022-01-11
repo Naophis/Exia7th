@@ -67,7 +67,7 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
 
   mp->reset_tgt_data();
   mp->reset_ego_data();
-  vTaskDelay(100 / portTICK_RATE_MS);
+  vTaskDelay(300 / portTICK_RATE_MS);
   pt->motor_disable();
 
   param_roll_t pr;
@@ -80,8 +80,8 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
   mp->pivot_turn(pr);
   mp->reset_tgt_data();
   mp->reset_ego_data();
+  vTaskDelay(300 / portTICK_RATE_MS);
   pt->motor_disable();
-  vTaskDelay(100 / portTICK_RATE_MS);
 
   mp->reset_gyro_ref();
 

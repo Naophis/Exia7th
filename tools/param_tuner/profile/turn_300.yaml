@@ -20,30 +20,30 @@ straight:
 normal:
   v: 300
   ang: 90
-  rad: 40
+  rad: 36
   pow_n: 4
-  time: 0.13721875
+  time: 0.12350000
   front: { right: 10, left: 10 }
   back: { right: 10, left: 10 }
 large:
-  v: 500
+  v: 300
   ang: 90
   rad: 65
   pow_n: 4
-  time: 0.13378125
+  time: 0.22296875
   front: { right: 10, left: 10 }
   back: { right: 10, left: 10 }
 orval:
   v: 300
   ang: 180
-  rad: 90
+  rad: 43
   pow_n: 4
-  time: 0.13721875
+  time: 0.29500000
   front: { right: 10, left: 10 }
   back: { right: 10, left: 10 }
 dia45:
   v: 300
-  ang: 90
+  ang: 45
   rad: 60
   pow_n: 4
   time: 0.13721875
@@ -51,7 +51,7 @@ dia45:
   back: { right: 10, left: 10 }
 dia45_2:
   v: 300
-  ang: 90
+  ang: 45
   rad: 60
   pow_n: 4
   time: 0.13721875
@@ -59,7 +59,7 @@ dia45_2:
   back: { right: 10, left: 10 }
 dia135:
   v: 300
-  ang: 90
+  ang: 135
   rad: 60
   pow_n: 4
   time: 0.13721875
@@ -67,7 +67,7 @@ dia135:
   back: { right: 10, left: 10 }
 dia135_2:
   v: 300
-  ang: 90
+  ang: 135
   rad: 60
   pow_n: 4
   time: 0.13721875

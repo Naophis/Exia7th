@@ -24,6 +24,8 @@ void PlanningTask::suction_enable(float duty) {
   mcpwm_start(MCPWM_UNIT_1, MCPWM_TIMER_2);
 }
 void PlanningTask::motor_disable() {
+  gpio_set_level(A_PWM, 0);
+  gpio_set_level(B_PWM, 0);
   motor_en = false;
   mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A);
   mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A);
@@ -31,6 +33,7 @@ void PlanningTask::motor_disable() {
   mcpwm_stop(MCPWM_UNIT_0, MCPWM_TIMER_1);
 }
 void PlanningTask::suction_disable() {
+  gpio_set_level(SUCTION_PWM, 0);
   suction_en = false;
   tgt_duty.duty_suction = 0;
   mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A);
@@ -126,6 +129,7 @@ void PlanningTask::task() {
 
   motor_en = false;
   set_next_duty(0, 0, 0);
+  gpio_set_level(SUCTION_PWM, 0);
   mpc_tgt_calc.initialize();
 
   while (1) {

@@ -117,7 +117,6 @@ void MainTask::reset_tgt_data() { mp->reset_tgt_data(); }
 void MainTask::reset_ego_data() { mp->reset_ego_data(); }
 
 void MainTask::keep_pivot() {
-  const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
   reset_tgt_data();
   reset_ego_data();
 
@@ -552,7 +551,7 @@ void MainTask::task() {
 
   // echo_sensing_result_with_json();
 
-  // dump1(); // taskの最終行に配置すること
+  dump1(); // taskの最終行に配置すること
   while (1) {
     vTaskDelay(xDelay);
   }
@@ -598,7 +597,7 @@ void MainTask::test_run() {
   mp->go_straight(ps);
   reset_tgt_data();
   reset_ego_data();
-  vTaskDelay(10 / portTICK_RATE_MS);
+  vTaskDelay(300 / portTICK_RATE_MS);
   pt->motor_disable();
   pt->suction_disable();
 
@@ -640,7 +639,7 @@ void MainTask::test_turn() {
   pr.RorL = rorl;
 
   mp->pivot_turn(pr);
-  vTaskDelay(10 / portTICK_RATE_MS);
+  vTaskDelay(300 / portTICK_RATE_MS);
   pt->motor_disable();
   pt->suction_disable();
 
@@ -674,8 +673,12 @@ void MainTask::test_sla() {
 
   auto sla_p =
       paramset_list[file_idx].map[static_cast<TurnType>(sys.test.sla_type)];
-
-  printf("%d %f\n", sla_p.pow_n, sla_p.time);
+  printf("slalom params\n");
+  printf("v = %f\n", sla_p.v);
+  printf("ang = %f\n", sla_p.ang * 180 / PI);
+  printf("radius =  %f\n", sla_p.rad);
+  printf("time =  %f\n", sla_p.time);
+  printf("n = %d\n", sla_p.pow_n);
 
   TurnDirection rorl = ui->select_direction();
 
@@ -719,12 +722,11 @@ void MainTask::test_sla() {
 
   reset_tgt_data();
   reset_ego_data();
-  vTaskDelay(10 / portTICK_RATE_MS);
+  vTaskDelay(300 / portTICK_RATE_MS);
   pt->motor_disable();
   pt->suction_disable();
+  lt->stop_slalom_log();
 
-  reset_tgt_data();
-  reset_ego_data();
   lt->save(slalom_log_file);
   ui->coin(120);
 

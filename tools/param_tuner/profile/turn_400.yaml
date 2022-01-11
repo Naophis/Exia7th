@@ -20,25 +20,25 @@ straight:
 normal:
   v: 400
   ang: 90
-  rad: 90
+  rad: 36
   pow_n: 4
-  time: 0.13721875
+  time: 0.0926250
   front: { right: 10, left: 10 }
   back: { right: 10, left: 10 }
 large:
-  v: 400
+  v: 800
   ang: 90
-  rad: 60
+  rad: 65
   pow_n: 4
-  time: 0.13721875
+  time: 0.11062500
   front: { right: 10, left: 10 }
   back: { right: 10, left: 10 }
 orval:
   v: 400
   ang: 180
-  rad: 90
+  rad: 43
   pow_n: 4
-  time: 0.13721875
+  time: 0.22125000
   front: { right: 10, left: 10 }
   back: { right: 10, left: 10 }
 dia45:

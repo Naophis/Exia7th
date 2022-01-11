@@ -2,8 +2,8 @@
 dt = 0.001/4;
 Normal = 0;Large = 1; Orval = 2; Dia45 = 3; Dia135 = 4; Dia90 = 5; Dia180 = 6;
 
-ego_v = 300;
-turn_mode = Normal;
+ego_v = 800;
+turn_mode = Orval;
 
 is_dia_mode = false;
 slip_gain = -495;
@@ -12,13 +12,13 @@ wall_off_offset = 0;
 wall_off_offset_dia = 0 * sqrt(2);
 
 if turn_mode == Normal
-    radius = 32; sla.pow_n = 4;
+    radius = 36; sla.pow_n = 4;
     target_angle = 90, is_dia_mode = false, turn_mode_str = 'Normal';
 elseif turn_mode == Large
     radius = 65; sla.pow_n = 4;
     target_angle = 90, is_dia_mode = false, turn_mode_str = 'Large';
 elseif turn_mode == Orval
-    radius = 86.30025; sla.pow_n = 4;
+    radius = 43; sla.pow_n = 4;
     target_angle = 180, is_dia_mode = false, turn_mode_str = 'Orval';
 elseif turn_mode == Dia45
     radius = 145; sla.pow_n = 4;
@@ -64,6 +64,7 @@ end
 sla.base_time = calc_slalom(ego_v, radius, Et, target_angle * pi / 180);
 sla.limit_time_count = sla.base_time * 2 / dt;
 % disp(sla.base_time);
+fprintf('time=\n');
 fprintf('%.8f\r\n', sla.base_time);
 
 tmp_x_list = zeros(100, 1);
@@ -120,24 +121,24 @@ fprintf('pos(x,y,rad,deg,max_G) = (%0.8f, %0.8f, %0.8f, %0.8f, %0.8fG)\r\n', tmp
 [a,b]=plot_slalom(turn_mode, tmp_x_list, tmp_y_list, tmp_w_list, tmp_x, tmp_y, target_angle, is_dia_mode, 'normal', wall_off_offset, wall_off_offset_dia);
 
 
-fprintf('no_slip %0.8f\t%0.8f\r\n', ...
-    a, b);
-[l_start, l_end] = plot_slalom(turn_mode, tmp_slip_x_list, tmp_slip_y_list, tmp_w_list, tmp_x, tmp_y, target_angle, is_dia_mode, 'slip', wall_off_offset, wall_off_offset_dia);
+% fprintf('no_slip %0.8f\t%0.8f\r\n', ...
+%     a, b);
+% [l_start, l_end] = plot_slalom(turn_mode, tmp_slip_x_list, tmp_slip_y_list, tmp_w_list, tmp_x, tmp_y, target_angle, is_dia_mode, 'slip', wall_off_offset, wall_off_offset_dia);
 
-fprintf('%d\t%s\t', ...
-    ego_v, turn_mode_str);
+% fprintf('%d\t%s\t', ...
+%     ego_v, turn_mode_str);
 
-fprintf('%d\t%d\t', ...
-    target_angle, radius);
+% fprintf('%d\t%d\t', ...
+%     target_angle, radius);
 
-fprintf('%0.8f\t%0.8f\t', ...
-    l_start, l_end);
+% fprintf('%0.8f\t%0.8f\t', ...
+%     l_start, l_end);
 
-fprintf('%0.8f\t%0.8f\t', ...
-    l_start, l_end);
+% fprintf('%0.8f\t%0.8f\t', ...
+%     l_start, l_end);
 
-fprintf('%0.8f\t%d\t', ...
-    sla.base_time, sla.pow_n);
+% fprintf('%0.8f\t%d\t', ...
+%     sla.base_time, sla.pow_n);
 
-fprintf('%0.8f\t%0.8f\t%0.8f\r\n', ...
-    l_start, l_end, l_start);
+% fprintf('%0.8f\t%0.8f\t%0.8f\r\n', ...
+%     l_start, l_end, l_start);

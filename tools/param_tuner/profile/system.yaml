@@ -1,21 +1,21 @@
 goals: [[7, 7], [7, 8], [8, 7], [8, 8]]
 # goals: [[1, 0]]
 maze_size: 32
-mode: 2 # モード選択
+mode: 1 # モード選択
 test: # テスト走行時に使用するパラメータ群
   v_max: 2600
   end_v: 5
   accl: 8000
   decel: -8000
   dist: 540
-  w_max: 5.0
-  alpha: 20
-  ang: 540
+  w_max: 20.0
+  alpha: 40
+  ang: 180
   suction_active: 1
   suction_duty: 99.0
-  file_idx: 0
+  file_idx: 1
   sla_dist: 180
-  sla_type: 1 #normal
+  sla_type: 3 #normal
   # sla_type: 2 #orval
   # sla_type: 3 #large
   # sla_type: 4 #dia45
