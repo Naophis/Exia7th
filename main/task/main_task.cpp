@@ -297,6 +297,7 @@ void MainTask::load_sys_param() {
   sys.test.sla_return = cJSON_GetObjectItem(test, "sla_return")->valueint;
   sys.test.sla_type2 = cJSON_GetObjectItem(test, "sla_type2")->valueint;
   sys.test.sla_dist = cJSON_GetObjectItem(test, "sla_dist")->valuedouble;
+  sys.test.turn_times = cJSON_GetObjectItem(test, "turn_times")->valueint;
 
   cJSON_free(root);
   cJSON_free(goals);
@@ -683,7 +684,8 @@ void MainTask::test_sla() {
   printf("n = %d\n", sla_p.pow_n);
 
   TurnDirection rorl = ui->select_direction();
-
+  TurnDirection rorl2 = (rorl == TurnDirection::Right) ? (TurnDirection::Left)
+                                                       : (TurnDirection::Right);
   mp->reset_gyro_ref_with_check();
 
   if (sys.test.suction_active) {
@@ -714,17 +716,8 @@ void MainTask::test_sla() {
   nm.is_turn = false;
 
   mp->slalom(sla_p, rorl, nm);
-  for (int i = 0; i < 3; i++) {
-
-  mp->slalom(sla_p, rorl, nm);
-    // mp->slalom(sla_p,
-    //            rorl == TurnDirection::Right ? (TurnDirection::Left)
-    //                                         : (TurnDirection::Right),
-    //            nm);
-    // mp->slalom(sla_p,
-    //            rorl == TurnDirection::Right ? (TurnDirection::Right)
-    //                                         : (TurnDirection::Left),
-    //            nm);
+  for (int i = 0; i < sys.test.turn_times; i++) {
+    mp->slalom(sla_p, rorl2, nm);
   }
 
   ps.v_max = sla_p.v;

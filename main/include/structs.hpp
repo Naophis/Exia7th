@@ -246,6 +246,7 @@ typedef struct {
   int sla_type;
   int sla_return;
   int sla_type2;
+  int turn_times;
 } test_mode_t;
 
 typedef struct {
