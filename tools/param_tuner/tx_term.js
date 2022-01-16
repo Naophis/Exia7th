@@ -47,11 +47,13 @@ async function callerFun() {
 
   const files = fs.readdirSync(__dirname + "/profile");
 
-  for (const file of files) {
-    //
+  for (const file of files) //
+  {
     // let file = "turn_300.yaml";
     // let file = "turn_400.yaml";
     // let file = "profiles.yaml";
+    // let file = "hardware.yaml";
+    // let file = "system.yaml";
     if (file.match(/.yaml$/)) {
       let txt = fs.readFileSync(`${__dirname}/profile/${file}`, {
         encoding: "utf-8",

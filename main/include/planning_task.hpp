@@ -23,7 +23,8 @@ public:
   void motor_disable();
   void suction_disable();
 
-  void set_sensing_entity(std::shared_ptr<sensing_result_entity_t> &_sensing_result);
+  void
+  set_sensing_entity(std::shared_ptr<sensing_result_entity_t> &_sensing_result);
   void set_input_param_entity(std::shared_ptr<input_param_t> &_param_ro);
   void set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val);
 
@@ -76,6 +77,9 @@ private:
   t_ego mpc_next_ego;
 
   fail_safe_t fail_safe;
+  float get_feadforward_front();
+  float get_feadforward_roll();
+  float get_rpm_ff_val(TurnDirection td);
 };
 
 #endif

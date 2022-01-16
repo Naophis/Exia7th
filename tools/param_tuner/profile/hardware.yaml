@@ -13,8 +13,8 @@ motor_pid:
   i: 0.04
   d: 0.001
 gyro_pid:
-  p: 10.0
-  i: 0.25
+  p: 0.0 #10.0
+  i: 0.0 #0.25
   d: 0
 sensor_pid:
   p: 0.1
@@ -32,3 +32,10 @@ battery_param:
   lp_delay: 0.25
 led_param:
   lp_delay: 0.25
+kalman_config:
+  # q_ang: 0.01 #大：応答早
+  # q_bias: 0.01 # 大：gyro_wの値を類似する
+  # r_measure: 0.8 #大：応答送れ
+  q_ang: 2 #大：応答早
+  q_bias: 0.003 # 大：gyro_wの値を類似する
+  r_measure: 0.03 #大：応答送れ

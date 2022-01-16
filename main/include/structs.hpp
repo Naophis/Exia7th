@@ -56,11 +56,18 @@ typedef struct {
 } duty_t;
 
 typedef struct {
+  float front;
+  float roll;
+} ff_duty_t;
+
+typedef struct {
   float v_r = 0;
   float v_l = 0;
   float v_c = 0;
   float w_raw = 0;
   float w_lp = 0;
+  float w_kalman = 0;
+  float ang_kalman = 0;
   float battery_raw = 0;
   float battery_lp = 0;
 
@@ -77,6 +84,7 @@ typedef struct {
 
   rpm_t rpm;
   duty_t duty;
+  ff_duty_t ff_duty;
   char motion_type = 0;
 } ego_entity_t;
 
@@ -124,6 +132,10 @@ typedef struct {
   float Resist = 0;
   float Mass = 0;
   float Lm = 0;
+  float Kalman_ang = 0.0;
+  float Kalman_bias = 0.003f;
+  float Kalman_measure = 0.03f;
+  float tread = 38;
   pid_param_t motor_pid;
   pid_param_t gyro_pid;
   pid_param_t sensor_pid;
@@ -337,6 +349,9 @@ typedef struct {
   float battery_lp;
 
   char motion_type;
+
+  float duty_ff_front;
+  float duty_ff_roll;
 
 } log_data_t;
 

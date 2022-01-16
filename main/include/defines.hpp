@@ -121,6 +121,6 @@ static const std::string slalom_log_file("/spiflash/sla.log");
 static const std::string format1("%d,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
 static const std::string format2("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
 static const std::string
-    format3("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%d\n");
+    format3("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%d,%0.3f,%0.3f\n");
 
 #endif

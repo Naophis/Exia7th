@@ -204,7 +204,7 @@ void MainTask::load_hw_param() {
   printf("%s\n", line_buf);
 
   cJSON *root = cJSON_CreateObject(), *motor_pid, *gyro_pid, *gyro_param,
-        *battery_param, *led_param;
+        *kalman_config, *battery_param, *led_param;
   root = cJSON_Parse(line_buf);
 
   param->dt = cJSON_GetObjectItem(root, "dt")->valuedouble;
@@ -244,12 +244,20 @@ void MainTask::load_hw_param() {
   param->led_param.lp_delay =
       cJSON_GetObjectItem(led_param, "lp_delay")->valuedouble;
 
+  kalman_config = cJSON_GetObjectItem(root, "kalman_config");
+  param->Kalman_ang = cJSON_GetObjectItem(kalman_config, "q_ang")->valuedouble;
+  param->Kalman_bias =
+      cJSON_GetObjectItem(kalman_config, "q_bias")->valuedouble;
+  param->Kalman_measure =
+      cJSON_GetObjectItem(kalman_config, "r_measure")->valuedouble;
+
   cJSON_free(root);
   cJSON_free(motor_pid);
   cJSON_free(gyro_pid);
   cJSON_free(gyro_param);
   cJSON_free(battery_param);
   cJSON_free(led_param);
+  cJSON_free(kalman_config);
 }
 
 void MainTask::load_sys_param() {

@@ -2,3 +2,4 @@ build/
 *.pdf
 node_modules/
 *.csv
+slprj/
