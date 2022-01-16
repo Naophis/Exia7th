@@ -136,6 +136,9 @@ typedef struct {
   float Kalman_bias = 0.003f;
   float Kalman_measure = 0.03f;
   float tread = 38;
+  int FF_front = 0;
+  int FF_roll = 0;
+  int FF_keV = 0;
   pid_param_t motor_pid;
   pid_param_t gyro_pid;
   pid_param_t sensor_pid;

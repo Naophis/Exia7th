@@ -218,6 +218,10 @@ void MainTask::load_hw_param() {
   param->Mass = cJSON_GetObjectItem(root, "Mass")->valuedouble;
   param->Lm = cJSON_GetObjectItem(root, "Lm")->valuedouble;
 
+  param->FF_front = cJSON_GetObjectItem(root, "FF_front")->valueint;
+  param->FF_roll = cJSON_GetObjectItem(root, "FF_roll")->valueint;
+  param->FF_keV = cJSON_GetObjectItem(root, "FF_keV")->valueint;
+
   motor_pid = cJSON_GetObjectItem(root, "motor_pid");
   param->motor_pid.p = cJSON_GetObjectItem(motor_pid, "p")->valuedouble;
   param->motor_pid.i = cJSON_GetObjectItem(motor_pid, "i")->valuedouble;

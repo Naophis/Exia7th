@@ -343,30 +343,33 @@ void PlanningTask::pl_req_activate() {
 }
 
 float PlanningTask::get_feadforward_front() {
-  return 0;
-  // return param_ro->Mass * mpc_next_ego.accl  //
-  //        * param_ro->tire * param_ro->Resist //
-  //        / ((param_ro->gear_a / param_ro->gear_b) * param_ro->Km * 1000);
+  // return 0;
+  if (param_ro->FF_front == 0)
+    return 0;
+  return param_ro->Mass * mpc_next_ego.accl / 1000  //
+         * param_ro->tire / 1000 * param_ro->Resist //
+         / ((param_ro->gear_a / param_ro->gear_b) * param_ro->Km);
 }
 float PlanningTask::get_feadforward_roll() {
-  return 0;
-  // return param_ro->Lm * mpc_next_ego.alpha                        //
-  //        * param_ro->tire * param_ro->Resist                      //
-  //        / ((param_ro->gear_a / param_ro->gear_b) * param_ro->Km) //
-  //        / param_ro->tread;
+  // return 0;
+  if (param_ro->FF_roll == 0)
+    return 0;
+  return param_ro->Lm * mpc_next_ego.alpha                        //
+         * param_ro->tire * param_ro->Resist                      //
+         / ((param_ro->gear_a / param_ro->gear_b) * param_ro->Km) //
+         / param_ro->tread;
 }
 float PlanningTask::get_rpm_ff_val(TurnDirection td) {
   // return 0;
+  if (param_ro->FF_keV == 0)
+    return 0;
   if (td == TurnDirection::Right)
     return param_ro->Ke *
-           (tgt_val->ego_in.v / 1000 +
-            param_ro->tread / 2000 * tgt_val->ego_in.w) /
-           (param_ro->tire / 2000) * (30.0 / PI);
-
+           (tgt_val->ego_in.v + param_ro->tread / 2 * tgt_val->ego_in.w) /
+           (param_ro->tire / 2) * 30.0 / PI;
   return param_ro->Ke *
-         (tgt_val->ego_in.v / 1000 -
-          param_ro->tread / 2000 * tgt_val->ego_in.w) /
-         (param_ro->tire / 2000) * (30.0 / PI);
+         (tgt_val->ego_in.v - param_ro->tread / 2 * tgt_val->ego_in.w) /
+         (param_ro->tire / 2) * 30.0 / PI;
 }
 void PlanningTask::calc_tgt_duty() {
 
@@ -378,6 +381,7 @@ void PlanningTask::calc_tgt_duty() {
 
   float duty_rpm_r = get_rpm_ff_val(TurnDirection::Right);
   float duty_rpm_l = get_rpm_ff_val(TurnDirection::Left);
+
   float duty_ff_front = get_feadforward_front();
   float duty_ff_roll = get_feadforward_roll();
 
@@ -395,6 +399,8 @@ void PlanningTask::calc_tgt_duty() {
                     (duty_rpm_l + duty_ff_front - duty_ff_roll) /
                         sensing_result->ego.battery_lp * 100;
 
+  // printf("%0.3f, %0.3f %0.3f\n", duty_rpm_l, duty_rpm_r,
+  // sensing_result->ego.battery_lp );
   if (!motor_en) {
     duty_c = 0;
     duty_roll = 0;
