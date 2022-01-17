@@ -109,6 +109,7 @@ typedef struct {
   float p = 0;
   float i = 0;
   float d = 0;
+  char mode = 0;
 } pid_param_t;
 
 typedef struct {
@@ -140,7 +141,9 @@ typedef struct {
   int FF_roll = 0;
   int FF_keV = 0;
   pid_param_t motor_pid;
+  pid_param_t dist_pid;
   pid_param_t gyro_pid;
+  pid_param_t angle_pid;
   pid_param_t sensor_pid;
   pid_param_t sensor_pid_dia;
   gyro_param_t gyro_param;
@@ -156,8 +159,19 @@ typedef struct {
 } pid_error_t;
 
 typedef struct {
+  float gain_z;
+  float gain_zz;
+} gain_log_t;
+
+typedef struct {
   pid_error_t v;
+  pid_error_t dist;
   pid_error_t w;
+  pid_error_t ang;
+  gain_log_t v_log;
+  gain_log_t dist_log;
+  gain_log_t w_log;
+  gain_log_t ang_log;
 } pid_error_entity_t;
 
 // 指示速度
@@ -179,6 +193,8 @@ typedef struct {
   int error_gyro_reset = 0;
   int error_vel_reset = 0;
   int error_led_reset = 0;
+  int error_ang_reset = 0;
+  int error_dist_reset = 0;
   // int log_start = 0;
   // int log_end = 0;
 } planning_req_t;

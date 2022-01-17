@@ -204,7 +204,7 @@ void MainTask::load_hw_param() {
   printf("%s\n", line_buf);
 
   cJSON *root = cJSON_CreateObject(), *motor_pid, *gyro_pid, *gyro_param,
-        *kalman_config, *battery_param, *led_param;
+        *kalman_config, *battery_param, *led_param, *angle_pid, *dist_pid;
   root = cJSON_Parse(line_buf);
 
   param->dt = cJSON_GetObjectItem(root, "dt")->valuedouble;
@@ -226,11 +226,25 @@ void MainTask::load_hw_param() {
   param->motor_pid.p = cJSON_GetObjectItem(motor_pid, "p")->valuedouble;
   param->motor_pid.i = cJSON_GetObjectItem(motor_pid, "i")->valuedouble;
   param->motor_pid.d = cJSON_GetObjectItem(motor_pid, "d")->valuedouble;
+  param->motor_pid.mode = cJSON_GetObjectItem(motor_pid, "mode")->valueint;
+  
+  dist_pid = cJSON_GetObjectItem(root, "dist_pid");
+  param->dist_pid.p = cJSON_GetObjectItem(dist_pid, "p")->valuedouble;
+  param->dist_pid.i = cJSON_GetObjectItem(dist_pid, "i")->valuedouble;
+  param->dist_pid.d = cJSON_GetObjectItem(dist_pid, "d")->valuedouble;
+  param->dist_pid.mode = cJSON_GetObjectItem(dist_pid, "mode")->valueint;
 
   gyro_pid = cJSON_GetObjectItem(root, "gyro_pid");
   param->gyro_pid.p = cJSON_GetObjectItem(gyro_pid, "p")->valuedouble;
   param->gyro_pid.i = cJSON_GetObjectItem(gyro_pid, "i")->valuedouble;
   param->gyro_pid.d = cJSON_GetObjectItem(gyro_pid, "d")->valuedouble;
+  param->gyro_pid.mode = cJSON_GetObjectItem(gyro_pid, "mode")->valueint;
+
+  angle_pid = cJSON_GetObjectItem(root, "angle_pid");
+  param->angle_pid.p = cJSON_GetObjectItem(angle_pid, "p")->valuedouble;
+  param->angle_pid.i = cJSON_GetObjectItem(angle_pid, "i")->valuedouble;
+  param->angle_pid.d = cJSON_GetObjectItem(angle_pid, "d")->valuedouble;
+  param->angle_pid.mode = cJSON_GetObjectItem(angle_pid, "mode")->valueint;
 
   gyro_param = cJSON_GetObjectItem(root, "gyro_param");
   param->gyro_param.gyro_w_gain_right =
@@ -261,6 +275,8 @@ void MainTask::load_hw_param() {
   cJSON_free(gyro_param);
   cJSON_free(battery_param);
   cJSON_free(led_param);
+  cJSON_free(dist_pid);
+  cJSON_free(angle_pid);
   cJSON_free(kalman_config);
 }
 
@@ -582,6 +598,8 @@ void MainTask::recieve_data() {
 void MainTask::req_error_reset() {
   tgt_val->pl_req.error_vel_reset = 1;
   tgt_val->pl_req.error_gyro_reset = 1;
+  tgt_val->pl_req.error_ang_reset = 1;
+  tgt_val->pl_req.error_dist_reset = 1;
   tgt_val->pl_req.time_stamp++;
 }
 
@@ -602,11 +620,17 @@ void MainTask::test_run() {
   // pt->active_logging(_f);
 
   ps.v_max = sys.test.v_max;
-  ps.v_end = sys.test.end_v;
-  ps.dist = sys.test.dist;
+  ps.v_end = 20;
+  ps.dist = sys.test.dist - 5;
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
 
+  mp->go_straight(ps);
+  ps.v_max = 20;
+  ps.v_end = sys.test.end_v;
+  ps.dist = 5;
+  ps.accl = sys.test.accl;
+  ps.decel = sys.test.decel;
   mp->go_straight(ps);
   reset_tgt_data();
   reset_ego_data();

@@ -3,27 +3,45 @@ tire: 12
 gear_a: 37
 gear_b: 8
 max_duty: 99.9
-FF_front: 0
-FF_roll: 0
-FF_keV: 0
-Ke: 0.00035
+FF_front: 1
+FF_roll: 1
+FF_keV: 1
+Ke: 0.00040
 Km: 0.00025
 Resist: 2.93
 Mass: 0.015
-Lm: 0.000035
+Lm: 0.0000095
 motor_pid:
-  p: 0.05
-  i: 0.025
+  p: 0.01
+  i: 0.002
   d: 0.0
+  mode: 1
+  # p: 0.0
+  # i: 0.0
+  # d: 0.0
+dist_pid:
+  p: 0.75
+  i: 0.025
+  d: 0
+  mode: 1
   # p: 0.0
   # i: 0.0
   # d: 0.0
 gyro_pid:
-  p: 5.0
+  p: 0.275
+  i: 0.00495
+  d: 0
+  mode: 1
+  # p: 0.0
+  # i: 0.0
+  # d: 0
+angle_pid:
+  p: 2.5
   i: 0.25
   d: 0
-  # p: 0.0 #10.0
-  # i: 0.0 #0.25
+  mode: 1
+  # p: 0.0
+  # i: 0.0
   # d: 0
 sensor_pid:
   p: 0.1

@@ -327,7 +327,13 @@ void PlanningTask::pl_req_activate() {
       error_entity.v.error_i = 0;
     }
     if (tgt_val->pl_req.error_vel_reset == 1) {
+      error_entity.dist.error_i = 0;
+    }
+    if (tgt_val->pl_req.error_dist_reset == 1) {
       error_entity.w.error_i = 0;
+    }
+    if (tgt_val->pl_req.error_ang_reset == 1) {
+      error_entity.ang.error_i = 0;
     }
     if (tgt_val->pl_req.error_led_reset == 1) {
       // error_entity.led.error_i = 0;
@@ -374,10 +380,14 @@ float PlanningTask::get_rpm_ff_val(TurnDirection td) {
 void PlanningTask::calc_tgt_duty() {
 
   error_entity.v.error_p = tgt_val->ego_in.v - sensing_result->ego.v_c;
+  error_entity.dist.error_p = tgt_val->ego_in.img_dist - tgt_val->ego_in.dist;
   error_entity.w.error_p = tgt_val->ego_in.w - sensing_result->ego.w_lp;
+  error_entity.ang.error_p = tgt_val->ego_in.img_ang - tgt_val->ego_in.ang;
 
   error_entity.v.error_i += error_entity.v.error_p;
+  error_entity.dist.error_i += error_entity.dist.error_p;
   error_entity.w.error_i += error_entity.w.error_p;
+  error_entity.ang.error_i += error_entity.ang.error_p;
 
   float duty_rpm_r = get_rpm_ff_val(TurnDirection::Right);
   float duty_rpm_l = get_rpm_ff_val(TurnDirection::Left);
@@ -385,29 +395,101 @@ void PlanningTask::calc_tgt_duty() {
   float duty_ff_front = get_feadforward_front();
   float duty_ff_roll = get_feadforward_roll();
 
-  float duty_c = param_ro->motor_pid.p * error_entity.v.error_p +
-                 param_ro->motor_pid.i * error_entity.v.error_i;
+  float duty_c = 0;
+  float duty_c2 = 0;
+  float duty_roll = 0;
+  float duty_roll2 = 0;
 
-  float duty_roll = param_ro->gyro_pid.p * error_entity.w.error_p +
-                    param_ro->gyro_pid.i * error_entity.w.error_i;
+  if (param_ro->motor_pid.mode == 1) {
+    duty_c = param_ro->motor_pid.p * error_entity.v.error_p +
+             param_ro->motor_pid.i * error_entity.v.error_i +
+             param_ro->motor_pid.d * error_entity.v.error_d +
+             (error_entity.v_log.gain_z - error_entity.v_log.gain_zz) * dt;
+    error_entity.v_log.gain_zz = error_entity.v_log.gain_z;
+    error_entity.v_log.gain_z = duty_c;
+  } else {
+    duty_c = param_ro->motor_pid.p * error_entity.v.error_p +
+             param_ro->motor_pid.i * error_entity.v.error_i +
+             param_ro->motor_pid.d * error_entity.v.error_d;
+    error_entity.v_log.gain_zz = 0;
+    error_entity.v_log.gain_z = 0;
+  }
+  if (param_ro->dist_pid.mode == 1) {
+    duty_c2 =
+        param_ro->dist_pid.p * error_entity.dist.error_p +
+        param_ro->dist_pid.i * error_entity.dist.error_i +
+        param_ro->dist_pid.d * error_entity.dist.error_d +
+        (error_entity.dist_log.gain_z - error_entity.dist_log.gain_zz) * dt;
+    error_entity.dist_log.gain_zz = error_entity.dist_log.gain_z;
+    error_entity.dist_log.gain_z = duty_c;
+  } else {
+    duty_c2 = param_ro->dist_pid.p * error_entity.dist.error_p +
+              param_ro->dist_pid.i * error_entity.dist.error_i +
+              param_ro->dist_pid.d * error_entity.dist.error_d;
+    error_entity.dist_log.gain_zz = 0;
+    error_entity.dist_log.gain_z = 0;
+  }
 
-  tgt_duty.duty_r = duty_c + duty_roll +
-                    (duty_rpm_r + duty_ff_front + duty_ff_roll) /
-                        sensing_result->ego.battery_lp * 100;
+  if (param_ro->gyro_pid.mode == 1) {
+    duty_roll = param_ro->gyro_pid.p * error_entity.w.error_p +
+                param_ro->gyro_pid.i * error_entity.w.error_i +
+                param_ro->gyro_pid.d * error_entity.w.error_d +
+                (error_entity.w_log.gain_z - error_entity.w_log.gain_zz) * dt;
+    error_entity.w_log.gain_zz = error_entity.w_log.gain_z;
+    error_entity.w_log.gain_z = duty_roll;
+  } else {
+    duty_roll = param_ro->gyro_pid.p * error_entity.w.error_p +
+                param_ro->gyro_pid.i * error_entity.w.error_i +
+                param_ro->gyro_pid.d * error_entity.w.error_d;
+    error_entity.w_log.gain_zz = 0;
+    error_entity.w_log.gain_z = 0;
+  }
 
-  tgt_duty.duty_l = duty_c - duty_roll +
-                    (duty_rpm_l + duty_ff_front - duty_ff_roll) /
-                        sensing_result->ego.battery_lp * 100;
+  if (param_ro->angle_pid.mode == 1) {
+    duty_roll2 =
+        param_ro->angle_pid.p * error_entity.ang.error_p +
+        param_ro->angle_pid.i * error_entity.ang.error_i +
+        param_ro->angle_pid.d * error_entity.ang.error_d +
+        (error_entity.ang_log.gain_z - error_entity.ang_log.gain_zz) * dt;
+    error_entity.ang_log.gain_zz = error_entity.ang_log.gain_z;
+    error_entity.ang_log.gain_z = duty_roll2;
+  } else {
+    duty_roll2 = param_ro->angle_pid.p * error_entity.ang.error_p +
+                 param_ro->angle_pid.i * error_entity.ang.error_i +
+                 param_ro->angle_pid.d * error_entity.ang.error_d;
+    error_entity.ang_log.gain_zz = 0;
+    error_entity.ang_log.gain_z = 0;
+  }
+
+  tgt_duty.duty_r = (duty_c + duty_c2 + duty_roll + duty_roll2 + duty_rpm_r +
+                     duty_ff_front + duty_ff_roll) /
+                    sensing_result->ego.battery_lp * 100;
+
+  tgt_duty.duty_l = (duty_c + duty_c2 - duty_roll - duty_roll2 + duty_rpm_l +
+                     duty_ff_front - duty_ff_roll) /
+                    sensing_result->ego.battery_lp * 100;
 
   // printf("%0.3f, %0.3f %0.3f\n", duty_rpm_l, duty_rpm_r,
   // sensing_result->ego.battery_lp );
   if (!motor_en) {
     duty_c = 0;
     duty_roll = 0;
-    error_entity.v.error_i = error_entity.w.error_i = 0;
+    duty_roll2 = 0;
+    error_entity.v.error_i = 0;
+    error_entity.dist.error_i = 0;
+    error_entity.w.error_i = 0;
+    error_entity.ang.error_i = 0;
     tgt_duty.duty_r = tgt_duty.duty_l = 0;
     duty_ff_front = duty_ff_roll = 0;
     duty_rpm_r = duty_rpm_l = 0;
+    error_entity.v_log.gain_zz = 0;
+    error_entity.v_log.gain_z = 0;
+    error_entity.dist_log.gain_zz = 0;
+    error_entity.dist_log.gain_z = 0;
+    error_entity.w_log.gain_zz = 0;
+    error_entity.w_log.gain_z = 0;
+    error_entity.ang_log.gain_zz = 0;
+    error_entity.ang_log.gain_z = 0;
   }
   sensing_result->ego.duty.duty_r = tgt_duty.duty_r;
   sensing_result->ego.duty.duty_l = tgt_duty.duty_l;
@@ -482,10 +564,14 @@ void PlanningTask::cp_request() {
     tgt_val->ego_in.sla_param.pow_n = tgt_val->nmr.sla_pow_n;
 
     tgt_val->ego_in.state = 0;
-    tgt_val->ego_in.img_ang = 0;
-    tgt_val->ego_in.img_dist = 0;
-    tgt_val->ego_in.ang = 0;
-    tgt_val->ego_in.dist = 0;
+    if (tgt_val->tgt_in.tgt_angle != 0) {
+      tgt_val->ego_in.img_ang = 0;
+      tgt_val->ego_in.ang = 0;
+    }
+    if (tgt_val->tgt_in.tgt_dist != 0) {
+      tgt_val->ego_in.img_dist = 0;
+      tgt_val->ego_in.dist = 0;
+    }
     tgt_val->ego_in.sla_param.counter = 1;
     tgt_val->ego_in.sla_param.state = 0;
 
