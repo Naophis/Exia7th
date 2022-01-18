@@ -49,6 +49,11 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p) {
 }
 
 MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
+  // 一度初期化
+  tgt_val->motion_type = MotionType::NONE;
+  tgt_val->nmr.timstamp++;
+  vTaskDelay(1 / portTICK_RATE_MS);
+
   tgt_val->nmr.v_max = 0;
   tgt_val->nmr.v_end = 0;
   tgt_val->nmr.accl = 0;
@@ -229,6 +234,11 @@ void MotionPlanning::reset_tgt_data() {
 
   tgt_val->tgt_in.accl_param.limit = 2500;
   tgt_val->tgt_in.accl_param.n = 4;
+  tgt_val->global_pos.ang = 0;
+  tgt_val->global_pos.img_ang = 0;
+  tgt_val->global_pos.dist = 0;
+  tgt_val->global_pos.img_dist = 0;
+
 }
 
 void MotionPlanning::reset_ego_data() {
@@ -251,6 +261,10 @@ void MotionPlanning::reset_ego_data() {
   tgt_val->ego_in.w = 0;
 
   tgt_val->motion_mode = 0;
+  // 一度初期化
+  tgt_val->motion_type = MotionType::NONE;
+  tgt_val->nmr.timstamp++;
+  vTaskDelay(1 / portTICK_RATE_MS);
 }
 
 void MotionPlanning::reset_gyro_ref() {

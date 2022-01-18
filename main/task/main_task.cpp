@@ -38,6 +38,7 @@ void MainTask::set_planning_task(std::shared_ptr<PlanningTask> &_pt) {
 }
 void MainTask::set_logging_task(std::shared_ptr<LoggingTask> &_lt) {
   lt = _lt; //
+  search_ctrl->set_logging_task(lt);
 }
 void MainTask::check_battery() {
   vTaskDelay(1500 / portTICK_PERIOD_MS); //他モジュールの起動待ち
@@ -531,6 +532,7 @@ void MainTask::rx_uart_json() {
 void MainTask::task() {
   const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
   mp->set_userinterface(ui);
+  search_ctrl->set_userinterface(ui);
   pt->motor_disable();
   check_battery();
   // ui->init();
@@ -844,7 +846,6 @@ void MainTask::save_maze_data(bool write) {
   fclose(f);
 }
 void MainTask::read_maze_data() {
-
   auto *f = fopen(maze_log_file.c_str(), "rb");
   if (f == NULL)
     return;

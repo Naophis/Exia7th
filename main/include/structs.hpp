@@ -224,8 +224,16 @@ typedef struct {
 } new_motion_req_t;
 
 typedef struct {
+  float img_dist;
+  float img_ang;
+  float dist;
+  float ang;
+} global_ego_pos_t;
+
+typedef struct {
   t_tgt tgt_in;
   t_ego ego_in;
+  global_ego_pos_t global_pos;
   int32_t motion_mode;
   MotionType motion_type;
   MotionDirection motion_dir;

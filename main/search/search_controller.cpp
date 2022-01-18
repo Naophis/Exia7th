@@ -26,6 +26,13 @@ void SearchController::set_sensing_entity(
   sensing_result = _entity;
 }
 
+void SearchController::set_logging_task(std::shared_ptr<LoggingTask> &_lt) {
+  lt = _lt;
+}
+
+void SearchController::set_userinterface(std::shared_ptr<UserInterface> &_ui) {
+  ui = _ui;
+}
 void SearchController::reset() {
   ego->dir = Direction::North;
   ego->x = 0;
@@ -110,6 +117,7 @@ bool SearchController::is_goaled() { return tmp_goal_list.size() == 0; }
 void SearchController::exec(param_set_t &p_set, SearchMode sm) {
 
   mp->reset_gyro_ref_with_check();
+  lt->start_slalom_log();
   reset();
 
   for (const auto p : lgc->goal_list) {
@@ -160,7 +168,15 @@ void SearchController::exec(param_set_t &p_set, SearchMode sm) {
   }
   finish(p_set);
   pt->motor_disable();
+  lt->stop_slalom_log();
   mp->coin();
+  lt->save(slalom_log_file);
+  while (1) {
+    if (ui->button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
+  lt->dump_log(slalom_log_file);
 }
 void SearchController::judge_wall() {
   bool wall_n = false;

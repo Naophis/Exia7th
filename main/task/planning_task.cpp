@@ -197,6 +197,7 @@ void PlanningTask::update_ego_motion() {
       30.0 * sensing_result->ego.v_l / (PI * tire / 2);
 
   tgt_val->ego_in.dist += sensing_result->ego.v_c * dt;
+  tgt_val->global_pos.dist += sensing_result->ego.v_c * dt;
 
   if (tgt_val->motion_dir == MotionDirection::LEFT) {
     sensing_result->ego.w_raw =
@@ -219,6 +220,7 @@ void PlanningTask::update_ego_motion() {
       sensing_result->ego.battery_raw * param_ro->battery_param.lp_delay;
 
   tgt_val->ego_in.ang += sensing_result->ego.w_lp * dt;
+  tgt_val->global_pos.ang += sensing_result->ego.w_lp * dt;
 
   sensing_result->ego.right90_raw = sensing_result->led_sen.right90.raw;
   sensing_result->ego.right90_lp =
@@ -385,9 +387,19 @@ void PlanningTask::calc_tgt_duty() {
   error_entity.ang.error_d = error_entity.ang.error_p;
 
   error_entity.v.error_p = tgt_val->ego_in.v - sensing_result->ego.v_c;
-  error_entity.dist.error_p = tgt_val->ego_in.img_dist - tgt_val->ego_in.dist;
   error_entity.w.error_p = tgt_val->ego_in.w - sensing_result->ego.w_lp;
-  error_entity.ang.error_p = tgt_val->ego_in.img_ang - tgt_val->ego_in.ang;
+
+  // tgt_val->global_pos.img_ang += mpc_next_ego.w;
+  // tgt_val->global_pos.img_dist += mpc_next_ego.v;
+
+  // error_entity.dist.error_p = tgt_val->ego_in.img_dist -
+  // tgt_val->ego_in.dist; error_entity.ang.error_p = tgt_val->ego_in.img_ang -
+  // tgt_val->ego_in.ang;
+
+  error_entity.dist.error_p =
+      tgt_val->global_pos.img_dist - tgt_val->global_pos.dist;
+  error_entity.ang.error_p =
+      tgt_val->global_pos.img_ang - tgt_val->global_pos.ang;
 
   error_entity.v.error_d = error_entity.v.error_p - error_entity.v.error_d;
   error_entity.dist.error_d =
@@ -485,6 +497,7 @@ void PlanningTask::calc_tgt_duty() {
   // sensing_result->ego.battery_lp );
   if (!motor_en) {
     duty_c = 0;
+    duty_c2 = 0;
     duty_roll = 0;
     duty_roll2 = 0;
     error_entity.v.error_i = 0;
@@ -502,6 +515,10 @@ void PlanningTask::calc_tgt_duty() {
     error_entity.w_log.gain_z = 0;
     error_entity.ang_log.gain_zz = 0;
     error_entity.ang_log.gain_z = 0;
+    tgt_val->global_pos.ang = 0;
+    tgt_val->global_pos.img_ang = 0;
+    tgt_val->global_pos.dist = 0;
+    tgt_val->global_pos.img_dist = 0;
   }
   sensing_result->ego.duty.duty_r = tgt_duty.duty_r;
   sensing_result->ego.duty.duty_l = tgt_duty.duty_l;
@@ -523,6 +540,9 @@ void PlanningTask::cp_tgt_val() {
 
   tgt_val->ego_in.img_ang = mpc_next_ego.img_ang;
   tgt_val->ego_in.img_dist = mpc_next_ego.img_dist;
+
+  tgt_val->global_pos.img_ang += mpc_next_ego.w * dt;
+  tgt_val->global_pos.img_dist += mpc_next_ego.v * dt;
 
   tgt_val->ego_in.slip_point.slip_angle = mpc_next_ego.slip_point.slip_angle;
 
@@ -576,6 +596,21 @@ void PlanningTask::cp_request() {
     tgt_val->ego_in.sla_param.pow_n = tgt_val->nmr.sla_pow_n;
 
     tgt_val->ego_in.state = 0;
+
+    if (!(tgt_val->motion_type == MotionType::NONE ||
+          tgt_val->motion_type == MotionType::STRAIGHT ||
+          tgt_val->motion_type == MotionType::WALL_OFF)) {
+      tgt_val->ego_in.img_ang = 0;
+      tgt_val->ego_in.ang = 0;
+    }
+
+    if (tgt_val->motion_type == MotionType::NONE) {
+      tgt_val->global_pos.ang = 0;
+      tgt_val->global_pos.img_ang = 0;
+      tgt_val->global_pos.dist = 0;
+      tgt_val->global_pos.img_dist = 0;
+    }
+
     if (tgt_val->tgt_in.tgt_angle != 0) {
       tgt_val->ego_in.img_ang = 0;
       tgt_val->ego_in.ang = 0;

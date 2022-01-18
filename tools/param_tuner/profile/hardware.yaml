@@ -3,9 +3,9 @@ tire: 12
 gear_a: 37
 gear_b: 8
 max_duty: 99.9
-FF_front: 1
-FF_roll: 1
-FF_keV: 1
+FF_front: 0
+FF_roll: 0
+FF_keV: 0
 Ke: 0.00040
 Km: 0.00025
 Resist: 2.93
@@ -28,7 +28,7 @@ dist_pid:
   # i: 0.0
   # d: 0.0
 gyro_pid:
-  p: 0.275
+  p: 0.75
   i: 0.00495
   d: 0
   mode: 1
