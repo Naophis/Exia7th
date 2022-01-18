@@ -96,6 +96,8 @@ constexpr float LOW_BATTERY_TH = 3.95;
 
 constexpr uint16_t RESET_GYRO_LOOP_CNT = 100;
 
+static char line_buf[LINE_BUF_SIZE];
+
 static const std::initializer_list<std::pair<TurnType, std::string>>
     turn_name_list = {
         {TurnType::None, "straight"},    //
@@ -117,6 +119,7 @@ static const std::initializer_list<std::pair<StraightType, std::string>>
 };
 
 static const std::string slalom_log_file("/spiflash/sla.log");
+static const std::string maze_log_file("/spiflash/maze.log");
 
 static const std::string format1("%d,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
 static const std::string format2("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");

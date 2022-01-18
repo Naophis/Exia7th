@@ -282,6 +282,7 @@ typedef struct {
 
 typedef struct {
   std::vector<point_t> goals;
+  int maze_size;
   int user_mode;
   test_mode_t test;
 } system_t;

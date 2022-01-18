@@ -1,6 +1,12 @@
 #ifndef ENUMS_HPP
 #define ENUMS_HPP
 
+enum class SearchMode : int {
+  ALL = 0,
+  Kata = 1,
+  Return = 2,
+};
+
 enum class LogFileType : int {
   SLALOM = 0,
   STRAIGHT = 1,

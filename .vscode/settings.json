@@ -55,7 +55,11 @@
         "deque": "cpp",
         "fstream": "cpp",
         "iostream": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "condition_variable": "cpp",
+        "set": "cpp",
+        "mutex": "cpp",
+        "thread": "cpp"
     },
     "idf.adapterTargetName": "esp32s3"
 }

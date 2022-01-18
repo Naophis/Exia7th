@@ -15,6 +15,8 @@ public:
 
   ~MazeSolverBaseLgc();
 
+  void step_cell(int x, int y, Direction d);
+
   void set_map_val(int idx, int val);
 
   void init(const int _maze_size, const int _max_step_val);
@@ -41,6 +43,8 @@ public:
 
   void set_wall_data(const int x, const int y, Direction dir,
                      const bool isWall);
+
+  void set_native_wall_data(const int idx, const uint8_t data);
 
   void set_default_wall_data();
 
@@ -159,7 +163,6 @@ public:
     // St2 = cell_size / 2;
     // St3 = cell_size / 4;
 
-
     cell_size = 7;
     Dia = cell_size * 1.41421356 / 2;
     Dia2 = cell_size * 1.41421356 / 2 * 3 / 5;
@@ -184,13 +187,13 @@ public:
   void priorityStraight2(int x, int y, Direction now_dir, Direction dir,
                          float &dist_val, Direction &next_dir);
 
-private:
   vector<unsigned char> map;
   vector<unsigned int> dist;
   vector<unsigned char> updateMap;
   vector<point_t> q_list;
   vector<dir_pt_t> vq_list;
 
+private:
   unsigned int maze_list_size;
   unsigned int goal_list_size;
   unsigned int vector_max_step_val = 180 * 1024;

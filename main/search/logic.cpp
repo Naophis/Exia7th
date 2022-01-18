@@ -127,8 +127,8 @@ void MazeSolverBaseLgc::update_dist_map(const int mode,
   }
   int pt1;
   int b;
-  char X = 0, Y = 0;
-  char i, j;
+  int X = 0, Y = 0;
+  int i, j;
   while (head != tail) {
     Y = q_list[head].y;
     X = q_list[head].x;
@@ -231,15 +231,21 @@ void MazeSolverBaseLgc::set_wall_data(const int x, const int y, Direction dir,
                  (map[idx] & (~(0x01 * static_cast<int>(dir)) & 0x0f));
   }
 }
+void MazeSolverBaseLgc::set_native_wall_data(const int idx,
+                                             const uint8_t data) {
+  if (idx >= maze_list_size)
+    return;
+  map[idx] = data;
+}
 
 void MazeSolverBaseLgc::set_default_wall_data() {
-  // for (int i = 0; i < maze_size; i++) {
-  //   // set_map
-  //   set_wall_data(i, maze_size - 1, Direction::North, true);
-  //   set_wall_data(maze_size - 1, i, Direction::East, true);
-  //   set_wall_data(0, i, Direction::West, true);
-  //   set_wall_data(i, 0, Direction::South, true);
-  // }
+  for (int i = 0; i < maze_size; i++) {
+    // set_map
+    set_wall_data(i, maze_size - 1, Direction::North, true);
+    set_wall_data(maze_size - 1, i, Direction::East, true);
+    set_wall_data(0, i, Direction::West, true);
+    set_wall_data(i, 0, Direction::South, true);
+  }
   set_wall_data(0, 0, Direction::East, true);
   set_wall_data(0, 0, Direction::North, false);
   set_wall_data(1, 0, Direction::West, true);
@@ -869,6 +875,18 @@ unsigned int MazeSolverBaseLgc::updateVectorMap(
   }
   return c;
 }
+void MazeSolverBaseLgc::step_cell(int x, int y, Direction d) {
+  if (valid_map_list_idx(x, y)) {
+    if (d == Direction::North)
+      map[x + y * maze_size] |= 0x10;
+    else if (d == Direction::East)
+      map[x + y * maze_size] |= 0x20;
+    else if (d == Direction::West)
+      map[x + y * maze_size] |= 0x40;
+    else if (d == Direction::South)
+      map[x + y * maze_size] |= 0x80;
+  }
+}
 
 bool MazeSolverBaseLgc::is_stepped(int x, int y) {
   if (valid_map_list_idx(x, y))
@@ -921,8 +939,8 @@ unsigned int MazeSolverBaseLgc::searchGoalPosition(
   Direction now_dir = Direction::North;
   int x = 0;
   int y = 1;
-  int position = 0;
-  int idx;
+  // int position = 0;
+  // int idx;
   float Value;
 
   Direction dirLog[3];
@@ -949,7 +967,7 @@ unsigned int MazeSolverBaseLgc::searchGoalPosition(
     if (arrival_goal_position(x, y))
       break;
 
-    const unsigned int position = getDistVector(x, y, now_dir);
+    // const unsigned int position = getDistVector(x, y, now_dir);
 
     setNextRootDirectionPathUnKnown(x, y, Direction::North, now_dir, next_dir,
                                     Value);

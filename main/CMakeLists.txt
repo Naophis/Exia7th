@@ -13,7 +13,6 @@ set(COMPONENT_SRCS
     "task/motion_planning.cpp"
     "task/planning_task.cpp"
     "task/ui.cpp"
-    "task/integrated_entity.cpp"
     "task/main_task.cpp"
     "task/icm20689.cpp"
     "task/sensing_task.cpp"

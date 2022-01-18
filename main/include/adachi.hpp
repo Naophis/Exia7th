@@ -27,6 +27,7 @@ public:
   void deadEnd(int egox, int egoy);
   bool is_goal(int x, int y);
   bool is_goaled();
+  void reset_goal() { goaled = false; }
 
 private:
   void setNextDirection(int x2, int y2, Direction dir, Direction &next_dir,

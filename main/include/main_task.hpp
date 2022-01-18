@@ -20,7 +20,6 @@
 
 #include "gen_code/mpc_tgt_calc.h"
 #include "include/adachi.hpp"
-#include "include/integrated_entity.hpp"
 #include "include/logic.hpp"
 #include "include/motion_planning.hpp"
 #include "include/search_controller.hpp"
@@ -102,6 +101,8 @@ private:
   void load_turn_param_profiles();
   void load_slalom_param();
   void dump_log();
+  void save_maze_data(bool write);
+  void read_maze_data();
   std::vector<param_set_t> paramset_list;
 
   std::shared_ptr<MazeSolverBaseLgc> lgc;

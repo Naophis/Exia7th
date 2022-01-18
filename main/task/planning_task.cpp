@@ -354,7 +354,7 @@ float PlanningTask::get_feadforward_front() {
     return 0;
   return param_ro->Mass * mpc_next_ego.accl / 1000  //
          * param_ro->tire / 1000 * param_ro->Resist //
-         / ((param_ro->gear_a / param_ro->gear_b) * param_ro->Km);
+         / ((param_ro->gear_a / param_ro->gear_b) * param_ro->Km) / 2;
 }
 float PlanningTask::get_feadforward_roll() {
   // return 0;
@@ -379,10 +379,22 @@ float PlanningTask::get_rpm_ff_val(TurnDirection td) {
 }
 void PlanningTask::calc_tgt_duty() {
 
+  error_entity.v.error_d = error_entity.v.error_p;
+  error_entity.dist.error_d = error_entity.dist.error_p;
+  error_entity.w.error_d = error_entity.w.error_p;
+  error_entity.ang.error_d = error_entity.ang.error_p;
+
   error_entity.v.error_p = tgt_val->ego_in.v - sensing_result->ego.v_c;
   error_entity.dist.error_p = tgt_val->ego_in.img_dist - tgt_val->ego_in.dist;
   error_entity.w.error_p = tgt_val->ego_in.w - sensing_result->ego.w_lp;
   error_entity.ang.error_p = tgt_val->ego_in.img_ang - tgt_val->ego_in.ang;
+
+  error_entity.v.error_d = error_entity.v.error_p - error_entity.v.error_d;
+  error_entity.dist.error_d =
+      error_entity.dist.error_p - error_entity.dist.error_d;
+  error_entity.w.error_d = error_entity.w.error_p - error_entity.w.error_d;
+  error_entity.ang.error_d =
+      error_entity.ang.error_p - error_entity.ang.error_d;
 
   error_entity.v.error_i += error_entity.v.error_p;
   error_entity.dist.error_i += error_entity.dist.error_p;

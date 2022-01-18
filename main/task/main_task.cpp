@@ -10,8 +10,8 @@ MainTask::MainTask() {
 MainTask::~MainTask() {}
 
 void MainTask::create_task(const BaseType_t xCoreID) {
-  xTaskCreatePinnedToCore(task_entry_point, "main_task", 8192, this, 2, &handle,
-                          xCoreID);
+  xTaskCreatePinnedToCore(task_entry_point, "main_task", 8192 * 2, this, 2,
+                          &handle, xCoreID);
 }
 void MainTask::task_entry_point(void *task_instance) {
   static_cast<MainTask *>(task_instance)->task();
@@ -97,8 +97,8 @@ int MainTask::select_mode() {
     int res = ui->encoder_operation();
     mode_num += res;
     if (mode_num == -1) {
-      mode_num = 14;
-    } else if (mode_num == 15) {
+      mode_num = 15;
+    } else if (mode_num == 16) {
       mode_num = (int)(MODE::SEARCH);
     }
     lbit.byte = mode_num + 1;
@@ -197,7 +197,6 @@ void MainTask::load_hw_param() {
   if (f == NULL) {
     return;
   }
-  char line_buf[LINE_BUF_SIZE];
   fgets(line_buf, sizeof(line_buf), f);
   fclose(f);
 
@@ -227,7 +226,7 @@ void MainTask::load_hw_param() {
   param->motor_pid.i = cJSON_GetObjectItem(motor_pid, "i")->valuedouble;
   param->motor_pid.d = cJSON_GetObjectItem(motor_pid, "d")->valuedouble;
   param->motor_pid.mode = cJSON_GetObjectItem(motor_pid, "mode")->valueint;
-  
+
   dist_pid = cJSON_GetObjectItem(root, "dist_pid");
   param->dist_pid.p = cJSON_GetObjectItem(dist_pid, "p")->valuedouble;
   param->dist_pid.i = cJSON_GetObjectItem(dist_pid, "i")->valuedouble;
@@ -285,7 +284,6 @@ void MainTask::load_sys_param() {
   if (f == NULL) {
     return;
   }
-  char line_buf[LINE_BUF_SIZE];
   fgets(line_buf, sizeof(line_buf), f);
   fclose(f);
 
@@ -304,7 +302,7 @@ void MainTask::load_sys_param() {
     sys.goals.emplace_back(pt);
     printf("%u %u\n", pt.x, pt.y);
   }
-
+  sys.maze_size = cJSON_GetObjectItem(root, "maze_size")->valueint;
   sys.user_mode = cJSON_GetObjectItem(root, "mode")->valueint;
   test = cJSON_GetObjectItem(root, "test");
 
@@ -336,7 +334,6 @@ void MainTask::load_turn_param_profiles() {
   FILE *f = fopen("/spiflash/profiles.txt", "rb");
   if (f == NULL)
     return;
-  char line_buf[LINE_BUF_SIZE];
   fgets(line_buf, sizeof(line_buf), f);
   fclose(f);
 
@@ -403,7 +400,6 @@ void MainTask::load_slalom_param() {
       return;
     }
     printf("%s\n", path.c_str());
-    char line_buf[LINE_BUF_SIZE];
     fgets(line_buf, sizeof(line_buf), f);
     fclose(f);
 
@@ -565,21 +561,45 @@ void MainTask::task() {
     }
   } else {
     ui->hello_exia();
-
-    lgc->init(32, 1023);
+    lgc->init(sys.maze_size, sys.maze_size * sys.maze_size - 1);
     lgc->set_goal_pos(sys.goals);
     search_ctrl->set_lgc(lgc);
     search_ctrl->set_motion_plannning(mp);
-
-    int mode_num = select_mode();
-    printf("%d\n", mode_num);
-    if (mode_num == 0) {
-      search_ctrl->exec(paramset_list[mode_num]);
+    read_maze_data();
+    while (1) {
+      int mode_num = select_mode();
+      printf("%d\n", mode_num);
+      if (mode_num == 0) {
+        search_ctrl->exec(paramset_list[0], SearchMode::Kata);
+        save_maze_data(true);
+        while (1) {
+          if (ui->button_state_hold())
+            break;
+          vTaskDelay(10 / portTICK_RATE_MS);
+        }
+        search_ctrl->print_maze();
+      } else if (mode_num == 1) {
+        search_ctrl->exec(paramset_list[0], SearchMode::Return);
+        save_maze_data(true);
+        while (1) {
+          if (ui->button_state_hold())
+            break;
+          vTaskDelay(10 / portTICK_RATE_MS);
+        }
+        search_ctrl->print_maze();
+      } else if (mode_num == 15) {
+        save_maze_data(false);
+      }
+      vTaskDelay(10 / portTICK_RATE_MS);
     }
   }
 
   // echo_sensing_result_with_json();
-
+  while (1) {
+    if (ui->button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
   dump1(); // taskの最終行に配置すること
   while (1) {
     vTaskDelay(xDelay);
@@ -799,7 +819,6 @@ void MainTask::dump_log() {
     printf("log_file_error\n");
     return;
   }
-  char line_buf[LINE_BUF_SIZE];
   while (fgets(line_buf, sizeof(line_buf), f) != NULL)
     printf("%s\n", line_buf);
   fclose(f);
@@ -809,4 +828,36 @@ void MainTask::dump_log() {
       break;
     vTaskDelay(10 / portTICK_RATE_MS);
   }
+}
+void MainTask::save_maze_data(bool write) {
+  auto *f = fopen(maze_log_file.c_str(), "wb");
+  if (f == NULL)
+    return;
+  if (write) {
+    for (const auto d : lgc->map) {
+      fprintf(f, "%d,", d);
+    }
+  } else {
+    printf("delete maze data\n");
+    fprintf(f, "null");
+  }
+  fclose(f);
+}
+void MainTask::read_maze_data() {
+
+  auto *f = fopen(maze_log_file.c_str(), "rb");
+  if (f == NULL)
+    return;
+  while (fgets(line_buf, sizeof(line_buf), f) != NULL)
+    printf("%s\n", line_buf);
+  fclose(f);
+  std::string str = std::string(line_buf);
+  if (str == "null")
+    return;
+  auto map_list = split(str, ',');
+  for (int i = 0; i < map_list.size(); i++) {
+    lgc->set_native_wall_data(i, stoi(map_list[i]));
+  }
+  printf("read maze data!!!\n");
+  search_ctrl->print_maze();
 }
