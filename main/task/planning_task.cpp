@@ -199,14 +199,34 @@ void PlanningTask::update_ego_motion() {
   tgt_val->ego_in.dist += sensing_result->ego.v_c * dt;
   tgt_val->global_pos.dist += sensing_result->ego.v_c * dt;
 
-  if (tgt_val->motion_dir == MotionDirection::LEFT) {
-    sensing_result->ego.w_raw =
-        param_ro->gyro_param.gyro_w_gain_left *
-        (sensing_result->gyro.raw - tgt_val->gyro_zero_p_offset);
+  if (GY_MODE) {
+    sensing_result->gyro.data = 0;
+    for (int i = 0; i < GY_DQ_SIZE; i++) {
+      sensing_result->gyro.data += sensing_result->gyro_list[i];
+    }
+    sensing_result->gyro.data /= GY_DQ_SIZE;
+  }
+
+  if (GY_MODE) {
+    if (tgt_val->motion_dir == MotionDirection::LEFT) {
+      sensing_result->ego.w_raw =
+          param_ro->gyro_param.gyro_w_gain_left *
+          (sensing_result->gyro.data - tgt_val->gyro_zero_p_offset);
+    } else {
+      sensing_result->ego.w_raw =
+          param_ro->gyro_param.gyro_w_gain_right *
+          (sensing_result->gyro.data - tgt_val->gyro_zero_p_offset);
+    }
   } else {
-    sensing_result->ego.w_raw =
-        param_ro->gyro_param.gyro_w_gain_right *
-        (sensing_result->gyro.raw - tgt_val->gyro_zero_p_offset);
+    if (tgt_val->motion_dir == MotionDirection::LEFT) {
+      sensing_result->ego.w_raw =
+          param_ro->gyro_param.gyro_w_gain_left *
+          (sensing_result->gyro.raw - tgt_val->gyro_zero_p_offset);
+    } else {
+      sensing_result->ego.w_raw =
+          param_ro->gyro_param.gyro_w_gain_right *
+          (sensing_result->gyro.raw - tgt_val->gyro_zero_p_offset);
+    }
   }
 
   sensing_result->ego.w_lp =

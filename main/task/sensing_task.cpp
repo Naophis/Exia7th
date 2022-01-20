@@ -13,58 +13,19 @@ void SensingTask::task_entry_point(void *task_instance) {
   static_cast<SensingTask *>(task_instance)->task();
 }
 
-void IRAM_ATTR SensingTask::isr_entry_point(void *task_instance) {
-  static_cast<SensingTask *>(task_instance)->timer_isr();
-}
-
 void SensingTask::set_sensing_entity(
     std::shared_ptr<sensing_result_entity_t> &_sensing_result) {
   sensing_result = _sensing_result;
-}
-
-void IRAM_ATTR SensingTask::timer_isr() {
-  timer_group_clr_intr_status_in_isr(TIMER_GROUP_0, TIMER_0);
-  timer_group_enable_alarm_in_isr(TIMER_GROUP_0, TIMER_0);
-  if (itr_state) {
-    timer_set_alarm_value(TIMER_GROUP_0, TIMER_0, 2500); // 250 nsec
-    itr_state = false;
-    c++;
-  } else {
-    timer_set_alarm_value(TIMER_GROUP_0, TIMER_0, 7500); // 1000 nsec
-    itr_state = true;
-    d++;
-  }
-}
-void IRAM_ATTR SensingTask::timerCallback(void *arg) {
-  timer_group_clr_intr_status_in_isr(TIMER_GROUP_0, TIMER_0);
-  timer_group_enable_alarm_in_isr(TIMER_GROUP_0, TIMER_0);
-  ets_printf("Hey:\n");
-}
-void SensingTask::timer_init_grp0_timer0() {
-  timer_config_t config;
-  config.alarm_en = TIMER_ALARM_EN;
-  config.counter_en = TIMER_PAUSE;
-  config.clk_src = TIMER_SRC_CLK_APB;
-  config.auto_reload = TIMER_AUTORELOAD_EN;
-  config.counter_dir = TIMER_COUNT_UP;
-  config.divider = 8; // 80Mhz / divider
-  timer_init(TIMER_GROUP_0, TIMER_0, &config);
-
-  timer_set_alarm_value(TIMER_GROUP_0, TIMER_0, 250); // 1000 nsec
-  timer_isr_register(TIMER_GROUP_0, TIMER_0, isr_entry_point, NULL,
-                     ESP_INTR_FLAG_IRAM, &handle_isr);
-  timer_enable_intr(TIMER_GROUP_0, TIMER_0);
-  timer_set_counter_value(TIMER_GROUP_0, TIMER_0, 0);
-  timer_start(TIMER_GROUP_0, TIMER_0);
 }
 
 void SensingTask::task() {
   const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
   static const adc_bits_width_t width = ADC_WIDTH_BIT_12;
   static const adc_atten_t atten = ADC_ATTEN_DB_11;
-
+  // timer_init_grp0_timer0();
   gyro_if.init();
   gyro_if.setup();
+  ready = true;
 
   // sensing init
   adc2_config_channel_atten(SEN_R90, atten);
@@ -128,7 +89,19 @@ void SensingTask::task() {
     pcnt_get_counter_value(PCNT_UNIT_1, &sensing_result->encoder_raw.left);
     pcnt_counter_clear(PCNT_UNIT_1);
 
-    sensing_result->gyro.raw = gyro_if.read_gyro_z();
+    if (GY_MODE == 0) {
+      sensing_result->gyro.raw = gyro_if.read_gyro_z();
+    } else {
+      if (gyro_q.size() == GY_DQ_SIZE) {
+        sensing_result->gyro.raw = gyro_q[0];
+        for (int i = 0; i < GY_DQ_SIZE; i++) {
+          sensing_result->gyro_list[i] = gyro_q[i];
+        }
+      } else {
+        sensing_result->gyro.raw = 0;
+      }
+    }
+
     sensing_result->battery.data =
         BATTERY_GAIN * 2 * sensing_result->battery.raw / 4096;
     sensing_result->encoder.right = sensing_result->encoder_raw.right;

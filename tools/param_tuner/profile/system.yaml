@@ -2,7 +2,7 @@
 goals: [[1, 0]]
 maze_size: 16
 debug: 0
-mode: 14 # モード選択
+mode: 1 # モード選択
 test: # テスト走行時に使用するパラメータ群
   v_max: 3000
   end_v: 1

@@ -121,7 +121,7 @@ void MainTask::keep_pivot() {
   reset_tgt_data();
   reset_ego_data();
 
-  ui->motion_check();
+  mp->reset_gyro_ref_with_check();
   pt->motor_enable();
 
   req_error_reset();
@@ -654,10 +654,11 @@ void MainTask::test_run() {
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
   mp->go_straight(ps);
-  reset_tgt_data();
-  reset_ego_data();
   vTaskDelay(100 / portTICK_RATE_MS);
   pt->motor_disable();
+  reset_tgt_data();
+  reset_ego_data();
+  req_error_reset();
   pt->suction_disable();
 
   lt->stop_slalom_log();
@@ -785,11 +786,11 @@ void MainTask::test_sla() {
   ps.decel = sys.test.decel;
   mp->go_straight(ps);
 
+  vTaskDelay(100 / portTICK_RATE_MS);
+  pt->motor_disable();
   reset_tgt_data();
   reset_ego_data();
   req_error_reset();
-  vTaskDelay(100 / portTICK_RATE_MS);
-  pt->motor_disable();
   pt->suction_disable();
   lt->stop_slalom_log();
 

@@ -41,6 +41,8 @@
 
 #include "rom/uart.h"
 
+SensingTask st;
+
 void init_uart() {
   uart_config_t uart_config;
   uart_config.baud_rate = 2 * 1000 * 1000;
@@ -92,6 +94,31 @@ void init_gpio() {
   gpio_set_level(SUCTION_PWM, 0);
   // gpio_set_direction((gpio_num_t)GPIO_OUTPUT_IO_8,
 }
+void timer_isr(void *parameters) {
+  timer_group_clr_intr_status_in_isr(TIMER_GROUP_0, TIMER_0);
+  timer_group_enable_alarm_in_isr(TIMER_GROUP_0, TIMER_0);
+  if (st.is_ready()) {
+    st.gyro_q.push_back(st.gyro_if.read_gyro_z());
+    if (st.gyro_q.size() > GY_DQ_SIZE) {
+      st.gyro_q.pop_front();
+    }
+  }
+}
+void hwtimer_init(void) {
+  timer_config_t config;
+  config.alarm_en = TIMER_ALARM_EN;
+  config.counter_en = TIMER_PAUSE;
+  config.clk_src = TIMER_SRC_CLK_APB;
+  config.auto_reload = TIMER_AUTORELOAD_EN;
+  config.counter_dir = TIMER_COUNT_UP;
+  config.divider = 8; // 80Mhz / divider
+  timer_init(TIMER_GROUP_0, TIMER_0, &config);
+  timer_set_alarm_value(TIMER_GROUP_0, TIMER_0, GY_CYCLE);
+  timer_isr_register(TIMER_GROUP_0, TIMER_0, timer_isr, NULL, 0, NULL);
+  timer_enable_intr(TIMER_GROUP_0, TIMER_0);
+  timer_set_counter_value(TIMER_GROUP_0, TIMER_0, 0);
+  timer_start(TIMER_GROUP_0, TIMER_0);
+}
 
 extern "C" void app_main() {
   // Adachi adachi;
@@ -104,6 +131,10 @@ extern "C" void app_main() {
 
   init_gpio();
   init_uart();
+
+  if (GY_MODE) {
+    hwtimer_init();
+  }
 
   esp_vfs_fat_mount_config_t mount_config;
   mount_config.max_files = 8;
@@ -135,7 +166,6 @@ extern "C" void app_main() {
   tgt_val->ego_in.w = 0;
   param->gyro_param.gyro_w_gain_left = 0.0002645;
 
-  SensingTask st;
   st.set_sensing_entity(sensing_entity);
   st.create_task(0);
 
@@ -172,6 +202,6 @@ extern "C" void app_main() {
   gpio_set_level(LED5, 0);
 
   while (1) {
-    vTaskDelay(100 / portTICK_RATE_MS);
+    vTaskDelay(1000 / portTICK_RATE_MS);
   }
 }

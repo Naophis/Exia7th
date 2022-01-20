@@ -2,6 +2,7 @@
 #define STRUCTS_HPP
 
 #include "gen_code/bus.h"
+#include "include/defines.hpp"
 #include "include/enums.hpp"
 #include "include/maze_solver.hpp"
 
@@ -93,6 +94,7 @@ typedef struct {
   led_sensor_t led_sen_after;
   led_sensor_t led_sen_before;
   sensing_data_t gyro;
+  int gyro_list[4];
   sensing_data_t battery;
   encoder_data_t encoder_raw;
   encoder_data_t encoder;

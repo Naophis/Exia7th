@@ -1,4 +1,3 @@
-
 #ifndef DEFINES_HPP
 #define DEFINES_HPP
 
@@ -22,6 +21,10 @@
 #include <vector>
 
 #define ABS(IN) ((IN) < 0 ? -(IN) : (IN))
+
+constexpr int GY_DQ_SIZE = 4;
+constexpr int GY_CYCLE = 2500;
+constexpr int GY_MODE = 1;
 
 constexpr gpio_num_t LED_R90 = GPIO_NUM_9;
 constexpr gpio_num_t LED_R45 = GPIO_NUM_10;
@@ -94,7 +97,7 @@ constexpr float BATTERY_GAIN = 2.97324;
 constexpr uint8_t LEDC_HIGH_SPEED_MODE = 0;
 constexpr float LOW_BATTERY_TH = 3.95;
 
-constexpr uint16_t RESET_GYRO_LOOP_CNT = 100;
+constexpr uint16_t RESET_GYRO_LOOP_CNT = 512;
 
 static char line_buf[LINE_BUF_SIZE];
 
