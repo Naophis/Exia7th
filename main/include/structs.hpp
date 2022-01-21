@@ -223,6 +223,7 @@ typedef struct {
 
   int timstamp = 0;
   MotionDirection motion_dir;
+  SensorCtrlType sct;
 } new_motion_req_t;
 
 typedef struct {
@@ -253,6 +254,7 @@ typedef struct {
   float decel;
   float dist;
   MotionType motion_type;
+  SensorCtrlType sct;
 } param_straight_t;
 
 typedef struct {
@@ -328,6 +330,7 @@ typedef struct {
   slalom_offset_t back;
   int pow_n;
   float time;
+  TurnType type;
 } slalom_param2_t;
 
 typedef struct {

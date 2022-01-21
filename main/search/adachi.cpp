@@ -4,9 +4,7 @@ Adachi::Adachi() {}
 
 Adachi::~Adachi() {}
 
-void Adachi::set_logic(std::shared_ptr<MazeSolverBaseLgc> &_lgc) {
-  lgc = _lgc; //
-}
+void Adachi::set_logic(std::shared_ptr<MazeSolverBaseLgc> &_lgc) { lgc = _lgc; }
 
 void Adachi::set_ego(std::shared_ptr<ego_t> &_ego) { ego = _ego; }
 

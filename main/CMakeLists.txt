@@ -10,6 +10,8 @@ set(COMPONENT_ADD_INCLUDEDIRS
 set(COMPONENT_SRCS 
     "main.cpp"
     "task/logging_task.cpp"
+    "task/trajectory_creator.cpp"
+    "task/path_creator.cpp"
     "task/motion_planning.cpp"
     "task/planning_task.cpp"
     "task/ui.cpp"

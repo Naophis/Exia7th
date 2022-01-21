@@ -4,6 +4,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "include/defines.hpp"
+#include "include/path_creator.hpp"
+#include "include/trajectory_creator.hpp"
 #include "include/ui.hpp"
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,12 +22,15 @@ public:
   void set_input_param_entity(std::shared_ptr<input_param_t> &_param);
 
   void set_userinterface(std::shared_ptr<UserInterface> &_ui);
+  void set_path_creator(std::shared_ptr<PathCreator> &_pc);
 
   MotionResult go_straight(param_straight_t &p);
   MotionResult pivot_turn(param_roll_t &p);
   void normal_slalom(param_normal_slalom_t &p, param_straight_t &p_str);
   void n_slalom(param_normal_slalom_t &p, param_straight_t &p_str);
 
+  MotionResult slalom(slalom_param2_t &sp, TurnDirection dir,
+                      next_motionr_t &next_motion, bool dia);
   MotionResult slalom(slalom_param2_t &sp, TurnDirection dir,
                       next_motionr_t &next_motion);
   void reset_tgt_data();
@@ -35,6 +40,8 @@ public:
   void coin();
   void keep();
 
+  void exec_path_running(param_set_t &param_set);
+
 private:
   std::shared_ptr<UserInterface> ui;
 
@@ -42,5 +49,7 @@ private:
 
   std::shared_ptr<sensing_result_entity_t> sensing_result;
   std::shared_ptr<input_param_t> param;
+  std::shared_ptr<PathCreator> pc;
+  TrajectoryCreator tc;
 };
 #endif

@@ -18,6 +18,10 @@ void MotionPlanning::set_userinterface(std::shared_ptr<UserInterface> &_ui) {
   ui = _ui;
 }
 
+void MotionPlanning::set_path_creator(std::shared_ptr<PathCreator> &_pc) {
+  pc = _pc;
+}
+
 MotionResult MotionPlanning::go_straight(param_straight_t &p) {
   tgt_val->nmr.v_max = p.v_max;
   tgt_val->nmr.v_end = p.v_end;
@@ -31,6 +35,9 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p) {
   tgt_val->nmr.motion_mode = RUN_MODE2::ST_RUN;
   tgt_val->nmr.motion_type = MotionType::STRAIGHT;
   tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
+
+  tgt_val->nmr.sct = p.sct;
+
   if (p.motion_type != MotionType::NONE) {
     tgt_val->motion_type = p.motion_type;
   }
@@ -90,7 +97,11 @@ MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
 
 MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
                                     next_motionr_t &next_motion) {
+  return slalom(sp, td, next_motion, false);
+}
 
+MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
+                                    next_motionr_t &next_motion, bool dia) {
   param_straight_t ps_front;
   ps_front.v_max = sp.v;
   ps_front.v_end = sp.v;
@@ -98,6 +109,8 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   ps_front.decel = next_motion.decel;
   ps_front.dist = (td == TurnDirection::Right) ? sp.front.right : sp.front.left;
   ps_front.motion_type = MotionType::SLA_FRONT_STR;
+  ps_front.sct = !dia ? SensorCtrlType::Straight : SensorCtrlType::Dia;
+
   auto res_f = go_straight(ps_front);
   if (res_f != MotionResult::NONE) {
     return MotionResult::ERROR;
@@ -154,6 +167,9 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   ps_back.decel = next_motion.decel;
   ps_back.dist = (td == TurnDirection::Right) ? sp.back.right : sp.back.left;
   ps_back.motion_type = MotionType::SLA_BACK_STR;
+  ps_back.sct = SensorCtrlType::Straight;
+
+  //  : SensorCtrlType::Dia;
   auto res_b = go_straight(ps_back);
   if (res_b != MotionResult::NONE) {
     return MotionResult::ERROR;
@@ -238,7 +254,6 @@ void MotionPlanning::reset_tgt_data() {
   tgt_val->global_pos.img_ang = 0;
   tgt_val->global_pos.dist = 0;
   tgt_val->global_pos.img_dist = 0;
-
 }
 
 void MotionPlanning::reset_ego_data() {
@@ -306,6 +321,80 @@ void MotionPlanning::keep() {
     vTaskDelay(1 / portTICK_RATE_MS);
     if (ui->button_state_hold()) {
       break;
+    }
+  }
+}
+void MotionPlanning::exec_path_running(param_set_t &p_set) {
+  ego_odom_t ego;
+  ego.x = ego.y = ego.ang = 0;
+  ego.dir = Direction::North;
+  bool dia = false;
+
+  // default straight parma
+  param_straight_t ps;
+  ps.v_max = 400;
+  ps.v_end = 400;
+  ps.accl = 1000;
+  ps.decel = -1000;
+  ps.motion_type = MotionType::STRAIGHT;
+  next_motionr_t nm;
+
+  for (int i = 0; i < pc->path_size; i++) {
+    float dist = 0.5 * pc->path_s[i] - 1;
+    auto turn_dir = tc.get_turn_dir(pc->path_t[i]);
+    auto turn_type = tc.get_turn_type(pc->path_t[i]);
+
+    if (dist > 0 || i == 0) {
+      auto st = !dia ? StraightType::FastRun : StraightType::FastRunDia;
+      ps.v_max = p_set.str_map[st].v_max;
+      ps.v_end = p_set.map[turn_type].v;
+      ps.accl = p_set.str_map[st].accl;
+      ps.decel = p_set.str_map[st].decel;
+
+      ps.dist = !dia ? (dist * cell_size) : (dist * cell_size * ROOT2);
+      if (i == 0) {
+        if (dist == 0) {
+          // 初手ターンの場合は距離合成して加速区間を増やす
+          dist = (turn_dir == TurnDirection::Left)
+                     ? p_set.map[turn_type].front.left
+                     : p_set.map[turn_type].front.right;
+        }
+        ps.dist += 10; // 初期加速距離を加算（パラメータ化する）
+      }
+      ps.motion_type = MotionType::STRAIGHT;
+      go_straight(ps);
+    }
+
+    if (!((turn_type == TurnType::None) || (turn_type == TurnType::Finish))) {
+      auto st = !dia ? StraightType::FastRun : StraightType::FastRunDia;
+      bool exist_next_idx = (i + 1) < pc->path_size; //絶対true
+      float dist3 = 0;
+      float dist4 = 0;
+      if (exist_next_idx) {
+        dist3 = 0.5 * pc->path_s[i + 1] * cell_size;
+        dist4 = 0.5 * pc->path_s[i + 1] - 1;
+      }
+      // スラロームの後距離の目標速度を指定
+      nm.v_max = p_set.map[turn_type].v;
+      nm.v_end = p_set.map[turn_type].v;
+      nm.accl = p_set.str_map[st].accl;
+      nm.decel = p_set.str_map[st].decel;
+      nm.is_turn = false;
+
+      if (exist_next_idx && !(dist3 > 0 && dist4 > 0)) {
+        //連続スラロームのとき、次のスラロームの速度になるように加速
+        auto next_turn_type = tc.get_turn_type(pc->path_t[i + 1]);
+        nm.v_max = p_set.map[next_turn_type].v;
+        nm.v_end = p_set.map[next_turn_type].v;
+        nm.is_turn = true;
+      }
+
+      slalom(p_set.map[turn_type], turn_dir, nm);
+      ego.dir = tc.get_next_dir(ego.dir, turn_type, turn_dir);
+      // ego.ang = trj_ele.ang;
+      dia =
+          (ego.dir == Direction::NorthEast || ego.dir == Direction::NorthWest ||
+           ego.dir == Direction::SouthEast || ego.dir == Direction::SouthWest);
     }
   }
 }

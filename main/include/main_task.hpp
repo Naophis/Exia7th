@@ -20,8 +20,10 @@
 
 #include "gen_code/mpc_tgt_calc.h"
 #include "include/adachi.hpp"
+#include "include/logging_task.hpp"
 #include "include/logic.hpp"
 #include "include/motion_planning.hpp"
+#include "include/path_creator.hpp"
 #include "include/search_controller.hpp"
 #include "include/ui.hpp"
 
@@ -30,8 +32,6 @@
 #include <sstream>
 #include <string>
 #include <vector>
-
-#include "include/logging_task.hpp"
 
 #include "cJSON.h"
 
@@ -54,6 +54,8 @@ public:
 
   virtual void task();
   void check_battery();
+
+  TurnType cast_turn_type(std::string str);
 
 private:
   xTaskHandle handle = 0;
@@ -106,8 +108,9 @@ private:
   std::vector<param_set_t> paramset_list;
 
   std::shared_ptr<MazeSolverBaseLgc> lgc;
-  std::shared_ptr<Adachi> adachi;
+  // std::shared_ptr<Adachi> adachi;
   std::shared_ptr<SearchController> search_ctrl;
+  std::shared_ptr<PathCreator> pc;
 };
 
 #endif

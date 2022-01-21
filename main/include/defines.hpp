@@ -25,6 +25,7 @@
 constexpr int GY_DQ_SIZE = 4;
 constexpr int GY_CYCLE = 2500;
 constexpr int GY_MODE = 1;
+constexpr float cell_size = 90;
 
 constexpr gpio_num_t LED_R90 = GPIO_NUM_9;
 constexpr gpio_num_t LED_R45 = GPIO_NUM_10;

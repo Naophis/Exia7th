@@ -5,6 +5,7 @@ MainTask::MainTask() {
   mp = std::make_shared<MotionPlanning>();
   lgc = std::make_shared<MazeSolverBaseLgc>();
   search_ctrl = std::make_shared<SearchController>();
+  pc = std::make_shared<PathCreator>();
 }
 
 MainTask::~MainTask() {}
@@ -52,6 +53,25 @@ void MainTask::check_battery() {
   }
 }
 
+TurnType MainTask::cast_turn_type(std::string str) {
+  if (str == "normal")
+    return TurnType::Normal;
+  if (str == "large")
+    return TurnType::Large;
+  if (str == "orval")
+    return TurnType::Orval;
+  if (str == "dia45")
+    return TurnType::Dia45;
+  if (str == "dia45_2")
+    return TurnType::Dia45_2;
+  if (str == "dia135")
+    return TurnType::Dia135;
+  if (str == "dia135_2")
+    return TurnType::Dia135_2;
+  if (str == "dia90")
+    return TurnType::Dia90;
+  return TurnType::None;
+}
 void MainTask::dump1() {
   const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
   while (1) {
@@ -490,7 +510,7 @@ void MainTask::load_slalom_param() {
                                   "back"),
               "left")
               ->valuedouble;
-
+      sp2.type = cast_turn_type(p.second);
       sp.map[p.first] = sp2;
     }
 
@@ -567,6 +587,7 @@ void MainTask::task() {
     lgc->set_goal_pos(sys.goals);
     search_ctrl->set_lgc(lgc);
     search_ctrl->set_motion_plannning(mp);
+    pc->set_logic(lgc);
     read_maze_data();
     while (1) {
       int mode_num = select_mode();
@@ -589,6 +610,14 @@ void MainTask::task() {
           vTaskDelay(10 / portTICK_RATE_MS);
         }
         search_ctrl->print_maze();
+      } else if (mode_num == 2) {
+        pc->path_create(true);
+        pc->convert_large_path(true);
+        pc->diagonalPath(true, true);
+        pc->print_path();
+
+        mp->exec_path_running(paramset_list[0]);
+
       } else if (mode_num == 15) {
         save_maze_data(false);
       }
@@ -646,6 +675,7 @@ void MainTask::test_run() {
   ps.dist = sys.test.dist - 5;
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
+  ps.sct = SensorCtrlType::Straight;
 
   mp->go_straight(ps);
   ps.v_max = 20;
@@ -765,6 +795,8 @@ void MainTask::test_sla() {
   ps.dist = sys.test.sla_dist;
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
+  ps.sct = SensorCtrlType::Straight;
+
   mp->go_straight(ps);
 
   next_motionr_t nm;
