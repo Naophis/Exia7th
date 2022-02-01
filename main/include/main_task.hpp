@@ -93,16 +93,18 @@ private:
   void req_error_reset();
   void test_turn();
   void test_sla();
+  void test_run_sla();
+  void test_search_sla();
   void rx_uart_json();
 
   void save_json_data(std::string &str);
   vector<string> split(const string &s, char delim);
   void load_param();
   void load_hw_param();
+  void load_sensor_param();
   void load_sys_param();
   void load_turn_param_profiles();
   void load_slalom_param();
-  void dump_log();
   void save_maze_data(bool write);
   void read_maze_data();
   std::vector<param_set_t> paramset_list;

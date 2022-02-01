@@ -23,8 +23,9 @@ public:
   void set_sensing_entity(std::shared_ptr<sensing_result_entity_t> &_entity);
   void set_logging_task(std::shared_ptr<LoggingTask> &_lt);
   void set_userinterface(std::shared_ptr<UserInterface> &_ui);
-  
+
   void print_maze();
+  void set_input_param_entity(std::shared_ptr<input_param_t> &_param);
 
 private:
   std::shared_ptr<MotionPlanning> mp;
@@ -33,6 +34,7 @@ private:
   std::shared_ptr<Adachi> adachi;
   std::shared_ptr<LoggingTask> lt;
   std::shared_ptr<UserInterface> ui;
+  std::shared_ptr<input_param_t> param;
 
   unordered_map<unsigned int, unsigned char> tmp_goal_list;
 

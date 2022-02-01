@@ -1,10 +1,14 @@
 normal:
   ref:
-    right45: 1000
-    left45: 1000
+    right45: 410
+    left45: 205
+    front: 500
+    kireme_r: 2
+    kireme_l: 2
   exist:
-    right45: 70
-    left45: 70
+    right45: 300
+    left45: 120
+    front: 500
 dia:
   ref:
     right45: 1000
@@ -12,3 +16,11 @@ dia:
   exist:
     right45: 70
     left45: 70
+search:
+  exist:
+    front: 270
+    right45: 200
+    left45: 100
+
+    right90: 70
+    left90: 70

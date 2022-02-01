@@ -35,7 +35,7 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p) {
   tgt_val->nmr.motion_mode = RUN_MODE2::ST_RUN;
   tgt_val->nmr.motion_type = MotionType::STRAIGHT;
   tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
-
+  tgt_val->nmr.dia_mode = p.dia_mode;
   tgt_val->nmr.sct = p.sct;
 
   if (p.motion_type != MotionType::NONE) {
@@ -81,6 +81,7 @@ MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
   }
   tgt_val->nmr.motion_mode = RUN_MODE2::PIVOT_TURN;
   tgt_val->nmr.motion_type = MotionType::PIVOT;
+  tgt_val->nmr.sct = SensorCtrlType::NONE;
   tgt_val->nmr.timstamp++;
 
   while (1) {
@@ -136,6 +137,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   tgt_val->nmr.sla_pow_n = sp.pow_n;
   tgt_val->nmr.motion_mode = RUN_MODE2::SLAROM_RUN;
   tgt_val->nmr.motion_type = MotionType::SLALOM;
+  tgt_val->nmr.sct = SensorCtrlType::NONE;
   tgt_val->nmr.timstamp++;
   tgt_val->ego_in.sla_param.counter = 1;
 
@@ -167,7 +169,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   ps_back.decel = next_motion.decel;
   ps_back.dist = (td == TurnDirection::Right) ? sp.back.right : sp.back.left;
   ps_back.motion_type = MotionType::SLA_BACK_STR;
-  ps_back.sct = SensorCtrlType::Straight;
+  ps_back.sct = !dia ? SensorCtrlType::Straight : SensorCtrlType::Dia;
 
   //  : SensorCtrlType::Dia;
   auto res_b = go_straight(ps_back);
@@ -315,6 +317,7 @@ void MotionPlanning::keep() {
   tgt_val->nmr.motion_mode = RUN_MODE2::KEEP;
   tgt_val->nmr.motion_type = MotionType::NONE;
   tgt_val->nmr.timstamp++;
+  tgt_val->nmr.dia_mode = false;
   tgt_val->ego_in.sla_param.counter = 1;
 
   while (1) {
@@ -332,10 +335,10 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
 
   // default straight parma
   param_straight_t ps;
-  ps.v_max = 400;
-  ps.v_end = 400;
-  ps.accl = 1000;
-  ps.decel = -1000;
+  ps.v_max = p_set.str_map[StraightType::FastRun].v_max;
+  ps.v_end = p_set.str_map[StraightType::FastRun].v_max;
+  ps.accl = p_set.str_map[StraightType::FastRun].accl;
+  ps.decel = p_set.str_map[StraightType::FastRun].decel;
   ps.motion_type = MotionType::STRAIGHT;
   next_motionr_t nm;
 
@@ -350,6 +353,7 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
       ps.v_end = p_set.map[turn_type].v;
       ps.accl = p_set.str_map[st].accl;
       ps.decel = p_set.str_map[st].decel;
+      ps.dia_mode = dia;
 
       ps.dist = !dia ? (dist * cell_size) : (dist * cell_size * ROOT2);
       if (i == 0) {
@@ -359,13 +363,14 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
                      ? p_set.map[turn_type].front.left
                      : p_set.map[turn_type].front.right;
         }
-        ps.dist += 10; // 初期加速距離を加算（パラメータ化する）
+        ps.dist += param->offset_start_dist; // 初期加速距離を加算
       }
       ps.motion_type = MotionType::STRAIGHT;
       go_straight(ps);
     }
 
     if (!((turn_type == TurnType::None) || (turn_type == TurnType::Finish))) {
+      // TODO wall_off
       auto st = !dia ? StraightType::FastRun : StraightType::FastRunDia;
       bool exist_next_idx = (i + 1) < pc->path_size; //絶対true
       float dist3 = 0;

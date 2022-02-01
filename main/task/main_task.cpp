@@ -27,6 +27,7 @@ void MainTask::set_sensing_entity(
 void MainTask::set_input_param_entity(std::shared_ptr<input_param_t> &_param) {
   param = _param;
   mp->set_input_param_entity(_param);
+  search_ctrl->set_input_param_entity(_param);
 }
 void MainTask::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
   tgt_val = _tgt_val;
@@ -89,6 +90,12 @@ void MainTask::dump1() {
            sensing_result->led_sen.front.raw,
            sensing_result->led_sen.right45.raw,
            sensing_result->led_sen.right90.raw);
+    printf("sensor: %0.1f, %0.1f, %0.1f, %0.1f, %0.1f\n",
+           param->sen_ref_p.search_exist.left90,
+           param->sen_ref_p.search_exist.left45,
+           param->sen_ref_p.search_exist.front,
+           param->sen_ref_p.search_exist.right45,
+           param->sen_ref_p.search_exist.right90);
 
     printf("ego_v: %0.3f, %0.3f, %0.3f, %0.3f\n", sensing_result->ego.v_l,
            sensing_result->ego.v_c, sensing_result->ego.v_r,
@@ -224,7 +231,8 @@ void MainTask::load_hw_param() {
   printf("%s\n", line_buf);
 
   cJSON *root = cJSON_CreateObject(), *motor_pid, *gyro_pid, *gyro_param,
-        *kalman_config, *battery_param, *led_param, *angle_pid, *dist_pid;
+        *kalman_config, *battery_param, *led_param, *angle_pid, *dist_pid,
+        *sen_pid, *sen_pid_dia;
   root = cJSON_Parse(line_buf);
 
   param->dt = cJSON_GetObjectItem(root, "dt")->valuedouble;
@@ -237,6 +245,8 @@ void MainTask::load_hw_param() {
   param->Resist = cJSON_GetObjectItem(root, "Resist")->valuedouble;
   param->Mass = cJSON_GetObjectItem(root, "Mass")->valuedouble;
   param->Lm = cJSON_GetObjectItem(root, "Lm")->valuedouble;
+  param->offset_start_dist =
+      cJSON_GetObjectItem(root, "offset_start_dist")->valuedouble;
 
   param->FF_front = cJSON_GetObjectItem(root, "FF_front")->valueint;
   param->FF_roll = cJSON_GetObjectItem(root, "FF_roll")->valueint;
@@ -247,6 +257,19 @@ void MainTask::load_hw_param() {
   param->motor_pid.i = cJSON_GetObjectItem(motor_pid, "i")->valuedouble;
   param->motor_pid.d = cJSON_GetObjectItem(motor_pid, "d")->valuedouble;
   param->motor_pid.mode = cJSON_GetObjectItem(motor_pid, "mode")->valueint;
+
+  sen_pid = cJSON_GetObjectItem(root, "sensor_pid");
+  param->sensor_pid.p = cJSON_GetObjectItem(sen_pid, "p")->valuedouble;
+  param->sensor_pid.i = cJSON_GetObjectItem(sen_pid, "i")->valuedouble;
+  param->sensor_pid.d = cJSON_GetObjectItem(sen_pid, "d")->valuedouble;
+  param->sensor_pid.mode = cJSON_GetObjectItem(sen_pid, "mode")->valueint;
+
+  sen_pid_dia = cJSON_GetObjectItem(root, "sensor_pid_dia");
+  param->sensor_pid_dia.p = cJSON_GetObjectItem(sen_pid_dia, "p")->valuedouble;
+  param->sensor_pid_dia.i = cJSON_GetObjectItem(sen_pid_dia, "i")->valuedouble;
+  param->sensor_pid_dia.d = cJSON_GetObjectItem(sen_pid_dia, "d")->valuedouble;
+  param->sensor_pid_dia.mode =
+      cJSON_GetObjectItem(sen_pid_dia, "mode")->valueint;
 
   dist_pid = cJSON_GetObjectItem(root, "dist_pid");
   param->dist_pid.p = cJSON_GetObjectItem(dist_pid, "p")->valuedouble;
@@ -292,12 +315,87 @@ void MainTask::load_hw_param() {
   cJSON_free(root);
   cJSON_free(motor_pid);
   cJSON_free(gyro_pid);
+  cJSON_free(sen_pid);
+  cJSON_free(sen_pid_dia);
   cJSON_free(gyro_param);
   cJSON_free(battery_param);
   cJSON_free(led_param);
   cJSON_free(dist_pid);
   cJSON_free(angle_pid);
   cJSON_free(kalman_config);
+}
+
+void MainTask::load_sensor_param() {
+  FILE *f = fopen("/spiflash/sensor.txt", "rb");
+  if (f == NULL) {
+    return;
+  }
+  fgets(line_buf, sizeof(line_buf), f);
+  fclose(f);
+
+  printf("%s\n", line_buf);
+
+  cJSON *root = cJSON_CreateObject(), *normal, *normal_ref, *normal_exist, *dia,
+        *dia_ref, *dia_exist, *search, *search_exist;
+  root = cJSON_Parse(line_buf);
+
+  normal = cJSON_GetObjectItem(root, "normal");
+  normal_ref = cJSON_GetObjectItem(normal, "ref");
+  normal_exist = cJSON_GetObjectItem(normal, "exist");
+  param->sen_ref_p.normal.ref.right45 =
+      cJSON_GetObjectItem(normal_ref, "right45")->valuedouble;
+  param->sen_ref_p.normal.ref.left45 =
+      cJSON_GetObjectItem(normal_ref, "left45")->valuedouble;
+  param->sen_ref_p.normal.ref.kireme_r =
+      cJSON_GetObjectItem(normal_ref, "kireme_r")->valuedouble;
+  param->sen_ref_p.normal.ref.kireme_l =
+      cJSON_GetObjectItem(normal_ref, "kireme_l")->valuedouble;
+
+  printf("%f,%f\n", param->sen_ref_p.normal.ref.kireme_l,
+         param->sen_ref_p.normal.ref.kireme_r);
+
+  param->sen_ref_p.normal.exist.right45 =
+      cJSON_GetObjectItem(normal_exist, "right45")->valuedouble;
+  param->sen_ref_p.normal.exist.left45 =
+      cJSON_GetObjectItem(normal_exist, "left45")->valuedouble;
+  param->sen_ref_p.normal.exist.front =
+      cJSON_GetObjectItem(normal_exist, "front")->valuedouble;
+
+  dia = cJSON_GetObjectItem(root, "dia");
+  dia_ref = cJSON_GetObjectItem(dia, "ref");
+  dia_exist = cJSON_GetObjectItem(dia, "exist");
+  param->sen_ref_p.dia.ref.right45 =
+      cJSON_GetObjectItem(dia_ref, "right45")->valuedouble;
+  param->sen_ref_p.dia.ref.left45 =
+      cJSON_GetObjectItem(dia_ref, "left45")->valuedouble;
+
+  param->sen_ref_p.dia.exist.right45 =
+      cJSON_GetObjectItem(dia_exist, "right45")->valuedouble;
+  param->sen_ref_p.dia.exist.left45 =
+      cJSON_GetObjectItem(dia_exist, "left45")->valuedouble;
+
+  search = cJSON_GetObjectItem(root, "search");
+  search_exist = cJSON_GetObjectItem(search, "exist");
+  param->sen_ref_p.search_exist.front =
+      cJSON_GetObjectItem(search_exist, "front")->valuedouble;
+  param->sen_ref_p.search_exist.right45 =
+      cJSON_GetObjectItem(search_exist, "right45")->valuedouble;
+  param->sen_ref_p.search_exist.right90 =
+      cJSON_GetObjectItem(search_exist, "right90")->valuedouble;
+  param->sen_ref_p.search_exist.left45 =
+      cJSON_GetObjectItem(search_exist, "left45")->valuedouble;
+  param->sen_ref_p.search_exist.left90 =
+      cJSON_GetObjectItem(search_exist, "left90")->valuedouble;
+
+  cJSON_free(root);
+  cJSON_free(normal);
+  cJSON_free(normal_ref);
+  cJSON_free(normal_exist);
+  cJSON_free(dia);
+  cJSON_free(dia_ref);
+  cJSON_free(dia_exist);
+  cJSON_free(search);
+  cJSON_free(search_exist);
 }
 
 void MainTask::load_sys_param() {
@@ -520,10 +618,13 @@ void MainTask::load_slalom_param() {
 }
 
 void MainTask::load_param() {
-  load_hw_param();
-  load_sys_param();
-  load_turn_param_profiles();
-  load_slalom_param();
+  if (!ui->button_state_hold()) {
+    load_hw_param();
+    load_sensor_param();
+    load_sys_param();
+    load_turn_param_profiles();
+    load_slalom_param();
+  }
 }
 void MainTask::rx_uart_json() {
 
@@ -569,6 +670,10 @@ void MainTask::task() {
       test_run();
     } else if (sys.user_mode == 3) {
       test_turn();
+    } else if (sys.user_mode == 4) {
+      test_run_sla();
+    } else if (sys.user_mode == 5) {
+      test_search_sla();
     } else if (sys.user_mode == 14) {
       keep_pivot();
     } else if (sys.user_mode == 15) {
@@ -580,6 +685,7 @@ void MainTask::task() {
           break;
         vTaskDelay(10 / portTICK_RATE_MS);
       }
+    } else if (sys.user_mode == 17) {
     }
   } else {
     ui->hello_exia();
@@ -589,6 +695,7 @@ void MainTask::task() {
     search_ctrl->set_motion_plannning(mp);
     pc->set_logic(lgc);
     read_maze_data();
+    search_ctrl->print_maze();
     while (1) {
       int mode_num = select_mode();
       printf("%d\n", mode_num);
@@ -673,9 +780,69 @@ void MainTask::test_run() {
   ps.v_max = sys.test.v_max;
   ps.v_end = 20;
   ps.dist = sys.test.dist - 5;
+  // + param->offset_start_dist;
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
   ps.sct = SensorCtrlType::Straight;
+  ps.dia_mode = false;
+
+  mp->go_straight(ps);
+  ps.v_max = 20;
+  ps.v_end = sys.test.end_v;
+  ps.dist = 5;
+  ps.accl = sys.test.accl;
+  ps.decel = sys.test.decel;
+  mp->go_straight(ps);
+  vTaskDelay(100 / portTICK_RATE_MS);
+  pt->motor_disable();
+  reset_tgt_data();
+  reset_ego_data();
+  req_error_reset();
+  pt->suction_disable();
+
+  lt->stop_slalom_log();
+  reset_tgt_data();
+  reset_ego_data();
+  req_error_reset();
+  lt->save(slalom_log_file);
+  ui->coin(120);
+
+  while (1) {
+    if (ui->button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
+  lt->dump_log(slalom_log_file);
+  while (1) {
+    if (ui->button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
+}
+
+void MainTask::test_run_sla() {
+  mp->reset_gyro_ref_with_check();
+
+  if (sys.test.suction_active) {
+    pt->suction_enable(sys.test.suction_duty);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+  }
+
+  reset_tgt_data();
+  reset_ego_data();
+  pt->motor_enable();
+
+  req_error_reset();
+  lt->start_slalom_log();
+  // pt->active_logging(_f);
+
+  ps.v_max = sys.test.v_max;
+  ps.v_end = 20;
+  ps.dist = sys.test.dist - 5 + param->offset_start_dist;
+  ps.accl = sys.test.accl;
+  ps.decel = sys.test.decel;
+  ps.sct = SensorCtrlType::Straight;
+  ps.dia_mode = false;
 
   mp->go_straight(ps);
   ps.v_max = 20;
@@ -816,6 +983,7 @@ void MainTask::test_sla() {
   ps.dist = 90;
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
+  ps.sct = SensorCtrlType::NONE;
   mp->go_straight(ps);
 
   vTaskDelay(100 / portTICK_RATE_MS);
@@ -842,28 +1010,95 @@ void MainTask::test_sla() {
   }
 }
 
-void MainTask::dump_log() {
+void MainTask::test_search_sla() {
+
+  int file_idx = sys.test.file_idx;
+
+  if (file_idx >= tpp.file_list_size) {
+    ui->error();
+    return;
+  }
+
+  auto sla_p = paramset_list[file_idx].map[TurnType::Normal];
+
+  TurnDirection rorl = ui->select_direction();
+  TurnDirection rorl2 = (rorl == TurnDirection::Right) ? (TurnDirection::Left)
+                                                       : (TurnDirection::Right);
+  mp->reset_gyro_ref_with_check();
+
+  if (sys.test.suction_active) {
+    pt->suction_enable(sys.test.suction_duty);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+  }
+
+  reset_tgt_data();
+  reset_ego_data();
+  pt->motor_enable();
+
+  req_error_reset();
+
+  lt->start_slalom_log();
+
+  ps.v_max = sla_p.v;
+  ps.v_end = sla_p.v;
+  ps.dist = 45 + param->offset_start_dist;
+  ps.accl = sys.test.accl;
+  ps.decel = sys.test.decel;
+  ps.sct = SensorCtrlType::Straight;
+
+  mp->go_straight(ps);
+
+  next_motionr_t nm;
+  nm.v_max = sla_p.v;
+  nm.v_end = sla_p.v;
+  nm.accl = sys.test.accl;
+  nm.decel = sys.test.decel;
+  nm.is_turn = false;
+
+  mp->slalom(sla_p, rorl, nm);
+  for (int i = 0; i < sys.test.turn_times; i++) {
+    mp->slalom(sla_p, rorl2, nm);
+  }
+
+  ps.v_max = sla_p.v;
+  ps.v_end = 20;
+  ps.dist = 45 - 5;
+  ps.accl = sys.test.accl;
+  ps.decel = sys.test.decel;
+  ps.sct = SensorCtrlType::NONE;
+  mp->go_straight(ps);
+  ps.v_max = 20;
+  ps.v_end = sys.test.end_v;
+  ps.dist = 5;
+  ps.accl = sys.test.accl;
+  ps.decel = sys.test.decel;
+  ps.sct = SensorCtrlType::NONE;
+  mp->go_straight(ps);
+
+  vTaskDelay(100 / portTICK_RATE_MS);
+  pt->motor_disable();
+  reset_tgt_data();
+  reset_ego_data();
+  req_error_reset();
+  pt->suction_disable();
+  lt->stop_slalom_log();
+
+  lt->save(slalom_log_file);
+  ui->coin(120);
 
   while (1) {
     if (ui->button_state_hold())
       break;
     vTaskDelay(10 / portTICK_RATE_MS);
   }
-  FILE *f = fopen(slalom_log_file.c_str(), "rb");
-  if (f == NULL) {
-    printf("log_file_error\n");
-    return;
-  }
-  while (fgets(line_buf, sizeof(line_buf), f) != NULL)
-    printf("%s\n", line_buf);
-  fclose(f);
-
+  lt->dump_log(slalom_log_file);
   while (1) {
     if (ui->button_state_hold())
       break;
     vTaskDelay(10 / portTICK_RATE_MS);
   }
 }
+
 void MainTask::save_maze_data(bool write) {
   auto *f = fopen(maze_log_file.c_str(), "wb");
   if (f == NULL)
@@ -878,6 +1113,7 @@ void MainTask::save_maze_data(bool write) {
   }
   fclose(f);
 }
+
 void MainTask::read_maze_data() {
   auto *f = fopen(maze_log_file.c_str(), "rb");
   if (f == NULL)

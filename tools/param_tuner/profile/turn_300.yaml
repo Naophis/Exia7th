@@ -23,8 +23,8 @@ normal:
   rad: 36
   pow_n: 4
   time: 0.12350000
-  front: { right: 10, left: 10 }
-  back: { right: 10, left: 10 }
+  front: { right: 1, left: 5 }
+  back: { right: 1, left: 5 }
 large:
   v: 300
   ang: 90

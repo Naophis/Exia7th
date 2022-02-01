@@ -48,6 +48,7 @@ MotionResult SearchController::go_straight_wrapper(param_set_t &p_set) {
   p.decel = p_set.str_map[StraightType::Search].decel;
   p.dist = 90;
   p.motion_type = MotionType::NONE;
+  p.dia_mode = false;
   return mp->go_straight(p);
 }
 MotionResult SearchController::slalom(param_set_t &p_set,
@@ -71,6 +72,7 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
   p.decel = p_set.str_map[StraightType::Search].decel;
   p.dist = 45;
   p.motion_type = MotionType::NONE;
+  p.sct = SensorCtrlType::Straight;
   mp->go_straight(p);
 
   mp->reset_tgt_data();
@@ -117,7 +119,7 @@ bool SearchController::is_goaled() { return tmp_goal_list.size() == 0; }
 void SearchController::exec(param_set_t &p_set, SearchMode sm) {
 
   mp->reset_gyro_ref_with_check();
-  lt->start_slalom_log();
+  // lt->start_slalom_log();
   reset();
 
   for (const auto p : lgc->goal_list) {
@@ -129,7 +131,8 @@ void SearchController::exec(param_set_t &p_set, SearchMode sm) {
   p.v_max = p.v_end = p_set.str_map[StraightType::Search].v_max;
   p.accl = p_set.str_map[StraightType::Search].accl;
   p.decel = p_set.str_map[StraightType::Search].decel;
-  p.dist = 45;
+  p.dist = 45 + param->offset_start_dist;
+  p.sct = SensorCtrlType::Straight;
   p.motion_type = MotionType::NONE;
 
   pt->motor_enable();
@@ -170,44 +173,67 @@ void SearchController::exec(param_set_t &p_set, SearchMode sm) {
   pt->motor_disable();
   lt->stop_slalom_log();
   mp->coin();
-  lt->save(slalom_log_file);
-  while (1) {
-    if (ui->button_state_hold())
-      break;
-    vTaskDelay(10 / portTICK_RATE_MS);
-  }
-  lt->dump_log(slalom_log_file);
+  // lt->save(slalom_log_file);
+  // while (1) {
+  //   if (ui->button_state_hold())
+  //     break;
+  //   vTaskDelay(10 / portTICK_RATE_MS);
+  // }
+  // lt->dump_log(slalom_log_file);
 }
 void SearchController::judge_wall() {
   bool wall_n = false;
   bool wall_e = false;
   bool wall_w = false;
   bool wall_s = false;
-  // wall_n = false;
-  // wall_e = false;
-  // wall_w = false;
-  // wall_s = false;
+
   if (ego->dir == Direction::North) {
-    // if (sensing_result->ego.front_lp > TEST) {
-    // }
+    wall_n = sensing_result->ego.front_lp > param->sen_ref_p.search_exist.front;
+    wall_e =
+        sensing_result->ego.right45_lp > param->sen_ref_p.search_exist.right45;
+    wall_w =
+        sensing_result->ego.left45_lp > param->sen_ref_p.search_exist.left45;
   } else if (ego->dir == Direction::East) {
+    wall_e = sensing_result->ego.front_lp > param->sen_ref_p.search_exist.front;
+    wall_s =
+        sensing_result->ego.right45_lp > param->sen_ref_p.search_exist.right45;
+    wall_n =
+        sensing_result->ego.left45_lp > param->sen_ref_p.search_exist.left45;
 
   } else if (ego->dir == Direction::West) {
+    wall_w = sensing_result->ego.front_lp > param->sen_ref_p.search_exist.front;
+    wall_n =
+        sensing_result->ego.right45_lp > param->sen_ref_p.search_exist.right45;
+    wall_s =
+        sensing_result->ego.left45_lp > param->sen_ref_p.search_exist.left45;
 
   } else if (ego->dir == Direction::South) {
+    wall_s = sensing_result->ego.front_lp > param->sen_ref_p.search_exist.front;
+    wall_w =
+        sensing_result->ego.right45_lp > param->sen_ref_p.search_exist.right45;
+    wall_e =
+        sensing_result->ego.left45_lp > param->sen_ref_p.search_exist.left45;
   }
-  lgc->set_wall_data(ego->x, ego->y, Direction::North, false);
-  lgc->set_wall_data(ego->x, ego->y + 1, Direction::South, false);
-  lgc->set_wall_data(ego->x, ego->y, Direction::East, false);
-  lgc->set_wall_data(ego->x + 1, ego->y, Direction::West, false);
-  lgc->set_wall_data(ego->x, ego->y, Direction::West, false);
-  lgc->set_wall_data(ego->x - 1, ego->y, Direction::East, false);
-  lgc->set_wall_data(ego->x, ego->y, Direction::South, false);
-  lgc->set_wall_data(ego->x, ego->y - 1, Direction::North, false);
+  lgc->set_wall_data(ego->x, ego->y, Direction::North, wall_n);
+  lgc->set_wall_data(ego->x, ego->y + 1, Direction::South, wall_n);
 
-  lgc->set_wall_data(0, 0, Direction::East, true);
-  lgc->set_wall_data(1, 0, Direction::West, true);
+  lgc->set_wall_data(ego->x, ego->y, Direction::East, wall_e);
+  lgc->set_wall_data(ego->x + 1, ego->y, Direction::West, wall_e);
+
+  lgc->set_wall_data(ego->x, ego->y, Direction::West, wall_w);
+  lgc->set_wall_data(ego->x - 1, ego->y, Direction::East, wall_w);
+
+  lgc->set_wall_data(ego->x, ego->y, Direction::South, wall_s);
+  lgc->set_wall_data(ego->x, ego->y - 1, Direction::North, wall_s);
+
+  // lgc->set_wall_data(0, 0, Direction::East, true);
+  // lgc->set_wall_data(1, 0, Direction::West, true);
 }
+void SearchController::set_input_param_entity(
+    std::shared_ptr<input_param_t> &_param) {
+  param = _param;
+}
+
 void SearchController::print_maze() {
   printf("\r\n");
   for (int j = lgc->maze_size - 1; j >= 0; j--) {

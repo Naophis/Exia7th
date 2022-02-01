@@ -174,6 +174,54 @@ void PlanningTask::task() {
   }
 }
 
+float PlanningTask::calc_sensor_pid() {
+  float duty = 0;
+  error_entity.sen.error_d = error_entity.sen.error_p;
+  error_entity.sen.error_p = check_sen_error();
+
+  duty = param_ro->sensor_pid.p * error_entity.sen.error_p;
+
+  return duty;
+}
+float PlanningTask::check_sen_error() {
+  float error = 0;
+  int check = 0;
+
+  //前壁が近すぎるときはエスケープ
+  if (sensing_result->ego.front_lp < param_ro->sen_ref_p.normal.exist.front) {
+    if (ABS(sensing_result->ego.right45_lp -
+            sensing_result->ego.right45_lp_old) <
+        param_ro->sen_ref_p.normal.ref.kireme_r) {
+      if (sensing_result->ego.right45_lp >
+          param_ro->sen_ref_p.normal.exist.right45) {
+        error += sensing_result->ego.right45_lp -
+                 param_ro->sen_ref_p.normal.ref.right45;
+        check++;
+      }
+    }
+    if (ABS(sensing_result->ego.left45_lp - sensing_result->ego.left45_lp_old) <
+        param_ro->sen_ref_p.normal.ref.kireme_l) {
+      if (sensing_result->ego.left45_lp >
+          param_ro->sen_ref_p.normal.exist.left45) {
+        error -= sensing_result->ego.left45_lp -
+                 param_ro->sen_ref_p.normal.ref.left45;
+        check++;
+      }
+    }
+  }
+  if (check == 0) {
+    // reset
+  } else {
+    error_entity.w.error_i = 0;
+    // error_entity.ang.error_i = 0;
+  }
+  if (check == 2) {
+    return error;
+  }
+
+  return error * 2;
+}
+
 void PlanningTask::update_ego_motion() {
   const float dt = param_ro->dt;
   const float tire = param_ro->tire;
@@ -241,6 +289,12 @@ void PlanningTask::update_ego_motion() {
 
   tgt_val->ego_in.ang += sensing_result->ego.w_lp * dt;
   tgt_val->global_pos.ang += sensing_result->ego.w_lp * dt;
+
+  sensing_result->ego.left45_lp_old = sensing_result->ego.left45_lp;
+  sensing_result->ego.left90_lp_old = sensing_result->ego.left90_lp;
+  sensing_result->ego.front_lp_old = sensing_result->ego.front_lp;
+  sensing_result->ego.right45_lp_old = sensing_result->ego.right45_lp;
+  sensing_result->ego.right90_lp_old = sensing_result->ego.right90_lp;
 
   sensing_result->ego.right90_raw = sensing_result->led_sen.right90.raw;
   sensing_result->ego.right90_lp =
@@ -401,6 +455,14 @@ float PlanningTask::get_rpm_ff_val(TurnDirection td) {
 }
 void PlanningTask::calc_tgt_duty() {
 
+  float duty_sen = 0;
+  if (tgt_val->nmr.sct == SensorCtrlType::Straight) {
+    duty_sen = calc_sensor_pid();
+  } else if (tgt_val->nmr.sct == SensorCtrlType::Dia) {
+
+  } else if (tgt_val->nmr.sct == SensorCtrlType::NONE) {
+  }
+
   error_entity.v.error_d = error_entity.v.error_p;
   error_entity.dist.error_d = error_entity.dist.error_p;
   error_entity.w.error_d = error_entity.w.error_p;
@@ -495,22 +557,28 @@ void PlanningTask::calc_tgt_duty() {
         param_ro->angle_pid.i * error_entity.ang.error_i +
         param_ro->angle_pid.d * error_entity.ang.error_d +
         (error_entity.ang_log.gain_z - error_entity.ang_log.gain_zz) * dt;
+    // if (duty_sen == 0) {
+    //   duty_roll2 = 0;
+    // }
     error_entity.ang_log.gain_zz = error_entity.ang_log.gain_z;
     error_entity.ang_log.gain_z = duty_roll2;
   } else {
     duty_roll2 = param_ro->angle_pid.p * error_entity.ang.error_p +
                  param_ro->angle_pid.i * error_entity.ang.error_i +
                  param_ro->angle_pid.d * error_entity.ang.error_d;
+    // if (duty_sen == 0) {
+    //   duty_roll2 = 0;
+    // }
     error_entity.ang_log.gain_zz = 0;
     error_entity.ang_log.gain_z = 0;
   }
 
   tgt_duty.duty_r = (duty_c + duty_c2 + duty_roll + duty_roll2 + duty_rpm_r +
-                     duty_ff_front + duty_ff_roll) /
+                     duty_ff_front + duty_ff_roll + duty_sen) /
                     sensing_result->ego.battery_lp * 100;
 
   tgt_duty.duty_l = (duty_c + duty_c2 - duty_roll - duty_roll2 + duty_rpm_l +
-                     duty_ff_front - duty_ff_roll) /
+                     duty_ff_front - duty_ff_roll - duty_sen) /
                     sensing_result->ego.battery_lp * 100;
 
   // printf("%0.3f, %0.3f %0.3f\n", duty_rpm_l, duty_rpm_r,
@@ -643,5 +711,6 @@ void PlanningTask::cp_request() {
     tgt_val->ego_in.sla_param.state = 0;
 
     tgt_val->motion_dir = tgt_val->nmr.motion_dir;
+    tgt_val->dia_mode = tgt_val->nmr.dia_mode;
   }
 }

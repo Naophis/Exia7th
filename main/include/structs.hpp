@@ -77,11 +77,18 @@ typedef struct {
   float right45_raw = 0;
   float right45_lp = 0;
   float front_raw = 0;
+
   float front_lp = 0;
   float left45_raw = 0;
   float left45_lp = 0;
   float left90_raw = 0;
   float left90_lp = 0;
+
+  float front_lp_old = 0;
+  float left45_lp_old = 0;
+  float left90_lp_old = 0;
+  float right45_lp_old = 0;
+  float right90_lp_old = 0;
 
   rpm_t rpm;
   duty_t duty;
@@ -125,6 +132,33 @@ typedef struct {
 } sen_param_t;
 
 typedef struct {
+  float right45;
+  float left45;
+  float front;
+  float kireme_r;
+  float kireme_l;
+} sen_ref_param3_t;
+
+typedef struct {
+  float front;
+  float right45;
+  float left45;
+  float right90;
+  float left90;
+} sen_search_param_t;
+
+typedef struct {
+  sen_ref_param3_t ref;
+  sen_ref_param3_t exist;
+} sen_ref_param2_t;
+
+typedef struct {
+  sen_ref_param2_t normal;
+  sen_ref_param2_t dia;
+  sen_search_param_t search_exist;
+} sen_ref_param_t;
+
+typedef struct {
   float dt = 0.001;
   float tire = 12;
   float gear_a = 37;
@@ -142,6 +176,7 @@ typedef struct {
   int FF_front = 0;
   int FF_roll = 0;
   int FF_keV = 0;
+  float offset_start_dist = 0;
   pid_param_t motor_pid;
   pid_param_t dist_pid;
   pid_param_t gyro_pid;
@@ -152,6 +187,7 @@ typedef struct {
   sen_param_t battery_param;
   sen_param_t led_param;
   MotionDirection motion_dir;
+  sen_ref_param_t sen_ref_p;
 } input_param_t;
 
 typedef struct {
@@ -174,6 +210,8 @@ typedef struct {
   gain_log_t dist_log;
   gain_log_t w_log;
   gain_log_t ang_log;
+  pid_error_t sen;
+  pid_error_t sen_dia;
 } pid_error_entity_t;
 
 // 指示速度
@@ -223,6 +261,7 @@ typedef struct {
 
   int timstamp = 0;
   MotionDirection motion_dir;
+  bool dia_mode = false;
   SensorCtrlType sct;
 } new_motion_req_t;
 
@@ -240,6 +279,7 @@ typedef struct {
   int32_t motion_mode;
   MotionType motion_type;
   MotionDirection motion_dir;
+  bool dia_mode = false;
   planning_req_t pl_req;
   fail_safe_state_t fss;
   float gyro_zero_p_offset = 0;
@@ -255,6 +295,7 @@ typedef struct {
   float dist;
   MotionType motion_type;
   SensorCtrlType sct;
+  bool dia_mode = false;
 } param_straight_t;
 
 typedef struct {
