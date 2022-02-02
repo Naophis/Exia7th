@@ -52,4 +52,10 @@ enum class MotionDirection : int {
   LEFT = 2,
 };
 
+enum class WallOffReq : int {
+  NONE = 0,
+  SEARCH = 1,
+  FAST_RUN = 2,
+};
+
 #endif

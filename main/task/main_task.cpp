@@ -362,6 +362,10 @@ void MainTask::load_sensor_param() {
       cJSON_GetObjectItem(normal_exist, "left45")->valuedouble;
   param->sen_ref_p.normal.exist.front =
       cJSON_GetObjectItem(normal_exist, "front")->valuedouble;
+  param->sen_ref_p.normal.exist.right90 =
+      cJSON_GetObjectItem(normal_exist, "right90")->valuedouble;
+  param->sen_ref_p.normal.exist.left90 =
+      cJSON_GetObjectItem(normal_exist, "left90")->valuedouble;
 
   dia = cJSON_GetObjectItem(root, "dia");
   dia_ref = cJSON_GetObjectItem(dia, "ref");
@@ -388,6 +392,14 @@ void MainTask::load_sensor_param() {
       cJSON_GetObjectItem(search_exist, "left45")->valuedouble;
   param->sen_ref_p.search_exist.left90 =
       cJSON_GetObjectItem(search_exist, "left90")->valuedouble;
+  param->sen_ref_p.search_exist.kireme_r =
+      cJSON_GetObjectItem(search_exist, "kireme_r")->valuedouble;
+  param->sen_ref_p.search_exist.kireme_l =
+      cJSON_GetObjectItem(search_exist, "kireme_l")->valuedouble;
+  param->sen_ref_p.search_exist.offset_r =
+      cJSON_GetObjectItem(search_exist, "offset_r")->valuedouble;
+  param->sen_ref_p.search_exist.offset_l =
+      cJSON_GetObjectItem(search_exist, "offset_l")->valuedouble;
 
   cJSON_free(root);
   cJSON_free(normal);
@@ -670,18 +682,28 @@ void MainTask::task() {
 
   if (sys.user_mode != 0) {
     if (sys.user_mode == 1) {
+      printf("test_sla\n");
       test_sla();
     } else if (sys.user_mode == 2) {
+      printf("test_run\n");
       test_run();
     } else if (sys.user_mode == 3) {
+      printf("test_turn\n");
       test_turn();
     } else if (sys.user_mode == 4) {
+      printf("test_run_sla\n");
       test_run_sla();
     } else if (sys.user_mode == 5) {
+      printf("test_search_sla\n");
       test_search_sla();
+    } else if (sys.user_mode == 6) {
+      printf("test_search_sla_walloff\n");
+      test_search_sla_walloff();
     } else if (sys.user_mode == 14) {
+      printf("keep_pivot\n");
       keep_pivot();
     } else if (sys.user_mode == 15) {
+      printf("echo_printf\n");
       echo_sensing_result_with_json();
     } else if (sys.user_mode == 16) {
       lt->dump_log(slalom_log_file);
@@ -1114,6 +1136,92 @@ void MainTask::test_search_sla() {
 
   param->sen_ref_p.normal.exist.right45 = backup_r;
   param->sen_ref_p.normal.exist.left45 = backup_l;
+  while (1) {
+    if (ui->button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
+  lt->dump_log(slalom_log_file);
+  while (1) {
+    if (ui->button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
+}
+
+void MainTask::test_search_sla_walloff() {
+  printf("search_walloff_offset= %f, %f\n",
+         param->sen_ref_p.search_exist.offset_l,
+         param->sen_ref_p.search_exist.offset_r);
+
+  mp->reset_gyro_ref_with_check();
+
+  if (sys.test.suction_active) {
+    pt->suction_enable(sys.test.suction_duty);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+  }
+
+  reset_tgt_data();
+  reset_ego_data();
+  pt->motor_enable();
+
+  req_error_reset();
+  lt->start_slalom_log();
+  // pt->active_logging(_f);
+
+  ps.v_max = sys.test.v_max;
+  ps.v_end = sys.test.v_max;
+  ps.dist = 45 + param->offset_start_dist;
+  ps.accl = sys.test.accl;
+  ps.decel = sys.test.decel;
+  ps.sct = SensorCtrlType::Straight;
+  ps.wall_off_req = WallOffReq::NONE;
+  ps.wall_off_dist_r = 0;
+  ps.wall_off_dist_l = 0;
+  ps.dia_mode = false;
+  mp->go_straight(ps);
+
+  ps.v_max = sys.test.v_max;
+  ps.v_end = sys.test.v_max;
+  ps.dist = 90;
+  ps.accl = sys.test.accl;
+  ps.decel = sys.test.decel;
+  ps.sct = SensorCtrlType::Straight;
+  ps.wall_off_req = WallOffReq::SEARCH;
+  ps.wall_off_dist_r = param->sen_ref_p.search_exist.offset_r;
+  ps.wall_off_dist_l = param->sen_ref_p.search_exist.offset_l;
+  ps.dia_mode = false;
+  mp->go_straight(ps);
+
+  ps.v_max = sys.test.v_max;
+  ps.v_end = 20;
+  ps.dist = 40;
+  ps.accl = sys.test.accl;
+  ps.decel = sys.test.decel;
+  ps.wall_off_req = WallOffReq::NONE;
+  mp->go_straight(ps);
+
+  ps.v_max = 20;
+  ps.v_end = sys.test.end_v;
+  ps.dist = 5;
+  ps.accl = sys.test.accl;
+  ps.decel = sys.test.decel;
+  mp->go_straight(ps);
+
+  vTaskDelay(100 / portTICK_RATE_MS);
+  pt->motor_disable();
+  reset_tgt_data();
+  reset_ego_data();
+  req_error_reset();
+  pt->suction_disable();
+
+  lt->stop_slalom_log();
+  reset_tgt_data();
+  reset_ego_data();
+  req_error_reset();
+  lt->save(slalom_log_file);
+  ui->coin(120);
+
   while (1) {
     if (ui->button_state_hold())
       break;

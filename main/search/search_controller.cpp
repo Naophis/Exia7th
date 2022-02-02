@@ -48,6 +48,9 @@ MotionResult SearchController::go_straight_wrapper(param_set_t &p_set) {
   p.decel = p_set.str_map[StraightType::Search].decel;
   p.dist = 90;
   p.motion_type = MotionType::NONE;
+  p.wall_off_req = WallOffReq::SEARCH;
+  p.wall_off_dist_r = param->sen_ref_p.search_exist.offset_r;
+  p.wall_off_dist_l = param->sen_ref_p.search_exist.offset_l;
   p.dia_mode = false;
   return mp->go_straight(p);
 }
@@ -67,12 +70,22 @@ MotionResult SearchController::slalom(param_set_t &p_set,
 MotionResult SearchController::pivot(param_set_t &p_set) {
   param_straight_t p;
   p.v_max = p_set.str_map[StraightType::Search].v_max;
-  p.v_end = 0;
+  p.v_end = 20;
   p.accl = p_set.str_map[StraightType::Search].accl;
   p.decel = p_set.str_map[StraightType::Search].decel;
-  p.dist = 45;
+  p.dist = 40;
   p.motion_type = MotionType::NONE;
   p.sct = SensorCtrlType::Straight;
+  p.wall_off_req = WallOffReq::NONE;
+  mp->go_straight(p);
+  p.v_max = 20;
+  p.v_end = 5;
+  p.accl = p_set.str_map[StraightType::Search].accl;
+  p.decel = p_set.str_map[StraightType::Search].decel;
+  p.dist = 5;
+  p.motion_type = MotionType::NONE;
+  p.sct = SensorCtrlType::Straight;
+  p.wall_off_req = WallOffReq::NONE;
   mp->go_straight(p);
 
   mp->reset_tgt_data();
@@ -94,16 +107,18 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
   pt->motor_disable();
 
   mp->reset_gyro_ref();
-
   mp->reset_tgt_data();
   mp->reset_ego_data();
   pt->motor_enable();
-  p.v_max = p.v_end = p_set.str_map[StraightType::Search].v_max;
+  p.v_max = p_set.str_map[StraightType::Search].v_max;
+  p.v_end = p_set.str_map[StraightType::Search].v_max;
   p.accl = p_set.str_map[StraightType::Search].accl;
   p.decel = p_set.str_map[StraightType::Search].decel;
   p.dist = 45;
   p.motion_type = MotionType::NONE;
-  return mp->go_straight(p);
+  mp->go_straight(p);
+  
+  return MotionResult::NONE;
 }
 MotionResult SearchController::finish(param_set_t &p_set) {
   param_straight_t p;
@@ -134,6 +149,10 @@ void SearchController::exec(param_set_t &p_set, SearchMode sm) {
   p.dist = 45 + param->offset_start_dist;
   p.sct = SensorCtrlType::Straight;
   p.motion_type = MotionType::NONE;
+  // p.wall_off_req = WallOffReq::SEARCH;
+  p.wall_off_req = WallOffReq::NONE;
+  p.wall_off_dist_r = param->sen_ref_p.search_exist.offset_r;
+  p.wall_off_dist_l = param->sen_ref_p.search_exist.offset_l;
 
   pt->motor_enable();
   mp->reset_tgt_data();

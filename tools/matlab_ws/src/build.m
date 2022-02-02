@@ -45,7 +45,7 @@ function build(tgt_model_name)
     copyfile('*.h', gen_code_dir);
     
     cd(gen_code_dir);
-    delete ert_main.c   
+%    delete ert_main.c   
     
     copyfile('*.*', '../../../src/gen_code');
     cd(home);

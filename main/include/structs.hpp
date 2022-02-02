@@ -134,6 +134,8 @@ typedef struct {
 typedef struct {
   float right45;
   float left45;
+  float right90;
+  float left90;
   float front;
   float kireme_r;
   float kireme_l;
@@ -145,6 +147,10 @@ typedef struct {
   float left45;
   float right90;
   float left90;
+  float kireme_r;
+  float kireme_l;
+  float offset_r;
+  float offset_l;
 } sen_search_param_t;
 
 typedef struct {
@@ -297,6 +303,9 @@ typedef struct {
   float dist;
   MotionType motion_type;
   SensorCtrlType sct;
+  WallOffReq wall_off_req;
+  float wall_off_dist_r;
+  float wall_off_dist_l;
   bool dia_mode = false;
 } param_straight_t;
 
@@ -306,6 +315,7 @@ typedef struct {
   float alpha;
   float ang;
   TurnDirection RorL;
+
 } param_roll_t;
 
 typedef struct {

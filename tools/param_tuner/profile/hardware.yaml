@@ -1,20 +1,20 @@
 dt: 0.001
-tire: 13.675
-offset_start_dist: 22.5
+tire: 13.595
+offset_start_dist: 16.0
 gear_a: 37
 gear_b: 8
 max_duty: 99.9
-FF_front: 0
-FF_roll: 0
-FF_keV: 0
+FF_front: 1
+FF_roll: 1
+FF_keV: 1
 Ke: 0.00040
 Km: 0.00025
 Resist: 2.93
 Mass: 0.015
-Lm: 0.0000095
+Lm: 0.000045
 motor_pid:
-  p: 0.012
-  i: 0.0015
+  p: 0.0055
+  i: 0.002125
   d: 0.0
   mode: 1
   # p: 0.0
@@ -29,9 +29,9 @@ dist_pid:
   # i: 0.0
   # d: 0.0
 gyro_pid:
-  p: 0.375
-  i: 0.0125
-  d: 0
+  p: 0.275
+  i: 0.0025
+  d: 0.0
   mode: 1
   # p: 0.0
   # i: 0.0
@@ -45,10 +45,10 @@ angle_pid:
   # i: 0.0
   # d: 0
 sensor_pid:
-  p: 0.01
+  p: 0.0025
   i: 0.0
   d: 0.0
-  mode: 1
+  mode: 0
 sensor_pid_dia:
   p: 0.1
   i: 0.0

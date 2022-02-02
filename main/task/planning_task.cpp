@@ -207,26 +207,35 @@ float PlanningTask::check_sen_error() {
         param_ro->sen_ref_p.normal.ref.kireme_r) {
       if (sensing_result->ego.right45_lp >
           param_ro->sen_ref_p.normal.exist.right45) {
-        error += sensing_result->ego.right45_lp -
-                 param_ro->sen_ref_p.normal.ref.right45;
-        check++;
+        if (sensing_result->ego.right90_lp >
+            param_ro->sen_ref_p.normal.exist.right90) {
+          error += sensing_result->ego.right45_lp -
+                   param_ro->sen_ref_p.normal.ref.right45;
+          check++;
+        }
       }
     }
     if (ABS(sensing_result->ego.left45_lp - sensing_result->ego.left45_lp_old) <
         param_ro->sen_ref_p.normal.ref.kireme_l) {
       if (sensing_result->ego.left45_lp >
           param_ro->sen_ref_p.normal.exist.left45) {
-        error -= sensing_result->ego.left45_lp -
-                 param_ro->sen_ref_p.normal.ref.left45;
-        check++;
+        if (sensing_result->ego.left90_lp >
+            param_ro->sen_ref_p.normal.exist.left90) {
+          error -= sensing_result->ego.left45_lp -
+                   param_ro->sen_ref_p.normal.ref.left45;
+          check++;
+        }
       }
     }
   }
   if (check == 0) {
     // reset
   } else {
+    tgt_val->global_pos.ang = tgt_val->global_pos.img_ang;
     error_entity.w.error_i = 0;
-    // error_entity.ang.error_i = 0;
+    error_entity.w.error_d = 0;
+    error_entity.ang.error_i = 0;
+    error_entity.ang.error_d = 0;
   }
   if (check == 2) {
     return error;

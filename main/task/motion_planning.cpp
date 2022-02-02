@@ -47,9 +47,37 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p) {
     tgt_val->motion_type = p.motion_type;
   }
   tgt_val->nmr.timstamp++;
+  bool wall_off_req = p.wall_off_req == WallOffReq::SEARCH;
+  bool exist_r = false;
+  bool exist_l = false;
+  if (wall_off_req) {
+    exist_r =
+        sensing_result->ego.right90_lp > param->sen_ref_p.search_exist.right90;
+    exist_l =
+        sensing_result->ego.left90_lp > param->sen_ref_p.search_exist.left90;
+  }
 
   while (1) {
+    if (exist_r) {
+      if (sensing_result->ego.right90_lp <
+          param->sen_ref_p.search_exist.kireme_r) {
+        tgt_val->nmr.dist = p.wall_off_dist_r;
+        p.dist = p.wall_off_dist_r;
+        tgt_val->nmr.timstamp++;
+        exist_r = false;
+      }
+    }
+    if (exist_l) {
+      if (sensing_result->ego.left90_lp <
+          param->sen_ref_p.search_exist.kireme_l) {
+        tgt_val->nmr.dist = p.wall_off_dist_l;
+        p.dist = p.wall_off_dist_l;
+        tgt_val->nmr.timstamp++;
+        exist_l = false;
+      }
+    }
     vTaskDelay(1 / portTICK_RATE_MS);
+
     if (tgt_val->ego_in.dist > p.dist) {
       break;
     }

@@ -2,7 +2,7 @@
 goals: [[1, 0]]
 maze_size: 16
 debug: 0
-mode: 2 # モード選択
+mode: 3 # モード選択
 
 test: # テスト走行時に使用するパラメータ群
   v_max: 300
@@ -13,7 +13,7 @@ test: # テスト走行時に使用するパラメータ群
   # dist: 90 # スラロームテスト
   w_max: 7.0
   alpha: 20
-  ang: 3600
+  ang: 360
   suction_active: 0
   suction_duty: 99.0
   file_idx: 0
