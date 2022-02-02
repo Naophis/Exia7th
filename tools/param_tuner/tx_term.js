@@ -2,7 +2,6 @@ var fs = require("fs");
 const yaml = require("js-yaml");
 let SerialPort = require("serialport");
 const Readline = require("@serialport/parser-readline");
-
 let comport;
 let port;
 
@@ -21,16 +20,7 @@ async function f1(str) {
   var x = await resolveAfter2Seconds(str);
 }
 
-function testAsync() {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      console.log("Hello from inside the testAsync function");
-      resolve();
-    }, 2500);
-  });
-}
-
-async function callerFun() {
+const callerFun = async () => {
   async function write(str, result) {
     return new Promise((resolve) => {
       port.write(`${str}`, function () {
@@ -45,29 +35,55 @@ async function callerFun() {
     });
   }
 
-  const files = fs.readdirSync(__dirname + "/profile");
+  while (true) {
+    const files = fs.readdirSync(__dirname + "/profile");
+    var list = [];
+    for (var i in files) {
+      if (files[i].match(/.yaml$/)) {
+        list.push(files[i]);
+      }
+    }
+    for (var i in list) {
+      console.log(` ${i} : ${list[i]}`);
+    }
+    console.log(">");
+    var str = fs.readFileSync("/dev/stdin").toString().trim();
 
-  for (const file of files) //
-  {
-    // let file = "turn_300.yaml";
-    // let file = "turn_400.yaml";
-    // let file = "profiles.yaml";
-    // let file = "hardware.yaml";
-    // let file = "system.yaml";
-    if (file.match(/.yaml$/)) {
-      let txt = fs.readFileSync(`${__dirname}/profile/${file}`, {
+    var idx = parseInt(str);
+    if (str === "all") {
+      console.log("all")
+      for (const file of files) {
+        if (file.match(/.yaml$/)) {
+          let txt = fs.readFileSync(`${__dirname}/profile/${file}`, {
+            encoding: "utf-8",
+          });
+          var file_name = file.replaceAll("yaml", "txt");
+          var saveData = yaml.load(txt);
+          var str = `${file_name}@${JSON.stringify(saveData)}`;
+          write(str);
+          // console.log(saveData)
+          await sleep2(600);
+          console.log(`${file}: finish!!`);
+        }
+      }
+    } else {
+      if (idx > list.length) {
+        console.log("out of index");
+        continue;
+      }
+      let txt = fs.readFileSync(`${__dirname}/profile/${list[idx]}`, {
         encoding: "utf-8",
       });
-      var file_name = file.replaceAll("yaml", "txt");
+      var file_name = list[idx].replaceAll("yaml", "txt");
       var saveData = yaml.load(txt);
       var str = `${file_name}@${JSON.stringify(saveData)}`;
       write(str);
       // console.log(saveData)
       await sleep2(600);
-      console.log(`${file}: finish!!`);
+      console.log(`${list[idx]}: finish!!`);
     }
   }
-}
+};
 
 let ready = function () {
   port = new SerialPort(

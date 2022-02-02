@@ -18,66 +18,71 @@ straight:
     w_max: 5
     alpha: 10
 normal:
-  v: 300
-  ang: 90
-  rad: 36
-  pow_n: 4
-  time: 0.12350000
-  front: { right: 1, left: 5 }
-  back: { right: 1, left: 5 }
+  v: 300.000000
+  ang: 90.000000
+  rad: 32.000000
+  pow_n: 4.000000
+  time: 0.109781
+  front: { left: 4.99502614, right: 4.99502614 }
+  back: { left: 5.78059430, right: 5.78059430 }
+
 large:
-  v: 300
-  ang: 90
-  rad: 65
-  pow_n: 4
-  time: 0.22296875
-  front: { right: 10, left: 10 }
-  back: { right: 10, left: 10 }
+  v: 300.000000
+  ang: 90.000000
+  rad: 65.000000
+  pow_n: 4.000000
+  time: 0.222969
+  front: { left: 8.62297754, right: 8.62297754 }
+  back: { left: 8.45166270, right: 8.45166270 }
 orval:
-  v: 300
-  ang: 180
-  rad: 43
-  pow_n: 4
-  time: 0.29500000
-  front: { right: 10, left: 10 }
-  back: { right: 10, left: 10 }
+  v: 300.000000
+  ang: 180.000000
+  rad: 45.000000
+  pow_n: 4.000000
+  time: 0.308734
+  front: { left: 10.00000000, right: 10.00000000 }
+  back: { left: 9.83365438, right: 9.83365438 }
 dia45:
-  v: 300
-  ang: 45
-  rad: 60
-  pow_n: 4
-  time: 0.13721875
-  front: { right: 10, left: 10 }
-  back: { right: 10, left: 10 }
+  v: 300.000000
+  ang: 45.000000
+  rad: 75.000000
+  pow_n: 4.000000
+  time: 0.128641
+  front: { left: 4.83230852, right: 4.83230852 }
+  back: { left: 23.25189851, right: 23.25189851 }
+
 dia45_2:
-  v: 300
-  ang: 45
-  rad: 60
-  pow_n: 4
-  time: 0.13721875
-  front: { right: 10, left: 10 }
-  back: { right: 10, left: 10 }
+  v: 300.000000
+  ang: 45.000000
+  rad: 75.000000
+  pow_n: 4.000000
+  time: 0.128641
+  front: { left: 23.47191883, right: 23.47191883 }
+  back: { left: 4.61228820, right: 4.61228820 }
+
 dia135:
-  v: 300
-  ang: 135
-  rad: 60
-  pow_n: 4
-  time: 0.13721875
-  front: { right: 10, left: 10 }
-  back: { right: 10, left: 10 }
+  v: 300.000000
+  ang: 135.000000
+  rad: 43.000000
+  pow_n: 4.000000
+  time: 0.221250
+  front: { left: 13.18127347, right: 13.18127347 }
+  back: { left: 5.31005057, right: 5.31005057 }
+
 dia135_2:
-  v: 300
-  ang: 135
-  rad: 60
-  pow_n: 4
-  time: 0.13721875
-  front: { right: 10, left: 10 }
-  back: { right: 10, left: 10 }
+  v: 300.000000
+  ang: 135.000000
+  rad: 43.000000
+  pow_n: 4.000000
+  time: 0.221250
+  front: { left: 5.46049408, right: 5.46049408 }
+  back: { left: 13.03082995, right: 13.03082995 }
+
 dia90:
-  v: 300
-  ang: 90
-  rad: 60
-  pow_n: 4
-  time: 0.13721875
-  front: { right: 10, left: 10 }
-  back: { right: 10, left: 10 }
+  v: 300.000000
+  ang: 90.000000
+  rad: 40.000000
+  pow_n: 4.000000
+  time: 0.137219
+  front: { left: 13.60497358, right: 13.60497358 }
+  back: { left: 13.43049948, right: 13.43049948 }

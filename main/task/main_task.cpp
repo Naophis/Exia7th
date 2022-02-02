@@ -37,10 +37,12 @@ void MainTask::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
 void MainTask::set_planning_task(std::shared_ptr<PlanningTask> &_pt) {
   pt = _pt;
   search_ctrl->set_planning_task(_pt);
+  mp->set_planning_task(_pt);
 }
 void MainTask::set_logging_task(std::shared_ptr<LoggingTask> &_lt) {
   lt = _lt; //
   search_ctrl->set_logging_task(lt);
+  mp->set_logging_task(lt);
 }
 void MainTask::check_battery() {
   vTaskDelay(1500 / portTICK_PERIOD_MS); //他モジュールの起動待ち
@@ -443,7 +445,8 @@ void MainTask::load_sys_param() {
   sys.test.sla_type2 = cJSON_GetObjectItem(test, "sla_type2")->valueint;
   sys.test.sla_dist = cJSON_GetObjectItem(test, "sla_dist")->valuedouble;
   sys.test.turn_times = cJSON_GetObjectItem(test, "turn_times")->valueint;
-
+  sys.test.ignore_opp_sen =
+      cJSON_GetObjectItem(test, "ignore_opp_sen")->valueint;
   cJSON_free(root);
   cJSON_free(goals);
   cJSON_free(test);
@@ -455,6 +458,7 @@ void MainTask::load_turn_param_profiles() {
     return;
   fgets(line_buf, sizeof(line_buf), f);
   fclose(f);
+  printf("%s\n", line_buf);
 
   cJSON *root = cJSON_CreateObject(), *profile_list, *profile_idx;
   root = cJSON_Parse(line_buf);
@@ -518,9 +522,10 @@ void MainTask::load_slalom_param() {
     if (f == NULL) {
       return;
     }
-    printf("%s\n", path.c_str());
+    printf("%s\n===================\n", path.c_str());
     fgets(line_buf, sizeof(line_buf), f);
     fclose(f);
+    printf("%s\n===================\n", line_buf);
 
     cJSON *root = cJSON_CreateObject();
     root = cJSON_Parse(line_buf);
@@ -942,6 +947,16 @@ void MainTask::test_sla() {
   TurnDirection rorl = ui->select_direction();
   TurnDirection rorl2 = (rorl == TurnDirection::Right) ? (TurnDirection::Left)
                                                        : (TurnDirection::Right);
+
+  float backup_r = param->sen_ref_p.normal.exist.right45;
+  float backup_l = param->sen_ref_p.normal.exist.left45;
+  if (sys.test.ignore_opp_sen) {
+    if (rorl == TurnDirection::Right) {
+      param->sen_ref_p.normal.exist.right45 = 9999;
+    } else {
+      param->sen_ref_p.normal.exist.left45 = 9999;
+    }
+  }
   mp->reset_gyro_ref_with_check();
 
   if (sys.test.suction_active) {
@@ -959,7 +974,7 @@ void MainTask::test_sla() {
 
   ps.v_max = sla_p.v;
   ps.v_end = sla_p.v;
-  ps.dist = sys.test.sla_dist;
+  ps.dist = sys.test.sla_dist + param->offset_start_dist;
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
   ps.sct = SensorCtrlType::Straight;
@@ -997,6 +1012,8 @@ void MainTask::test_sla() {
   lt->save(slalom_log_file);
   ui->coin(120);
 
+  param->sen_ref_p.normal.exist.right45 = backup_r;
+  param->sen_ref_p.normal.exist.left45 = backup_l;
   while (1) {
     if (ui->button_state_hold())
       break;
@@ -1022,6 +1039,15 @@ void MainTask::test_search_sla() {
   auto sla_p = paramset_list[file_idx].map[TurnType::Normal];
 
   TurnDirection rorl = ui->select_direction();
+  float backup_r = param->sen_ref_p.normal.exist.right45;
+  float backup_l = param->sen_ref_p.normal.exist.left45;
+  if (sys.test.ignore_opp_sen) {
+    if (rorl == TurnDirection::Right) {
+      param->sen_ref_p.normal.exist.right45 = 9999;
+    } else {
+      param->sen_ref_p.normal.exist.left45 = 9999;
+    }
+  }
   TurnDirection rorl2 = (rorl == TurnDirection::Right) ? (TurnDirection::Left)
                                                        : (TurnDirection::Right);
   mp->reset_gyro_ref_with_check();
@@ -1086,6 +1112,8 @@ void MainTask::test_search_sla() {
   lt->save(slalom_log_file);
   ui->coin(120);
 
+  param->sen_ref_p.normal.exist.right45 = backup_r;
+  param->sen_ref_p.normal.exist.left45 = backup_l;
   while (1) {
     if (ui->button_state_hold())
       break;

@@ -60,9 +60,11 @@ public:
   void exec3(path_struct &base_path, vector<trajectory_point_t> &trajectory);
   void make_chopped_trajectory(vector<trajectory_point_t> &trajectory,
                                int turn_num, bool dia);
-                               
+
   Direction get_next_dir(Direction dir, TurnType type, TurnDirection turn_dir);
   TurnType get_turn_type(int turn_num);
+  TurnType get_turn_type(int turn_num, bool dia);
+
   TurnDirection get_turn_dir(int turn_dir);
   double chop_dt = 3;
   slalom_data_t sla_data;

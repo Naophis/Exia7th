@@ -80,8 +80,6 @@ constexpr gpio_num_t SUCTION_PWM = GPIO_NUM_37;
 // constexpr adc2_channel_t SEN_L90 = ADC2_CHANNEL_8;
 // constexpr adc2_channel_t BATTERY = ADC2_CHANNEL_9;
 
-constexpr int MOTOR_HZ = 100000;
-constexpr int SUCTION_MOTOR_HZ = 10000;
 constexpr int16_t ENCODER_H_LIM_VAL = 32767;
 constexpr int16_t ENCODER_L_LIM_VAL = -32767;
 constexpr uint8_t READ_FLAG = 0x80;

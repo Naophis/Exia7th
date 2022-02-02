@@ -1,9 +1,16 @@
 % ego
 dt = 0.001/4;
-Normal = 0;Large = 1; Orval = 2; Dia45 = 3; Dia135 = 4; Dia90 = 5; Dia180 = 6;
+Normal = 0; Large = 1; Orval = 2; Dia45 = 3; Dia135 = 4; Dia90 = 5; Dia180 = 6; Dia45_2 = 7; Dia135_2 = 8;
 
-ego_v = 800;
+ego_v = 300;
+% turn_mode = Normal;
+%turn_mode = Large;
 turn_mode = Orval;
+% turn_mode = Dia45;
+% turn_mode = Dia45_2;
+% turn_mode = Dia135;
+% turn_mode = Dia135_2;
+% turn_mode = Dia90;
 
 is_dia_mode = false;
 slip_gain = -495;
@@ -12,22 +19,35 @@ wall_off_offset = 0;
 wall_off_offset_dia = 0 * sqrt(2);
 
 if turn_mode == Normal
-    radius = 36; sla.pow_n = 4;
+    radius = 32; sla.pow_n = 4;
     target_angle = 90, is_dia_mode = false, turn_mode_str = 'Normal';
 elseif turn_mode == Large
     radius = 65; sla.pow_n = 4;
     target_angle = 90, is_dia_mode = false, turn_mode_str = 'Large';
 elseif turn_mode == Orval
-    radius = 43; sla.pow_n = 4;
+    radius = 45; sla.pow_n = 4;
     target_angle = 180, is_dia_mode = false, turn_mode_str = 'Orval';
 elseif turn_mode == Dia45
-    radius = 145; sla.pow_n = 4;
+    radius = 75; sla.pow_n = 4;
     target_angle = 45, turn_mode_str = 'Dia45';
+    is_dia_mode = false;
+elseif turn_mode == Dia45_2
+    radius = 75; sla.pow_n = 4;
+    target_angle = 45, turn_mode_str = 'Dia45';
+    is_dia_mode = true;
 elseif turn_mode == Dia135
-    radius = 85; sla.pow_n = 4;
+    radius = 43; sla.pow_n = 4;
     target_angle = 135, turn_mode_str = 'Dia135';
+    is_dia_mode = false;
+elseif turn_mode == Dia135_2
+    radius = 43; sla.pow_n = 4;
+    target_angle = 135, turn_mode_str = 'Dia135';
+    is_dia_mode = true;
 elseif turn_mode == Dia90
+    radius = 40; sla.pow_n = 4;
+    target_angle = 90;
     is_dia_mode = false, turn_mode_str = 'Dia90';
+    
 end
 
 tmp_x = 0;
@@ -118,27 +138,32 @@ end
 G = 9.81;
 fprintf('pos(x,y,rad,deg,max_G) = (%0.8f, %0.8f, %0.8f, %0.8f, %0.8fG)\r\n', tmp_x, tmp_y, tmp_theta, tmp_theta * 180 / pi, max(tmp_w_list)^2 * (radius / 1000) / G);
 
-[a,b]=plot_slalom(turn_mode, tmp_x_list, tmp_y_list, tmp_w_list, tmp_x, tmp_y, target_angle, is_dia_mode, 'normal', wall_off_offset, wall_off_offset_dia);
+[a, b] = plot_slalom(turn_mode, tmp_x_list, tmp_y_list, tmp_w_list, tmp_x, tmp_y, target_angle, is_dia_mode, 'normal', wall_off_offset, wall_off_offset_dia);
 
+if turn_mode == Normal
+    fprintf("normal:\n");
+elseif turn_mode == Large
+    fprintf("large:\n");
+elseif turn_mode == Orval
+    fprintf("orval:\n");
+elseif turn_mode == Dia45
+    fprintf("dia45:\n");
+elseif turn_mode == Dia135
+    fprintf("dia135:\n");
+elseif turn_mode == Dia90
+    fprintf("dia90:\n");
+elseif turn_mode == Dia45_2
+    fprintf("dia45_2:\n");
+elseif turn_mode == Dia135_2
+    fprintf("dia135_2:\n");
+end
 
-% fprintf('no_slip %0.8f\t%0.8f\r\n', ...
-%     a, b);
-% [l_start, l_end] = plot_slalom(turn_mode, tmp_slip_x_list, tmp_slip_y_list, tmp_w_list, tmp_x, tmp_y, target_angle, is_dia_mode, 'slip', wall_off_offset, wall_off_offset_dia);
+fprintf("  v: %f\n", ego_v);
+fprintf("  ang: %f\n", target_angle);
+fprintf("  rad: %f\n", radius);
+fprintf("  pow_n: %f\n", sla.pow_n);
+fprintf("  time: %f\n", sla.base_time);
 
-% fprintf('%d\t%s\t', ...
-%     ego_v, turn_mode_str);
+fprintf('  front: { left: %0.8f, right : %0.8f}\n', a, a);
+fprintf('  back: { left: %0.8f, right : %0.8f}\n', b, b);
 
-% fprintf('%d\t%d\t', ...
-%     target_angle, radius);
-
-% fprintf('%0.8f\t%0.8f\t', ...
-%     l_start, l_end);
-
-% fprintf('%0.8f\t%0.8f\t', ...
-%     l_start, l_end);
-
-% fprintf('%0.8f\t%d\t', ...
-%     sla.base_time, sla.pow_n);
-
-% fprintf('%0.8f\t%0.8f\t%0.8f\r\n', ...
-%     l_start, l_end, l_start);

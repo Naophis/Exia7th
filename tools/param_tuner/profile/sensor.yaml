@@ -1,13 +1,13 @@
 normal:
   ref:
-    right45: 410
-    left45: 205
+    right45: 400
+    left45: 300
     front: 500
-    kireme_r: 2
-    kireme_l: 2
+    kireme_r: 5
+    kireme_l: 5
   exist:
-    right45: 300
-    left45: 120
+    right45: 280
+    left45: 180
     front: 500
 dia:
   ref:

@@ -1,6 +1,7 @@
 function [l_start, l_end] = plot_slalom(turn_mode, tmp_x_list, tmp_y_list, tmp_w_list, ...
         tmp_x, tmp_y, target_angle, is_dia_mode, fig_num, wall_off_offset, wall_off_offset_dia)
-    Normal = 0; Large = 1; Orval = 2; Dia45 = 3; Dia135 = 4; Dia90 = 5;
+    
+    Normal = 0; Large = 1; Orval = 2; Dia45 = 3; Dia135 = 4; Dia90 = 5; Dia180 = 6; Dia45_2 = 7; Dia135_2 = 8;
     output = 0;
     fig1 = figure('Name',fig_num);
     clf(fig1);
@@ -12,7 +13,6 @@ function [l_start, l_end] = plot_slalom(turn_mode, tmp_x_list, tmp_y_list, tmp_w
     cell_size = half;
 
     LineWidth = 2;
-    
     if turn_mode == Normal
         [l_start, l_end] = calc_offset_dist(tmp_x_list, tmp_y_list, cell_size/2 - wall_off_offset, cell_size/2 - wall_off_offset, target_angle);
         l_start = l_start + wall_off_offset;
@@ -51,7 +51,7 @@ function [l_start, l_end] = plot_slalom(turn_mode, tmp_x_list, tmp_y_list, tmp_w
         l_end_y1 = tmp_y_list(end);
         plot([l_end_x0 l_end_x1], [l_end_y0 l_end_y1], 'LineWidth', LineWidth);
         hold off;
-    elseif turn_mode == Dia45
+    elseif turn_mode == Dia45 || turn_mode == Dia45_2
 
         if ~is_dia_mode
             [l_start, l_end] = calc_offset_dist(tmp_x_list, tmp_y_list, cell_size - wall_off_offset_dia * sin(pi / 4), cell_size/2 - wall_off_offset_dia * sin(pi / 4), target_angle);
@@ -85,7 +85,7 @@ function [l_start, l_end] = plot_slalom(turn_mode, tmp_x_list, tmp_y_list, tmp_w
             l_start = l_start + wall_off_offset_dia;
         end
 
-    elseif turn_mode == Dia135
+    elseif turn_mode == Dia135|| turn_mode == Dia135_2
 
         if ~is_dia_mode
             [l_start, l_end] = calc_offset_dist(tmp_x_list, tmp_y_list, cell_size/2 + wall_off_offset_dia * sin(pi / 4), cell_size - wall_off_offset_dia * sin(pi / 4), target_angle);
@@ -203,7 +203,6 @@ function [l_start, l_end] = plot_slalom(turn_mode, tmp_x_list, tmp_y_list, tmp_w
 
         hold off;
     end
-
-    fprintf('%0.8f\t%0.8f\t\r\n', l_start, l_end);
+    
 
 end

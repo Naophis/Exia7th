@@ -210,6 +210,8 @@ typedef struct {
   gain_log_t dist_log;
   gain_log_t w_log;
   gain_log_t ang_log;
+  gain_log_t sen_log;
+  gain_log_t sen_log_dia;
   pid_error_t sen;
   pid_error_t sen_dia;
 } pid_error_entity_t;
@@ -331,6 +333,7 @@ typedef struct {
   int sla_return;
   int sla_type2;
   int turn_times;
+  int ignore_opp_sen = 0;
 } test_mode_t;
 
 typedef struct {

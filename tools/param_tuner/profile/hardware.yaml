@@ -1,5 +1,5 @@
 dt: 0.001
-tire: 13.70
+tire: 13.675
 offset_start_dist: 22.5
 gear_a: 37
 gear_b: 8
@@ -13,8 +13,8 @@ Resist: 2.93
 Mass: 0.015
 Lm: 0.0000095
 motor_pid:
-  p: 0.01
-  i: 0.002
+  p: 0.012
+  i: 0.0015
   d: 0.0
   mode: 1
   # p: 0.0
@@ -29,8 +29,8 @@ dist_pid:
   # i: 0.0
   # d: 0.0
 gyro_pid:
-  p: 0.35
-  i: 0.004125
+  p: 0.375
+  i: 0.0125
   d: 0
   mode: 1
   # p: 0.0
@@ -48,15 +48,15 @@ sensor_pid:
   p: 0.01
   i: 0.0
   d: 0.0
-  mode: 0
+  mode: 1
 sensor_pid_dia:
   p: 0.1
   i: 0.0
   d: 0.0
-  mode: 0
+  mode: 1
 gyro_param:
-  gyro_w_gain_right: 0.00106475
-  gyro_w_gain_left: 0.00106475
+  gyro_w_gain_right: 0.001059
+  gyro_w_gain_left: 0.001059
   lp_delay: 0.1
 battery_param:
   lp_delay: 0.25

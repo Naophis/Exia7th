@@ -21,7 +21,12 @@ void MotionPlanning::set_userinterface(std::shared_ptr<UserInterface> &_ui) {
 void MotionPlanning::set_path_creator(std::shared_ptr<PathCreator> &_pc) {
   pc = _pc;
 }
-
+void MotionPlanning::set_planning_task(std::shared_ptr<PlanningTask> &_pt) {
+  pt = _pt;
+}
+void MotionPlanning::set_logging_task(std::shared_ptr<LoggingTask> &_lt) {
+  lt = _lt; //
+}
 MotionResult MotionPlanning::go_straight(param_straight_t &p) {
   tgt_val->nmr.v_max = p.v_max;
   tgt_val->nmr.v_end = p.v_end;
@@ -342,6 +347,13 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
   ps.motion_type = MotionType::STRAIGHT;
   next_motionr_t nm;
 
+  reset_gyro_ref_with_check();
+  // lt->start_slalom_log();
+  // reset();
+  reset_tgt_data();
+  reset_ego_data();
+  pt->motor_enable();
+
   for (int i = 0; i < pc->path_size; i++) {
     float dist = 0.5 * pc->path_s[i] - 1;
     auto turn_dir = tc.get_turn_dir(pc->path_t[i]);
@@ -365,8 +377,15 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
         }
         ps.dist += param->offset_start_dist; // 初期加速距離を加算
       }
+      if (turn_type == TurnType::Finish) {
+        ps.dist += 40;
+        ps.v_end = 20;
+      }
       ps.motion_type = MotionType::STRAIGHT;
       go_straight(ps);
+      if (turn_type == TurnType::Finish) {
+        break;
+      }
     }
 
     if (!((turn_type == TurnType::None) || (turn_type == TurnType::Finish))) {
@@ -402,4 +421,15 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
            ego.dir == Direction::SouthEast || ego.dir == Direction::SouthWest);
     }
   }
+
+  ps.v_max = 20;
+  ps.v_end = 1;
+  ps.dist = 5;
+  ps.accl = p_set.str_map[StraightType::FastRun].accl;
+  ps.decel = p_set.str_map[StraightType::FastRun].decel;
+  go_straight(ps);
+
+  pt->motor_disable();
+  // lt->stop_slalom_log();
+  coin();
 }

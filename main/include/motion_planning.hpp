@@ -4,7 +4,9 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "include/defines.hpp"
+#include "include/logging_task.hpp"
 #include "include/path_creator.hpp"
+#include "include/planning_task.hpp"
 #include "include/trajectory_creator.hpp"
 #include "include/ui.hpp"
 #include <stdio.h>
@@ -42,6 +44,9 @@ public:
 
   void exec_path_running(param_set_t &param_set);
 
+  void set_planning_task(std::shared_ptr<PlanningTask> &pt);
+  void set_logging_task(std::shared_ptr<LoggingTask> &lt);
+
 private:
   std::shared_ptr<UserInterface> ui;
 
@@ -51,5 +56,7 @@ private:
   std::shared_ptr<input_param_t> param;
   std::shared_ptr<PathCreator> pc;
   TrajectoryCreator tc;
+  std::shared_ptr<PlanningTask> pt;
+  std::shared_ptr<LoggingTask> lt;
 };
 #endif

@@ -1,6 +1,8 @@
 
 #include "include/planning_task.hpp"
 
+constexpr int MOTOR_HZ = 100000;
+constexpr int SUCTION_MOTOR_HZ = 10000;
 PlanningTask::PlanningTask() {}
 
 PlanningTask::~PlanningTask() {}
@@ -176,10 +178,21 @@ void PlanningTask::task() {
 
 float PlanningTask::calc_sensor_pid() {
   float duty = 0;
-  error_entity.sen.error_d = error_entity.sen.error_p;
-  error_entity.sen.error_p = check_sen_error();
 
-  duty = param_ro->sensor_pid.p * error_entity.sen.error_p;
+  error_entity.sen.error_i += error_entity.sen.error_p;
+  error_entity.sen.error_p = check_sen_error();
+  if (param_ro->sensor_pid.mode == 1) {
+    duty = param_ro->sensor_pid.p * error_entity.sen.error_p +
+           param_ro->sensor_pid.i * error_entity.sen.error_i +
+           param_ro->sensor_pid.d * error_entity.sen.error_d +
+           (error_entity.sen_log.gain_z - error_entity.sen_log.gain_zz) * dt;
+    error_entity.sen_log.gain_zz = error_entity.sen_log.gain_z;
+    error_entity.sen_log.gain_z = duty;
+  } else {
+    duty = param_ro->sensor_pid.p * error_entity.sen.error_p +
+           param_ro->sensor_pid.i * error_entity.sen.error_i +
+           param_ro->sensor_pid.d * error_entity.sen.error_d;
+  }
 
   return duty;
 }
@@ -588,10 +601,13 @@ void PlanningTask::calc_tgt_duty() {
     duty_c2 = 0;
     duty_roll = 0;
     duty_roll2 = 0;
+    duty_sen = 0;
     error_entity.v.error_i = 0;
     error_entity.dist.error_i = 0;
     error_entity.w.error_i = 0;
     error_entity.ang.error_i = 0;
+    error_entity.sen.error_i = 0;
+    error_entity.sen_dia.error_i = 0;
     tgt_duty.duty_r = tgt_duty.duty_l = 0;
     duty_ff_front = duty_ff_roll = 0;
     duty_rpm_r = duty_rpm_l = 0;
@@ -603,6 +619,8 @@ void PlanningTask::calc_tgt_duty() {
     error_entity.w_log.gain_z = 0;
     error_entity.ang_log.gain_zz = 0;
     error_entity.ang_log.gain_z = 0;
+    error_entity.sen_log.gain_z = 0;
+    error_entity.sen_log.gain_zz = 0;
     tgt_val->global_pos.ang = 0;
     tgt_val->global_pos.img_ang = 0;
     tgt_val->global_pos.dist = 0;

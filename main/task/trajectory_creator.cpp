@@ -21,6 +21,26 @@ TurnType TrajectoryCreator::get_turn_type(int turn_num) {
   return TurnType::Finish;
 }
 
+TurnType TrajectoryCreator::get_turn_type(int turn_num, bool dia) {
+  if (turn_num == 1 || turn_num == 2)
+    return TurnType::Normal;
+  if (turn_num == 3 || turn_num == 4)
+    return TurnType::Orval;
+  if (turn_num == 5 || turn_num == 6)
+    return TurnType::Large;
+  if (turn_num == 7 || turn_num == 8)
+    return !dia ? TurnType::Dia45 : TurnType::Dia45_2;
+  if (turn_num == 9 || turn_num == 10)
+    return !dia ? TurnType::Dia135 : TurnType::Dia135_2;
+  if (turn_num == 11 || turn_num == 12)
+    return TurnType::Dia90;
+  if (turn_num == 13 || turn_num == 14)
+    return TurnType::Kojima;
+  if (turn_num == 255)
+    return TurnType::Finish;
+  return TurnType::Finish;
+}
+
 TurnDirection TrajectoryCreator::get_turn_dir(int turn_num) {
   if (turn_num == 255 || turn_num == 0)
     return TurnDirection::End;
