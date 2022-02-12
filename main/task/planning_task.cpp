@@ -201,6 +201,17 @@ float PlanningTask::check_sen_error() {
   int check = 0;
 
   //前壁が近すぎるときはエスケープ
+
+  bool enable = true;
+
+  if (tgt_val->tgt_in.tgt_dist > 45) {
+    int div = ((int)tgt_val->ego_in.dist) / 90;
+    float mod = tgt_val->ego_in.dist - 90 * div;
+    if (mod > 5 && (mod < 40 || mod > 85)) {
+      // enable = false;
+    }
+  }
+
   if (sensing_result->ego.front_lp < param_ro->sen_ref_p.normal.exist.front) {
     if (ABS(sensing_result->ego.right45_lp -
             sensing_result->ego.right45_lp_old) <
@@ -228,14 +239,18 @@ float PlanningTask::check_sen_error() {
       }
     }
   }
-  if (check == 0) {
-    // reset
+  if (check == 0 || !enable) {
+    error_entity.sen.error_i = 0;
+    error_entity.sen_log.gain_zz = 0;
+    error_entity.sen_log.gain_z = 0;
   } else {
-    tgt_val->global_pos.ang = tgt_val->global_pos.img_ang;
-    error_entity.w.error_i = 0;
-    error_entity.w.error_d = 0;
-    error_entity.ang.error_i = 0;
-    error_entity.ang.error_d = 0;
+    if (tgt_val->tgt_in.tgt_dist >= 45) {
+      tgt_val->global_pos.ang = tgt_val->global_pos.img_ang;
+      error_entity.w.error_i = 0;
+      error_entity.w.error_d = 0;
+      error_entity.ang.error_i = 0;
+      error_entity.ang.error_d = 0;
+    }
   }
   if (check == 2) {
     return error;
@@ -446,22 +461,40 @@ void PlanningTask::pl_req_activate() {
   }
 }
 
+float PlanningTask::get_feadforward_front(TurnDirection td) {
+  // return 0;
+  if (param_ro->FF_front == 0)
+    return 0;
+  const float tread = 38;
+  if (td == TurnDirection::Right) {
+    return (param_ro->Mass * mpc_next_ego.accl / 1000 * param_ro->tire / 2000 +
+            param_ro->Ke * (tgt_val->ego_in.v + tread / 2 * tgt_val->ego_in.w) /
+                (param_ro->tire / 2) * 30.0 / PI) *
+           (param_ro->Resist / param_ro->Km) / 2 /
+           (param_ro->gear_a / param_ro->gear_b);
+  }
+  return (param_ro->Mass * mpc_next_ego.accl / 1000 * param_ro->tire / 2000 +
+          param_ro->Ke * (tgt_val->ego_in.v - tread / 2 * tgt_val->ego_in.w) /
+              (param_ro->tire / 2) * 30.0 / PI) *
+         (param_ro->Resist / param_ro->Km) / 2 /
+         (param_ro->gear_a / param_ro->gear_b);
+}
 float PlanningTask::get_feadforward_front() {
   // return 0;
   if (param_ro->FF_front == 0)
     return 0;
-  return param_ro->Mass * mpc_next_ego.accl / 1000  //
-         * param_ro->tire / 1000 * param_ro->Resist //
-         / ((param_ro->gear_a / param_ro->gear_b) * param_ro->Km) / 2;
+  return param_ro->Mass * mpc_next_ego.accl / 1000 * param_ro->tire / 1000 *
+         param_ro->Resist /
+         ((param_ro->gear_a / param_ro->gear_b) * param_ro->Km) / 2;
 }
 float PlanningTask::get_feadforward_roll() {
   // return 0;
+  const float tread = 38;
   if (param_ro->FF_roll == 0)
     return 0;
-  return param_ro->Lm * mpc_next_ego.alpha                        //
-         * param_ro->tire * param_ro->Resist                      //
-         / ((param_ro->gear_a / param_ro->gear_b) * param_ro->Km) //
-         / param_ro->tread;
+  return param_ro->Lm * mpc_next_ego.alpha * param_ro->tire * //
+         param_ro->Resist /
+         ((param_ro->gear_a / param_ro->gear_b) * param_ro->Km) / tread;
 }
 float PlanningTask::get_rpm_ff_val(TurnDirection td) {
   // return 0;
@@ -484,6 +517,7 @@ void PlanningTask::calc_tgt_duty() {
 
   } else if (tgt_val->nmr.sct == SensorCtrlType::NONE) {
   }
+  sensing_result->ego.duty.sen = duty_sen;
 
   error_entity.v.error_d = error_entity.v.error_p;
   error_entity.dist.error_d = error_entity.dist.error_p;
@@ -519,9 +553,12 @@ void PlanningTask::calc_tgt_duty() {
 
   float duty_rpm_r = get_rpm_ff_val(TurnDirection::Right);
   float duty_rpm_l = get_rpm_ff_val(TurnDirection::Left);
-
-  float duty_ff_front = get_feadforward_front();
-  float duty_ff_roll = get_feadforward_roll();
+  // float duty_rpm_r = get_feadforward_front(TurnDirection::Right);
+  // float duty_rpm_l = get_feadforward_front(TurnDirection::Left);
+  float duty_ff_front = 0;
+  float duty_ff_roll = 0;
+  duty_ff_front = get_feadforward_front();
+  duty_ff_roll = get_feadforward_roll();
 
   float duty_c = 0;
   float duty_c2 = 0;
@@ -668,9 +705,13 @@ void PlanningTask::cp_tgt_val() {
 void PlanningTask::check_fail_safe() {
   bool no_problem = true;
   if (motor_en) {
-    if (ABS(sensing_result->ego.duty.duty_l) > 80) {
+    if (ABS(sensing_result->ego.duty.duty_r) > 80) {
       fail_safe.invalid_duty_r_cnt++;
-      no_problem = true;
+      no_problem = false;
+    }
+    if (ABS(sensing_result->ego.duty.duty_l) > 80) {
+      fail_safe.invalid_duty_l_cnt++;
+      no_problem = false;
     }
   }
 

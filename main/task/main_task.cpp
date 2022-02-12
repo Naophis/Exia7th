@@ -227,6 +227,7 @@ void MainTask::load_hw_param() {
   if (f == NULL) {
     return;
   }
+  char line_buf[LINE_BUF_SIZE];
   fgets(line_buf, sizeof(line_buf), f);
   fclose(f);
 
@@ -332,6 +333,7 @@ void MainTask::load_sensor_param() {
   if (f == NULL) {
     return;
   }
+  char line_buf[LINE_BUF_SIZE];
   fgets(line_buf, sizeof(line_buf), f);
   fclose(f);
 
@@ -400,6 +402,10 @@ void MainTask::load_sensor_param() {
       cJSON_GetObjectItem(search_exist, "offset_r")->valuedouble;
   param->sen_ref_p.search_exist.offset_l =
       cJSON_GetObjectItem(search_exist, "offset_l")->valuedouble;
+  param->sen_ref_p.search_exist.front_ctrl_th =
+      cJSON_GetObjectItem(search_exist, "front_ctrl_th")->valuedouble;
+  param->sen_ref_p.search_exist.front_ctrl =
+      cJSON_GetObjectItem(search_exist, "front_ctrl")->valuedouble;
 
   cJSON_free(root);
   cJSON_free(normal);
@@ -417,6 +423,7 @@ void MainTask::load_sys_param() {
   if (f == NULL) {
     return;
   }
+  char line_buf[LINE_BUF_SIZE];
   fgets(line_buf, sizeof(line_buf), f);
   fclose(f);
 
@@ -468,6 +475,7 @@ void MainTask::load_turn_param_profiles() {
   FILE *f = fopen("/spiflash/profiles.txt", "rb");
   if (f == NULL)
     return;
+  char line_buf[LINE_BUF_SIZE];
   fgets(line_buf, sizeof(line_buf), f);
   fclose(f);
   printf("%s\n", line_buf);
@@ -534,6 +542,7 @@ void MainTask::load_slalom_param() {
     if (f == NULL) {
       return;
     }
+    char line_buf[LINE_BUF_SIZE];
     printf("%s\n===================\n", path.c_str());
     fgets(line_buf, sizeof(line_buf), f);
     fclose(f);
@@ -699,12 +708,16 @@ void MainTask::task() {
     } else if (sys.user_mode == 6) {
       printf("test_search_sla_walloff\n");
       test_search_sla_walloff();
+    } else if (sys.user_mode == 7) {
+      printf("test_search_front_ctrl\n");
+      test_front_ctrl();
     } else if (sys.user_mode == 14) {
       printf("keep_pivot\n");
       keep_pivot();
     } else if (sys.user_mode == 15) {
       printf("echo_printf\n");
-      echo_sensing_result_with_json();
+      // echo_sensing_result_with_json();
+      dump1();
     } else if (sys.user_mode == 16) {
       lt->dump_log(slalom_log_file);
       while (1) {
@@ -752,6 +765,8 @@ void MainTask::task() {
 
         mp->exec_path_running(paramset_list[0]);
 
+      } else if (mode_num == 14) {
+        dump1(); // taskの最終行に配置すること
       } else if (mode_num == 15) {
         save_maze_data(false);
       }
@@ -865,7 +880,7 @@ void MainTask::test_run_sla() {
 
   ps.v_max = sys.test.v_max;
   ps.v_end = 20;
-  ps.dist = sys.test.dist - 5 + param->offset_start_dist;
+  ps.dist = 45 + param->offset_start_dist + 90;
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
   ps.sct = SensorCtrlType::Straight;
@@ -1149,6 +1164,82 @@ void MainTask::test_search_sla() {
   }
 }
 
+// 探索中の前壁制御
+void MainTask::test_front_ctrl() {
+  int file_idx = sys.test.file_idx;
+
+  if (file_idx >= tpp.file_list_size) {
+    ui->error();
+    return;
+  }
+
+  auto sla_p = paramset_list[file_idx].map[TurnType::Normal];
+
+  mp->reset_gyro_ref_with_check();
+
+  if (sys.test.suction_active) {
+    pt->suction_enable(sys.test.suction_duty);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+  }
+
+  reset_tgt_data();
+  reset_ego_data();
+  pt->motor_enable();
+
+  req_error_reset();
+
+  lt->start_slalom_log();
+
+  ps.v_max = sla_p.v;
+  ps.v_end = sla_p.v;
+  ps.dist = 45 + 80 + param->offset_start_dist;
+  ps.accl = sys.test.accl;
+  ps.decel = sys.test.decel;
+  ps.sct = SensorCtrlType::Straight;
+
+  mp->go_straight(ps);
+
+  mp->search_front_ctrl(ps);
+
+  ps.v_max = sla_p.v;
+  ps.v_end = 20;
+  ps.dist = 45 - 5;
+  ps.accl = sys.test.accl;
+  ps.decel = sys.test.decel;
+  ps.sct = SensorCtrlType::NONE;
+  mp->go_straight(ps);
+  ps.v_max = 20;
+  ps.v_end = sys.test.end_v;
+  ps.dist = 5;
+  ps.accl = sys.test.accl;
+  ps.decel = sys.test.decel;
+  ps.sct = SensorCtrlType::NONE;
+  mp->go_straight(ps);
+
+  vTaskDelay(100 / portTICK_RATE_MS);
+  pt->motor_disable();
+  reset_tgt_data();
+  reset_ego_data();
+  req_error_reset();
+  pt->suction_disable();
+  lt->stop_slalom_log();
+
+  lt->save(slalom_log_file);
+  ui->coin(120);
+
+  while (1) {
+    if (ui->button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
+  lt->dump_log(slalom_log_file);
+  while (1) {
+    if (ui->button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
+}
+
 void MainTask::test_search_sla_walloff() {
   printf("search_walloff_offset= %f, %f\n",
          param->sen_ref_p.search_exist.offset_l,
@@ -1254,6 +1345,7 @@ void MainTask::read_maze_data() {
   auto *f = fopen(maze_log_file.c_str(), "rb");
   if (f == NULL)
     return;
+  char line_buf[LINE_BUF_SIZE];
   while (fgets(line_buf, sizeof(line_buf), f) != NULL)
     printf("%s\n", line_buf);
   fclose(f);

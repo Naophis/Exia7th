@@ -47,8 +47,9 @@ MotionResult SearchController::go_straight_wrapper(param_set_t &p_set) {
   p.accl = p_set.str_map[StraightType::Search].accl;
   p.decel = p_set.str_map[StraightType::Search].decel;
   p.dist = 90;
-  p.motion_type = MotionType::NONE;
+  p.motion_type = MotionType::STRAIGHT;
   p.wall_off_req = WallOffReq::SEARCH;
+  p.sct = SensorCtrlType::Straight;
   p.wall_off_dist_r = param->sen_ref_p.search_exist.offset_r;
   p.wall_off_dist_l = param->sen_ref_p.search_exist.offset_l;
   p.dia_mode = false;
@@ -69,24 +70,31 @@ MotionResult SearchController::slalom(param_set_t &p_set,
 }
 MotionResult SearchController::pivot(param_set_t &p_set) {
   param_straight_t p;
+  MotionResult res;
   p.v_max = p_set.str_map[StraightType::Search].v_max;
   p.v_end = 20;
   p.accl = p_set.str_map[StraightType::Search].accl;
   p.decel = p_set.str_map[StraightType::Search].decel;
   p.dist = 40;
-  p.motion_type = MotionType::NONE;
+  p.motion_type = MotionType::STRAIGHT;
   p.sct = SensorCtrlType::Straight;
   p.wall_off_req = WallOffReq::NONE;
-  mp->go_straight(p);
+  res = mp->go_straight(p);
+
+  if (res == MotionResult::ERROR)
+    return MotionResult::ERROR;
+
   p.v_max = 20;
   p.v_end = 5;
   p.accl = p_set.str_map[StraightType::Search].accl;
   p.decel = p_set.str_map[StraightType::Search].decel;
   p.dist = 5;
-  p.motion_type = MotionType::NONE;
+  p.motion_type = MotionType::STRAIGHT;
   p.sct = SensorCtrlType::Straight;
   p.wall_off_req = WallOffReq::NONE;
-  mp->go_straight(p);
+  res = mp->go_straight(p);
+  if (res == MotionResult::ERROR)
+    return MotionResult::ERROR;
 
   mp->reset_tgt_data();
   mp->reset_ego_data();
@@ -100,25 +108,36 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
   pr.ang = PI;
   pr.RorL = TurnDirection::Right;
   pt->motor_enable();
-  mp->pivot_turn(pr);
+
+  res = mp->pivot_turn(pr);
+  // if (res == MotionResult::ERROR)
+  //   return MotionResult::ERROR;
+
   mp->reset_tgt_data();
   mp->reset_ego_data();
   vTaskDelay(100 / portTICK_RATE_MS);
   pt->motor_disable();
 
   mp->reset_gyro_ref();
+
+  ui->coin(100);
+
+  vTaskDelay(100 / portTICK_RATE_MS);
+  pt->motor_enable();
   mp->reset_tgt_data();
   mp->reset_ego_data();
-  pt->motor_enable();
   p.v_max = p_set.str_map[StraightType::Search].v_max;
   p.v_end = p_set.str_map[StraightType::Search].v_max;
   p.accl = p_set.str_map[StraightType::Search].accl;
   p.decel = p_set.str_map[StraightType::Search].decel;
   p.dist = 45;
-  p.motion_type = MotionType::NONE;
-  mp->go_straight(p);
-  
-  return MotionResult::NONE;
+  p.motion_type = MotionType::STRAIGHT;
+  p.sct = SensorCtrlType::Straight;
+  p.wall_off_req = WallOffReq::NONE;
+  res = mp->go_straight(p);
+  // ui->coin(100);
+
+  return res;
 }
 MotionResult SearchController::finish(param_set_t &p_set) {
   param_straight_t p;
@@ -134,7 +153,7 @@ bool SearchController::is_goaled() { return tmp_goal_list.size() == 0; }
 void SearchController::exec(param_set_t &p_set, SearchMode sm) {
 
   mp->reset_gyro_ref_with_check();
-  // lt->start_slalom_log();
+  lt->start_slalom_log();
   reset();
 
   for (const auto p : lgc->goal_list) {
@@ -148,7 +167,7 @@ void SearchController::exec(param_set_t &p_set, SearchMode sm) {
   p.decel = p_set.str_map[StraightType::Search].decel;
   p.dist = 45 + param->offset_start_dist;
   p.sct = SensorCtrlType::Straight;
-  p.motion_type = MotionType::NONE;
+  p.motion_type = MotionType::STRAIGHT;
   // p.wall_off_req = WallOffReq::SEARCH;
   p.wall_off_req = WallOffReq::NONE;
   p.wall_off_dist_r = param->sen_ref_p.search_exist.offset_r;
@@ -158,7 +177,8 @@ void SearchController::exec(param_set_t &p_set, SearchMode sm) {
   mp->reset_tgt_data();
   mp->reset_ego_data();
   mp->go_straight(p);
-
+  int back_cnt = 0;
+  // pivot(p_set);
   while (1) {
     // sensing(ego);
     judge_wall();
@@ -184,21 +204,33 @@ void SearchController::exec(param_set_t &p_set, SearchMode sm) {
       slalom(p_set, TurnDirection::Left);
     } else if (next_motion == Motion::Back) {
       pivot(p_set);
+      back_cnt++;
+      // break;
     } else if (next_motion == Motion::NONE) {
+      break;
+    }
+
+    if (next_motion == Motion::Back) {
+      back_cnt++;
+    } else {
+      back_cnt = 0;
+    }
+
+    if (back_cnt == 3) {
       break;
     }
   }
   finish(p_set);
   pt->motor_disable();
   lt->stop_slalom_log();
+  lt->save(slalom_log_file);
   mp->coin();
-  // lt->save(slalom_log_file);
-  // while (1) {
-  //   if (ui->button_state_hold())
-  //     break;
-  //   vTaskDelay(10 / portTICK_RATE_MS);
-  // }
-  // lt->dump_log(slalom_log_file);
+  while (1) {
+    if (ui->button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
+  lt->dump_log(slalom_log_file);
 }
 void SearchController::judge_wall() {
   bool wall_n = false;

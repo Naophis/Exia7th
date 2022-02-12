@@ -1,18 +1,18 @@
 normal:
   ref:
-    right45: 380
-    left45: 315
+    right45: 400
+    left45: 280
     front: 500
-    kireme_r: 5
-    kireme_l: 5
+    kireme_r: 10
+    kireme_l: 10
   exist:
-    right45: 330  #
-    left45: 180
+    right45: 300
+    left45: 200
     front: 500
-    kireme_r: 1500 #右90壁有無
-    kireme_l: 1400 #左90壁有無
-    right90: 700
-    left90: 700
+    kireme_r: 100 #右90壁有無
+    kireme_l: 100 #左90壁有無
+    right90: 0
+    left90: 0
 dia:
   ref:
     right45: 1000
@@ -34,3 +34,5 @@ search:
     offset_r: 4.5 #切れ目後距離
     offset_l: 6.5 #切れ目後距離
 
+    front_ctrl_th: 200
+    front_ctrl: 300

@@ -40,6 +40,7 @@
 #include <vector>
 
 #include "rom/uart.h"
+#include "esp_debug_helpers.h"
 
 SensingTask st;
 
@@ -131,6 +132,8 @@ extern "C" void app_main() {
 
   init_gpio();
   init_uart();
+
+  // esp_backtrace_print(0);
 
   if (GY_MODE) {
     hwtimer_init();

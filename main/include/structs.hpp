@@ -54,6 +54,7 @@ typedef struct {
   float duty_l = 0;
   float duty_r = 0;
   float duty_suction = 0;
+  float sen = 0;
 } duty_t;
 
 typedef struct {
@@ -151,6 +152,8 @@ typedef struct {
   float kireme_l;
   float offset_r;
   float offset_l;
+  float front_ctrl;
+  float front_ctrl_th;
 } sen_search_param_t;
 
 typedef struct {
@@ -439,7 +442,7 @@ typedef struct {
 
   float duty_ff_front;
   float duty_ff_roll;
-
+  float duty_sensor_ctrl;
 } log_data_t;
 
 typedef struct {

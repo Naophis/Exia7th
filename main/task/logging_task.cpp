@@ -33,8 +33,7 @@ void LoggingTask::stop_slalom_log() {
 }
 
 void LoggingTask::task() {
-  const TickType_t xDelay_fast = 1 / portTICK_PERIOD_MS;
-  const TickType_t xDelay2 = 1 / portTICK_PERIOD_MS;
+  const TickType_t xDelay = 4 / portTICK_PERIOD_MS;
   while (1) {
     logging_active = active_slalom_log;
     if (logging_active) {
@@ -56,9 +55,6 @@ void LoggingTask::task() {
         ld->img_ang = tgt_val->ego_in.img_ang * 180 / PI;
         ld->ang = tgt_val->ego_in.ang * 180 / PI;
 
-        ld->duty_l = sensing_result->ego.duty.duty_l;
-        ld->duty_r = sensing_result->ego.duty.duty_r;
-
         ld->left90_lp = sensing_result->ego.left90_lp;
         ld->left45_lp = sensing_result->ego.left45_lp;
         ld->front_lp = sensing_result->ego.front_lp;
@@ -71,15 +67,16 @@ void LoggingTask::task() {
 
         ld->motion_type = static_cast<char>(tgt_val->motion_type);
 
+        ld->duty_sensor_ctrl = sensing_result->ego.duty.sen;
         ld->duty_ff_front = sensing_result->ego.ff_duty.front;
         ld->duty_ff_roll = sensing_result->ego.ff_duty.roll;
 
         log_vec.push_back(ld);
         idx_slalom_log++;
       }
-      vTaskDelay(xDelay_fast);
+      vTaskDelay(xDelay);
     } else {
-      vTaskDelay(xDelay2);
+      vTaskDelay(xDelay);
     }
   }
 }
@@ -97,15 +94,16 @@ void LoggingTask::save(std::string file_name) {
   int i = 0;
 
   for (const auto ld : log_vec) {
-    fprintf(f_slalom_log, f1, // "%d,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,", i,
+    fprintf(f_slalom_log, f1, //
             i++, ld->img_v, ld->v_c, ld->v_l, ld->v_r, ld->accl);
-    fprintf(f_slalom_log, f2, //"%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,", //
+    fprintf(f_slalom_log, f2, //
             ld->img_w, ld->w_lp, ld->alpha, ld->img_dist, ld->dist, ld->img_ang,
             ld->ang);
-    fprintf(f_slalom_log, f3, //"%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f\n", //
+    fprintf(f_slalom_log, f3, //
             ld->left90_lp, ld->left45_lp, ld->front_lp, ld->right45_lp,
             ld->right90_lp, ld->battery_lp, ld->duty_l, ld->duty_r,
-            ld->motion_type, ld->duty_ff_front, ld->duty_ff_roll);
+            ld->motion_type, ld->duty_sensor_ctrl, ld->duty_ff_roll,
+            ld->duty_sensor_ctrl);
   }
 
   if (f_slalom_log != NULL) {
@@ -125,7 +123,7 @@ void LoggingTask::dump_log(std::string file_name) {
   vTaskDelay(xDelay2);
   printf("index,ideal_v,v_c,v_l,v_r,accl,ideal_w,w_lp,alpha,ideal_dist,dist,"
          "ideal_ang,ang,left90,left45,front,right45,right90,battery,duty_l,"
-         "duty_r,motion_state,ff_duty_front,ff_duty_roll\n");
+         "duty_r,motion_state,ff_duty_front,ff_duty_roll,duty_sen\n");
   while (fgets(line_buf, sizeof(line_buf), f) != NULL)
     printf("%s\n", line_buf);
   printf("end___\n"); // csvファイル追記終了トリガー

@@ -17,17 +17,6 @@
 
 class mpc_tgt_calcModelClass {
  public:
-  struct P_decel_mpc_tgt_calc_T {
-    real_T Constant1_Value;
-    real_T Gain_Gain;
-    int32_T Constant2_Value;
-    real32_T Gain1_Gain;
-    real32_T Switch1_Threshold;
-    real32_T Constant_Value;
-    real32_T Switch2_Threshold;
-    uint8_T ManualSwitch_CurrentSetting;
-  };
-
   struct P_keep_mpc_tgt_calc_T {
     real_T Constant_Value;
     int32_T Constant2_Value;
@@ -37,8 +26,12 @@ class mpc_tgt_calcModelClass {
     real_T Constant1_Value;
     real_T Constant1_Value_d;
     real_T Gain_Gain;
+    real_T Constant1_Value_l;
+    real_T Gain_Gain_j;
     real_T Constant_Value;
     real_T Constant_Value_n;
+    real_T Constant1_Value_m;
+    real_T Gain_Gain_g;
     real_T Constant_Value_p;
     real_T Constant1_Value_o;
     real_T Gain_Gain_n;
@@ -50,28 +43,34 @@ class mpc_tgt_calcModelClass {
     real_T Gain1_Gain_c;
     real_T Constant_Value_cx;
     real_T Constant_Value_cf;
-    int32_T Constant1_Value_p;
     int32_T Constant2_Value;
+    int32_T Constant1_Value_p;
+    int32_T Constant2_Value_f;
     int32_T Constant2_Value_g;
     int32_T Constant1_Value_c;
+    int32_T Constant2_Value_f2;
     int32_T Constant1_Value_oj;
     int32_T Constant2_Value_j;
     int32_T Constant1_Value_e;
     int32_T Constant2_Value_p;
-    int32_T Constant1_Value_l;
+    int32_T Constant1_Value_lj;
     int32_T Constant2_Value_gw;
     int32_T Constant2_Value_i;
     int32_T Constant1_Value_k;
     int32_T Constant2_Value_d;
     real32_T Constant_Value_j;
     real32_T Constant5_Value;
-    real32_T Constant1_Value_m;
+    real32_T Constant1_Value_mn;
     real32_T Constant_Value_ne;
     real32_T Gain_Gain_e;
     real32_T Constant6_Value;
     real32_T Constant4_Value;
     real32_T Constant2_Value_e;
     real32_T Gain1_Gain_l;
+    real32_T Gain1_Gain_h;
+    real32_T Switch1_Threshold;
+    real32_T Constant_Value_ph;
+    real32_T Switch2_Threshold;
     real32_T Constant4_Value_i;
     real32_T Constant3_Value;
     real32_T Gain3_Gain;
@@ -80,8 +79,12 @@ class mpc_tgt_calcModelClass {
     real32_T Switch_Threshold;
     real32_T Gain_Gain_d;
     real32_T Constant_Value_pr;
+    real32_T Gain1_Gain_n;
+    real32_T Switch1_Threshold_i;
+    real32_T Constant_Value_h;
+    real32_T Switch2_Threshold_m;
     real32_T Gain2_Gain_i;
-    real32_T Gain1_Gain_h;
+    real32_T Gain1_Gain_hy;
     real32_T Gain_Gain_m;
     real32_T Gain4_Gain;
     real32_T Gain_Gain_c;
@@ -95,10 +98,10 @@ class mpc_tgt_calcModelClass {
     real32_T Constant_Value_nex;
     real32_T Constant4_Value_c;
     real32_T Constant3_Value_cn;
-    real32_T Gain1_Gain_n;
+    real32_T Gain1_Gain_nz;
     real32_T Merge_InitialOutput_m;
     real32_T Gain_Gain_k;
-    real32_T Constant_Value_h;
+    real32_T Constant_Value_hs;
     real32_T Constant1_Value_i;
     real32_T Constant_Value_hn;
     real32_T Saturation_UpperSat;
@@ -122,22 +125,18 @@ class mpc_tgt_calcModelClass {
     real32_T Gain_Gain_kq;
     real32_T DataStoreMemory_InitialValue;
     uint8_T ManualSwitch_CurrentSetting;
+    uint8_T ManualSwitch_CurrentSetting_c;
+    uint8_T ManualSwitch_CurrentSetting_j;
     uint8_T ManualSwitch_CurrentSetting_i;
     uint8_T ManualSwitch_CurrentSetting_e;
     uint8_T ManualSwitch_CurrentSetting_b;
     P_keep_mpc_tgt_calc_T keep_p;
     P_keep_mpc_tgt_calc_T keep_h;
-    P_decel_mpc_tgt_calc_T decel_d;
-    P_decel_mpc_tgt_calc_T decel;
   };
 
   struct RT_MODEL_mpc_tgt_calc_T {
     const char_T * volatile errorStatus;
   };
-
-  typedef struct {
-    P_decel_mpc_tgt_calc_T* defaultParam;
-  } self_decel_mpc_tgt_calc_T;
 
   typedef struct {
     P_keep_mpc_tgt_calc_T* defaultParam;
@@ -154,13 +153,7 @@ class mpc_tgt_calcModelClass {
   static P_mpc_tgt_calc_T mpc_tgt_calc_P;
   self_keep_mpc_tgt_calc_T self_keep_p;
   self_keep_mpc_tgt_calc_T self_keep_h;
-  self_decel_mpc_tgt_calc_T self_decel_d;
-  self_decel_mpc_tgt_calc_T self_decel;
   RT_MODEL_mpc_tgt_calc_T mpc_tgt_calc_M;
-  static void mpc_tgt_calc_decel(self_decel_mpc_tgt_calc_T
-    *mpc_tgt_calc_self_arg, real32_T rtu_decel_alpha, real32_T rtu_now_w,
-    real32_T rtu_end_w, real32_T rtu_ang, real32_T *rty_decel_out, int32_T
-    *rty_state_out);
   static void mpc_tgt_calc_keep(self_keep_mpc_tgt_calc_T *mpc_tgt_calc_self_arg,
     real32_T *rty_accl_out, int32_T *rty_state_out);
 };

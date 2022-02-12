@@ -24,7 +24,7 @@
 
 constexpr int GY_DQ_SIZE = 4;
 constexpr int GY_CYCLE = 2500;
-constexpr int GY_MODE = 1;
+constexpr int GY_MODE = 0;
 constexpr float cell_size = 90;
 
 constexpr gpio_num_t LED_R90 = GPIO_NUM_9;
@@ -89,7 +89,7 @@ constexpr uint16_t BUF_SIZE = 4096;
 constexpr uint16_t MOTION_CHECK_TH = 1000;
 constexpr uint16_t ENC_OPE_V_R_TH = 175;
 
-constexpr uint16_t LOG_SIZE = 2000;
+constexpr uint16_t LOG_SIZE = 1700;
 constexpr uint16_t LINE_BUF_SIZE = 1500;
 constexpr float BATTERY_GAIN = 2.97324;
 
@@ -97,8 +97,6 @@ constexpr uint8_t LEDC_HIGH_SPEED_MODE = 0;
 constexpr float LOW_BATTERY_TH = 3.95;
 
 constexpr uint16_t RESET_GYRO_LOOP_CNT = 512;
-
-static char line_buf[LINE_BUF_SIZE];
 
 static const std::initializer_list<std::pair<TurnType, std::string>>
     turn_name_list = {
@@ -125,7 +123,7 @@ static const std::string maze_log_file("/spiflash/maze.log");
 
 static const std::string format1("%d,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
 static const std::string format2("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
-static const std::string
-    format3("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%d,%0.3f,%0.3f\n");
+static const std::string format3(
+    "%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%d,%0.3f,%0.3f,%0.3f\n");
 
 #endif

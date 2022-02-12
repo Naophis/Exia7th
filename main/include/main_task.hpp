@@ -96,6 +96,7 @@ private:
   void test_run_sla();
   void test_search_sla();
   void test_search_sla_walloff();
+  void test_front_ctrl();
   void rx_uart_json();
 
   void save_json_data(std::string &str);

@@ -35,6 +35,8 @@ public:
                       next_motionr_t &next_motion, bool dia);
   MotionResult slalom(slalom_param2_t &sp, TurnDirection dir,
                       next_motionr_t &next_motion);
+  MotionResult search_front_ctrl(param_straight_t &p);
+
   void reset_tgt_data();
   void reset_ego_data();
   void reset_gyro_ref();

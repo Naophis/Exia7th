@@ -7,11 +7,13 @@ max_duty: 99.9
 FF_front: 1
 FF_roll: 1
 FF_keV: 1
-Ke: 0.00040
-Km: 0.00025
+# Ke: 0.00275
+Ke: 0.00305
+Km: 0.0005
 Resist: 2.93
 Mass: 0.015
-Lm: 0.000045
+# Lm: 0.0000025
+Lm: 0.00000025
 motor_pid:
   p: 0.0055
   i: 0.002125
@@ -29,8 +31,8 @@ dist_pid:
   # i: 0.0
   # d: 0.0
 gyro_pid:
-  p: 0.275
-  i: 0.0025
+  p: 0.20
+  i: 0.0075
   d: 0.0
   mode: 1
   # p: 0.0
@@ -43,9 +45,9 @@ angle_pid:
   mode: 1
   # p: 0.0
   # i: 0.0
-  # d: 0
+  # d: 0.0
 sensor_pid:
-  p: 0.0025
+  p: 0.005
   i: 0.0
   d: 0.0
   mode: 0

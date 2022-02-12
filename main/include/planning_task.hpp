@@ -78,6 +78,7 @@ private:
 
   fail_safe_t fail_safe;
   float get_feadforward_front();
+  float get_feadforward_front(TurnDirection td);
   float get_feadforward_roll();
   float get_rpm_ff_val(TurnDirection td);
   float calc_sensor_pid();

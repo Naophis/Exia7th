@@ -3,9 +3,9 @@ dt = 0.001/4;
 Normal = 0; Large = 1; Orval = 2; Dia45 = 3; Dia135 = 4; Dia90 = 5; Dia180 = 6; Dia45_2 = 7; Dia135_2 = 8;
 
 ego_v = 300;
-% turn_mode = Normal;
+turn_mode = Normal;
 %turn_mode = Large;
-turn_mode = Orval;
+% turn_mode = Orval;
 % turn_mode = Dia45;
 % turn_mode = Dia45_2;
 % turn_mode = Dia135;
@@ -19,7 +19,7 @@ wall_off_offset = 0;
 wall_off_offset_dia = 0 * sqrt(2);
 
 if turn_mode == Normal
-    radius = 32; sla.pow_n = 4;
+    radius = 26; sla.pow_n = 2;
     target_angle = 90, is_dia_mode = false, turn_mode_str = 'Normal';
 elseif turn_mode == Large
     radius = 65; sla.pow_n = 4;

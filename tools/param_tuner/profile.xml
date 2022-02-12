@@ -1,80 +1,81 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<root version="2.3.8">
+<root>
  <tabbed_widget parent="main_window" name="Main Window">
   <Tab containers="1" tab_name="all">
    <Container>
-    <DockSplitter sizes="1" count="1" orientation="-">
-     <DockSplitter sizes="0.5;0.5" count="2" orientation="|">
-      <DockSplitter sizes="0.25;0.25;0.25;0.25" count="4" orientation="-">
+    <DockSplitter orientation="-" sizes="1" count="1">
+     <DockSplitter orientation="|" sizes="0.5;0.5" count="2">
+      <DockSplitter orientation="-" sizes="0.250265;0.249735;0.250265;0.249735" count="4">
        <DockArea name="velocity">
         <plot mode="TimeSeries" style="Lines">
-         <range bottom="-25.264975" left="0.000000" right="884.000000" top="30.787175"/>
+         <range left="0.000000" bottom="-8.237515" top="337.738115" right="249.000000"/>
          <limitY/>
-         <curve name="v_c" color="#d62728">
-          <transform name="Moving Average" alias="v_c[Derivative 5cnt]">
-           <options compensate_offset="false" value="5"/>
+         <curve color="#d62728" name="v_c">
+          <transform alias="v_c[Derivative 5cnt]" name="Moving Average">
+           <options value="5" compensate_offset="false"/>
           </transform>
          </curve>
-         <curve name="ideal_v" color="#21ff2a"/>
+         <curve color="#21ff2a" name="ideal_v"/>
         </plot>
        </DockArea>
        <DockArea name="accel">
         <plot mode="TimeSeries" style="Lines">
-         <range bottom="-0.100000" left="0.000000" right="884.000000" top="0.100000"/>
+         <range left="0.000000" bottom="-4263.706825" top="4201.553825" right="249.000000"/>
          <limitY/>
-         <curve name="accl" color="#bd3522"/>
+         <curve color="#bd3522" name="accl"/>
         </plot>
        </DockArea>
        <DockArea name="angle_velocity">
         <plot mode="TimeSeries" style="Lines">
-         <range bottom="-17.367925" left="0.000000" right="884.000000" top="0.562925"/>
+         <range left="0.000000" bottom="-1.379725" top="1.800725" right="249.000000"/>
          <limitY/>
-         <curve name="w_lp" color="#ff260e"/>
-         <curve name="ideal_w" color="#0af215"/>
+         <curve color="#ff260e" name="w_lp"/>
+         <curve color="#0af215" name="ideal_w"/>
         </plot>
        </DockArea>
        <DockArea name="angle_accel">
         <plot mode="TimeSeries" style="Lines">
-         <range bottom="-44.994675" left="0.000000" right="884.000000" top="164.781675"/>
+         <range left="0.000000" bottom="-0.100000" top="0.100000" right="249.000000"/>
          <limitY/>
-         <curve name="alpha" color="#b42a1f"/>
+         <curve color="#b42a1f" name="alpha"/>
         </plot>
        </DockArea>
       </DockSplitter>
-      <DockSplitter sizes="0.25;0.25;0.25;0.25" count="4" orientation="-">
+      <DockSplitter orientation="-" sizes="0.250265;0.249735;0.250265;0.249735" count="4">
        <DockArea name="led_sensor">
         <plot mode="TimeSeries" style="Lines">
-         <range bottom="7.222425" left="0.000000" right="884.000000" top="51.934575"/>
+         <range left="0.000000" bottom="-16.771775" top="1910.724775" right="249.000000"/>
          <limitY/>
-         <curve name="left90" color="#bcbd22"/>
-         <curve name="left45" color="#1f77b4"/>
-         <curve name="front" color="#d62728"/>
-         <curve name="right45" color="#1ac938"/>
-         <curve name="right90" color="#ff7f0e"/>
+         <curve color="#bcbd22" name="left90"/>
+         <curve color="#1f77b4" name="left45"/>
+         <curve color="#d62728" name="front"/>
+         <curve color="#1ac938" name="right45"/>
+         <curve color="#ff7f0e" name="right90"/>
         </plot>
        </DockArea>
        <DockArea name="distance">
         <plot mode="TimeSeries" style="Lines">
-         <range bottom="-0.163475" left="0.000000" right="884.000000" top="0.150475"/>
+         <range left="0.000000" bottom="-4.380875" top="179.615875" right="249.000000"/>
          <limitY/>
-         <curve name="dist" color="#0eff20"/>
-         <curve name="ideal_dist" color="#f1664c"/>
+         <curve color="#0eff20" name="dist"/>
+         <curve color="#f1664c" name="ideal_dist"/>
         </plot>
        </DockArea>
        <DockArea name="angle">
         <plot mode="TimeSeries" style="Lines">
-         <range bottom="-373.812525" left="0.000000" right="884.000000" top="9.123525"/>
+         <range left="0.000000" bottom="-2.507200" top="0.063200" right="249.000000"/>
          <limitY/>
-         <curve name="ang" color="#ff0000"/>
-         <curve name="ideal_ang" color="#43cf17"/>
+         <curve color="#ff0000" name="ang"/>
+         <curve color="#43cf17" name="ideal_ang"/>
         </plot>
        </DockArea>
        <DockArea name="duty">
         <plot mode="TimeSeries" style="Lines">
-         <range bottom="-48.478150" left="0.000000" right="884.000000" top="43.676150"/>
+         <range left="0.000000" bottom="-1.950325" top="55.099325" right="249.000000"/>
          <limitY/>
-         <curve name="duty_l" color="#d62728"/>
-         <curve name="duty_r" color="#1ac938"/>
+         <curve color="#d62728" name="duty_l"/>
+         <curve color="#1ac938" name="duty_r"/>
+         <curve color="#1f77b4" name="duty_sen"/>
         </plot>
        </DockArea>
       </DockSplitter>
@@ -84,51 +85,58 @@
   </Tab>
   <Tab containers="1" tab_name="tab2">
    <Container>
-    <DockSplitter sizes="0.25;0.25;0.25;0.25" count="4" orientation="-">
+    <DockSplitter orientation="-" sizes="0.2;0.2;0.2;0.2;0.2" count="5">
      <DockArea name="...">
       <plot mode="TimeSeries" style="Lines">
-       <range bottom="-395.996850" left="0.000000" right="884.000000" top="386.792850"/>
+       <range left="0.000000" bottom="-31.802575" top="428.037575" right="249.000000"/>
        <limitY/>
-       <curve name="v_l" color="#d62728"/>
-       <curve name="v_c" color="#1ac938"/>
-       <curve name="v_r" color="#1f77b4"/>
-       <curve name="ideal_v" color="#ff7f0e"/>
+       <curve color="#d62728" name="v_l"/>
+       <curve color="#1ac938" name="v_c"/>
+       <curve color="#1f77b4" name="v_r"/>
+       <curve color="#ff7f0e" name="ideal_v"/>
       </plot>
      </DockArea>
      <DockArea name="...">
       <plot mode="TimeSeries" style="Lines">
-       <range bottom="-369.259650" left="0.000000" right="884.000000" top="372.941250"/>
+       <range left="0.000000" bottom="-9.332375" top="382.627375" right="249.000000"/>
        <limitY/>
-       <curve name="v_l" color="#ff0000">
-        <transform name="Moving Average" alias="v_l[Moving Average]">
-         <options compensate_offset="false" value="5"/>
+       <curve color="#ff0000" name="v_l">
+        <transform alias="v_l[Moving Average]" name="Moving Average">
+         <options value="5" compensate_offset="false"/>
         </transform>
        </curve>
-       <curve name="v_c" color="#00ff00">
-        <transform name="Moving Average" alias="v_c[Moving Average]">
-         <options compensate_offset="false" value="5"/>
+       <curve color="#00ff00" name="v_c">
+        <transform alias="v_c[Moving Average]" name="Moving Average">
+         <options value="5" compensate_offset="false"/>
         </transform>
        </curve>
-       <curve name="v_r" color="#0000ff">
-        <transform name="Moving Average" alias="v_r[Moving Average 5cnt]">
-         <options compensate_offset="false" value="5"/>
+       <curve color="#0000ff" name="v_r">
+        <transform alias="v_r[Moving Average 5cnt]" name="Moving Average">
+         <options value="5" compensate_offset="false"/>
         </transform>
        </curve>
       </plot>
      </DockArea>
      <DockArea name="...">
       <plot mode="TimeSeries" style="Lines">
-       <range bottom="3.932400" left="0.000000" right="884.000000" top="3.999600"/>
+       <range left="0.000000" bottom="3.961225" top="4.035775" right="249.000000"/>
        <limitY/>
-       <curve name="battery" color="#1f77b4"/>
+       <curve color="#1f77b4" name="battery"/>
       </plot>
      </DockArea>
      <DockArea name="...">
       <plot mode="TimeSeries" style="Lines">
-       <range bottom="-48.478150" left="0.000000" right="884.000000" top="43.676150"/>
+       <range left="0.000000" bottom="-0.905850" top="55.073850" right="249.000000"/>
        <limitY/>
-       <curve name="duty_r" color="#d62728"/>
-       <curve name="duty_l" color="#1ac938"/>
+       <curve color="#d62728" name="duty_r"/>
+       <curve color="#1ac938" name="duty_l"/>
+      </plot>
+     </DockArea>
+     <DockArea name="...">
+      <plot mode="TimeSeries" style="Lines">
+       <range left="0.000000" bottom="-0.616875" top="0.427875" right="249.000000"/>
+       <limitY/>
+       <curve color="#1f77b4" name="duty_sen"/>
       </plot>
      </DockArea>
     </DockSplitter>
@@ -141,7 +149,7 @@
  <!-- - - - - - - - - - - - - - - -->
  <Plugins>
   <plugin ID="DataLoad CSV">
-   <default time_axis="index"/>
+   <default delimiter="0" time_axis="index"/>
   </plugin>
   <plugin ID="DataLoad ROS bags">
    <use_header_stamp value="false"/>
@@ -158,17 +166,16 @@
   </plugin>
   <plugin ID="UDP Server"/>
   <plugin ID="WebSocket Server"/>
-  <plugin ID="ZMQ Subscriber"/>
-  <plugin status="idle" ID="CSV Exporter"/>
-  <plugin status="idle" ID="ROS /rosout Visualization"/>
-  <plugin status="idle" ID="ROS Topic Re-Publisher"/>
+  <plugin ID="CSV Exporter" status="idle"/>
+  <plugin ID="ROS /rosout Visualization" status="idle"/>
+  <plugin ID="ROS Topic Re-Publisher" status="idle"/>
  </Plugins>
  <!-- - - - - - - - - - - - - - - -->
  <previouslyLoaded_Datafiles>
-  <fileInfo filename="./tools/param_tuner/logs/latest.csv" prefix="">
+  <fileInfo prefix="" filename="tools/param_tuner/logs/latest.csv">
    <selected_datasources value=""/>
    <plugin ID="DataLoad CSV">
-    <default time_axis="index"/>
+    <default delimiter="0" time_axis=""/>
    </plugin>
   </fileInfo>
  </previouslyLoaded_Datafiles>
