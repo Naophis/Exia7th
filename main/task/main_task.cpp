@@ -452,6 +452,7 @@ void MainTask::load_sys_param() {
   sys.test.decel = cJSON_GetObjectItem(test, "decel")->valuedouble;
   sys.test.dist = cJSON_GetObjectItem(test, "dist")->valuedouble;
   sys.test.w_max = cJSON_GetObjectItem(test, "w_max")->valuedouble;
+  // sys.test.w_end = cJSON_GetObjectItem(test, "w_end")->valuedouble;
   sys.test.alpha = cJSON_GetObjectItem(test, "alpha")->valuedouble;
   sys.test.ang = cJSON_GetObjectItem(test, "ang")->valuedouble;
   sys.test.suction_active =
@@ -582,6 +583,12 @@ void MainTask::load_slalom_param() {
                                 cJSON_GetObjectItem(root, p.second.c_str()),
                                 p2.second.c_str()),
                             "w_max")
+                            ->valuedouble;
+          str_p.w_end = cJSON_GetObjectItem(
+                            cJSON_GetObjectItem(
+                                cJSON_GetObjectItem(root, p.second.c_str()),
+                                p2.second.c_str()),
+                            "w_end")
                             ->valuedouble;
           str_p.alpha = cJSON_GetObjectItem(
                             cJSON_GetObjectItem(
@@ -846,6 +853,12 @@ void MainTask::test_run() {
   reset_tgt_data();
   reset_ego_data();
   req_error_reset();
+  mp->coin();
+  while (1) {
+    if (ui->button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
   lt->save(slalom_log_file);
   ui->coin(120);
 

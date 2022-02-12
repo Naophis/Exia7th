@@ -59,11 +59,11 @@ sensor_pid_dia:
 gyro_param:
   gyro_w_gain_right: 0.001059
   gyro_w_gain_left: 0.001059
-  lp_delay: 0.1
+  lp_delay: 0.9975
 battery_param:
   lp_delay: 0.25
 led_param:
-  lp_delay: 0.25
+  lp_delay: 0.925
 kalman_config:
   # q_ang: 0.01 #大：応答早
   # q_bias: 0.01 # 大：gyro_wの値を類似する

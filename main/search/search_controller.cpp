@@ -81,8 +81,8 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
   p.wall_off_req = WallOffReq::NONE;
   res = mp->go_straight(p);
 
-  if (res == MotionResult::ERROR)
-    return MotionResult::ERROR;
+  // if (res == MotionResult::ERROR)
+  //   return MotionResult::ERROR;
 
   p.v_max = 20;
   p.v_end = 5;
@@ -104,9 +104,11 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
   param_roll_t pr;
   pr.w_max = p_set.str_map[StraightType::Search].w_max;
   pr.alpha = p_set.str_map[StraightType::Search].alpha;
-  pr.w_end = 0;
+  pr.w_end =  p_set.str_map[StraightType::Search].w_end;
   pr.ang = PI;
   pr.RorL = TurnDirection::Right;
+  mp->reset_tgt_data();
+  mp->reset_ego_data();
   pt->motor_enable();
 
   res = mp->pivot_turn(pr);
@@ -115,17 +117,17 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
 
   mp->reset_tgt_data();
   mp->reset_ego_data();
-  vTaskDelay(100 / portTICK_RATE_MS);
+  vTaskDelay(50 / portTICK_RATE_MS);
   pt->motor_disable();
 
   mp->reset_gyro_ref();
 
   ui->coin(100);
 
-  vTaskDelay(100 / portTICK_RATE_MS);
-  pt->motor_enable();
+  vTaskDelay(50 / portTICK_RATE_MS);
   mp->reset_tgt_data();
   mp->reset_ego_data();
+  pt->motor_enable();
   p.v_max = p_set.str_map[StraightType::Search].v_max;
   p.v_end = p_set.str_map[StraightType::Search].v_max;
   p.accl = p_set.str_map[StraightType::Search].accl;
@@ -177,6 +179,7 @@ void SearchController::exec(param_set_t &p_set, SearchMode sm) {
   mp->reset_tgt_data();
   mp->reset_ego_data();
   mp->go_straight(p);
+
   int back_cnt = 0;
   // pivot(p_set);
   while (1) {
@@ -204,7 +207,6 @@ void SearchController::exec(param_set_t &p_set, SearchMode sm) {
       slalom(p_set, TurnDirection::Left);
     } else if (next_motion == Motion::Back) {
       pivot(p_set);
-      back_cnt++;
       // break;
     } else if (next_motion == Motion::NONE) {
       break;
@@ -216,7 +218,7 @@ void SearchController::exec(param_set_t &p_set, SearchMode sm) {
       back_cnt = 0;
     }
 
-    if (back_cnt == 3) {
+    if (back_cnt >= 3) {
       break;
     }
   }

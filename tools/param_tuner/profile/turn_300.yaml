@@ -3,19 +3,22 @@ straight:
     v_max: 300
     accl: 2500
     decel: -2500
-    w_max: 15
+    w_max: 7
+    w_end: 0.1
     alpha: 20
   fast_run:
     v_max: 300
     accl: 1500
     decel: -1500
-    w_max: 5
-    alpha: 10
+    w_max: 7
+    w_end: 0.1
+    alpha: 20
   fast_run_dia:
     v_max: 300
     accl: 1000
     decel: -1000
     w_max: 5
+    w_end: 0.1
     alpha: 10
 # normal:
 #   v: 300.000000

@@ -756,24 +756,19 @@ void PlanningTask::cp_request() {
     if (!(tgt_val->motion_type == MotionType::NONE ||
           tgt_val->motion_type == MotionType::STRAIGHT ||
           tgt_val->motion_type == MotionType::WALL_OFF)) {
-      tgt_val->ego_in.img_ang = 0;
-      tgt_val->ego_in.ang = 0;
+      tgt_val->ego_in.img_ang = tgt_val->ego_in.ang = 0;
     }
 
     if (tgt_val->motion_type == MotionType::NONE) {
-      tgt_val->global_pos.ang = 0;
-      tgt_val->global_pos.img_ang = 0;
-      tgt_val->global_pos.dist = 0;
-      tgt_val->global_pos.img_dist = 0;
+      tgt_val->global_pos.ang = tgt_val->global_pos.img_ang = 0;
+      tgt_val->global_pos.dist = tgt_val->global_pos.img_dist = 0;
     }
 
     if (tgt_val->tgt_in.tgt_angle != 0) {
-      tgt_val->ego_in.img_ang = 0;
-      tgt_val->ego_in.ang = 0;
+      tgt_val->ego_in.img_ang = tgt_val->ego_in.ang = 0;
     }
     if (tgt_val->tgt_in.tgt_dist != 0) {
-      tgt_val->ego_in.img_dist = 0;
-      tgt_val->ego_in.dist = 0;
+      tgt_val->ego_in.img_dist = tgt_val->ego_in.dist = 0;
     }
     tgt_val->ego_in.sla_param.counter = 1;
     tgt_val->ego_in.sla_param.state = 0;

@@ -57,6 +57,7 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p) {
         sensing_result->ego.left90_lp > param->sen_ref_p.search_exist.left90;
   }
 
+  vTaskDelay(1 / portTICK_RATE_MS);
   while (1) {
     if (exist_r) {
       if (sensing_result->ego.right90_lp <
@@ -316,6 +317,10 @@ void MotionPlanning::reset_ego_data() {
   tgt_val->ego_in.w = 0;
 
   tgt_val->motion_mode = 0;
+
+  tgt_val->nmr.motion_mode = RUN_MODE2::NONE_MODE;
+  tgt_val->nmr.motion_type = MotionType::NONE;
+  tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
   // 一度初期化
   tgt_val->motion_type = MotionType::NONE;
   tgt_val->nmr.timstamp++;

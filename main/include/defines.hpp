@@ -126,4 +126,8 @@ static const std::string format2("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
 static const std::string format3(
     "%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%d,%0.3f,%0.3f,%0.3f\n");
 
+// static const std::string format1("%d,%d,%d,%d,%d,%d,");
+// static const std::string format2("%d,%d,%d,%d,%d,%d,%d,");
+// static const std::string format3("%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n");
+
 #endif

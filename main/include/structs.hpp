@@ -336,6 +336,7 @@ typedef struct {
   float decel;
   float dist;
   float w_max;
+  float w_end;
   float alpha;
   float ang;
   int suction_active;
@@ -395,6 +396,7 @@ typedef struct {
   float accl;
   float decel;
   float w_max;
+  float w_end;
   float alpha;
 } straight_param_t;
 
@@ -444,6 +446,57 @@ typedef struct {
   float duty_ff_roll;
   float duty_sensor_ctrl;
 } log_data_t;
+
+union float16_bitmap {
+  struct {
+    unsigned int s : 1;
+    unsigned int e : 8;
+    unsigned int m : 23;
+  };
+  float data;
+};
+
+union uint16_bitmap {
+  struct {
+    unsigned int s : 1;
+    unsigned int e : 5;
+    unsigned int m : 10;
+  };
+  int16_t data;
+};
+
+typedef struct {
+  // int idx;
+  int16_t img_v;
+  int16_t v_l;
+  int16_t v_c;
+  int16_t v_r;
+  int16_t accl;
+  int16_t img_w;
+  int16_t w_lp;
+  int16_t alpha;
+
+  int16_t img_dist;
+  int16_t dist;
+  int16_t img_ang;
+  int16_t ang;
+
+  int16_t duty_l;
+  int16_t duty_r;
+
+  int16_t left90_lp;
+  int16_t left45_lp;
+  int16_t front_lp;
+  int16_t right45_lp;
+  int16_t right90_lp;
+  int16_t battery_lp;
+
+  char motion_type;
+
+  int16_t duty_ff_front;
+  int16_t duty_ff_roll;
+  int16_t duty_sensor_ctrl;
+} log_data_t2;
 
 typedef struct {
   int invalid_duty_r_cnt;
