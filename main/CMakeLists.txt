@@ -21,11 +21,12 @@ set(COMPONENT_SRCS
     "search/adachi.cpp"
     "search/logic.cpp"
     "search/search_controller.cpp"
-    "gen_code/mpc_tgt_calc_data.cpp"
-    "gen_code/mpc_tgt_calc.cpp"
-    "gen_code/rt_nonfinite.cpp"
-    "gen_code/rtGetInf.cpp"
-    "gen_code/rtGetNaN.cpp"
+    "gen_code_mpc/mpc_tgt_calc_data.cpp"
+    "gen_code_mpc/mpc_tgt_calc.cpp"
+    "gen_code_mpc/rt_nonfinite.cpp"
+    "gen_code_mpc/rtGetInf.cpp"
+    "gen_code_mpc/rtGetNaN.cpp"
+    "gen_code_conv_single2half/half_type.cpp"
     )
       
 register_component()

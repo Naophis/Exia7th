@@ -36,40 +36,46 @@ void LoggingTask::task() {
   const TickType_t xDelay = 4 / portTICK_PERIOD_MS;
   while (1) {
     logging_active = active_slalom_log;
+    // auto ang_row = tgt_val->ego_in.ang * 180 / PI;
+    // auto ang = floatToHalf(ang_row);
+    // auto ang2 = halfToFloat(ang);
+    // printf("%0.3f, %0.3f\n", ang_row, ang2);
+    // conv_single2half_step();
     if (logging_active) {
       if (active_slalom_log && idx_slalom_log <= LOG_SIZE) {
-        auto ld = std::make_shared<log_data_t>();
-        ld->img_v = tgt_val->ego_in.v;
-        ld->v_l = sensing_result->ego.v_l;
-        ld->v_c = sensing_result->ego.v_c;
-        ld->v_r = sensing_result->ego.v_r;
-        ld->accl = tgt_val->ego_in.accl;
+        auto ld = std::make_shared<log_data_t2>();
 
-        ld->img_w = tgt_val->ego_in.w;
-        ld->w_lp = sensing_result->ego.w_lp;
-        ld->alpha = tgt_val->ego_in.alpha;
+        ld->img_v = floatToHalf(tgt_val->ego_in.v);
+        ld->v_l = floatToHalf(sensing_result->ego.v_l);
+        ld->v_c = floatToHalf(sensing_result->ego.v_c);
+        ld->v_r = floatToHalf(sensing_result->ego.v_r);
+        ld->accl = floatToHalf(tgt_val->ego_in.accl);
 
-        ld->img_dist = tgt_val->ego_in.img_dist;
-        ld->dist = tgt_val->ego_in.dist;
+        ld->img_w = floatToHalf(tgt_val->ego_in.w);
+        ld->w_lp = floatToHalf(sensing_result->ego.w_lp);
+        ld->alpha = floatToHalf(tgt_val->ego_in.alpha);
 
-        ld->img_ang = tgt_val->ego_in.img_ang * 180 / PI;
-        ld->ang = tgt_val->ego_in.ang * 180 / PI;
+        ld->img_dist = floatToHalf(tgt_val->ego_in.img_dist);
+        ld->dist = floatToHalf(tgt_val->ego_in.dist);
 
-        ld->left90_lp = sensing_result->ego.left90_lp;
-        ld->left45_lp = sensing_result->ego.left45_lp;
-        ld->front_lp = sensing_result->ego.front_lp;
-        ld->right45_lp = sensing_result->ego.right45_lp;
-        ld->right90_lp = sensing_result->ego.right90_lp;
+        ld->img_ang = floatToHalf(tgt_val->ego_in.img_ang * 180 / PI);
+        ld->ang = floatToHalf(tgt_val->ego_in.ang * 180 / PI);
 
-        ld->battery_lp = sensing_result->ego.battery_lp;
-        ld->duty_l = sensing_result->ego.duty.duty_l;
-        ld->duty_r = sensing_result->ego.duty.duty_r;
+        ld->left90_lp = floatToHalf(sensing_result->ego.left90_lp);
+        ld->left45_lp = floatToHalf(sensing_result->ego.left45_lp);
+        ld->front_lp = floatToHalf(sensing_result->ego.front_lp);
+        ld->right45_lp = floatToHalf(sensing_result->ego.right45_lp);
+        ld->right90_lp = floatToHalf(sensing_result->ego.right90_lp);
+
+        ld->battery_lp = floatToHalf(sensing_result->ego.battery_lp);
+        ld->duty_l = floatToHalf(sensing_result->ego.duty.duty_l);
+        ld->duty_r = floatToHalf(sensing_result->ego.duty.duty_r);
 
         ld->motion_type = static_cast<char>(tgt_val->motion_type);
 
-        ld->duty_sensor_ctrl = sensing_result->ego.duty.sen;
-        ld->duty_ff_front = sensing_result->ego.ff_duty.front;
-        ld->duty_ff_roll = sensing_result->ego.ff_duty.roll;
+        ld->duty_sensor_ctrl = floatToHalf(sensing_result->ego.duty.sen);
+        ld->duty_ff_front = floatToHalf(sensing_result->ego.ff_duty.front);
+        ld->duty_ff_roll = floatToHalf(sensing_result->ego.ff_duty.roll);
 
         log_vec.push_back(ld);
         idx_slalom_log++;
@@ -87,6 +93,7 @@ void LoggingTask::save(std::string file_name) {
   if (f_slalom_log == NULL)
     printf("slalom_file_load_failed\n");
 
+  printf("list size = %d\n", log_vec.size());
   const char *f1 = format1.c_str();
   const char *f2 = format2.c_str();
   const char *f3 = format3.c_str();
@@ -94,16 +101,35 @@ void LoggingTask::save(std::string file_name) {
   int i = 0;
 
   for (const auto ld : log_vec) {
-    fprintf(f_slalom_log, f1, //
-            i++, ld->img_v, ld->v_c, ld->v_l, ld->v_r, ld->accl);
-    fprintf(f_slalom_log, f2, //
-            ld->img_w, ld->w_lp, ld->alpha, ld->img_dist, ld->dist, ld->img_ang,
-            ld->ang);
-    fprintf(f_slalom_log, f3, //
-            ld->left90_lp, ld->left45_lp, ld->front_lp, ld->right45_lp,
-            ld->right90_lp, ld->battery_lp, ld->duty_l, ld->duty_r,
-            ld->motion_type, ld->duty_sensor_ctrl, ld->duty_ff_roll,
-            ld->duty_sensor_ctrl);
+
+    printf(f1,                                 //
+           i++,                                //
+           halfToFloat(ld->img_v),             //
+           halfToFloat(ld->v_c),               //
+           halfToFloat(ld->v_l),               //
+           halfToFloat(ld->v_r),               //
+           halfToFloat(ld->accl));             //
+    printf(f2,                                 //
+           halfToFloat(ld->img_w),             //
+           halfToFloat(ld->w_lp),              //
+           halfToFloat(ld->alpha),             //
+           halfToFloat(ld->img_dist),          //
+           halfToFloat(ld->dist),              //
+           halfToFloat(ld->img_ang),           //
+           halfToFloat(ld->ang));              //
+    printf(f3,                                 //
+           halfToFloat(ld->left90_lp),         //
+           halfToFloat(ld->left45_lp),         //
+           halfToFloat(ld->front_lp),          //
+           halfToFloat(ld->right45_lp),        //
+           halfToFloat(ld->right90_lp),        //
+           halfToFloat(ld->battery_lp),        //
+           halfToFloat(ld->duty_l),            //
+           halfToFloat(ld->duty_r),            //
+           (ld->motion_type),                  //
+           halfToFloat(ld->duty_sensor_ctrl),  //
+           halfToFloat(ld->duty_ff_roll),      //
+           halfToFloat(ld->duty_sensor_ctrl)); //
   }
 
   if (f_slalom_log != NULL) {

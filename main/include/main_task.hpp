@@ -18,7 +18,6 @@
 #include "esp_vfs.h"
 #include "esp_vfs_fat.h"
 
-#include "gen_code/mpc_tgt_calc.h"
 #include "include/adachi.hpp"
 #include "include/logging_task.hpp"
 #include "include/logic.hpp"

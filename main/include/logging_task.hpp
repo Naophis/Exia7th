@@ -7,6 +7,7 @@
 #include "esp_vfs_fat.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "gen_code_conv_single2half/half_type.h"
 
 class LoggingTask {
 public:
@@ -29,24 +30,6 @@ public:
   void dump_log(const std::string file_name);
   void save(const std::string file_name);
 
-  int16_t convert_float16_2_halffloat(float from) {
-    fbm.data = from;
-    uibm.data = 0;
-    uibm.s = fbm.s;
-    uibm.s = fbm.e & 0x1f;
-    uibm.m = fbm.m & 0x3f;
-    return uibm.data;
-  }
-
-  float convert_halffloat_to_float16(int16_t from) {
-    uibm.data = from;
-    fbm.data = 0;
-    fbm.s = uibm.s;
-    fbm.e = uibm.e;
-    fbm.m = uibm.m;
-    return fbm.data;
-  }
-
 private:
   bool logging_active = false;
   xTaskHandle handle = 0;
@@ -60,8 +43,8 @@ private:
   bool active_slalom_log = false;
   int idx_slalom_log = 0;
   FILE *f_slalom_log;
-  std::vector<std::shared_ptr<log_data_t>> log_vec;
-  // std::vector<std::shared_ptr<log_data_t2>> log_vec;
+  // std::vector<std::shared_ptr<log_data_t>> log_vec;
+  std::vector<std::shared_ptr<log_data_t2>> log_vec;
 };
 
 #endif

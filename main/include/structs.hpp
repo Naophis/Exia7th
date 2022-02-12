@@ -1,10 +1,13 @@
 #ifndef STRUCTS_HPP
 #define STRUCTS_HPP
 
-#include "gen_code/bus.h"
+#include "gen_code_mpc/bus.h"
 #include "include/defines.hpp"
 #include "include/enums.hpp"
 #include "include/maze_solver.hpp"
+
+#include "gen_code_conv_single2half/rtwtypes.h"
+#include "gen_code_conv_single2half/half_type.h"
 
 #include <initializer_list>
 #include <iostream>
@@ -467,35 +470,35 @@ union uint16_bitmap {
 
 typedef struct {
   // int idx;
-  int16_t img_v;
-  int16_t v_l;
-  int16_t v_c;
-  int16_t v_r;
-  int16_t accl;
-  int16_t img_w;
-  int16_t w_lp;
-  int16_t alpha;
+  real16_T img_v;
+  real16_T v_l;
+  real16_T v_c;
+  real16_T v_r;
+  real16_T accl;
+  real16_T img_w;
+  real16_T w_lp;
+  real16_T alpha;
 
-  int16_t img_dist;
-  int16_t dist;
-  int16_t img_ang;
-  int16_t ang;
+  real16_T img_dist;
+  real16_T dist;
+  real16_T img_ang;
+  real16_T ang;
 
-  int16_t duty_l;
-  int16_t duty_r;
+  real16_T duty_l;
+  real16_T duty_r;
 
-  int16_t left90_lp;
-  int16_t left45_lp;
-  int16_t front_lp;
-  int16_t right45_lp;
-  int16_t right90_lp;
-  int16_t battery_lp;
+  real16_T left90_lp;
+  real16_T left45_lp;
+  real16_T front_lp;
+  real16_T right45_lp;
+  real16_T right90_lp;
+  real16_T battery_lp;
 
   char motion_type;
 
-  int16_t duty_ff_front;
-  int16_t duty_ff_roll;
-  int16_t duty_sensor_ctrl;
+  real16_T duty_ff_front;
+  real16_T duty_ff_roll;
+  real16_T duty_sensor_ctrl;
 } log_data_t2;
 
 typedef struct {

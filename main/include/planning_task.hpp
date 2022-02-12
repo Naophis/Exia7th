@@ -6,7 +6,7 @@
 #include "driver/mcpwm.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "gen_code/mpc_tgt_calc.h"
+#include "gen_code_mpc/mpc_tgt_calc.h"
 #include "include/maze_solver.hpp"
 
 #include "esp_system.h"

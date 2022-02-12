@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "half_type.h": "c",
+        "conv_single2half_types.h": "c",
+        "conv_single2half.h": "c"
+    }
+}

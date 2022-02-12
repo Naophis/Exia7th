@@ -3,7 +3,7 @@
 
 #include "driver/gpio.h"
 #include "driver/ledc.h"
-#include "gen_code/bus.h"
+#include "gen_code_mpc/bus.h"
 #include "include/maze_solver.hpp"
 #include "sdkconfig.h"
 #include "soc/adc_channel.h"
@@ -89,7 +89,7 @@ constexpr uint16_t BUF_SIZE = 4096;
 constexpr uint16_t MOTION_CHECK_TH = 1000;
 constexpr uint16_t ENC_OPE_V_R_TH = 175;
 
-constexpr uint16_t LOG_SIZE = 1700;
+constexpr uint16_t LOG_SIZE = 2300;
 constexpr uint16_t LINE_BUF_SIZE = 1500;
 constexpr float BATTERY_GAIN = 2.97324;
 
