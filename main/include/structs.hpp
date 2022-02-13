@@ -6,8 +6,8 @@
 #include "include/enums.hpp"
 #include "include/maze_solver.hpp"
 
-#include "gen_code_conv_single2half/rtwtypes.h"
 #include "gen_code_conv_single2half/half_type.h"
+#include "gen_code_conv_single2half/rtwtypes.h"
 
 #include <initializer_list>
 #include <iostream>
@@ -200,6 +200,7 @@ typedef struct {
   sen_param_t led_param;
   MotionDirection motion_dir;
   sen_ref_param_t sen_ref_p;
+  int sakiyomi_time = 1;
 } input_param_t;
 
 typedef struct {

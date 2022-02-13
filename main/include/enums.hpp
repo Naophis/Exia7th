@@ -35,6 +35,7 @@ enum class MotionType : char {
   SLALOM = 4,
   SLA_BACK_STR = 5,
   WALL_OFF = 6,
+  READY = 7,
 };
 
 enum class FailSafe : int {

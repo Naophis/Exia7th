@@ -45,6 +45,9 @@ void UserInterface::music_sync(MUSIC m, int time) {
 }
 void UserInterface::motion_check() {
   int c = 0;
+  tgt_val->nmr.motion_type = MotionType::READY;
+  tgt_val->nmr.timstamp++;
+  vTaskDelay(1 / portTICK_PERIOD_MS);
   while (1) {
     c++;
     if (c % 2 == 0) {

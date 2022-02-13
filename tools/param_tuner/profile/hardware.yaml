@@ -14,9 +14,10 @@ Resist: 2.93
 Mass: 0.015
 # Lm: 0.0000025
 Lm: 0.00000025
+sakiyomi_time: 25
 motor_pid:
   p: 0.0055
-  i: 0.002125
+  i: 0.0018
   d: 0.0
   mode: 1
   # p: 0.0
@@ -31,21 +32,21 @@ dist_pid:
   # i: 0.0
   # d: 0.0
 gyro_pid:
-  p: 0.17
-  i: 0.0085
+  p: 0.15
+  i: 0.0065
   d: 0.0
   mode: 1
   # p: 0.0
   # i: 0.0
   # d: 0
 angle_pid:
-  p: 0.0
-  i: 0.05
-  d: 40.5
-  mode: 1
   # p: 0.0
-  # i: 0.0
-  # d: 0.0
+  # i: 0.05
+  # d: 40.5
+  mode: 1
+  p: 0.0
+  i: 0.0
+  d: 0.0
 sensor_pid:
   p: 0.005
   i: 0.0
@@ -57,8 +58,8 @@ sensor_pid_dia:
   d: 0.0
   mode: 1
 gyro_param:
-  gyro_w_gain_right: 0.001059
-  gyro_w_gain_left: 0.001059
+  gyro_w_gain_right: 0.0010585
+  gyro_w_gain_left: 0.0010585
   lp_delay: 0.9975
 battery_param:
   lp_delay: 0.25

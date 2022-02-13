@@ -250,6 +250,8 @@ void MainTask::load_hw_param() {
   param->Lm = cJSON_GetObjectItem(root, "Lm")->valuedouble;
   param->offset_start_dist =
       cJSON_GetObjectItem(root, "offset_start_dist")->valuedouble;
+  param->sakiyomi_time =
+      cJSON_GetObjectItem(root, "sakiyomi_time")->valuedouble;
 
   param->FF_front = cJSON_GetObjectItem(root, "FF_front")->valueint;
   param->FF_roll = cJSON_GetObjectItem(root, "FF_roll")->valueint;

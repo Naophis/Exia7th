@@ -170,6 +170,7 @@ extern "C" void app_main() {
   param->gyro_param.gyro_w_gain_left = 0.0002645;
 
   st.set_sensing_entity(sensing_entity);
+  st.set_tgt_val(tgt_val);
   st.create_task(0);
 
   std::shared_ptr<PlanningTask> pt = std::make_shared<PlanningTask>();

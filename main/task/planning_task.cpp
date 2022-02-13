@@ -158,6 +158,9 @@ void PlanningTask::task() {
     mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in, tgt_val->motion_mode,
                       mpc_step, &mpc_next_ego);
 
+    mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in, tgt_val->motion_mode,
+                      param_ro->sakiyomi_time, &mpc_next_ego2);
+
     // 算出結果をコピー
     cp_tgt_val();
 
@@ -467,13 +470,13 @@ float PlanningTask::get_feadforward_front(TurnDirection td) {
     return 0;
   const float tread = 38;
   if (td == TurnDirection::Right) {
-    return (param_ro->Mass * mpc_next_ego.accl / 1000 * param_ro->tire / 2000 +
+    return (param_ro->Mass * mpc_next_ego2.accl / 1000 * param_ro->tire / 2000 +
             param_ro->Ke * (tgt_val->ego_in.v + tread / 2 * tgt_val->ego_in.w) /
                 (param_ro->tire / 2) * 30.0 / PI) *
            (param_ro->Resist / param_ro->Km) / 2 /
            (param_ro->gear_a / param_ro->gear_b);
   }
-  return (param_ro->Mass * mpc_next_ego.accl / 1000 * param_ro->tire / 2000 +
+  return (param_ro->Mass * mpc_next_ego2.accl / 1000 * param_ro->tire / 2000 +
           param_ro->Ke * (tgt_val->ego_in.v - tread / 2 * tgt_val->ego_in.w) /
               (param_ro->tire / 2) * 30.0 / PI) *
          (param_ro->Resist / param_ro->Km) / 2 /
@@ -483,7 +486,7 @@ float PlanningTask::get_feadforward_front() {
   // return 0;
   if (param_ro->FF_front == 0)
     return 0;
-  return param_ro->Mass * mpc_next_ego.accl / 1000 * param_ro->tire / 1000 *
+  return param_ro->Mass * mpc_next_ego2.accl / 1000 * param_ro->tire / 1000 *
          param_ro->Resist /
          ((param_ro->gear_a / param_ro->gear_b) * param_ro->Km) / 2;
 }
@@ -755,11 +758,13 @@ void PlanningTask::cp_request() {
 
     if (!(tgt_val->motion_type == MotionType::NONE ||
           tgt_val->motion_type == MotionType::STRAIGHT ||
+          tgt_val->motion_type == MotionType::READY ||
           tgt_val->motion_type == MotionType::WALL_OFF)) {
       tgt_val->ego_in.img_ang = tgt_val->ego_in.ang = 0;
     }
 
-    if (tgt_val->motion_type == MotionType::NONE) {
+    if (tgt_val->motion_type == MotionType::NONE ||
+        tgt_val->motion_type == MotionType::READY) {
       tgt_val->global_pos.ang = tgt_val->global_pos.img_ang = 0;
       tgt_val->global_pos.dist = tgt_val->global_pos.img_dist = 0;
     }

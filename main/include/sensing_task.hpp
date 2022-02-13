@@ -28,6 +28,7 @@ public:
   ICM20689 gyro_if;
   bool is_ready() { return ready; }
   std::deque<int> gyro_q;
+  void set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val);
 
 private:
   xTaskHandle handle = 0;
@@ -37,10 +38,9 @@ private:
                     const gpio_num_t pinB);
 
   // void timer_isr(void *parameters);
+  std::shared_ptr<motion_tgt_val_t> tgt_val;
 
   bool itr_state = true;
-  int c = 0;
-  int d = 0;
 };
 
 #endif

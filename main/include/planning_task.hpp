@@ -75,6 +75,7 @@ private:
   int32_t mpc_mode;
   int32_t mpc_step;
   t_ego mpc_next_ego;
+  t_ego mpc_next_ego2;
 
   fail_safe_t fail_safe;
   float get_feadforward_front();

@@ -47,13 +47,15 @@ void SensingTask::task() {
     adc2_get_raw(SEN_L45, width, &sensing_result->led_sen_before.left45.raw);
     adc2_get_raw(SEN_L90, width, &sensing_result->led_sen_before.left90.raw);
 
-    // LED_ON ADC
-    gpio_set_level(LED_R90, 1);
-    gpio_set_level(LED_R45, 1);
-    gpio_set_level(LED_F, 1);
-    gpio_set_level(LED_L45, 1);
-    gpio_set_level(LED_L90, 1);
-
+    // 超信地旋回中は発光をサボる
+    if (!(tgt_val->motion_type == MotionType::NONE ||
+          tgt_val->motion_type == MotionType::PIVOT)) {
+      gpio_set_level(LED_R90, 1);
+      gpio_set_level(LED_R45, 1);
+      gpio_set_level(LED_F, 1);
+      gpio_set_level(LED_L45, 1);
+      gpio_set_level(LED_L90, 1);
+    }
     for (int i = 0; i < 10000; i++)
       ;
     adc2_get_raw(SEN_R90, width, &sensing_result->led_sen_after.right90.raw);
@@ -110,7 +112,9 @@ void SensingTask::task() {
     vTaskDelay(xDelay);
   }
 }
-
+void SensingTask::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
+  tgt_val = _tgt_val;
+}
 void SensingTask::encoder_init(const pcnt_unit_t unit, const gpio_num_t pinA,
                                const gpio_num_t pinB) {
   pcnt_config_t pcnt_config_0 = {
