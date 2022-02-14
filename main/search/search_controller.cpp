@@ -75,8 +75,8 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
   p.v_end = 20;
   p.accl = p_set.str_map[StraightType::Search].accl;
   p.decel = p_set.str_map[StraightType::Search].decel;
-  p.dist = 40;
-  p.motion_type = MotionType::STRAIGHT;
+  p.dist = 43;
+  p.motion_type = MotionType::PIVOT_PRE;
   p.sct = SensorCtrlType::Straight;
   p.wall_off_req = WallOffReq::NONE;
   res = mp->go_straight(p);
@@ -88,8 +88,8 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
   p.v_end = 5;
   p.accl = p_set.str_map[StraightType::Search].accl;
   p.decel = p_set.str_map[StraightType::Search].decel;
-  p.dist = 5;
-  p.motion_type = MotionType::STRAIGHT;
+  p.dist = 2;
+  p.motion_type = MotionType::PIVOT_PRE2;
   p.sct = SensorCtrlType::Straight;
   p.wall_off_req = WallOffReq::NONE;
   res = mp->go_straight(p);
@@ -98,7 +98,7 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
 
   mp->reset_tgt_data();
   mp->reset_ego_data();
-  vTaskDelay(100 / portTICK_RATE_MS);
+  vTaskDelay(25 / portTICK_RATE_MS);
   pt->motor_disable();
 
   param_roll_t pr;
@@ -117,14 +117,13 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
 
   mp->reset_tgt_data();
   mp->reset_ego_data();
-  vTaskDelay(50 / portTICK_RATE_MS);
+  vTaskDelay(25 / portTICK_RATE_MS);
   pt->motor_disable();
 
-  mp->reset_gyro_ref();
+  // mp->reset_gyro_ref();
+  // ui->coin(100);
 
-  ui->coin(100);
-
-  vTaskDelay(50 / portTICK_RATE_MS);
+  vTaskDelay(25 / portTICK_RATE_MS);
   mp->reset_tgt_data();
   mp->reset_ego_data();
   pt->motor_enable();
@@ -133,7 +132,7 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
   p.accl = p_set.str_map[StraightType::Search].accl;
   p.decel = p_set.str_map[StraightType::Search].decel;
   p.dist = 45;
-  p.motion_type = MotionType::STRAIGHT;
+  p.motion_type = MotionType::PIVOT_AFTER;
   p.sct = SensorCtrlType::Straight;
   p.wall_off_req = WallOffReq::NONE;
   res = mp->go_straight(p);
@@ -279,8 +278,8 @@ void SearchController::judge_wall() {
   lgc->set_wall_data(ego->x, ego->y, Direction::South, wall_s);
   lgc->set_wall_data(ego->x, ego->y - 1, Direction::North, wall_s);
 
-  // lgc->set_wall_data(0, 0, Direction::East, true);
-  // lgc->set_wall_data(1, 0, Direction::West, true);
+  lgc->set_wall_data(0, 0, Direction::East, true);
+  lgc->set_wall_data(1, 0, Direction::West, true);
 }
 void SearchController::set_input_param_entity(
     std::shared_ptr<input_param_t> &_param) {

@@ -496,6 +496,7 @@ typedef struct {
   real16_T battery_lp;
 
   char motion_type;
+  int16_t motion_timestamp;
 
   real16_T duty_ff_front;
   real16_T duty_ff_roll;

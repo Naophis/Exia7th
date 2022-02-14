@@ -8,16 +8,19 @@ FF_front: 1
 FF_roll: 1
 FF_keV: 1
 # Ke: 0.00275
+# Ke: 0.0045
+# Km: 0.00275
 Ke: 0.00305
 Km: 0.0005
 Resist: 2.93
 Mass: 0.015
 # Lm: 0.0000025
+# Lm: 0.000025
 Lm: 0.00000025
-sakiyomi_time: 25
+sakiyomi_time: 40
 motor_pid:
-  p: 0.0055
-  i: 0.0018
+  p: 0.002
+  i: 0.0035
   d: 0.0
   mode: 1
   # p: 0.0
@@ -40,15 +43,15 @@ gyro_pid:
   # i: 0.0
   # d: 0
 angle_pid:
-  # p: 0.0
-  # i: 0.05
-  # d: 40.5
-  mode: 1
   p: 0.0
-  i: 0.0
-  d: 0.0
+  i: 0.05
+  d: 40.5
+  mode: 1
+  # p: 0.0
+  # i: 0.0
+  # d: 0.0
 sensor_pid:
-  p: 0.005
+  p: 0.0125
   i: 0.0
   d: 0.0
   mode: 0

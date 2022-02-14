@@ -77,6 +77,9 @@ TurnType MainTask::cast_turn_type(std::string str) {
 }
 void MainTask::dump1() {
   const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
+
+  tgt_val->nmr.motion_type = MotionType::READY;
+  tgt_val->nmr.timstamp++;
   while (1) {
     printf("%c[2J", ESC);   /* 画面消去 */
     printf("%c[0;0H", ESC); /* 戦闘戻す*/
@@ -856,11 +859,6 @@ void MainTask::test_run() {
   reset_ego_data();
   req_error_reset();
   mp->coin();
-  while (1) {
-    if (ui->button_state_hold())
-      break;
-    vTaskDelay(10 / portTICK_RATE_MS);
-  }
   lt->save(slalom_log_file);
   ui->coin(120);
 

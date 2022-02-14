@@ -72,6 +72,8 @@ void LoggingTask::task() {
         ld->duty_ff_front = floatToHalf(sensing_result->ego.ff_duty.front);
         ld->duty_ff_roll = floatToHalf(sensing_result->ego.ff_duty.roll);
 
+        ld->motion_timestamp = tgt_val->nmr.timstamp;
+
         log_vec.push_back(ld);
         idx_slalom_log++;
       }
@@ -96,34 +98,35 @@ void LoggingTask::save(std::string file_name) {
 
   for (const auto ld : log_vec) {
 
-    fprintf(f_slalom_log, f1,                   //
-            i++,                                //
-            halfToFloat(ld->img_v),             //
-            halfToFloat(ld->v_c),               //
-            halfToFloat(ld->v_l),               //
-            halfToFloat(ld->v_r),               //
-            halfToFloat(ld->accl));             //
-    fprintf(f_slalom_log, f2,                   //
-            halfToFloat(ld->img_w),             //
-            halfToFloat(ld->w_lp),              //
-            halfToFloat(ld->alpha),             //
-            halfToFloat(ld->img_dist),          //
-            halfToFloat(ld->dist),              //
-            halfToFloat(ld->img_ang),           //
-            halfToFloat(ld->ang));              //
-    fprintf(f_slalom_log, f3,                   //
-            halfToFloat(ld->left90_lp),         //
-            halfToFloat(ld->left45_lp),         //
-            halfToFloat(ld->front_lp),          //
-            halfToFloat(ld->right45_lp),        //
-            halfToFloat(ld->right90_lp),        //
-            halfToFloat(ld->battery_lp),        //
-            halfToFloat(ld->duty_l),            //
-            halfToFloat(ld->duty_r),            //
-            (ld->motion_type),                  //
-            halfToFloat(ld->duty_sensor_ctrl),  //
-            halfToFloat(ld->duty_ff_roll),      //
-            halfToFloat(ld->duty_sensor_ctrl)); //
+    fprintf(f_slalom_log, f1,                  //
+            i++,                               //
+            halfToFloat(ld->img_v),            //
+            halfToFloat(ld->v_c),              //
+            halfToFloat(ld->v_l),              //
+            halfToFloat(ld->v_r),              //
+            halfToFloat(ld->accl));            //
+    fprintf(f_slalom_log, f2,                  //
+            halfToFloat(ld->img_w),            //
+            halfToFloat(ld->w_lp),             //
+            halfToFloat(ld->alpha),            //
+            halfToFloat(ld->img_dist),         //
+            halfToFloat(ld->dist),             //
+            halfToFloat(ld->img_ang),          //
+            halfToFloat(ld->ang));             //
+    fprintf(f_slalom_log, f3,                  //
+            halfToFloat(ld->left90_lp),        //
+            halfToFloat(ld->left45_lp),        //
+            halfToFloat(ld->front_lp),         //
+            halfToFloat(ld->right45_lp),       //
+            halfToFloat(ld->right90_lp),       //
+            halfToFloat(ld->battery_lp),       //
+            halfToFloat(ld->duty_l),           //
+            halfToFloat(ld->duty_r),           //
+            (ld->motion_type),                 //
+            halfToFloat(ld->duty_sensor_ctrl), //
+            halfToFloat(ld->duty_ff_roll),     //
+            halfToFloat(ld->duty_sensor_ctrl), //
+            ld->motion_timestamp);             //
   }
 
   if (f_slalom_log != NULL) {
@@ -143,7 +146,7 @@ void LoggingTask::dump_log(std::string file_name) {
   vTaskDelay(xDelay2);
   printf("index,ideal_v,v_c,v_l,v_r,accl,ideal_w,w_lp,alpha,ideal_dist,dist,"
          "ideal_ang,ang,left90,left45,front,right45,right90,battery,duty_l,"
-         "duty_r,motion_state,ff_duty_front,ff_duty_roll,duty_sen\n");
+         "duty_r,motion_state,ff_duty_front,ff_duty_roll,duty_sen,timestamp\n");
   while (fgets(line_buf, sizeof(line_buf), f) != NULL)
     printf("%s\n", line_buf);
   printf("end___\n"); // csvファイル追記終了トリガー

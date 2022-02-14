@@ -247,7 +247,7 @@ float PlanningTask::check_sen_error() {
     error_entity.sen_log.gain_zz = 0;
     error_entity.sen_log.gain_z = 0;
   } else {
-    if (tgt_val->tgt_in.tgt_dist >= 45) {
+    if (tgt_val->tgt_in.tgt_dist >= 60) {
       tgt_val->global_pos.ang = tgt_val->global_pos.img_ang;
       error_entity.w.error_i = 0;
       error_entity.w.error_d = 0;
@@ -470,14 +470,15 @@ float PlanningTask::get_feadforward_front(TurnDirection td) {
     return 0;
   const float tread = 38;
   if (td == TurnDirection::Right) {
+
     return (param_ro->Mass * mpc_next_ego2.accl / 1000 * param_ro->tire / 2000 +
-            param_ro->Ke * (tgt_val->ego_in.v + tread / 2 * tgt_val->ego_in.w) /
+            param_ro->Ke * (mpc_next_ego2.v + tread / 2 * mpc_next_ego2.w) /
                 (param_ro->tire / 2) * 30.0 / PI) *
            (param_ro->Resist / param_ro->Km) / 2 /
            (param_ro->gear_a / param_ro->gear_b);
   }
   return (param_ro->Mass * mpc_next_ego2.accl / 1000 * param_ro->tire / 2000 +
-          param_ro->Ke * (tgt_val->ego_in.v - tread / 2 * tgt_val->ego_in.w) /
+          param_ro->Ke * (mpc_next_ego2.v - tread / 2 * mpc_next_ego2.w) /
               (param_ro->tire / 2) * 30.0 / PI) *
          (param_ro->Resist / param_ro->Km) / 2 /
          (param_ro->gear_a / param_ro->gear_b);
@@ -495,7 +496,7 @@ float PlanningTask::get_feadforward_roll() {
   const float tread = 38;
   if (param_ro->FF_roll == 0)
     return 0;
-  return param_ro->Lm * mpc_next_ego.alpha * param_ro->tire * //
+  return param_ro->Lm * mpc_next_ego2.alpha * param_ro->tire * //
          param_ro->Resist /
          ((param_ro->gear_a / param_ro->gear_b) * param_ro->Km) / tread;
 }
@@ -708,11 +709,11 @@ void PlanningTask::cp_tgt_val() {
 void PlanningTask::check_fail_safe() {
   bool no_problem = true;
   if (motor_en) {
-    if (ABS(sensing_result->ego.duty.duty_r) > 80) {
+    if (ABS(sensing_result->ego.duty.duty_r) > 90) {
       fail_safe.invalid_duty_r_cnt++;
       no_problem = false;
     }
-    if (ABS(sensing_result->ego.duty.duty_l) > 80) {
+    if (ABS(sensing_result->ego.duty.duty_l) > 90) {
       fail_safe.invalid_duty_l_cnt++;
       no_problem = false;
     }
@@ -723,8 +724,8 @@ void PlanningTask::check_fail_safe() {
     fail_safe.invalid_duty_l_cnt = 0;
     tgt_val->fss.error = 0;
   } else {
-    if (ABS(fail_safe.invalid_duty_r_cnt) > 10 ||
-        ABS(fail_safe.invalid_duty_l_cnt) > 10) {
+    if (ABS(fail_safe.invalid_duty_r_cnt) > 50 ||
+        ABS(fail_safe.invalid_duty_l_cnt) > 50) {
       tgt_val->fss.error = 1;
     }
   }
@@ -758,6 +759,8 @@ void PlanningTask::cp_request() {
 
     if (!(tgt_val->motion_type == MotionType::NONE ||
           tgt_val->motion_type == MotionType::STRAIGHT ||
+          tgt_val->motion_type == MotionType::PIVOT_PRE ||
+          tgt_val->motion_type == MotionType::PIVOT_AFTER ||
           tgt_val->motion_type == MotionType::READY ||
           tgt_val->motion_type == MotionType::WALL_OFF)) {
       tgt_val->ego_in.img_ang = tgt_val->ego_in.ang = 0;

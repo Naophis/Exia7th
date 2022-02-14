@@ -42,6 +42,7 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p) {
   tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
   tgt_val->nmr.dia_mode = p.dia_mode;
   tgt_val->nmr.sct = p.sct;
+  tgt_val->ego_in.dist = 0;
 
   if (p.motion_type != MotionType::NONE) {
     tgt_val->motion_type = p.motion_type;

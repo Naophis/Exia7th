@@ -36,6 +36,9 @@ enum class MotionType : char {
   SLA_BACK_STR = 5,
   WALL_OFF = 6,
   READY = 7,
+  PIVOT_PRE = 8,
+  PIVOT_PRE2 = 8,
+  PIVOT_AFTER = 10,
 };
 
 enum class FailSafe : int {
