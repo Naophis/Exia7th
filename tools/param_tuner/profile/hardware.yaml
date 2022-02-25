@@ -1,6 +1,6 @@
 dt: 0.001
-tire: 13.595
-offset_start_dist: 16.0
+tire: 13.520
+offset_start_dist: 17.0
 gear_a: 37
 gear_b: 8
 max_duty: 99.9

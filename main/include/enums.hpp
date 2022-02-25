@@ -27,7 +27,7 @@ enum class RUN_MODE2 : int {
   SLALOM_RUN2 = 4,
 };
 
-enum class MotionType : char {
+enum class MotionType : int {
   NONE = 0,
   STRAIGHT = 1,
   PIVOT = 2,

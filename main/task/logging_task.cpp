@@ -66,7 +66,7 @@ void LoggingTask::task() {
         ld->duty_l = floatToHalf(sensing_result->ego.duty.duty_l);
         ld->duty_r = floatToHalf(sensing_result->ego.duty.duty_r);
 
-        ld->motion_type = static_cast<char>(tgt_val->motion_type);
+        ld->motion_type = static_cast<int>(tgt_val->motion_type);
 
         ld->duty_sensor_ctrl = floatToHalf(sensing_result->ego.duty.sen);
         ld->duty_ff_front = floatToHalf(sensing_result->ego.ff_duty.front);
