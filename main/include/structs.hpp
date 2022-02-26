@@ -94,6 +94,17 @@ typedef struct {
   float right45_lp_old = 0;
   float right90_lp_old = 0;
 
+  float front_dist = 0;
+  float left45_dist = 0;
+  float left90_dist = 0;
+  float right45_dist = 0;
+  float right90_dist = 0;
+  float front_dist_old = 0;
+  float left45_dist_old = 0;
+  float left90_dist_old = 0;
+  float right45_dist_old = 0;
+  float right90_dist_old = 0;
+
   rpm_t rpm;
   duty_t duty;
   ff_duty_t ff_duty;
@@ -171,6 +182,19 @@ typedef struct {
 } sen_ref_param_t;
 
 typedef struct {
+  float a;
+  float b;
+} sensor_gain_param_t;
+
+typedef struct {
+  sensor_gain_param_t l90;
+  sensor_gain_param_t l45;
+  sensor_gain_param_t front;
+  sensor_gain_param_t r45;
+  sensor_gain_param_t r90;
+} sensor_gain_t;
+
+typedef struct {
   float dt = 0.001;
   float tire = 12;
   float gear_a = 37;
@@ -200,6 +224,7 @@ typedef struct {
   sen_param_t led_param;
   MotionDirection motion_dir;
   sen_ref_param_t sen_ref_p;
+  sensor_gain_t sensor_gain;
   int sakiyomi_time = 1;
 } input_param_t;
 

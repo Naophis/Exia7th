@@ -80,6 +80,7 @@ private:
   wl_handle_t s_wl_handle = WL_INVALID_HANDLE;
 
   void dump1();
+  void dump2();
   int select_mode();
   void keep_pivot();
   void echo_sensing_result_with_json();

@@ -149,6 +149,7 @@ void PlanningTask::task() {
   while (1) {
     // 自己位置更新
     update_ego_motion();
+    calc_sensor_dist_all();
 
     mpc_step = 1;
 
@@ -219,26 +220,43 @@ float PlanningTask::check_sen_error() {
     if (ABS(sensing_result->ego.right45_lp -
             sensing_result->ego.right45_lp_old) <
         param_ro->sen_ref_p.normal.ref.kireme_r) {
-      if (sensing_result->ego.right45_lp >
-          param_ro->sen_ref_p.normal.exist.right45) {
-        if (sensing_result->ego.right90_lp >
-            param_ro->sen_ref_p.normal.exist.right90) {
-          error += sensing_result->ego.right45_lp -
-                   param_ro->sen_ref_p.normal.ref.right45;
-          check++;
-        }
+      // if (sensing_result->ego.right45_lp >
+      //     param_ro->sen_ref_p.normal.exist.right45) {
+      //   if (sensing_result->ego.right90_lp >
+      //       param_ro->sen_ref_p.normal.exist.right90) {
+      //     // error += sensing_result->ego.right45_lp -
+      //     //          param_ro->sen_ref_p.normal.ref.right45;
+      //     error += sensing_result->ego.right45_dist - 45;
+
+      //     check++;
+      //   }
+      // }
+      if ((35 < sensing_result->ego.right45_dist &&
+           sensing_result->ego.right45_dist < 50) &&
+          (sensing_result->ego.right90_lp >
+           param_ro->sen_ref_p.normal.exist.right90)) {
+        error += 45 - sensing_result->ego.right45_dist;
+        check++;
       }
     }
     if (ABS(sensing_result->ego.left45_lp - sensing_result->ego.left45_lp_old) <
         param_ro->sen_ref_p.normal.ref.kireme_l) {
-      if (sensing_result->ego.left45_lp >
-          param_ro->sen_ref_p.normal.exist.left45) {
-        if (sensing_result->ego.left90_lp >
-            param_ro->sen_ref_p.normal.exist.left90) {
-          error -= sensing_result->ego.left45_lp -
-                   param_ro->sen_ref_p.normal.ref.left45;
-          check++;
-        }
+      // if (sensing_result->ego.left45_lp >
+      //     param_ro->sen_ref_p.normal.exist.left45) {
+      //   if (sensing_result->ego.left90_lp >
+      //       param_ro->sen_ref_p.normal.exist.left90) {
+      //     // error -= sensing_result->ego.left45_lp -
+      //     //          param_ro->sen_ref_p.normal.ref.left45;
+      //     error -= sensing_result->ego.left45_dist - 45;
+      //     check++;
+      //   }
+      // }
+      if ((35 < sensing_result->ego.left45_dist &&
+           sensing_result->ego.left45_dist < 50) &&
+          (sensing_result->ego.left90_lp >
+           param_ro->sen_ref_p.normal.exist.left90)) {
+        error -= 45 - sensing_result->ego.left45_dist;
+        check++;
       }
     }
   }
@@ -784,4 +802,36 @@ void PlanningTask::cp_request() {
     tgt_val->motion_dir = tgt_val->nmr.motion_dir;
     tgt_val->dia_mode = tgt_val->nmr.dia_mode;
   }
+}
+float PlanningTask::calc_sensor(float data, float a, float b) {
+  return a / std::log(data) - b;
+}
+
+void PlanningTask::calc_sensor_dist_all() {
+  sensing_result->ego.left90_dist =
+      calc_sensor(sensing_result->ego.left90_lp, param_ro->sensor_gain.l90.a,
+                  param_ro->sensor_gain.l90.b);
+  sensing_result->ego.left45_dist =
+      calc_sensor(sensing_result->ego.left45_lp, param_ro->sensor_gain.l45.a,
+                  param_ro->sensor_gain.l45.b);
+  sensing_result->ego.front_dist =
+      calc_sensor(sensing_result->ego.front_lp, param_ro->sensor_gain.front.a,
+                  param_ro->sensor_gain.front.b);
+  sensing_result->ego.right45_dist =
+      calc_sensor(sensing_result->ego.right45_lp, param_ro->sensor_gain.r45.a,
+                  param_ro->sensor_gain.r45.b);
+  sensing_result->ego.right90_dist =
+      calc_sensor(sensing_result->ego.right90_lp, param_ro->sensor_gain.r90.a,
+                  param_ro->sensor_gain.r90.b);
+
+  // 壁からの距離に変換。あとで斜め用に変更
+  calc_sensor_dist_diff();
+}
+
+void PlanningTask::calc_sensor_dist_diff() {
+  // sensing_result->ego.left90_dist -= 45;
+  // sensing_result->ego.left45_dist -= 45;
+  // sensing_result->ego.front_dist = 0;
+  // sensing_result->ego.right45_dist -= 45;
+  // sensing_result->ego.right90_dist -= 45;
 }

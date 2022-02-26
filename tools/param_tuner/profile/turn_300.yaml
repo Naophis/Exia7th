@@ -34,7 +34,7 @@ normal:
   rad: 32.000000
   pow_n: 4.000000
   time: 0.109781
-  front: { left: 10.5, right: 10.5 }
+  front: { left: 6.5, right: 9.5 }
   back: { left: 6.5, right: 6.5 }
 large:
   v: 300.000000

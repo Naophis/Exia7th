@@ -124,7 +124,8 @@ static const std::string maze_log_file("/spiflash/maze.log");
 static const std::string format1("%d,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
 static const std::string format2("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
 static const std::string format3(
-    "%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%d,%0.3f,%0.3f,%0.3f,%d\n");
+    "%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,"
+    "%0.3f,%d,%0.3f,%0.3f,%0.3f,%d\n");
 
 // static const std::string format1("%d,%d,%d,%d,%d,%d,");
 // static const std::string format2("%d,%d,%d,%d,%d,%d,%d,");

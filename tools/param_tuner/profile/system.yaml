@@ -2,7 +2,7 @@
 goals: [[1, 0]]
 maze_size: 16
 debug: 0
-mode: 4 # モード選択
+mode: 0 # モード選択
 
 test: # テスト走行時に使用するパラメータ群
   v_max: 300
@@ -28,5 +28,5 @@ test: # テスト走行時に使用するパラメータ群
   # sla_type: 9 #dia135_2
   sla_return: 0 # 往復フラグ
   sla_type2: 0 #復路ターン種類
-  turn_times: 4
+  turn_times: 0
   ignore_opp_sen: 0

@@ -12,6 +12,7 @@
 #include "esp_system.h"
 #include "esp_vfs.h"
 #include "esp_vfs_fat.h"
+#include <cmath>
 
 class PlanningTask {
 public:
@@ -50,6 +51,12 @@ private:
 
   void cp_request();
 
+  void calc_sensor_dist_diff();
+
+  void calc_sensor_dist_all();
+
+  float calc_sensor(float date, float a, float b);
+
   duty_t tgt_duty;
   pid_error_entity_t error_entity;
   int buzzer_time_cnt = 0;
@@ -84,7 +91,6 @@ private:
   float get_rpm_ff_val(TurnDirection td);
   float calc_sensor_pid();
   float check_sen_error();
- 
 };
 
 #endif

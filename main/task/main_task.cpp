@@ -95,6 +95,13 @@ void MainTask::dump1() {
            sensing_result->led_sen.front.raw,
            sensing_result->led_sen.right45.raw,
            sensing_result->led_sen.right90.raw);
+    printf("sensor_dist: %0.2f, %0.2f, %0.2f, %0.2f, %0.2f\n",
+           sensing_result->ego.left90_dist,  //
+           sensing_result->ego.left45_dist,  //
+           sensing_result->ego.front_dist,   //
+           sensing_result->ego.right45_dist, //
+           sensing_result->ego.right90_dist);
+
     printf("sensor: %0.1f, %0.1f, %0.1f, %0.1f, %0.1f\n",
            param->sen_ref_p.search_exist.left90,
            param->sen_ref_p.search_exist.left45,
@@ -112,6 +119,26 @@ void MainTask::dump1() {
            tgt_val->ego_in.ang * 180 / PI);
     printf("duty: %0.3f, %0.3f\n", sensing_result->ego.duty.duty_l,
            sensing_result->ego.duty.duty_r);
+
+    if (ui->button_state()) {
+      tgt_val->ego_in.ang = tgt_val->ego_in.dist = 0;
+    }
+
+    vTaskDelay(xDelay);
+  }
+}
+
+void MainTask::dump2() {
+  const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
+
+  tgt_val->nmr.motion_type = MotionType::READY;
+  tgt_val->nmr.timstamp++;
+  while (1) {
+    printf("%d, %d, %d, %d, %d\n", sensing_result->led_sen.left90.raw,
+           sensing_result->led_sen.left45.raw,
+           sensing_result->led_sen.front.raw,
+           sensing_result->led_sen.right45.raw,
+           sensing_result->led_sen.right90.raw);
 
     if (ui->button_state()) {
       tgt_val->ego_in.ang = tgt_val->ego_in.dist = 0;
@@ -345,7 +372,7 @@ void MainTask::load_sensor_param() {
   printf("%s\n", line_buf);
 
   cJSON *root = cJSON_CreateObject(), *normal, *normal_ref, *normal_exist, *dia,
-        *dia_ref, *dia_exist, *search, *search_exist;
+        *dia_ref, *dia_exist, *search, *search_exist, *gain;
   root = cJSON_Parse(line_buf);
 
   normal = cJSON_GetObjectItem(root, "normal");
@@ -412,6 +439,28 @@ void MainTask::load_sensor_param() {
   param->sen_ref_p.search_exist.front_ctrl =
       cJSON_GetObjectItem(search_exist, "front_ctrl")->valuedouble;
 
+  gain = cJSON_GetObjectItem(root, "gain");
+  param->sensor_gain.l90.a =
+      cJSON_GetArrayItem(cJSON_GetObjectItem(gain, "L90"), 0)->valuedouble;
+  param->sensor_gain.l90.b =
+      cJSON_GetArrayItem(cJSON_GetObjectItem(gain, "L90"), 1)->valuedouble;
+  param->sensor_gain.l45.a =
+      cJSON_GetArrayItem(cJSON_GetObjectItem(gain, "L45"), 0)->valuedouble;
+  param->sensor_gain.l45.b =
+      cJSON_GetArrayItem(cJSON_GetObjectItem(gain, "L45"), 1)->valuedouble;
+  param->sensor_gain.front.a =
+      cJSON_GetArrayItem(cJSON_GetObjectItem(gain, "F"), 0)->valuedouble;
+  param->sensor_gain.front.b =
+      cJSON_GetArrayItem(cJSON_GetObjectItem(gain, "F"), 1)->valuedouble;
+  param->sensor_gain.r45.a =
+      cJSON_GetArrayItem(cJSON_GetObjectItem(gain, "R45"), 0)->valuedouble;
+  param->sensor_gain.r45.b =
+      cJSON_GetArrayItem(cJSON_GetObjectItem(gain, "R45"), 1)->valuedouble;
+  param->sensor_gain.r90.a =
+      cJSON_GetArrayItem(cJSON_GetObjectItem(gain, "R90"), 0)->valuedouble;
+  param->sensor_gain.r90.b =
+      cJSON_GetArrayItem(cJSON_GetObjectItem(gain, "R90"), 1)->valuedouble;
+
   cJSON_free(root);
   cJSON_free(normal);
   cJSON_free(normal_ref);
@@ -421,6 +470,7 @@ void MainTask::load_sensor_param() {
   cJSON_free(dia_exist);
   cJSON_free(search);
   cJSON_free(search_exist);
+  cJSON_free(gain);
 }
 
 void MainTask::load_sys_param() {
@@ -723,13 +773,15 @@ void MainTask::task() {
     } else if (sys.user_mode == 7) {
       printf("test_search_front_ctrl\n");
       test_front_ctrl();
-    } else if (sys.user_mode == 14) {
+    } else if (sys.user_mode == 13) {
       printf("keep_pivot\n");
       keep_pivot();
+    } else if (sys.user_mode == 14) {
+      printf("echo_sensor_csv\n");
+      dump1();
     } else if (sys.user_mode == 15) {
       printf("echo_printf\n");
-      // echo_sensing_result_with_json();
-      dump1();
+      dump2();
     } else if (sys.user_mode == 16) {
       lt->dump_log(slalom_log_file);
       while (1) {

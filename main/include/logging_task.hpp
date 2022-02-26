@@ -45,6 +45,7 @@ private:
   FILE *f_slalom_log;
   // std::vector<std::shared_ptr<log_data_t>> log_vec;
   std::vector<std::shared_ptr<log_data_t2>> log_vec;
+  float calc_sensor(float data, float a, float b);
 };
 
 #endif

@@ -83,6 +83,9 @@ void LoggingTask::task() {
     }
   }
 }
+float LoggingTask::calc_sensor(float data, float a, float b) {
+  return a / std::log(data) - b;
+}
 
 void LoggingTask::save(std::string file_name) {
   printf("usefile: %s\n", slalom_log_file.c_str());
@@ -98,27 +101,40 @@ void LoggingTask::save(std::string file_name) {
 
   for (const auto ld : log_vec) {
 
-    fprintf(f_slalom_log, f1,                  //
-            i++,                               //
-            halfToFloat(ld->img_v),            //
-            halfToFloat(ld->v_c),              //
-            halfToFloat(ld->v_l),              //
-            halfToFloat(ld->v_r),              //
-            halfToFloat(ld->accl));            //
-    fprintf(f_slalom_log, f2,                  //
-            halfToFloat(ld->img_w),            //
-            halfToFloat(ld->w_lp),             //
-            halfToFloat(ld->alpha),            //
-            halfToFloat(ld->img_dist),         //
-            halfToFloat(ld->dist),             //
-            halfToFloat(ld->img_ang),          //
-            halfToFloat(ld->ang));             //
+    fprintf(f_slalom_log, f1,          //
+            i++,                       //
+            halfToFloat(ld->img_v),    //
+            halfToFloat(ld->v_c),      //
+            halfToFloat(ld->v_l),      //
+            halfToFloat(ld->v_r),      //
+            halfToFloat(ld->accl));    //
+    fprintf(f_slalom_log, f2,          //
+            halfToFloat(ld->img_w),    //
+            halfToFloat(ld->w_lp),     //
+            halfToFloat(ld->alpha),    //
+            halfToFloat(ld->img_dist), //
+            halfToFloat(ld->dist),     //
+            halfToFloat(ld->img_ang),  //
+            halfToFloat(ld->ang));     //
+    auto l90 = calc_sensor(halfToFloat(ld->left90_lp), param->sensor_gain.l90.a,
+                           param->sensor_gain.l90.b);
+    auto l45 = calc_sensor(halfToFloat(ld->left45_lp), param->sensor_gain.l45.a,
+                           param->sensor_gain.l45.b);
+    auto front =
+        calc_sensor(halfToFloat(ld->front_lp), param->sensor_gain.front.a,
+                    param->sensor_gain.front.b);
+    auto r45 = calc_sensor(halfToFloat(ld->right45_lp),
+                           param->sensor_gain.r45.a, param->sensor_gain.r45.b);
+    auto r90 = calc_sensor(halfToFloat(ld->right90_lp),
+                           param->sensor_gain.r90.a, param->sensor_gain.r90.b);
+
     fprintf(f_slalom_log, f3,                  //
             halfToFloat(ld->left90_lp),        //
             halfToFloat(ld->left45_lp),        //
             halfToFloat(ld->front_lp),         //
             halfToFloat(ld->right45_lp),       //
             halfToFloat(ld->right90_lp),       //
+            l90, l45, front, r45, r90,         //
             halfToFloat(ld->battery_lp),       //
             halfToFloat(ld->duty_l),           //
             halfToFloat(ld->duty_r),           //
@@ -145,7 +161,8 @@ void LoggingTask::dump_log(std::string file_name) {
   printf("start___\n"); // csvファイル作成トリガー
   vTaskDelay(xDelay2);
   printf("index,ideal_v,v_c,v_l,v_r,accl,ideal_w,w_lp,alpha,ideal_dist,dist,"
-         "ideal_ang,ang,left90,left45,front,right45,right90,battery,duty_l,"
+         "ideal_ang,ang,left90,left45,front,right45,right90,left90_d,left45_d,"
+         "front_d,right45_d,right90_d,battery,duty_l,"
          "duty_r,motion_state,ff_duty_front,ff_duty_roll,duty_sen,timestamp\n");
   while (fgets(line_buf, sizeof(line_buf), f) != NULL)
     printf("%s\n", line_buf);
