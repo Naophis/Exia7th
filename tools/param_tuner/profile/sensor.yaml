@@ -3,11 +3,11 @@ normal:
     right45: 400
     left45: 260
     front: 500
-    kireme_r: 5
-    kireme_l: 5
+    kireme_r: 8
+    kireme_l: 8
   exist:
-    right45: 300
-    left45: 200
+    right45: 48
+    left45: 48
     front: 500
     kireme_r: 100 #右90壁有無
     kireme_l: 100 #左90壁有無

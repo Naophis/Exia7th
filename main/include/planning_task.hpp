@@ -91,6 +91,10 @@ private:
   float get_rpm_ff_val(TurnDirection td);
   float calc_sensor_pid();
   float check_sen_error();
+  float error_right = 0;
+  float error_left = 0;
+  bool check_right = false;
+  bool check_left = false;
 };
 
 #endif

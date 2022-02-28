@@ -3,9 +3,9 @@ straight:
     v_max: 300
     accl: 2500
     decel: -2500
-    w_max: 7
+    w_max: 20
     w_end: 0.1
-    alpha: 20
+    alpha: 40
   fast_run:
     v_max: 300
     accl: 1500
@@ -34,7 +34,7 @@ normal:
   rad: 32.000000
   pow_n: 4.000000
   time: 0.109781
-  front: { left: 6.5, right: 9.5 }
+  front: { left: 6.5, right: 6.5 }
   back: { left: 6.5, right: 6.5 }
 large:
   v: 300.000000

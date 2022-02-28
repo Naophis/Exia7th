@@ -33,7 +33,7 @@ void LoggingTask::stop_slalom_log() {
 }
 
 void LoggingTask::task() {
-  const TickType_t xDelay = 4 / portTICK_PERIOD_MS;
+  const TickType_t xDelay = 3 / portTICK_PERIOD_MS;
   while (1) {
     logging_active = active_slalom_log;
     if (logging_active) {

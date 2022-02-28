@@ -37,8 +37,9 @@ enum class MotionType : int {
   WALL_OFF = 6,
   READY = 7,
   PIVOT_PRE = 8,
-  PIVOT_PRE2 = 8,
+  PIVOT_PRE2 = 9,
   PIVOT_AFTER = 10,
+  FRONT_CTRL = 11,
 };
 
 enum class FailSafe : int {

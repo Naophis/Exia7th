@@ -89,7 +89,7 @@ constexpr uint16_t BUF_SIZE = 4096;
 constexpr uint16_t MOTION_CHECK_TH = 1000;
 constexpr uint16_t ENC_OPE_V_R_TH = 175;
 
-constexpr uint16_t LOG_SIZE = 2300;
+constexpr uint16_t LOG_SIZE = 2500;
 constexpr uint16_t LINE_BUF_SIZE = 1500;
 constexpr float BATTERY_GAIN = 2.97324;
 

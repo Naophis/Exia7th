@@ -45,7 +45,7 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p) {
   tgt_val->ego_in.dist = 0;
 
   if (p.motion_type != MotionType::NONE) {
-    tgt_val->motion_type = p.motion_type;
+    tgt_val->nmr.motion_type = p.motion_type;
   }
   tgt_val->nmr.timstamp++;
   bool wall_off_req = p.wall_off_req == WallOffReq::SEARCH;
@@ -138,7 +138,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
 
 MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
                                     next_motionr_t &next_motion, bool dia) {
-  param_straight_t ps_front;
+
   ps_front.v_max = sp.v;
   ps_front.v_end = sp.v;
   ps_front.accl = next_motion.accl;
@@ -148,13 +148,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   ps_front.sct = !dia ? SensorCtrlType::Straight : SensorCtrlType::Dia;
   ps_front.wall_off_req = WallOffReq::NONE;
 
-  param_straight_t ps_back;
-  ps_back.v_max = next_motion.v_max;
-  ps_back.v_end = next_motion.v_end;
-  ps_back.accl = next_motion.accl;
-  ps_back.decel = next_motion.decel;
   ps_back.dist = (td == TurnDirection::Right) ? sp.back.right : sp.back.left;
-  ps_back.motion_type = MotionType::SLA_BACK_STR;
 
   if (sp.type == TurnType::Normal) {
     search_front_ctrl(ps_front); // 前壁制御
@@ -167,11 +161,11 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
     }
 
     if (td == TurnDirection::Right) {
-      if (sensing_result->ego.left45_dist < 45) {
+      if (sensing_result->ego.left45_dist < th_offset_dist) {
         ps_back.dist += (45 - sensing_result->ego.left45_dist);
       }
     } else {
-      if (sensing_result->ego.right45_dist < 45) {
+      if (sensing_result->ego.right45_dist < th_offset_dist) {
         ps_back.dist += (45 - sensing_result->ego.right45_dist);
       }
     }
@@ -227,9 +221,13 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
     //   }
     // }
   }
-
+  ps_back.v_max = next_motion.v_max;
+  ps_back.v_end = next_motion.v_end;
+  ps_back.accl = next_motion.accl;
+  ps_back.decel = next_motion.decel;
+  ps_back.motion_type = MotionType::SLA_BACK_STR;
   ps_back.sct = !dia ? SensorCtrlType::Straight : SensorCtrlType::Dia;
-  ps_front.wall_off_req = WallOffReq::NONE;
+  ps_back.wall_off_req = WallOffReq::NONE;
   //  : SensorCtrlType::Dia;
   auto res_b = go_straight(ps_back);
   if (res_b != MotionResult::NONE) {
@@ -503,13 +501,13 @@ MotionResult MotionPlanning::search_front_ctrl(param_straight_t &p) {
   tgt_val->nmr.alpha = 0;
   tgt_val->nmr.ang = 0;
   tgt_val->nmr.motion_mode = RUN_MODE2::ST_RUN;
-  tgt_val->nmr.motion_type = MotionType::STRAIGHT;
+  tgt_val->nmr.motion_type = MotionType::FRONT_CTRL;
   tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
   tgt_val->nmr.dia_mode = p.dia_mode;
   tgt_val->nmr.sct = p.sct;
 
   if (p.motion_type != MotionType::NONE) {
-    tgt_val->motion_type = p.motion_type;
+    tgt_val->nmr.motion_type = p.motion_type;
   }
   tgt_val->nmr.timstamp++;
   bool wall_off_req = sensing_result->ego.front_lp >

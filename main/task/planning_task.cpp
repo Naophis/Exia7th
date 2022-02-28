@@ -7,7 +7,7 @@ PlanningTask::PlanningTask() {}
 
 PlanningTask::~PlanningTask() {}
 void PlanningTask::create_task(const BaseType_t xCoreID) {
-  xTaskCreatePinnedToCore(task_entry_point, "planning_task", 8192, this, 1,
+  xTaskCreatePinnedToCore(task_entry_point, "planning_task", 8192 * 2, this, 1,
                           &handle, xCoreID);
 }
 void PlanningTask::motor_enable() {
@@ -203,64 +203,30 @@ float PlanningTask::calc_sensor_pid() {
 float PlanningTask::check_sen_error() {
   float error = 0;
   int check = 0;
-
   //前壁が近すぎるときはエスケープ
-
-  bool enable = true;
-
-  if (tgt_val->tgt_in.tgt_dist > 45) {
-    int div = ((int)tgt_val->ego_in.dist) / 90;
-    float mod = tgt_val->ego_in.dist - 90 * div;
-    if (mod > 5 && (mod < 40 || mod > 85)) {
-      // enable = false;
-    }
-  }
 
   if (sensing_result->ego.front_lp < param_ro->sen_ref_p.normal.exist.front) {
     if (ABS(sensing_result->ego.right45_lp -
             sensing_result->ego.right45_lp_old) <
         param_ro->sen_ref_p.normal.ref.kireme_r) {
-      // if (sensing_result->ego.right45_lp >
-      //     param_ro->sen_ref_p.normal.exist.right45) {
-      //   if (sensing_result->ego.right90_lp >
-      //       param_ro->sen_ref_p.normal.exist.right90) {
-      //     // error += sensing_result->ego.right45_lp -
-      //     //          param_ro->sen_ref_p.normal.ref.right45;
-      //     error += sensing_result->ego.right45_dist - 45;
-
-      //     check++;
-      //   }
-      // }
-      if ((35 < sensing_result->ego.right45_dist &&
-           sensing_result->ego.right45_dist < 50) &&
-          (sensing_result->ego.right90_lp >
-           param_ro->sen_ref_p.normal.exist.right90)) {
+      if ((1 < sensing_result->ego.right45_dist &&
+           sensing_result->ego.right45_dist <
+               param_ro->sen_ref_p.normal.exist.right45)) {
         error += 45 - sensing_result->ego.right45_dist;
         check++;
       }
     }
     if (ABS(sensing_result->ego.left45_lp - sensing_result->ego.left45_lp_old) <
         param_ro->sen_ref_p.normal.ref.kireme_l) {
-      // if (sensing_result->ego.left45_lp >
-      //     param_ro->sen_ref_p.normal.exist.left45) {
-      //   if (sensing_result->ego.left90_lp >
-      //       param_ro->sen_ref_p.normal.exist.left90) {
-      //     // error -= sensing_result->ego.left45_lp -
-      //     //          param_ro->sen_ref_p.normal.ref.left45;
-      //     error -= sensing_result->ego.left45_dist - 45;
-      //     check++;
-      //   }
-      // }
-      if ((35 < sensing_result->ego.left45_dist &&
-           sensing_result->ego.left45_dist < 50) &&
-          (sensing_result->ego.left90_lp >
-           param_ro->sen_ref_p.normal.exist.left90)) {
+      if ((1 < sensing_result->ego.left45_dist &&
+           sensing_result->ego.left45_dist <
+               param_ro->sen_ref_p.normal.exist.left45)) {
         error -= 45 - sensing_result->ego.left45_dist;
         check++;
       }
     }
   }
-  if (check == 0 || !enable) {
+  if (check == 0) {
     error_entity.sen.error_i = 0;
     error_entity.sen_log.gain_zz = 0;
     error_entity.sen_log.gain_z = 0;
@@ -273,11 +239,13 @@ float PlanningTask::check_sen_error() {
       error_entity.ang.error_d = 0;
     }
   }
+
   if (check == 2) {
     return error;
+  } else if (check == 1) {
+    return error * 2;
   }
-
-  return error * 2;
+  return 0;
 }
 
 void PlanningTask::update_ego_motion() {
@@ -804,6 +772,8 @@ void PlanningTask::cp_request() {
   }
 }
 float PlanningTask::calc_sensor(float data, float a, float b) {
+  if (data == 0)
+    return 0;
   return a / std::log(data) - b;
 }
 

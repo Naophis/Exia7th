@@ -75,7 +75,12 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
   p.v_end = 20;
   p.accl = p_set.str_map[StraightType::Search].accl;
   p.decel = p_set.str_map[StraightType::Search].decel;
-  p.dist = 43;
+  p.dist = 40;
+
+  if (40 < sensing_result->ego.front_dist &&
+      (sensing_result->ego.front_dist < 100)) {
+    p.dist += (sensing_result->ego.front_dist - 87);
+  }
   p.motion_type = MotionType::PIVOT_PRE;
   p.sct = SensorCtrlType::Straight;
   p.wall_off_req = WallOffReq::NONE;
@@ -104,7 +109,7 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
   param_roll_t pr;
   pr.w_max = p_set.str_map[StraightType::Search].w_max;
   pr.alpha = p_set.str_map[StraightType::Search].alpha;
-  pr.w_end =  p_set.str_map[StraightType::Search].w_end;
+  pr.w_end = p_set.str_map[StraightType::Search].w_end;
   pr.ang = PI;
   pr.RorL = TurnDirection::Right;
   mp->reset_tgt_data();

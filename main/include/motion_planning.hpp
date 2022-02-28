@@ -60,5 +60,8 @@ private:
   TrajectoryCreator tc;
   std::shared_ptr<PlanningTask> pt;
   std::shared_ptr<LoggingTask> lt;
+  const float th_offset_dist = 58.0;
+  param_straight_t ps_front;
+  param_straight_t ps_back;
 };
 #endif
