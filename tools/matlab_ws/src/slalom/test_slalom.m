@@ -19,7 +19,7 @@ wall_off_offset = 0;
 wall_off_offset_dia = 0 * sqrt(2);
 
 if turn_mode == Normal
-    radius = 26; sla.pow_n = 2;
+    radius = 32; sla.pow_n = 4;
     target_angle = 90, is_dia_mode = false, turn_mode_str = 'Normal';
 elseif turn_mode == Large
     radius = 65; sla.pow_n = 4;

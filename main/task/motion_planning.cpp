@@ -42,8 +42,8 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p) {
   tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
   tgt_val->nmr.dia_mode = p.dia_mode;
   tgt_val->nmr.sct = p.sct;
-  tgt_val->ego_in.dist = 0;
-
+  tgt_val->ego_in.dist -= tgt_val->ego_in.img_dist;
+  tgt_val->ego_in.img_dist = 0;
   if (p.motion_type != MotionType::NONE) {
     tgt_val->nmr.motion_type = p.motion_type;
   }
@@ -80,7 +80,7 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p) {
     }
     vTaskDelay(1 / portTICK_RATE_MS);
 
-    if (tgt_val->ego_in.dist > p.dist) {
+    if (tgt_val->ego_in.dist >= p.dist) {
       break;
     }
     if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
@@ -118,6 +118,8 @@ MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
   tgt_val->nmr.motion_type = MotionType::PIVOT;
   tgt_val->nmr.sct = SensorCtrlType::NONE;
   tgt_val->nmr.timstamp++;
+  tgt_val->ego_in.dist -= tgt_val->ego_in.img_dist;
+  tgt_val->ego_in.img_dist = 0;
 
   while (1) {
     vTaskDelay(1 / portTICK_RATE_MS);
@@ -146,6 +148,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   ps_front.dist = (td == TurnDirection::Right) ? sp.front.right : sp.front.left;
   ps_front.motion_type = MotionType::SLA_FRONT_STR;
   ps_front.sct = !dia ? SensorCtrlType::Straight : SensorCtrlType::Dia;
+  // ps_front.sct = SensorCtrlType::NONE;
   ps_front.wall_off_req = WallOffReq::NONE;
 
   ps_back.dist = (td == TurnDirection::Right) ? sp.back.right : sp.back.left;
@@ -153,7 +156,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   if (sp.type == TurnType::Normal) {
     search_front_ctrl(ps_front); // 前壁制御
     if (sensing_result->ego.front_dist < 87) {
-      ps_front.dist += (87 - sensing_result->ego.front_dist);
+      ps_front.dist -= (87 - sensing_result->ego.front_dist);
     }
     auto res_f = go_straight(ps_front);
     if (res_f != MotionResult::NONE) {
@@ -161,12 +164,18 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
     }
 
     if (td == TurnDirection::Right) {
-      if (sensing_result->ego.left45_dist < th_offset_dist) {
-        ps_back.dist += (45 - sensing_result->ego.left45_dist);
+      // if (sensing_result->ego.left45_dist < th_offset_dist) {
+      //   ps_back.dist += (45 - sensing_result->ego.left45_dist);
+      // }
+      if (sensing_result->ego.left90_dist < th_offset_dist) {
+        ps_back.dist += (45 - sensing_result->ego.left90_dist);
       }
     } else {
-      if (sensing_result->ego.right45_dist < th_offset_dist) {
-        ps_back.dist += (45 - sensing_result->ego.right45_dist);
+      // if (sensing_result->ego.right45_dist < th_offset_dist) {
+      //   ps_back.dist += (45 - sensing_result->ego.right45_dist);
+      // }
+      if (sensing_result->ego.right90_dist < th_offset_dist) {
+        ps_back.dist += (45 - sensing_result->ego.right90_dist);
       }
     }
 
@@ -200,6 +209,8 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   tgt_val->nmr.sct = SensorCtrlType::NONE;
   tgt_val->nmr.timstamp++;
   tgt_val->ego_in.sla_param.counter = 1;
+  tgt_val->ego_in.dist -= tgt_val->ego_in.img_dist;
+  tgt_val->ego_in.img_dist = 0;
 
   while (1) {
     vTaskDelay(1 / portTICK_RATE_MS);
@@ -227,6 +238,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   ps_back.decel = next_motion.decel;
   ps_back.motion_type = MotionType::SLA_BACK_STR;
   ps_back.sct = !dia ? SensorCtrlType::Straight : SensorCtrlType::Dia;
+  // ps_back.sct = SensorCtrlType::NONE;
   ps_back.wall_off_req = WallOffReq::NONE;
   //  : SensorCtrlType::Dia;
   auto res_b = go_straight(ps_back);
@@ -263,9 +275,9 @@ void MotionPlanning::normal_slalom(param_normal_slalom_t &p,
   tgt_val->ego_in.pivot_state = 0;
 
   tgt_val->ego_in.img_ang = 0;
-  tgt_val->ego_in.img_dist = 0;
   tgt_val->ego_in.ang = 0;
-  tgt_val->ego_in.dist = 0;
+  tgt_val->ego_in.dist -= tgt_val->ego_in.img_dist;
+  tgt_val->ego_in.img_dist = 0;
 
   while (1) {
     vTaskDelay(1 / portTICK_RATE_MS);
@@ -510,20 +522,21 @@ MotionResult MotionPlanning::search_front_ctrl(param_straight_t &p) {
     tgt_val->nmr.motion_type = p.motion_type;
   }
   tgt_val->nmr.timstamp++;
-  bool wall_off_req = sensing_result->ego.front_lp >
-                          param->sen_ref_p.search_exist.front_ctrl_th ||
-                      (70 < sensing_result->ego.front_dist &&
-                       sensing_result->ego.front_dist < 110);
+  bool wall_off_req =
+      // sensing_result->ego.front_lp >
+      //                         param->sen_ref_p.search_exist.front_ctrl_th ||
+      (70 < sensing_result->ego.front_dist &&
+       sensing_result->ego.front_dist < 110);
 
   if (!wall_off_req) {
     return MotionResult::NONE;
   }
 
   while (1) {
-    if (sensing_result->ego.front_lp >
-        param->sen_ref_p.search_exist.front_ctrl) {
-      break;
-    }
+    // if (sensing_result->ego.front_lp >
+    //     param->sen_ref_p.search_exist.front_ctrl) {
+    //   break;
+    // }
     if (sensing_result->ego.front_dist < 87) {
       break;
     }

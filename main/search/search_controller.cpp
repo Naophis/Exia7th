@@ -48,7 +48,8 @@ MotionResult SearchController::go_straight_wrapper(param_set_t &p_set) {
   p.decel = p_set.str_map[StraightType::Search].decel;
   p.dist = 90;
   p.motion_type = MotionType::STRAIGHT;
-  p.wall_off_req = WallOffReq::SEARCH;
+  // p.wall_off_req = WallOffReq::SEARCH;
+  p.wall_off_req = WallOffReq::NONE;
   p.sct = SensorCtrlType::Straight;
   p.wall_off_dist_r = param->sen_ref_p.search_exist.offset_r;
   p.wall_off_dist_l = param->sen_ref_p.search_exist.offset_l;
@@ -101,34 +102,77 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
   if (res == MotionResult::ERROR)
     return MotionResult::ERROR;
 
+  bool flag = false;
+  param_roll_t pr;
+  pr.w_max = p_set.str_map[StraightType::Search].w_max;
+  pr.alpha = p_set.str_map[StraightType::Search].alpha;
+  pr.w_end = p_set.str_map[StraightType::Search].w_end;
+  if (sensing_result->ego.left90_dist < 45) {
+    p.dist = (45 - sensing_result->ego.left90_dist);
+    pr.RorL = TurnDirection::Right;
+    flag = true;
+  } else if (sensing_result->ego.right90_dist < 45) {
+    p.dist = (45 - sensing_result->ego.right90_dist);
+    pr.RorL = TurnDirection::Left;
+    flag = true;
+  } else {
+    pr.ang = PI;
+    pr.RorL = TurnDirection::Right;
+    flag = false;
+  }
+
   mp->reset_tgt_data();
   mp->reset_ego_data();
   vTaskDelay(25 / portTICK_RATE_MS);
   pt->motor_disable();
 
-  param_roll_t pr;
-  pr.w_max = p_set.str_map[StraightType::Search].w_max;
-  pr.alpha = p_set.str_map[StraightType::Search].alpha;
-  pr.w_end = p_set.str_map[StraightType::Search].w_end;
-  pr.ang = PI;
-  pr.RorL = TurnDirection::Right;
   mp->reset_tgt_data();
   mp->reset_ego_data();
   pt->motor_enable();
 
-  res = mp->pivot_turn(pr);
+  vTaskDelay(5 / portTICK_RATE_MS);
+
+  if (flag) {
+    p.motion_type = MotionType::PIVOT_OFFSET;
+    p.sct = SensorCtrlType::NONE;
+    pr.ang = PI / 2;
+
+    res = mp->pivot_turn(pr);
+    vTaskDelay(10 / portTICK_RATE_MS);
+    pt->motor_disable();
+
+    vTaskDelay(10 / portTICK_RATE_MS);
+    mp->reset_tgt_data();
+    mp->reset_ego_data();
+    pt->motor_enable();
+    res = mp->go_straight(p);
+    mp->reset_tgt_data();
+    mp->reset_ego_data();
+    vTaskDelay(10 / portTICK_RATE_MS);
+    pt->motor_disable();
+
+    vTaskDelay(10 / portTICK_RATE_MS);
+    mp->reset_tgt_data();
+    mp->reset_ego_data();
+    pt->motor_enable();
+    res = mp->pivot_turn(pr);
+  } else {
+
+    res = mp->pivot_turn(pr);
+  }
+
   // if (res == MotionResult::ERROR)
   //   return MotionResult::ERROR;
 
   mp->reset_tgt_data();
   mp->reset_ego_data();
-  vTaskDelay(25 / portTICK_RATE_MS);
+  vTaskDelay(10 / portTICK_RATE_MS);
   pt->motor_disable();
 
   // mp->reset_gyro_ref();
   // ui->coin(100);
 
-  vTaskDelay(25 / portTICK_RATE_MS);
+  vTaskDelay(10 / portTICK_RATE_MS);
   mp->reset_tgt_data();
   mp->reset_ego_data();
   pt->motor_enable();

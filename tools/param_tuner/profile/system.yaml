@@ -9,7 +9,7 @@ test: # テスト走行時に使用するパラメータ群
   end_v: 1
   accl: 3000
   decel: -3000
-  dist: 360 #直進全部　
+  dist: 720 #直進全部　
   # dist: 180 # スラロームテスト
   w_max: 7.0
   alpha: 20

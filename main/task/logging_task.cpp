@@ -84,7 +84,16 @@ void LoggingTask::task() {
   }
 }
 float LoggingTask::calc_sensor(float data, float a, float b) {
-  return a / std::log(data) - b;
+  if ((tgt_val->motion_type == MotionType::NONE ||
+       tgt_val->motion_type == MotionType::PIVOT)) {
+    return 0;
+  }
+  auto res = a / std::log(data) - b;
+  if (res < 0)
+    return 0;
+  if (res > 180)
+    return 180;
+  return res;
 }
 
 void LoggingTask::save(std::string file_name) {

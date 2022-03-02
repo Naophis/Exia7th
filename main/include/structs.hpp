@@ -99,6 +99,7 @@ typedef struct {
   float left90_dist = 0;
   float right45_dist = 0;
   float right90_dist = 0;
+  
   float front_dist_old = 0;
   float left45_dist_old = 0;
   float left90_dist_old = 0;

@@ -5,7 +5,7 @@ straight:
     decel: -2500
     w_max: 20
     w_end: 0.1
-    alpha: 40
+    alpha: 100
   fast_run:
     v_max: 300
     accl: 1500
@@ -20,22 +20,22 @@ straight:
     w_max: 5
     w_end: 0.1
     alpha: 10
-# normal:
-#   v: 300.000000
-#   ang: 90.000000
-#   rad: 26.000000
-#   pow_n: 2.000000
-#   time: 0.112813
-#   front: { left: 4.94298864, right: 4.94298864 }
-#   back: { left: 4.74724031, right: 4.74724031 }
 normal:
   v: 300.000000
   ang: 90.000000
-  rad: 32.000000
-  pow_n: 4.000000
-  time: 0.109781
+  rad: 26.000000
+  pow_n: 2.000000
+  time: 0.112813
   front: { left: 6.5, right: 6.5 }
   back: { left: 6.5, right: 6.5 }
+# normal:
+#   v: 300.000000
+#   ang: 90.000000
+#   rad: 32.000000
+#   pow_n: 4.000000
+#   time: 0.109781
+#   front: { left: 6.5, right: 6.5 }
+#   back: { left: 6.5, right: 6.5 }
 large:
   v: 300.000000
   ang: 90.000000

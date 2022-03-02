@@ -206,23 +206,38 @@ float PlanningTask::check_sen_error() {
   //前壁が近すぎるときはエスケープ
 
   if (sensing_result->ego.front_lp < param_ro->sen_ref_p.normal.exist.front) {
-    if (ABS(sensing_result->ego.right45_lp -
-            sensing_result->ego.right45_lp_old) <
+    // if (ABS(sensing_result->ego.right45_lp -
+    //         sensing_result->ego.right45_lp_old) <
+    //     param_ro->sen_ref_p.normal.ref.kireme_r) {
+    if (ABS(sensing_result->ego.right45_dist -
+            sensing_result->ego.right45_dist_old) <
         param_ro->sen_ref_p.normal.ref.kireme_r) {
       if ((1 < sensing_result->ego.right45_dist &&
            sensing_result->ego.right45_dist <
                param_ro->sen_ref_p.normal.exist.right45)) {
-        error += 45 - sensing_result->ego.right45_dist;
-        check++;
+
+        if (ABS(sensing_result->ego.right45_dist -
+                sensing_result->ego.right90_dist) < 20) {
+          error += 45 - sensing_result->ego.right45_dist;
+          check++;
+        }
       }
     }
-    if (ABS(sensing_result->ego.left45_lp - sensing_result->ego.left45_lp_old) <
+    // if (ABS(sensing_result->ego.left45_lp -
+    // sensing_result->ego.left45_lp_old) <
+    //     param_ro->sen_ref_p.normal.ref.kireme_l) {
+    if (ABS(sensing_result->ego.left45_dist -
+            sensing_result->ego.left45_dist_old) <
         param_ro->sen_ref_p.normal.ref.kireme_l) {
       if ((1 < sensing_result->ego.left45_dist &&
            sensing_result->ego.left45_dist <
                param_ro->sen_ref_p.normal.exist.left45)) {
-        error -= 45 - sensing_result->ego.left45_dist;
-        check++;
+
+        if (ABS(sensing_result->ego.left45_dist -
+                sensing_result->ego.left90_dist) < 20) {
+          error -= 45 - sensing_result->ego.left45_dist;
+          check++;
+        }
       }
     }
   }
@@ -232,11 +247,13 @@ float PlanningTask::check_sen_error() {
     error_entity.sen_log.gain_z = 0;
   } else {
     if (tgt_val->tgt_in.tgt_dist >= 60) {
-      tgt_val->global_pos.ang = tgt_val->global_pos.img_ang;
-      error_entity.w.error_i = 0;
-      error_entity.w.error_d = 0;
-      error_entity.ang.error_i = 0;
-      error_entity.ang.error_d = 0;
+      if (ABS(tgt_val->ego_in.ang * 180 / PI) < 5) {
+        tgt_val->global_pos.ang = tgt_val->global_pos.img_ang;
+        error_entity.w.error_i = 0;
+        error_entity.w.error_d = 0;
+        error_entity.ang.error_i = 0;
+        error_entity.ang.error_d = 0;
+      }
     }
   }
 
@@ -749,20 +766,27 @@ void PlanningTask::cp_request() {
           tgt_val->motion_type == MotionType::PIVOT_AFTER ||
           tgt_val->motion_type == MotionType::READY ||
           tgt_val->motion_type == MotionType::WALL_OFF)) {
-      tgt_val->ego_in.img_ang = tgt_val->ego_in.ang = 0;
+      tgt_val->ego_in.ang -= tgt_val->ego_in.img_ang;
+      tgt_val->ego_in.img_ang = 0;
     }
 
     if (tgt_val->motion_type == MotionType::NONE ||
         tgt_val->motion_type == MotionType::READY) {
-      tgt_val->global_pos.ang = tgt_val->global_pos.img_ang = 0;
-      tgt_val->global_pos.dist = tgt_val->global_pos.img_dist = 0;
+      tgt_val->global_pos.ang -= tgt_val->global_pos.img_ang;
+      tgt_val->global_pos.img_ang = 0;
+
+      tgt_val->global_pos.dist -= tgt_val->global_pos.img_dist;
+      tgt_val->global_pos.img_dist = 0;
     }
 
     if (tgt_val->tgt_in.tgt_angle != 0) {
-      tgt_val->ego_in.img_ang = tgt_val->ego_in.ang = 0;
+      tgt_val->ego_in.ang -= tgt_val->ego_in.img_ang;
+      tgt_val->ego_in.ang = 0;
     }
     if (tgt_val->tgt_in.tgt_dist != 0) {
-      tgt_val->ego_in.img_dist = tgt_val->ego_in.dist = 0;
+      // tgt_val->ego_in.dist -= tgt_val->ego_in.img_dist;
+      tgt_val->ego_in.img_dist = 0;
+      tgt_val->ego_in.dist = 0;
     }
     tgt_val->ego_in.sla_param.counter = 1;
     tgt_val->ego_in.sla_param.state = 0;
@@ -772,28 +796,50 @@ void PlanningTask::cp_request() {
   }
 }
 float PlanningTask::calc_sensor(float data, float a, float b) {
-  if (data == 0)
+  if ((tgt_val->motion_type == MotionType::NONE ||
+       tgt_val->motion_type == MotionType::PIVOT)) {
     return 0;
-  return a / std::log(data) - b;
+  }
+  auto res = a / std::log(data) - b;
+  if (res < 0)
+    return 0;
+  if (res > 180)
+    return 180;
+  return res;
 }
 
 void PlanningTask::calc_sensor_dist_all() {
-  sensing_result->ego.left90_dist =
-      calc_sensor(sensing_result->ego.left90_lp, param_ro->sensor_gain.l90.a,
-                  param_ro->sensor_gain.l90.b);
-  sensing_result->ego.left45_dist =
-      calc_sensor(sensing_result->ego.left45_lp, param_ro->sensor_gain.l45.a,
-                  param_ro->sensor_gain.l45.b);
-  sensing_result->ego.front_dist =
-      calc_sensor(sensing_result->ego.front_lp, param_ro->sensor_gain.front.a,
-                  param_ro->sensor_gain.front.b);
-  sensing_result->ego.right45_dist =
-      calc_sensor(sensing_result->ego.right45_lp, param_ro->sensor_gain.r45.a,
-                  param_ro->sensor_gain.r45.b);
-  sensing_result->ego.right90_dist =
-      calc_sensor(sensing_result->ego.right90_lp, param_ro->sensor_gain.r90.a,
-                  param_ro->sensor_gain.r90.b);
+  if (!(tgt_val->motion_type == MotionType::NONE ||
+        tgt_val->motion_type == MotionType::PIVOT)) {
 
+    sensing_result->ego.left90_dist_old = sensing_result->ego.left90_dist;
+    sensing_result->ego.left45_dist_old = sensing_result->ego.left45_dist;
+    sensing_result->ego.front_dist_old = sensing_result->ego.front_dist;
+    sensing_result->ego.right45_dist_old = sensing_result->ego.right45_dist;
+    sensing_result->ego.right90_dist_old = sensing_result->ego.right90_dist;
+
+    sensing_result->ego.left90_dist =
+        calc_sensor(sensing_result->ego.left90_lp, param_ro->sensor_gain.l90.a,
+                    param_ro->sensor_gain.l90.b);
+    sensing_result->ego.left45_dist =
+        calc_sensor(sensing_result->ego.left45_lp, param_ro->sensor_gain.l45.a,
+                    param_ro->sensor_gain.l45.b);
+    sensing_result->ego.front_dist =
+        calc_sensor(sensing_result->ego.front_lp, param_ro->sensor_gain.front.a,
+                    param_ro->sensor_gain.front.b);
+    sensing_result->ego.right45_dist =
+        calc_sensor(sensing_result->ego.right45_lp, param_ro->sensor_gain.r45.a,
+                    param_ro->sensor_gain.r45.b);
+    sensing_result->ego.right90_dist =
+        calc_sensor(sensing_result->ego.right90_lp, param_ro->sensor_gain.r90.a,
+                    param_ro->sensor_gain.r90.b);
+  } else {
+    sensing_result->ego.left90_dist        //
+        = sensing_result->ego.left45_dist  //
+        = sensing_result->ego.front_dist   //
+        = sensing_result->ego.right45_dist //
+        = sensing_result->ego.right90_dist = 180;
+  }
   // 壁からの距離に変換。あとで斜め用に変更
   calc_sensor_dist_diff();
 }

@@ -51,7 +51,7 @@ angle_pid:
   # i: 0.0
   # d: 0.0
 sensor_pid:
-  p: 0.125
+  p: 0.075
   i: 0.0
   d: 0.0
   mode: 0

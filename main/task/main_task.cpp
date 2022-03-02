@@ -11,8 +11,8 @@ MainTask::MainTask() {
 MainTask::~MainTask() {}
 
 void MainTask::create_task(const BaseType_t xCoreID) {
-  xTaskCreatePinnedToCore(task_entry_point, "main_task", 8192 * 2, this, 2,
-                          &handle, xCoreID);
+  xTaskCreatePinnedToCore(task_entry_point, "main_task", 8192, this, 2, &handle,
+                          xCoreID);
 }
 void MainTask::task_entry_point(void *task_instance) {
   static_cast<MainTask *>(task_instance)->task();
