@@ -3,44 +3,44 @@
  <tabbed_widget parent="main_window" name="Main Window">
   <Tab containers="1" tab_name="all">
    <Container>
-    <DockSplitter count="1" sizes="1" orientation="-">
-     <DockSplitter count="2" sizes="0.5;0.5" orientation="|">
-      <DockSplitter count="4" sizes="0.25;0.25;0.25;0.25" orientation="-">
+    <DockSplitter sizes="1" orientation="-" count="1">
+     <DockSplitter sizes="0.5;0.5" orientation="|" count="2">
+      <DockSplitter sizes="0.25;0.25;0.25;0.25" orientation="-" count="4">
        <DockArea name="velocity">
-        <plot flip_y="false" flip_x="false" style="Lines" mode="TimeSeries">
-         <range left="0.000000" right="1681.000000" top="952.106250" bottom="-501.356250"/>
+        <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+         <range right="949.000000" top="1965.800000" bottom="-881.800000" left="0.000000"/>
          <limitY/>
          <curve color="#d62728" name="v_c"/>
          <curve color="#21ff2a" name="ideal_v"/>
         </plot>
        </DockArea>
        <DockArea name="accel">
-        <plot flip_y="false" flip_x="false" style="Lines" mode="TimeSeries">
-         <range left="0.000000" right="1681.000000" top="2562.500000" bottom="-62.500000"/>
+        <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+         <range right="949.000000" top="2702.600000" bottom="-5806.600000" left="0.000000"/>
          <limitY/>
          <curve color="#bd3522" name="accl"/>
         </plot>
        </DockArea>
        <DockArea name="angle_velocity">
-        <plot flip_y="false" flip_x="false" style="Lines" mode="TimeSeries">
-         <range left="0.000000" right="1681.000000" top="8.856975" bottom="-15.333975"/>
+        <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+         <range right="949.000000" top="4.248400" bottom="-8.410400" left="0.000000"/>
          <limitY/>
          <curve color="#ff260e" name="w_lp"/>
          <curve color="#0af215" name="ideal_w"/>
         </plot>
        </DockArea>
        <DockArea name="angle_accel">
-        <plot flip_y="false" flip_x="false" style="Lines" mode="TimeSeries">
-         <range left="0.000000" right="1681.000000" top="232.971875" bottom="-233.096875"/>
+        <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+         <range right="949.000000" top="86.231250" bottom="-86.231250" left="0.000000"/>
          <limitY/>
          <curve color="#b42a1f" name="alpha"/>
         </plot>
        </DockArea>
       </DockSplitter>
-      <DockSplitter count="4" sizes="0.25;0.25;0.25;0.25" orientation="-">
+      <DockSplitter sizes="0.25;0.25;0.25;0.25" orientation="-" count="4">
        <DockArea name="led_sensor">
-        <plot flip_y="false" flip_x="false" style="Lines" mode="TimeSeries">
-         <range left="0.000000" right="1681.000000" top="3687.950000" bottom="-89.950000"/>
+        <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+         <range right="949.000000" top="3689.740825" bottom="-79.373825" left="0.000000"/>
          <limitY/>
          <curve color="#bcbd22" name="left90"/>
          <curve color="#1f77b4" name="left45"/>
@@ -50,24 +50,24 @@
         </plot>
        </DockArea>
        <DockArea name="distance">
-        <plot flip_y="false" flip_x="false" style="Lines" mode="TimeSeries">
-         <range left="0.000000" right="1681.000000" top="712.975000" bottom="-734.975000"/>
+        <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+         <range right="949.000000" top="779.525475" bottom="-19.544475" left="0.000000"/>
          <limitY/>
          <curve color="#0eff20" name="dist"/>
          <curve color="#f1664c" name="ideal_dist"/>
         </plot>
        </DockArea>
        <DockArea name="angle">
-        <plot flip_y="false" flip_x="false" style="Lines" mode="TimeSeries">
-         <range left="0.000000" right="1681.000000" top="8.759200" bottom="-97.467200"/>
+        <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+         <range right="949.000000" top="9.372850" bottom="-184.618850" left="0.000000"/>
          <limitY/>
          <curve color="#ff0000" name="ang"/>
          <curve color="#43cf17" name="ideal_ang"/>
         </plot>
        </DockArea>
        <DockArea name="duty">
-        <plot flip_y="false" flip_x="false" style="Lines" mode="TimeSeries">
-         <range left="0.000000" right="1681.000000" top="248.443750" bottom="-148.193750"/>
+        <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+         <range right="949.000000" top="621.268750" bottom="-293.018750" left="0.000000"/>
          <limitY/>
          <curve color="#d62728" name="duty_l"/>
          <curve color="#1ac938" name="duty_r"/>
@@ -81,10 +81,10 @@
   </Tab>
   <Tab containers="1" tab_name="tab2">
    <Container>
-    <DockSplitter count="6" sizes="0.166667;0.166667;0.166667;0.166667;0.166667;0.166667" orientation="-">
+    <DockSplitter sizes="0.166667;0.166667;0.166667;0.166667;0.166667;0.166667" orientation="-" count="6">
      <DockArea name="...">
-      <plot flip_y="false" flip_x="false" style="Lines" mode="TimeSeries">
-       <range left="0.000000" right="1681.000000" top="1132.950000" bottom="-1174.950000"/>
+      <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+       <range right="949.000000" top="2245.537500" bottom="-1011.037500" left="0.000000"/>
        <limitY/>
        <curve color="#d62728" name="v_l"/>
        <curve color="#1ac938" name="v_c"/>
@@ -93,22 +93,22 @@
       </plot>
      </DockArea>
      <DockArea name="...">
-      <plot flip_y="false" flip_x="false" style="Lines" mode="TimeSeries">
-       <range left="0.000000" right="1681.000000" top="21.450000" bottom="2.550000"/>
+      <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+       <range right="949.000000" top="9.150000" bottom="2.850000" left="0.000000"/>
        <limitY/>
        <curve color="#1f77b4" name="timestamp"/>
       </plot>
      </DockArea>
      <DockArea name="...">
-      <plot flip_y="false" flip_x="false" style="Lines" mode="TimeSeries">
-       <range left="0.000000" right="1681.000000" top="9.225000" bottom="-0.225000"/>
+      <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+       <range right="949.000000" top="5.125000" bottom="-0.125000" left="0.000000"/>
        <limitY/>
        <curve color="#1f77b4" name="motion_state"/>
       </plot>
      </DockArea>
      <DockArea name="...">
-      <plot flip_y="false" flip_x="false" style="Lines" mode="TimeSeries">
-       <range left="0.000000" right="1681.000000" top="1132.950000" bottom="-1174.950000"/>
+      <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+       <range right="949.000000" top="2245.537500" bottom="-1011.037500" left="0.000000"/>
        <limitY/>
        <curve color="#ff0000" name="v_l"/>
        <curve color="#00ff00" name="v_c"/>
@@ -116,15 +116,15 @@
       </plot>
      </DockArea>
      <DockArea name="...">
-      <plot flip_y="false" flip_x="false" style="Lines" mode="TimeSeries">
-       <range left="0.000000" right="1681.000000" top="3.944275" bottom="3.428725"/>
+      <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+       <range right="949.000000" top="4.093425" bottom="3.613575" left="0.000000"/>
        <limitY/>
        <curve color="#1f77b4" name="battery"/>
       </plot>
      </DockArea>
      <DockArea name="...">
-      <plot flip_y="false" flip_x="false" style="Lines" mode="TimeSeries">
-       <range left="0.000000" right="1681.000000" top="1.254525" bottom="-2.085525"/>
+      <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+       <range right="949.000000" top="0.341300" bottom="-1.225300" left="0.000000"/>
        <limitY/>
        <curve color="#1f77b4" name="duty_sen"/>
       </plot>
@@ -134,33 +134,33 @@
   </Tab>
   <Tab containers="1" tab_name="tab3">
    <Container>
-    <DockSplitter count="4" sizes="0.25;0.25;0.25;0.25" orientation="-">
+    <DockSplitter sizes="0.25;0.25;0.25;0.25" orientation="-" count="4">
      <DockArea name="...">
-      <plot flip_y="false" flip_x="false" style="Lines" mode="TimeSeries">
-       <range left="0.000000" right="1681.000000" top="8.856975" bottom="-15.333975"/>
+      <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+       <range right="949.000000" top="4.248400" bottom="-8.410400" left="0.000000"/>
        <limitY/>
        <curve color="#1f77b4" name="ideal_w"/>
        <curve color="#d62728" name="w_lp"/>
       </plot>
      </DockArea>
      <DockArea name="...">
-      <plot flip_y="false" flip_x="false" style="Lines" mode="TimeSeries">
-       <range left="0.000000" right="1681.000000" top="232.971875" bottom="-233.096875"/>
+      <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+       <range right="949.000000" top="86.231250" bottom="-86.231250" left="0.000000"/>
        <limitY/>
        <curve color="#f14cc1" name="alpha"/>
       </plot>
      </DockArea>
      <DockArea name="...">
-      <plot flip_y="false" flip_x="false" style="Lines" mode="TimeSeries">
-       <range left="0.000000" right="1681.000000" top="8.759200" bottom="-97.467200"/>
+      <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+       <range right="949.000000" top="9.372850" bottom="-184.618850" left="0.000000"/>
        <limitY/>
        <curve color="#1ac938" name="ang"/>
        <curve color="#ff7f0e" name="ideal_ang"/>
       </plot>
      </DockArea>
      <DockArea name="...">
-      <plot flip_y="false" flip_x="false" style="Lines" mode="TimeSeries">
-       <range left="0.000000" right="1681.000000" top="9.225000" bottom="-0.225000"/>
+      <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+       <range right="949.000000" top="5.125000" bottom="-0.125000" left="0.000000"/>
        <limitY/>
        <curve color="#1f77b4" name="motion_state"/>
       </plot>
@@ -170,10 +170,10 @@
   </Tab>
   <Tab containers="1" tab_name="tab2">
    <Container>
-    <DockSplitter count="6" sizes="0.166667;0.166667;0.166667;0.166667;0.166667;0.166667" orientation="-">
+    <DockSplitter sizes="0.166667;0.166667;0.166667;0.166667;0.166667;0.166667" orientation="-" count="6">
      <DockArea name="...">
-      <plot flip_y="false" flip_x="false" style="Lines" mode="TimeSeries">
-       <range left="0.000000" right="1681.000000" top="99.317225" bottom="14.929775"/>
+      <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+       <range right="949.000000" top="183.997050" bottom="16.120950" left="0.000000"/>
        <limitY/>
        <curve color="#1f77b4" name="left45_d"/>
        <curve color="#ff7f0e" name="right45_d"/>
@@ -181,37 +181,37 @@
       </plot>
      </DockArea>
      <DockArea name="...">
-      <plot flip_y="false" flip_x="false" style="Lines" mode="TimeSeries">
-       <range left="0.000000" right="1681.000000" top="289.191025" bottom="37.819975"/>
+      <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+       <range right="949.000000" top="183.405100" bottom="40.390900" left="0.000000"/>
        <limitY/>
        <curve color="#1f77b4" name="front_d"/>
       </plot>
      </DockArea>
      <DockArea name="...">
-      <plot flip_y="false" flip_x="false" style="Lines" mode="TimeSeries">
-       <range left="0.000000" right="1681.000000" top="9.225000" bottom="-0.225000"/>
+      <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+       <range right="949.000000" top="5.125000" bottom="-0.125000" left="0.000000"/>
        <limitY/>
        <curve color="#1f77b4" name="motion_state"/>
       </plot>
      </DockArea>
      <DockArea name="...">
-      <plot flip_y="false" flip_x="false" style="Lines" mode="TimeSeries">
-       <range left="0.000000" right="1681.000000" top="712.975000" bottom="-734.975000"/>
+      <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+       <range right="949.000000" top="779.525475" bottom="-19.544475" left="0.000000"/>
        <limitY/>
        <curve color="#d62728" name="dist"/>
        <curve color="#1ac938" name="ideal_dist"/>
       </plot>
      </DockArea>
      <DockArea name="...">
-      <plot flip_y="false" flip_x="false" style="Lines" mode="TimeSeries">
-       <range left="0.000000" right="1681.000000" top="0.288475" bottom="-11.827475"/>
+      <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+       <range right="949.000000" top="0.166700" bottom="-6.834700" left="0.000000"/>
        <limitY/>
        <curve color="#1f77b4" name="ideal_w"/>
       </plot>
      </DockArea>
      <DockArea name="...">
-      <plot flip_y="false" flip_x="false" style="Lines" mode="TimeSeries">
-       <range left="0.000000" right="1681.000000" top="1.254525" bottom="-2.085525"/>
+      <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+       <range right="949.000000" top="0.341300" bottom="-1.225300" left="0.000000"/>
        <limitY/>
        <curve color="#d62728" name="duty_sen"/>
       </plot>
@@ -219,7 +219,29 @@
     </DockSplitter>
    </Container>
   </Tab>
-  <currentTabIndex index="3"/>
+  <Tab containers="1" tab_name="tab2">
+   <Container>
+    <DockSplitter sizes="0.5;0.5" orientation="-" count="2">
+     <DockArea name="...">
+      <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+       <range right="949.000000" top="183.997050" bottom="16.120950" left="0.000000"/>
+       <limitY/>
+       <curve color="#1f77b4" name="left45_d"/>
+       <curve color="#d62728" name="left90_d"/>
+      </plot>
+     </DockArea>
+     <DockArea name="...">
+      <plot flip_x="false" flip_y="false" mode="TimeSeries" style="Lines">
+       <range right="949.000000" top="183.955025" bottom="17.843975" left="0.000000"/>
+       <limitY/>
+       <curve color="#1ac938" name="right45_d"/>
+       <curve color="#ff7f0e" name="right90_d"/>
+      </plot>
+     </DockArea>
+    </DockSplitter>
+   </Container>
+  </Tab>
+  <currentTabIndex index="4"/>
  </tabbed_widget>
  <use_relative_time_offset enabled="0"/>
  <!-- - - - - - - - - - - - - - - -->
@@ -259,6 +281,9 @@
  <previouslyLoaded_Datafiles>
   <fileInfo prefix="" filename="tools/param_tuner/logs/latest.csv">
    <selected_datasources value=""/>
+   <plugin ID="DataLoad CSV">
+    <default delimiter="0" time_axis=""/>
+   </plugin>
   </fileInfo>
  </previouslyLoaded_Datafiles>
  <!-- - - - - - - - - - - - - - - -->

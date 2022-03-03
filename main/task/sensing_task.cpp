@@ -50,12 +50,12 @@ void SensingTask::task() {
     // 超信地旋回中は発光をサボる
     if (!(tgt_val->motion_type == MotionType::NONE ||
           tgt_val->motion_type == MotionType::PIVOT)) {
+    }
       gpio_set_level(LED_R90, 1);
       gpio_set_level(LED_R45, 1);
       gpio_set_level(LED_F, 1);
       gpio_set_level(LED_L45, 1);
       gpio_set_level(LED_L90, 1);
-    }
     for (int i = 0; i < 10000; i++)
       ;
     adc2_get_raw(SEN_R90, width, &sensing_result->led_sen_after.right90.raw);

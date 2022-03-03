@@ -6,6 +6,7 @@ MainTask::MainTask() {
   lgc = std::make_shared<MazeSolverBaseLgc>();
   search_ctrl = std::make_shared<SearchController>();
   pc = std::make_shared<PathCreator>();
+  mp->set_path_creator(pc);
 }
 
 MainTask::~MainTask() {}
@@ -76,7 +77,6 @@ TurnType MainTask::cast_turn_type(std::string str) {
   return TurnType::None;
 }
 void MainTask::dump1() {
-  const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
 
   tgt_val->nmr.motion_type = MotionType::READY;
   tgt_val->nmr.timstamp++;
@@ -124,12 +124,11 @@ void MainTask::dump1() {
       tgt_val->ego_in.ang = tgt_val->ego_in.dist = 0;
     }
 
-    vTaskDelay(xDelay);
+    vTaskDelay(xDelay100);
   }
 }
 
 void MainTask::dump2() {
-  const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
 
   tgt_val->nmr.motion_type = MotionType::READY;
   tgt_val->nmr.timstamp++;
@@ -144,14 +143,12 @@ void MainTask::dump2() {
       tgt_val->ego_in.ang = tgt_val->ego_in.dist = 0;
     }
 
-    vTaskDelay(xDelay);
+    vTaskDelay(xDelay100);
   }
 }
 
 int MainTask::select_mode() {
-  const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
   int mode_num = 0;
-  LED_bit lbit;
   lbit.byte = 0;
   while (1) {
     int res = ui->encoder_operation();
@@ -167,7 +164,7 @@ int MainTask::select_mode() {
       ui->coin(100);
       break;
     }
-    vTaskDelay(xDelay);
+    vTaskDelay(xDelay1);
   }
   return mode_num;
 }
@@ -188,33 +185,12 @@ void MainTask::keep_pivot() {
   mp->keep();
   pt->motor_disable();
 }
-// void MainTask::entity_to_json(nlohmann::json &j) {
-//   // j = nlohmann::json{
-//   //     {"led_sen",
-//   //      {{"right90", {{"raw", sensing_result->ego.right90_raw}, {"lp",
-//   sensing_result->ego.right90_lp}}},
-//   //       {"right45", {{"raw", sensing_result->ego.right45_raw}, {"lp",
-//   sensing_result->ego.right45_lp}}},
-//   //       {"front", {{"raw", sensing_result->ego.front_raw}, {"lp",
-//   sensing_result->ego.front_lp}}},
-//   //       {"left45", {{"raw", sensing_result->ego.left45_raw}, {"lp",
-//   sensing_result->ego.left45_lp}}},
-//   //       {"left90", {{"raw", sensing_result->ego.left90_raw}, {"lp",
-//   sensing_result->ego.left90_lp}}}}},
-//   //     {"gyro", {{"raw", sensing_result->ego.w_raw}, {"lp",
-//   sensing_result->ego.w_lp}}},
-//   //     {"battery", {{"raw", sensing_result->ego.battery_raw}, {"lp",
-//   sensing_result->ego.battery_lp}}},
-//   //     {"ego",
-//   //      {{"angle", tgt_val->ego_in.ang}, {"dist", tgt_val->ego_in.dist}}}};
-// }
 void MainTask::echo_sensing_result_with_json() {
-  const TickType_t xDelay = 50 / portTICK_PERIOD_MS;
   mp->reset_gyro_ref_with_check();
   while (1) {
     // entity_to_json(json_instance);
     // printf("%s\n", json_instance.dump().c_str());
-    vTaskDelay(xDelay);
+    vTaskDelay(xDelay50);
     bool break_btn = ui->button_state_hold();
     if (break_btn) {
       ui->coin(100);
@@ -557,7 +533,6 @@ void MainTask::load_turn_param_profiles() {
   profile_idx = cJSON_GetObjectItem(root, "profile_idx");
   int profile_idx_size = cJSON_GetArraySize(profile_idx);
 
-  profile_idx_t p_idx;
   for (int i = 0; i < profile_idx_size; i++) {
     p_idx.normal =
         cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "normal")
@@ -607,11 +582,8 @@ void MainTask::load_slalom_param() {
     cJSON *root = cJSON_CreateObject();
     root = cJSON_Parse(line_buf);
 
-    param_set_t sp;
     sp.map.clear();
 
-    straight_param_t str_p;
-    slalom_param2_t sp2;
     for (const auto p : turn_name_list) {
       if (p.first == TurnType::None) {
         for (const auto p2 : straight_name_list) {
@@ -739,7 +711,6 @@ void MainTask::rx_uart_json() {
   vTaskDelay(100 / portTICK_PERIOD_MS);
 }
 void MainTask::task() {
-  const TickType_t xDelay = 100 / portTICK_PERIOD_MS;
   mp->set_userinterface(ui);
   search_ctrl->set_userinterface(ui);
   pt->motor_disable();
@@ -842,22 +813,15 @@ void MainTask::task() {
   while (1) {
     if (ui->button_state_hold())
       break;
-    vTaskDelay(10 / portTICK_RATE_MS);
+    vTaskDelay(xDelay10 / portTICK_RATE_MS);
   }
   dump1(); // taskの最終行に配置すること
   while (1) {
-    vTaskDelay(xDelay);
+    vTaskDelay(xDelay100);
   }
 }
 
-void MainTask::recieve_data() {
-  // Read data from UART.
-  const uart_port_t uart_num = UART_NUM_2;
-  uint8_t data[128];
-  int length = 0;
-  ESP_ERROR_CHECK(uart_get_buffered_data_len(uart_num, (size_t *)&length));
-  length = uart_read_bytes(uart_num, data, length, 100);
-}
+void MainTask::recieve_data() {}
 
 void MainTask::req_error_reset() {
   tgt_val->pl_req.error_vel_reset = 1;
@@ -881,7 +845,6 @@ void MainTask::test_run() {
 
   req_error_reset();
   lt->start_slalom_log();
-  // pt->active_logging(_f);
 
   ps.v_max = sys.test.v_max;
   ps.v_end = 20;
@@ -890,6 +853,7 @@ void MainTask::test_run() {
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
   ps.sct = SensorCtrlType::Straight;
+  ps.motion_type = MotionType::STRAIGHT;
   ps.dia_mode = false;
 
   mp->go_straight(ps);
@@ -986,7 +950,7 @@ void MainTask::test_run_sla() {
 }
 
 void MainTask::test_turn() {
-  TurnDirection rorl = ui->select_direction();
+  rorl = ui->select_direction();
 
   mp->reset_gyro_ref_with_check();
   reset_tgt_data();
@@ -1039,6 +1003,7 @@ void MainTask::test_sla() {
 
   auto sla_p =
       paramset_list[file_idx].map[static_cast<TurnType>(sys.test.sla_type)];
+
   printf("slalom params\n");
   printf("v = %f\n", sla_p.v);
   printf("ang = %f\n", sla_p.ang * 180 / PI);
@@ -1046,24 +1011,24 @@ void MainTask::test_sla() {
   printf("time =  %f\n", sla_p.time);
   printf("n = %d\n", sla_p.pow_n);
 
-  TurnDirection rorl = ui->select_direction();
-  TurnDirection rorl2 = (rorl == TurnDirection::Right) ? (TurnDirection::Left)
-                                                       : (TurnDirection::Right);
+  rorl = ui->select_direction();
+  rorl2 = (rorl == TurnDirection::Right) ? (TurnDirection::Left)
+                                         : (TurnDirection::Right);
 
   float backup_r = param->sen_ref_p.normal.exist.right45;
   float backup_l = param->sen_ref_p.normal.exist.left45;
-  if (sys.test.ignore_opp_sen) {
-    if (rorl == TurnDirection::Right) {
-      param->sen_ref_p.normal.exist.right45 = 9999;
-    } else {
-      param->sen_ref_p.normal.exist.left45 = 9999;
-    }
-  }
+  // if (sys.test.ignore_opp_sen) {
+  //   if (rorl == TurnDirection::Right) {
+  //     param->sen_ref_p.normal.exist.right45 = 1;
+  //   } else {
+  //     param->sen_ref_p.normal.exist.left45 = 1;
+  //   }
+  // }
   mp->reset_gyro_ref_with_check();
 
   if (sys.test.suction_active) {
     pt->suction_enable(sys.test.suction_duty);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
+    vTaskDelay(xDelay500 / portTICK_PERIOD_MS);
   }
 
   reset_tgt_data();
@@ -1080,10 +1045,11 @@ void MainTask::test_sla() {
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
   ps.sct = SensorCtrlType::Straight;
+  ps.motion_type = MotionType::STRAIGHT;
+  ps.dia_mode = false;
 
   mp->go_straight(ps);
 
-  next_motionr_t nm;
   nm.v_max = sla_p.v;
   nm.v_end = sla_p.v;
   nm.accl = sys.test.accl;
@@ -1091,13 +1057,27 @@ void MainTask::test_sla() {
   nm.is_turn = false;
 
   mp->slalom(sla_p, rorl, nm);
-  for (int i = 0; i < sys.test.turn_times; i++) {
-    mp->slalom(sla_p, rorl2, nm);
+
+  if (sys.test.sla_return > 0) {
+    mp->slalom(
+        paramset_list[file_idx].map[static_cast<TurnType>(sys.test.sla_type2)],
+        rorl2, nm);
   }
 
   ps.v_max = sla_p.v;
   ps.v_end = sys.test.end_v;
   ps.dist = 90;
+
+  if (sys.test.sla_return == 0) {
+    if (static_cast<TurnType>(sys.test.sla_type) == TurnType::Dia45 ||
+        static_cast<TurnType>(sys.test.sla_type) == TurnType::Dia135) {
+      ps.dist = 45 * ROOT2;
+    }
+  } else if (sys.test.sla_return == 1) {
+    if (static_cast<TurnType>(sys.test.sla_type) == TurnType::Dia90) {
+      ps.dist = 45 * ROOT2;
+    }
+  }
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
   ps.sct = SensorCtrlType::NONE;
@@ -1140,7 +1120,7 @@ void MainTask::test_search_sla() {
 
   auto sla_p = paramset_list[file_idx].map[TurnType::Normal];
 
-  TurnDirection rorl = ui->select_direction();
+  rorl = ui->select_direction();
   float backup_r = param->sen_ref_p.normal.exist.right45;
   float backup_l = param->sen_ref_p.normal.exist.left45;
   if (sys.test.ignore_opp_sen) {
@@ -1150,8 +1130,8 @@ void MainTask::test_search_sla() {
       param->sen_ref_p.normal.exist.left45 = 9999;
     }
   }
-  TurnDirection rorl2 = (rorl == TurnDirection::Right) ? (TurnDirection::Left)
-                                                       : (TurnDirection::Right);
+  rorl2 = (rorl == TurnDirection::Right) ? (TurnDirection::Left)
+                                         : (TurnDirection::Right);
   mp->reset_gyro_ref_with_check();
 
   if (sys.test.suction_active) {
@@ -1176,7 +1156,6 @@ void MainTask::test_search_sla() {
 
   mp->go_straight(ps);
 
-  next_motionr_t nm;
   nm.v_max = sla_p.v;
   nm.v_end = sla_p.v;
   nm.accl = sys.test.accl;

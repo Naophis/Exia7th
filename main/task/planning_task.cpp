@@ -205,10 +205,7 @@ float PlanningTask::check_sen_error() {
   int check = 0;
   //前壁が近すぎるときはエスケープ
 
-  if (sensing_result->ego.front_lp < param_ro->sen_ref_p.normal.exist.front) {
-    // if (ABS(sensing_result->ego.right45_lp -
-    //         sensing_result->ego.right45_lp_old) <
-    //     param_ro->sen_ref_p.normal.ref.kireme_r) {
+  if (sensing_result->ego.front_dist > param_ro->sen_ref_p.normal.exist.front) {
     if (ABS(sensing_result->ego.right45_dist -
             sensing_result->ego.right45_dist_old) <
         param_ro->sen_ref_p.normal.ref.kireme_r) {
@@ -223,9 +220,6 @@ float PlanningTask::check_sen_error() {
         }
       }
     }
-    // if (ABS(sensing_result->ego.left45_lp -
-    // sensing_result->ego.left45_lp_old) <
-    //     param_ro->sen_ref_p.normal.ref.kireme_l) {
     if (ABS(sensing_result->ego.left45_dist -
             sensing_result->ego.left45_dist_old) <
         param_ro->sen_ref_p.normal.ref.kireme_l) {

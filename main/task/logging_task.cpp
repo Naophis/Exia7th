@@ -83,9 +83,9 @@ void LoggingTask::task() {
     }
   }
 }
-float LoggingTask::calc_sensor(float data, float a, float b) {
-  if ((tgt_val->motion_type == MotionType::NONE ||
-       tgt_val->motion_type == MotionType::PIVOT)) {
+float LoggingTask::calc_sensor(float data, float a, float b, char motion_type) {
+  if ((motion_type == static_cast<char>(MotionType::NONE) ||
+       motion_type == static_cast<char>(MotionType::PIVOT))) {
     return 0;
   }
   auto res = a / std::log(data) - b;
@@ -126,16 +126,18 @@ void LoggingTask::save(std::string file_name) {
             halfToFloat(ld->img_ang),  //
             halfToFloat(ld->ang));     //
     auto l90 = calc_sensor(halfToFloat(ld->left90_lp), param->sensor_gain.l90.a,
-                           param->sensor_gain.l90.b);
+                           param->sensor_gain.l90.b, ld->motion_type);
     auto l45 = calc_sensor(halfToFloat(ld->left45_lp), param->sensor_gain.l45.a,
-                           param->sensor_gain.l45.b);
+                           param->sensor_gain.l45.b, ld->motion_type);
     auto front =
         calc_sensor(halfToFloat(ld->front_lp), param->sensor_gain.front.a,
-                    param->sensor_gain.front.b);
-    auto r45 = calc_sensor(halfToFloat(ld->right45_lp),
-                           param->sensor_gain.r45.a, param->sensor_gain.r45.b);
-    auto r90 = calc_sensor(halfToFloat(ld->right90_lp),
-                           param->sensor_gain.r90.a, param->sensor_gain.r90.b);
+                    param->sensor_gain.front.b, ld->motion_type);
+    auto r45 =
+        calc_sensor(halfToFloat(ld->right45_lp), param->sensor_gain.r45.a,
+                    param->sensor_gain.r45.b, ld->motion_type);
+    auto r90 =
+        calc_sensor(halfToFloat(ld->right90_lp), param->sensor_gain.r90.a,
+                    param->sensor_gain.r90.b, ld->motion_type);
 
     fprintf(f_slalom_log, f3,                  //
             halfToFloat(ld->left90_lp),        //

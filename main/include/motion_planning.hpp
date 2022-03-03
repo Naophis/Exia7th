@@ -63,5 +63,9 @@ private:
   const float th_offset_dist = 58.0;
   param_straight_t ps_front;
   param_straight_t ps_back;
+  ego_odom_t ego;
+  bool dia = false;
+  param_straight_t ps;
+  next_motionr_t nm;
 };
 #endif

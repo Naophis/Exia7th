@@ -124,7 +124,7 @@ void PathCreator::path_create(bool is_search) {
     next_dir = Direction::Undefined;
 
     if (lgc->arrival_goal_position(x, y)) {
-      add_path_s(idx, 3);
+      // add_path_s(idx, 1);
       path_t.emplace_back(255);
       // path_t.emplace_back(0);
       path_size = idx;
@@ -501,7 +501,8 @@ void PathCreator::pathOffset() {
 }
 
 void PathCreator::print_path() {
-  for (int i = 0; i < path_size; i++) {
+  auto size = path_s.size();
+  for (int i = 0; i < size; i++) {
     float dist1 = 0.5 * path_s[i] * cell_size;
     float dist2 = 0.5 * path_s[i] - 1;
     printf("[%d]: %0.2f,\t%d\n", i, dist2, path_t[i]);

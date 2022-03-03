@@ -211,7 +211,8 @@ Direction TrajectoryCreator::get_next_dir(Direction dir, TurnType type,
     else if (dir == Direction::South)
       return turn_dir == TurnDirection::Right ? Direction::SouthWest
                                               : Direction::SouthEast;
-    else if (dir == Direction::NorthEast)
+  } else if (type == TurnType::Dia45_2) {
+    if (dir == Direction::NorthEast)
       return turn_dir == TurnDirection::Right ? Direction::East
                                               : Direction::North;
     else if (dir == Direction::NorthWest)
@@ -236,7 +237,8 @@ Direction TrajectoryCreator::get_next_dir(Direction dir, TurnType type,
     else if (dir == Direction::South)
       return turn_dir == TurnDirection::Right ? Direction::NorthWest
                                               : Direction::NorthEast;
-    else if (dir == Direction::NorthEast)
+  } else if (type == TurnType::Dia135_2) {
+    if (dir == Direction::NorthEast)
       return turn_dir == TurnDirection::Right ? Direction::South
                                               : Direction::West;
     else if (dir == Direction::NorthWest)

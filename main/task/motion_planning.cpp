@@ -158,28 +158,65 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
     if (sensing_result->ego.front_dist < 87) {
       ps_front.dist -= (87 - sensing_result->ego.front_dist);
     }
-    auto res_f = go_straight(ps_front);
-    if (res_f != MotionResult::NONE) {
-      return MotionResult::ERROR;
-    }
-
     if (td == TurnDirection::Right) {
-      // if (sensing_result->ego.left45_dist < th_offset_dist) {
-      //   ps_back.dist += (45 - sensing_result->ego.left45_dist);
-      // }
       if (sensing_result->ego.left90_dist < th_offset_dist) {
         ps_back.dist += (45 - sensing_result->ego.left90_dist);
       }
     } else {
-      // if (sensing_result->ego.right45_dist < th_offset_dist) {
-      //   ps_back.dist += (45 - sensing_result->ego.right45_dist);
-      // }
       if (sensing_result->ego.right90_dist < th_offset_dist) {
         ps_back.dist += (45 - sensing_result->ego.right90_dist);
       }
     }
-
+    auto res_f = go_straight(ps_front);
+    if (res_f != MotionResult::NONE) {
+      return MotionResult::ERROR;
+    }
+  } else if (sp.type == TurnType::Large) {
+    if (sensing_result->ego.front_dist < 150) {
+      ps_front.dist -= (132 - sensing_result->ego.front_dist);
+    }
+    if (td == TurnDirection::Right) {
+      if (sensing_result->ego.left90_dist < th_offset_dist) {
+        ps_back.dist += (45 - sensing_result->ego.left90_dist);
+      }
+    } else {
+      if (sensing_result->ego.right90_dist < th_offset_dist) {
+        ps_back.dist += (45 - sensing_result->ego.right90_dist);
+      }
+    }
+    auto res_f = go_straight(ps_front);
+    if (res_f != MotionResult::NONE) {
+      return MotionResult::ERROR;
+    }
+  } else if (sp.type == TurnType::Orval) {
+    if (sensing_result->ego.front_dist < 150) {
+      ps_front.dist -= (132 - sensing_result->ego.front_dist);
+      ps_back.dist -= (132 - sensing_result->ego.front_dist);
+    }
+    auto res_f = go_straight(ps_front);
+    if (res_f != MotionResult::NONE) {
+      return MotionResult::ERROR;
+    }
+  } else if ((sp.type == TurnType::Dia45 || sp.type == TurnType::Dia135) &&
+             !dia) {
+    if (sensing_result->ego.front_dist < 150) {
+      ps_front.dist -= (132 - sensing_result->ego.front_dist);
+    }
+    if (td == TurnDirection::Right) {
+      if (sensing_result->ego.right90_dist < th_offset_dist) {
+        ps_back.dist += (45 - sensing_result->ego.right90_dist) * ROOT2;
+      }
+    } else {
+      if (sensing_result->ego.left90_dist < th_offset_dist) {
+        ps_back.dist += (45 - sensing_result->ego.left90_dist) * ROOT2;
+      }
+    }
+    auto res_f = go_straight(ps_front);
+    if (res_f != MotionResult::NONE) {
+      return MotionResult::ERROR;
+    }
   } else {
+
     auto res_f = go_straight(ps_front);
     if (res_f != MotionResult::NONE) {
       return MotionResult::ERROR;
@@ -401,31 +438,29 @@ void MotionPlanning::keep() {
   }
 }
 void MotionPlanning::exec_path_running(param_set_t &p_set) {
-  ego_odom_t ego;
   ego.x = ego.y = ego.ang = 0;
   ego.dir = Direction::North;
-  bool dia = false;
+  dia = false;
 
   // default straight parma
-  param_straight_t ps;
   ps.v_max = p_set.str_map[StraightType::FastRun].v_max;
   ps.v_end = p_set.str_map[StraightType::FastRun].v_max;
   ps.accl = p_set.str_map[StraightType::FastRun].accl;
   ps.decel = p_set.str_map[StraightType::FastRun].decel;
   ps.motion_type = MotionType::STRAIGHT;
-  next_motionr_t nm;
+  ps.sct = SensorCtrlType::Straight;
 
   reset_gyro_ref_with_check();
-  // lt->start_slalom_log();
+  lt->start_slalom_log();
   // reset();
   reset_tgt_data();
   reset_ego_data();
   pt->motor_enable();
-
-  for (int i = 0; i < pc->path_size; i++) {
+  auto size = pc->path_s.size();
+  for (int i = 0; i < size; i++) {
     float dist = 0.5 * pc->path_s[i] - 1;
     auto turn_dir = tc.get_turn_dir(pc->path_t[i]);
-    auto turn_type = tc.get_turn_type(pc->path_t[i]);
+    auto turn_type = tc.get_turn_type(pc->path_t[i], dia);
 
     if (dist > 0 || i == 0) {
       auto st = !dia ? StraightType::FastRun : StraightType::FastRunDia;
@@ -450,6 +485,7 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
         ps.v_end = 20;
       }
       ps.motion_type = MotionType::STRAIGHT;
+      ps.sct = !dia ? SensorCtrlType::Straight : SensorCtrlType::Dia;
       go_straight(ps);
       if (turn_type == TurnType::Finish) {
         break;
@@ -481,7 +517,7 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
         nm.is_turn = true;
       }
 
-      slalom(p_set.map[turn_type], turn_dir, nm);
+      slalom(p_set.map[turn_type], turn_dir, nm, dia);
       ego.dir = tc.get_next_dir(ego.dir, turn_type, turn_dir);
       // ego.ang = trj_ele.ang;
       dia =
@@ -495,11 +531,19 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
   ps.dist = 5;
   ps.accl = p_set.str_map[StraightType::FastRun].accl;
   ps.decel = p_set.str_map[StraightType::FastRun].decel;
+  ps.sct = !dia ? SensorCtrlType::Straight : SensorCtrlType::Dia;
   go_straight(ps);
 
   pt->motor_disable();
-  // lt->stop_slalom_log();
+  lt->stop_slalom_log();
+  lt->save(slalom_log_file);
   coin();
+  while (1) {
+    if (ui->button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
+  lt->dump_log(slalom_log_file);
 }
 
 MotionResult MotionPlanning::search_front_ctrl(param_straight_t &p) {

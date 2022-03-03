@@ -203,7 +203,7 @@ bool SearchController::is_goaled() { return tmp_goal_list.size() == 0; }
 void SearchController::exec(param_set_t &p_set, SearchMode sm) {
 
   mp->reset_gyro_ref_with_check();
-  lt->start_slalom_log();
+  // lt->start_slalom_log();
   reset();
 
   for (const auto p : lgc->goal_list) {
@@ -273,14 +273,14 @@ void SearchController::exec(param_set_t &p_set, SearchMode sm) {
   finish(p_set);
   pt->motor_disable();
   lt->stop_slalom_log();
-  lt->save(slalom_log_file);
+  // lt->save(slalom_log_file);
   mp->coin();
   while (1) {
     if (ui->button_state_hold())
       break;
     vTaskDelay(10 / portTICK_RATE_MS);
   }
-  lt->dump_log(slalom_log_file);
+  // lt->dump_log(slalom_log_file);
 }
 void SearchController::judge_wall() {
   bool wall_n = false;

@@ -78,7 +78,20 @@ private:
   const char *base_path = "/spiflash";
   esp_vfs_fat_mount_config_t mount_config;
   wl_handle_t s_wl_handle = WL_INVALID_HANDLE;
+  profile_idx_t p_idx;
+  param_set_t sp;
+  straight_param_t str_p;
+  slalom_param2_t sp2;
+  LED_bit lbit;
+  TurnDirection rorl;
+  TurnDirection rorl2;
+  next_motionr_t nm;
 
+  const TickType_t xDelay500 = 500 / portTICK_PERIOD_MS;
+  const TickType_t xDelay100 = 100 / portTICK_PERIOD_MS;
+  const TickType_t xDelay50 = 50 / portTICK_PERIOD_MS;
+  const TickType_t xDelay10 = 10 / portTICK_PERIOD_MS;
+  const TickType_t xDelay1 = 1 / portTICK_PERIOD_MS;
   void dump1();
   void dump2();
   int select_mode();
