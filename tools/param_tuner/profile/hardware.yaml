@@ -18,6 +18,7 @@ Mass: 0.015
 # Lm: 0.000025
 Lm: 0.00000025
 sakiyomi_time: 40
+clear_angle: 5
 motor_pid:
   p: 0.002
   i: 0.0035
@@ -63,7 +64,7 @@ sensor_pid_dia:
 gyro_param:
   gyro_w_gain_right: 0.0010585
   gyro_w_gain_left: 0.0010585
-  lp_delay: 0.9975
+  lp_delay: 1
 battery_param:
   lp_delay: 0.25
 led_param:

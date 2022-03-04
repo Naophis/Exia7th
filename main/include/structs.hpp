@@ -99,7 +99,7 @@ typedef struct {
   float left90_dist = 0;
   float right45_dist = 0;
   float right90_dist = 0;
-  
+
   float front_dist_old = 0;
   float left45_dist_old = 0;
   float left90_dist_old = 0;
@@ -227,6 +227,7 @@ typedef struct {
   sen_ref_param_t sen_ref_p;
   sensor_gain_t sensor_gain;
   int sakiyomi_time = 1;
+  float clear_angle = 0;
 } input_param_t;
 
 typedef struct {

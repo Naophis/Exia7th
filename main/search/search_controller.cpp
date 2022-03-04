@@ -289,31 +289,33 @@ void SearchController::judge_wall() {
   bool wall_s = false;
 
   if (ego->dir == Direction::North) {
-    wall_n = sensing_result->ego.front_lp > param->sen_ref_p.search_exist.front;
-    wall_e =
-        sensing_result->ego.right45_lp > param->sen_ref_p.search_exist.right45;
+    wall_n =
+        sensing_result->ego.front_dist < param->sen_ref_p.search_exist.front;
+    wall_e = sensing_result->ego.right45_dist <
+             param->sen_ref_p.search_exist.right45;
     wall_w =
-        sensing_result->ego.left45_lp > param->sen_ref_p.search_exist.left45;
+        sensing_result->ego.left45_dist < param->sen_ref_p.search_exist.left45;
   } else if (ego->dir == Direction::East) {
-    wall_e = sensing_result->ego.front_lp > param->sen_ref_p.search_exist.front;
-    wall_s =
-        sensing_result->ego.right45_lp > param->sen_ref_p.search_exist.right45;
-    wall_n =
-        sensing_result->ego.left45_lp > param->sen_ref_p.search_exist.left45;
-
-  } else if (ego->dir == Direction::West) {
-    wall_w = sensing_result->ego.front_lp > param->sen_ref_p.search_exist.front;
-    wall_n =
-        sensing_result->ego.right45_lp > param->sen_ref_p.search_exist.right45;
-    wall_s =
-        sensing_result->ego.left45_lp > param->sen_ref_p.search_exist.left45;
-
-  } else if (ego->dir == Direction::South) {
-    wall_s = sensing_result->ego.front_lp > param->sen_ref_p.search_exist.front;
-    wall_w =
-        sensing_result->ego.right45_lp > param->sen_ref_p.search_exist.right45;
     wall_e =
-        sensing_result->ego.left45_lp > param->sen_ref_p.search_exist.left45;
+        sensing_result->ego.front_dist < param->sen_ref_p.search_exist.front;
+    wall_s = sensing_result->ego.right45_dist <
+             param->sen_ref_p.search_exist.right45;
+    wall_n =
+        sensing_result->ego.left45_dist < param->sen_ref_p.search_exist.left45;
+  } else if (ego->dir == Direction::West) {
+    wall_w =
+        sensing_result->ego.front_dist < param->sen_ref_p.search_exist.front;
+    wall_n = sensing_result->ego.right45_dist <
+             param->sen_ref_p.search_exist.right45;
+    wall_s =
+        sensing_result->ego.left45_dist < param->sen_ref_p.search_exist.left45;
+  } else if (ego->dir == Direction::South) {
+    wall_s =
+        sensing_result->ego.front_dist < param->sen_ref_p.search_exist.front;
+    wall_w = sensing_result->ego.right45_dist <
+             param->sen_ref_p.search_exist.right45;
+    wall_e =
+        sensing_result->ego.left45_dist < param->sen_ref_p.search_exist.left45;
   }
   lgc->set_wall_data(ego->x, ego->y, Direction::North, wall_n);
   lgc->set_wall_data(ego->x, ego->y + 1, Direction::South, wall_n);

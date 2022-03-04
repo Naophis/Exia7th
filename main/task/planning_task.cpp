@@ -241,7 +241,12 @@ float PlanningTask::check_sen_error() {
     error_entity.sen_log.gain_z = 0;
   } else {
     if (tgt_val->tgt_in.tgt_dist >= 60) {
-      if (ABS(tgt_val->ego_in.ang * 180 / PI) < 5) {
+
+      // if ((ABS(tgt_val->global_pos.ang - tgt_val->global_pos.img_ang) * 180 /
+      //      PI) < 2) {
+      // if (ABS(tgt_val->ego_in.ang * 180 / PI) < param_ro->clear_angle) {
+      if ((ABS(tgt_val->ego_in.ang - tgt_val->ego_in.img_ang) * 180 / PI) <
+          param_ro->clear_angle) {
         tgt_val->global_pos.ang = tgt_val->global_pos.img_ang;
         error_entity.w.error_i = 0;
         error_entity.w.error_d = 0;

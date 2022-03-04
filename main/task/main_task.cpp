@@ -258,6 +258,7 @@ void MainTask::load_hw_param() {
       cJSON_GetObjectItem(root, "offset_start_dist")->valuedouble;
   param->sakiyomi_time =
       cJSON_GetObjectItem(root, "sakiyomi_time")->valuedouble;
+  param->clear_angle = cJSON_GetObjectItem(root, "clear_angle")->valuedouble;
 
   param->FF_front = cJSON_GetObjectItem(root, "FF_front")->valueint;
   param->FF_roll = cJSON_GetObjectItem(root, "FF_roll")->valueint;
@@ -491,6 +492,7 @@ void MainTask::load_sys_param() {
   sys.test.suction_duty =
       cJSON_GetObjectItem(test, "suction_duty")->valuedouble;
   sys.test.file_idx = cJSON_GetObjectItem(test, "file_idx")->valueint;
+  printf("sys.test.file_idx = %d\n", sys.test.file_idx);
   sys.test.sla_type = cJSON_GetObjectItem(test, "sla_type")->valueint;
   sys.test.sla_return = cJSON_GetObjectItem(test, "sla_return")->valueint;
   sys.test.sla_type2 = cJSON_GetObjectItem(test, "sla_type2")->valueint;
@@ -519,6 +521,7 @@ void MainTask::load_turn_param_profiles() {
   profile_list = cJSON_GetObjectItem(root, "list");
   int profile_list_size = cJSON_GetArraySize(profile_list);
   printf("profile_list\n");
+  tpp.file_list_size = 0;
   for (int i = 0; i < profile_list_size; i++) {
     tpp.file_list.push_back(cJSON_GetArrayItem(profile_list, i)->valuestring);
     tpp.file_list_size++;
@@ -795,10 +798,26 @@ void MainTask::task() {
       } else if (mode_num == 2) {
         pc->path_create(true);
         pc->convert_large_path(true);
-        pc->diagonalPath(true, true);
+        // pc->diagonalPath(true, true);
         pc->print_path();
 
         mp->exec_path_running(paramset_list[0]);
+
+      } else if (mode_num == 3) {
+        pc->path_create(true);
+        pc->convert_large_path(true);
+        // pc->diagonalPath(true, true);
+        pc->print_path();
+
+        mp->exec_path_running(paramset_list[1]);
+
+      } else if (mode_num == 4) {
+        pc->path_create(true);
+        pc->convert_large_path(true);
+        // pc->diagonalPath(true, true);
+        pc->print_path();
+
+        mp->exec_path_running(paramset_list[2]);
 
       } else if (mode_num == 14) {
         dump1(); // taskの最終行に配置すること
@@ -997,6 +1016,7 @@ void MainTask::test_sla() {
   int file_idx = sys.test.file_idx;
 
   if (file_idx >= tpp.file_list_size) {
+    printf("%d %d\n", file_idx, tpp.file_list_size);
     ui->error();
     return;
   }

@@ -472,13 +472,17 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
 
       ps.dist = !dia ? (dist * cell_size) : (dist * cell_size * ROOT2);
       if (i == 0) {
-        if (dist == 0) {
-          // 初手ターンの場合は距離合成して加速区間を増やす
+        if (dist == 0) { // 初手ターンの場合は距離合成して加速区間を増やす
           dist = (turn_dir == TurnDirection::Left)
                      ? p_set.map[turn_type].front.left
                      : p_set.map[turn_type].front.right;
         }
         ps.dist += param->offset_start_dist; // 初期加速距離を加算
+        auto tmp_v2 = 2 * ps.accl * ps.dist;
+        if (ps.v_end * ps.v_end > tmp_v2) {
+          ps.accl = (ps.v_end * ps.v_end) / (2 * ps.dist) + 100;
+          ps.decel = -ps.accl;
+        }
       }
       if (turn_type == TurnType::Finish) {
         ps.dist += 40;

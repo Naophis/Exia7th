@@ -6,7 +6,7 @@ sim_time = 21;
 script_file = mfilename('fullpath');
 [filepath, name, ext] = fileparts(script_file);
 cd(filepath);
-
+Normal = 0; Large = 1; Orval = 2; Dia45 = 3; Dia135 = 4; Dia90 = 5; Dia180 = 6; Dia45_2 = 7; Dia135_2 = 8;
 Simulink.importExternalCTypes('../include/bus.h');
 
 dt = 0.001;
@@ -130,7 +130,7 @@ if test_mode == 1
         tmp_x_list(i) = trajectory_shape_list(i).x;
         tmp_y_list(i) = trajectory_shape_list(i).y;
     end
-    
+
     plot(tmp_x_list, tmp_y_list, 'LineWidth', 2);
     xlim([-90 270]);
     ylim([-90 270]);

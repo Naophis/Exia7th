@@ -1,13 +1,14 @@
 list: [
     "turn_300.txt", #0
     "turn_400.txt", #1
+    "turn_500.txt", #2
   ]
 
-profile_idx_size: 1
+profile_idx_size: 3
 # idx = mode選択時
 profile_idx: [
     {
-      # 探索パラメータindex
+      # 0: 探索パラメータindex&最短
       normal: 0,
       large: 0,
       orval: 0,
@@ -18,14 +19,25 @@ profile_idx: [
       dia90: 0,
     },
     {
-      # 探索パラメータindex
+      # 1: 最短パラメータ
+      normal: 1,
+      large: 1,
+      orval: 1,
+      dia45: 1,
+      dia45_2: 1,
+      dia135: 1,
+      dia135_2: 1,
+      dia90: 1,
+    },
+    {
+      # 2: 最短パラメータ
       normal: 0,
-      large: 0,
-      orval: 0,
-      dia45: 0,
-      dia45_2: 0,
-      dia135: 0,
-      dia135_2: 0,
-      dia90: 0,
+      large: 2,
+      orval: 2,
+      dia45: 2,
+      dia45_2: 2,
+      dia135: 2,
+      dia135_2: 2,
+      dia90: 2,
     },
   ]

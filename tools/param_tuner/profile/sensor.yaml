@@ -22,12 +22,12 @@ dia:
     left45: 70
 search:
   exist:
-    front: 200
-    right45: 200
-    left45: 100
-
-    right90: 1000
-    left90: 1000
+    front: 130
+    right45: 58
+    left45: 58
+    right90: 58
+    left90: 58
+    
     kireme_r: 800 #切れ目しきい値 R
     kireme_l: 800 #切れ目しきい値 L
 
