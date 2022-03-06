@@ -37,6 +37,8 @@ public:
                       next_motionr_t &next_motion);
   MotionResult search_front_ctrl(param_straight_t &p);
 
+  MotionResult wall_off(param_straight_t &p, bool dia);
+
   void reset_tgt_data();
   void reset_ego_data();
   void reset_gyro_ref();

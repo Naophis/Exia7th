@@ -259,6 +259,12 @@ void MainTask::load_hw_param() {
   param->sakiyomi_time =
       cJSON_GetObjectItem(root, "sakiyomi_time")->valuedouble;
   param->clear_angle = cJSON_GetObjectItem(root, "clear_angle")->valuedouble;
+  param->clear_dist_order =
+      cJSON_GetObjectItem(root, "clear_dist_order")->valuedouble;
+  param->front_dist_offset =
+      cJSON_GetObjectItem(root, "front_dist_offset")->valuedouble;
+  param->front_dist_offset2 =
+      cJSON_GetObjectItem(root, "front_dist_offset2")->valuedouble;
 
   param->FF_front = cJSON_GetObjectItem(root, "FF_front")->valueint;
   param->FF_roll = cJSON_GetObjectItem(root, "FF_roll")->valueint;
@@ -747,6 +753,9 @@ void MainTask::task() {
     } else if (sys.user_mode == 7) {
       printf("test_search_front_ctrl\n");
       test_front_ctrl();
+    } else if (sys.user_mode == 8) {
+      printf("test_wall_off\n");
+      //
     } else if (sys.user_mode == 13) {
       printf("keep_pivot\n");
       keep_pivot();
@@ -796,33 +805,29 @@ void MainTask::task() {
         }
         search_ctrl->print_maze();
       } else if (mode_num == 2) {
-        pc->path_create(true);
+        pc->path_create(false);
         pc->convert_large_path(true);
         // pc->diagonalPath(true, true);
         pc->print_path();
-
         mp->exec_path_running(paramset_list[0]);
-
       } else if (mode_num == 3) {
-        pc->path_create(true);
+        pc->path_create(false);
         pc->convert_large_path(true);
         // pc->diagonalPath(true, true);
         pc->print_path();
-
         mp->exec_path_running(paramset_list[1]);
-
       } else if (mode_num == 4) {
-        pc->path_create(true);
+        pc->path_create(false);
         pc->convert_large_path(true);
         // pc->diagonalPath(true, true);
         pc->print_path();
-
         mp->exec_path_running(paramset_list[2]);
-
       } else if (mode_num == 14) {
         dump1(); // taskの最終行に配置すること
       } else if (mode_num == 15) {
         save_maze_data(false);
+        lgc->init(sys.maze_size, sys.maze_size * sys.maze_size - 1);
+        lgc->set_goal_pos(sys.goals);
       }
       vTaskDelay(10 / portTICK_RATE_MS);
     }
@@ -1390,6 +1395,79 @@ void MainTask::test_search_sla_walloff() {
   }
 }
 
+void MainTask::test_sla_walloff() {
+
+  mp->reset_gyro_ref_with_check();
+
+  if (sys.test.suction_active) {
+    pt->suction_enable(sys.test.suction_duty);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+  }
+
+  reset_tgt_data();
+  reset_ego_data();
+  pt->motor_enable();
+
+  req_error_reset();
+  lt->start_slalom_log();
+  // pt->active_logging(_f);
+
+  ps.v_max = sys.test.v_max;
+  ps.v_end = sys.test.v_max;
+  ps.dist = 45 + 70 + param->offset_start_dist;
+  ps.accl = sys.test.accl;
+  ps.decel = sys.test.decel;
+  ps.sct = SensorCtrlType::Straight;
+  ps.wall_off_req = WallOffReq::NONE;
+  ps.wall_off_dist_r = 0;
+  ps.wall_off_dist_l = 0;
+  ps.dia_mode = false;
+  mp->go_straight(ps);
+
+  // walloff
+
+  ps.v_max = sys.test.v_max;
+  ps.v_end = 20;
+  ps.dist = 40;
+  ps.accl = sys.test.accl;
+  ps.decel = sys.test.decel;
+  ps.wall_off_req = WallOffReq::NONE;
+  mp->go_straight(ps);
+
+  ps.v_max = 20;
+  ps.v_end = sys.test.end_v;
+  ps.dist = 5;
+  ps.accl = sys.test.accl;
+  ps.decel = sys.test.decel;
+  mp->go_straight(ps);
+
+  vTaskDelay(100 / portTICK_RATE_MS);
+  pt->motor_disable();
+  reset_tgt_data();
+  reset_ego_data();
+  req_error_reset();
+  pt->suction_disable();
+
+  lt->stop_slalom_log();
+  reset_tgt_data();
+  reset_ego_data();
+  req_error_reset();
+  lt->save(slalom_log_file);
+  ui->coin(120);
+
+  while (1) {
+    if (ui->button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
+  lt->dump_log(slalom_log_file);
+  while (1) {
+    if (ui->button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
+}
+
 void MainTask::save_maze_data(bool write) {
   auto *f = fopen(maze_log_file.c_str(), "wb");
   if (f == NULL)
@@ -1421,5 +1499,4 @@ void MainTask::read_maze_data() {
     lgc->set_native_wall_data(i, stoi(map_list[i]));
   }
   printf("read maze data!!!\n");
-  search_ctrl->print_maze();
 }

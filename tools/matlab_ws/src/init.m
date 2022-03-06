@@ -2,7 +2,7 @@ clear;
 
 home = pwd;
 
-sim_time = 21;
+sim_time = 22;
 script_file = mfilename('fullpath');
 [filepath, name, ext] = fileparts(script_file);
 cd(filepath);
@@ -11,11 +11,11 @@ Simulink.importExternalCTypes('../include/bus.h');
 
 dt = 0.001;
 
-test_mode = 0; % straight
-% test_mode = 1; % slalom
+% test_mode = 0; % straight
+test_mode = 1; % slalom
 % test_mode = 2; % pivot
 % test_mode = 3; % back_straight
-%test_mode = 4; % back_straight
+test_mode = 4; % slalom2
 
 %default
 sla.base_alpha = 0;
@@ -239,12 +239,12 @@ if test_mode == 4
     ego_state = int8(0);
 
     % radius = 90.5;
-    radius = 120;
+    radius = 68;
 
-    tgt_angle = 135 * 2 * pi / 360;
+    tgt_angle = 180.0 * pi / 180;
     param_alpha = (2 * ego_v^2 / (radius^2 * tgt_angle / 2));
 
-    w_max = 2.5;
+    w_max = 250000;
     end_w = 0.1;
     tgt_dist = 0;
 

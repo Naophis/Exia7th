@@ -40,11 +40,11 @@ large:
 orval:
   v: 300.000000
   ang: 180.000000
-  rad: 40.000000
+  rad: 68.000000
   pow_n: 2.000000
   time: 0.347078
-  front: { left: 10.00000000, right: 10.00000000 }
-  back: { left: 9.81860390, right: 9.81860390 }
+  front: { left: 5.00000000, right: 5.00000000 }
+  back: { left: 5, right: 5 }
 
 dia45:
   v: 300.000000

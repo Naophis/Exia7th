@@ -212,9 +212,9 @@ float PlanningTask::check_sen_error() {
       if ((1 < sensing_result->ego.right45_dist &&
            sensing_result->ego.right45_dist <
                param_ro->sen_ref_p.normal.exist.right45)) {
-
         if (ABS(sensing_result->ego.right45_dist -
-                sensing_result->ego.right90_dist) < 20) {
+                sensing_result->ego.right90_dist) <
+            param_ro->sen_ref_p.normal.exist.right90) {
           error += 45 - sensing_result->ego.right45_dist;
           check++;
         }
@@ -228,7 +228,8 @@ float PlanningTask::check_sen_error() {
                param_ro->sen_ref_p.normal.exist.left45)) {
 
         if (ABS(sensing_result->ego.left45_dist -
-                sensing_result->ego.left90_dist) < 20) {
+                sensing_result->ego.left90_dist) <
+            param_ro->sen_ref_p.normal.exist.left90) {
           error -= 45 - sensing_result->ego.left45_dist;
           check++;
         }
@@ -240,7 +241,7 @@ float PlanningTask::check_sen_error() {
     error_entity.sen_log.gain_zz = 0;
     error_entity.sen_log.gain_z = 0;
   } else {
-    if (tgt_val->tgt_in.tgt_dist >= 60) {
+    if (tgt_val->tgt_in.tgt_dist >= param_ro->clear_dist_order) {
 
       // if ((ABS(tgt_val->global_pos.ang - tgt_val->global_pos.img_ang) * 180 /
       //      PI) < 2) {
@@ -758,6 +759,7 @@ void PlanningTask::cp_request() {
     tgt_val->ego_in.sla_param.pow_n = tgt_val->nmr.sla_pow_n;
 
     tgt_val->ego_in.state = 0;
+    tgt_val->ego_in.pivot_state = 0;
 
     if (!(tgt_val->motion_type == MotionType::NONE ||
           tgt_val->motion_type == MotionType::STRAIGHT ||
@@ -826,6 +828,7 @@ void PlanningTask::calc_sensor_dist_all() {
     sensing_result->ego.front_dist =
         calc_sensor(sensing_result->ego.front_lp, param_ro->sensor_gain.front.a,
                     param_ro->sensor_gain.front.b);
+    // +        param_ro->front_dist_offset;
     sensing_result->ego.right45_dist =
         calc_sensor(sensing_result->ego.right45_lp, param_ro->sensor_gain.r45.a,
                     param_ro->sensor_gain.r45.b);

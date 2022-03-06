@@ -228,6 +228,9 @@ typedef struct {
   sensor_gain_t sensor_gain;
   int sakiyomi_time = 1;
   float clear_angle = 0;
+  float clear_dist_order = 0;
+  float front_dist_offset = 0;
+  float front_dist_offset2 = 0;
 } input_param_t;
 
 typedef struct {
@@ -298,6 +301,7 @@ typedef struct {
   float sla_alpha;
   float sla_time;
   float sla_pow_n;
+  float sla_rad;
   RUN_MODE2 motion_mode;
   MotionType motion_type;
 
@@ -330,16 +334,16 @@ typedef struct {
 } motion_tgt_val_t;
 
 typedef struct {
-  float v_max;
-  float v_end;
-  float accl;
-  float decel;
-  float dist;
-  MotionType motion_type;
-  SensorCtrlType sct;
-  WallOffReq wall_off_req;
-  float wall_off_dist_r;
-  float wall_off_dist_l;
+  float v_max = 0;
+  float v_end = 0;
+  float accl = 0;
+  float decel = 0;
+  float dist = 0;
+  MotionType motion_type = MotionType::NONE;
+  SensorCtrlType sct = SensorCtrlType::NONE;
+  WallOffReq wall_off_req = WallOffReq::NONE;
+  float wall_off_dist_r = 0;
+  float wall_off_dist_l = 0;
   bool dia_mode = false;
 } param_straight_t;
 

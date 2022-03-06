@@ -44,14 +44,22 @@ large:
   time: 0.143172
   front: { left: 5.21230051, right: 5.21230051 }
   back: { left: 4.87907912, right: 4.87907912 }
+# orval:
+#   v: 500.000000
+#   ang: 180.000000
+#   rad: 40.000000
+#   pow_n: 2.000000
+#   time: 0.208250
+#   front: { left: 10.00000000, right: 10.00000000 }
+#   back: { left: 9.74460495, right: 9.74460495 }
 orval:
   v: 500.000000
   ang: 180.000000
-  rad: 40.000000
+  rad: 68.000000
   pow_n: 2.000000
-  time: 0.208250
-  front: { left: 10.00000000, right: 10.00000000 }
-  back: { left: 9.74460495, right: 9.74460495 }
+  time: 0.347078
+  front: { left: 5.00000000, right: 5.00000000 }
+  back: { left: 5, right: 5 }
 dia45:
   v: 500.000000
   ang: 45.000000

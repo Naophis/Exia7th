@@ -18,7 +18,10 @@ Mass: 0.015
 # Lm: 0.000025
 Lm: 0.00000025
 sakiyomi_time: 40
-clear_angle: 5
+clear_angle: 20
+clear_dist_order: 180
+front_dist_offset: 87
+front_dist_offset2: 120
 motor_pid:
   p: 0.002
   i: 0.0035
@@ -28,13 +31,13 @@ motor_pid:
   # i: 0.0
   # d: 0.0
 dist_pid:
-  p: 0.0
-  i: 0.0285
-  d: 0.2
-  mode: 1
   # p: 0.0
-  # i: 0.0
-  # d: 0.0
+  # i: 0.0285
+  # d: 0.2
+  mode: 1
+  p: 0.0
+  i: 0.0
+  d: 0.0
 gyro_pid:
   p: 0.15
   i: 0.0065
@@ -44,18 +47,21 @@ gyro_pid:
   # i: 0.0
   # d: 0
 angle_pid:
-  p: 0.0
-  i: 0.05
-  d: 40.5
-  mode: 1
   # p: 0.0
-  # i: 0.0
-  # d: 0.0
+  # i: 0.05
+  # d: 40.5
+  mode: 1
+  p: 0.0
+  i: 0.0
+  d: 0.0
 sensor_pid:
-  p: 0.075
+  p: 0.125
   i: 0.0
   d: 0.0
   mode: 0
+  # p: 0.0
+  # i: 0.0
+  # d: 0.0
 sensor_pid_dia:
   p: 0.1
   i: 0.0
@@ -68,7 +74,8 @@ gyro_param:
 battery_param:
   lp_delay: 0.25
 led_param:
-  lp_delay: 0.925
+  # lp_delay: 0.925
+  lp_delay: 1
 kalman_config:
   # q_ang: 0.01 #大：応答早
   # q_bias: 0.01 # 大：gyro_wの値を類似する
