@@ -265,6 +265,30 @@ void MainTask::load_hw_param() {
       cJSON_GetObjectItem(root, "front_dist_offset")->valuedouble;
   param->front_dist_offset2 =
       cJSON_GetObjectItem(root, "front_dist_offset2")->valuedouble;
+  param->clear_dist_ragne_from =
+      cJSON_GetObjectItem(root, "clear_dist_ragne_from")->valuedouble;
+  param->clear_dist_ragne_to =
+      cJSON_GetObjectItem(root, "clear_dist_ragne_to")->valuedouble;
+
+  param->wall_off_hold_dist =
+      cJSON_GetObjectItem(root, "wall_off_hold_dist")->valuedouble;
+  param->wall_off_dist.left_str =
+      cJSON_GetObjectItem(root, "wall_off_hold_dist_str_l")->valuedouble;
+  param->wall_off_dist.right_str =
+      cJSON_GetObjectItem(root, "wall_off_hold_dist_str_r")->valuedouble;
+  param->wall_off_dist.left_dia =
+      cJSON_GetObjectItem(root, "wall_off_hold_dist_dia_l")->valuedouble;
+  param->wall_off_dist.right_dia =
+      cJSON_GetObjectItem(root, "wall_off_hold_dist_dia_r")->valuedouble;
+
+  param->front_dist_offset_dia_front =
+      cJSON_GetObjectItem(root, "front_dist_offset_dia_front")->valuedouble;
+  param->front_dist_offset_dia_45_th =
+      cJSON_GetObjectItem(root, "front_dist_offset_dia_45_th")->valuedouble;
+  param->front_dist_offset_dia_right45 =
+      cJSON_GetObjectItem(root, "front_dist_offset_dia_right45")->valuedouble;
+  param->front_dist_offset_dia_left45 =
+      cJSON_GetObjectItem(root, "front_dist_offset_dia_left45")->valuedouble;
 
   param->FF_front = cJSON_GetObjectItem(root, "FF_front")->valueint;
   param->FF_roll = cJSON_GetObjectItem(root, "FF_roll")->valueint;
@@ -807,19 +831,19 @@ void MainTask::task() {
       } else if (mode_num == 2) {
         pc->path_create(false);
         pc->convert_large_path(true);
-        // pc->diagonalPath(true, true);
+        pc->diagonalPath(true, true);
         pc->print_path();
         mp->exec_path_running(paramset_list[0]);
       } else if (mode_num == 3) {
         pc->path_create(false);
         pc->convert_large_path(true);
-        // pc->diagonalPath(true, true);
+        pc->diagonalPath(true, true);
         pc->print_path();
         mp->exec_path_running(paramset_list[1]);
       } else if (mode_num == 4) {
         pc->path_create(false);
         pc->convert_large_path(true);
-        // pc->diagonalPath(true, true);
+        pc->diagonalPath(true, true);
         pc->print_path();
         mp->exec_path_running(paramset_list[2]);
       } else if (mode_num == 14) {
@@ -1066,13 +1090,15 @@ void MainTask::test_sla() {
 
   ps.v_max = sla_p.v;
   ps.v_end = sla_p.v;
-  ps.dist = sys.test.sla_dist + param->offset_start_dist;
+  ps.dist = 45 + param->offset_start_dist;
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
   ps.sct = SensorCtrlType::Straight;
   ps.motion_type = MotionType::STRAIGHT;
   ps.dia_mode = false;
+  mp->go_straight(ps);
 
+  ps.dist = 45;
   mp->go_straight(ps);
 
   nm.v_max = sla_p.v;
@@ -1081,12 +1107,17 @@ void MainTask::test_sla() {
   nm.decel = sys.test.decel;
   nm.is_turn = false;
 
-  mp->slalom(sla_p, rorl, nm);
+  mp->slalom(sla_p, rorl, nm, false);
 
   if (sys.test.sla_return > 0) {
+    bool dia =
+        static_cast<TurnType>(sys.test.sla_type2) == TurnType::Dia45_2 ||
+        static_cast<TurnType>(sys.test.sla_type2) == TurnType::Dia135_2 ||
+        static_cast<TurnType>(sys.test.sla_type2) == TurnType::Dia90;
+
     mp->slalom(
         paramset_list[file_idx].map[static_cast<TurnType>(sys.test.sla_type2)],
-        rorl2, nm);
+        rorl2, nm, dia);
   }
 
   ps.v_max = sla_p.v;

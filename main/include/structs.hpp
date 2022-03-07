@@ -113,6 +113,19 @@ typedef struct {
 } ego_entity_t;
 
 typedef struct {
+  float sensor_dist = 0;
+  float global_run_dist = 0;
+} sen_log_t;
+
+typedef struct {
+  // sen_log_t l90;
+  sen_log_t l45;
+  // sen_log_t front;
+  sen_log_t r45;
+  // sen_log_t r90;
+} sen_logs_t;
+
+typedef struct {
   led_sensor_t led_sen;
   led_sensor_t led_sen_after;
   led_sensor_t led_sen_before;
@@ -122,6 +135,7 @@ typedef struct {
   encoder_data_t encoder_raw;
   encoder_data_t encoder;
   ego_entity_t ego;
+  sen_logs_t sen;
 } sensing_result_entity_t;
 
 typedef struct {
@@ -195,6 +209,17 @@ typedef struct {
   sensor_gain_param_t r90;
 } sensor_gain_t;
 
+// typedef struct{
+
+// } wall_off_p
+
+typedef struct {
+  float left_str;
+  float right_str;
+  float left_dia;
+  float right_dia;
+} wall_off_hold_dist_t;
+
 typedef struct {
   float dt = 0.001;
   float tire = 12;
@@ -231,6 +256,15 @@ typedef struct {
   float clear_dist_order = 0;
   float front_dist_offset = 0;
   float front_dist_offset2 = 0;
+  float front_dist_offset_dia_front = 0;
+  float front_dist_offset_dia_45_th = 0;
+  float front_dist_offset_dia_right45 = 0;
+  float front_dist_offset_dia_left45 = 0;
+
+  float clear_dist_ragne_from = 0;
+  float clear_dist_ragne_to = 0;
+  float wall_off_hold_dist;
+  wall_off_hold_dist_t wall_off_dist;
 } input_param_t;
 
 typedef struct {
@@ -348,91 +382,91 @@ typedef struct {
 } param_straight_t;
 
 typedef struct {
-  float w_max;
-  float w_end;
-  float alpha;
-  float ang;
-  TurnDirection RorL;
+  float w_max = 0;
+  float w_end = 0;
+  float alpha = 0;
+  float ang = 0;
+  TurnDirection RorL = TurnDirection::None;
 
 } param_roll_t;
 
 typedef struct {
-  float radius;
-  float v_max;
-  float v_end;
-  float ang;
-  TurnDirection RorL;
+  float radius = 0;
+  float v_max = 0;
+  float v_end = 0;
+  float ang = 0;
+  TurnDirection RorL = TurnDirection::None;
 } param_normal_slalom_t;
 
 typedef struct {
-  float v_max;
-  float end_v;
-  float accl;
-  float decel;
-  float dist;
-  float w_max;
-  float w_end;
-  float alpha;
-  float ang;
-  int suction_active;
-  float suction_duty;
-  float sla_dist;
-  int file_idx;
-  int sla_type;
-  int sla_return;
-  int sla_type2;
-  int turn_times;
+  float v_max = 0;
+  float end_v = 0;
+  float accl = 0;
+  float decel = 0;
+  float dist = 0;
+  float w_max = 0;
+  float w_end = 0;
+  float alpha = 0;
+  float ang = 0;
+  int suction_active = 0;
+  float suction_duty = 0;
+  float sla_dist = 0;
+  int file_idx = 0;
+  int sla_type = 0;
+  int sla_return = 0;
+  int sla_type2 = 0;
+  int turn_times = 0;
   int ignore_opp_sen = 0;
 } test_mode_t;
 
 typedef struct {
   std::vector<point_t> goals;
-  int maze_size;
-  int user_mode;
+  int maze_size = 0;
+  int user_mode = 0;
   test_mode_t test;
 } system_t;
 
 typedef struct {
-  int normal;
-  int large;
-  int orval;
-  int dia45;
-  int dia45_2;
-  int dia135;
-  int dia135_2;
-  int dia90;
+  int normal = 0;
+  int large = 0;
+  int orval = 0;
+  int dia45 = 0;
+  int dia45_2 = 0;
+  int dia135 = 0;
+  int dia135_2 = 0;
+  int dia90 = 0;
 } profile_idx_t;
 
 typedef struct {
   std::vector<std::string> file_list;
-  int file_list_size;
-  int profile_idx_size;
+  int file_list_size = 0;
+  int profile_idx_size = 0;
   std::vector<profile_idx_t> profile_list;
 } turn_param_profile_t;
 
 typedef struct {
-  float right;
-  float left;
+  float right = 0;
+  float left = 0;
 } slalom_offset_t;
 
 typedef struct {
-  float v;
-  float ang;
-  float rad;
+  float v = 0;
+  float ang = 0;
+  float rad = 0;
   slalom_offset_t front;
   slalom_offset_t back;
-  int pow_n;
-  float time;
-  TurnType type;
+  int pow_n = 0;
+  float time = 0;
+  TurnType type = TurnType::None;
 } slalom_param2_t;
 
 typedef struct {
-  float v_max;
-  float accl;
-  float decel;
-  float w_max;
-  float w_end;
-  float alpha;
+  float v_max = 0;
+  float accl = 0;
+  float decel = 0;
+  float w_max = 0;
+  float w_end = 0;
+  float alpha = 0;
 } straight_param_t;
 
 typedef struct {
@@ -441,12 +475,12 @@ typedef struct {
 } param_set_t;
 
 typedef struct {
-  bool is_turn;
+  bool is_turn = false;
   TurnType next_turn_type;
-  float v_max;
-  float v_end;
-  float accl;
-  float decel;
+  float v_max = 0;
+  float v_end = 0;
+  float accl = 0;
+  float decel = 0;
 } next_motionr_t;
 
 typedef struct {
@@ -532,6 +566,8 @@ typedef struct {
   real16_T duty_ff_front;
   real16_T duty_ff_roll;
   real16_T duty_sensor_ctrl;
+  real16_T sen_log_l45;
+  real16_T sen_log_r45;
 } log_data_t2;
 
 typedef struct {

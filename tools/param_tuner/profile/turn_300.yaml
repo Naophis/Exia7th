@@ -20,22 +20,6 @@ straight:
     w_max: 5
     w_end: 0.1
     alpha: 10
-normal:
-  v: 300.000000
-  ang: 90.000000
-  rad: 26.000000
-  pow_n: 2.000000
-  time: 0.112813
-  front: { left: 6.5, right: 6.5 }
-  back: { left: 6.5, right: 6.5 }
-large:
-  v: 300.000000
-  ang: 90.000000
-  rad: 55.000000
-  pow_n: 2.000000
-  time: 0.238625
-  front: { left: 5.13756573, right: 5.13756573 }
-  back: { left: 4.97956049, right: 4.97956049 }
 
 orval:
   v: 300.000000
@@ -45,49 +29,59 @@ orval:
   time: 0.347078
   front: { left: 5.00000000, right: 5.00000000 }
   back: { left: 5, right: 5 }
-
+normal:
+  v: 300.000000
+  ang: 90.000000
+  rad: 26.000000
+  pow_n: 2.000000
+  time: 0.112813
+  front: { left: 4.94298864, right: 4.94298864 }
+  back: { left: 4.74724031, right: 4.74724031 }
+large:
+  v: 300.000000
+  ang: 90.000000
+  rad: 54.000000
+  pow_n: 2.000000
+  time: 0.234281
+  front: { left: 6.68228933, right: 6.68228933 }
+  back: { left: 6.47103826, right: 6.47103826 }
 dia45:
   v: 300.000000
   ang: 45.000000
-  rad: 55.000000
+  rad: 58.000000
   pow_n: 2.000000
-  time: 0.119313
-  front: { left: 7.97612341, right: 7.97612341 }
-  back: { left: 11.42400394, right: 11.42400394 }
-  # back: { left: 26.42400394, right: 26.42400394 }
-
+  time: 0.125828
+  front: { left: 5.95058670, right: 5.95058670 }
+  back: { left: 24.40307754, right: 24.40307754 }
 dia45_2:
   v: 300.000000
   ang: 45.000000
-  rad: 55.000000
+  rad: 58.000000
   pow_n: 2.000000
-  time: 0.119313
-  front: { left: 41.61573371, right: 41.61573371 }
-  back: { left: 7.78439363, right: 7.78439363 }
-
+  time: 0.125828
+  front: { left: 24.59019701, right: 24.59019701 }
+  back: { left: 5.76346723, right: 5.76346723 }
 dia135:
   v: 300.000000
   ang: 135.000000
-  rad: 33.000000
+  rad: 36.000000
   pow_n: 2.000000
-  time: 0.214750
-  front: { left: 24.53686596, right: 24.53686596 }
-  back: { left: 1.66589900, right: 1.66589900 }
-
+  time: 0.234281
+  front: { left: 14.48645410, right: 14.48645410 }
+  back: { left: 6.55493373, right: 6.55493373 }
 dia135_2:
   v: 300.000000
   ang: 135.000000
   rad: 36.000000
   pow_n: 2.000000
   time: 0.234281
-  front: { left: 21.76567471, right: 21.76567471 }
+  front: { left: 6.76567471, right: 6.76567471 }
   back: { left: 14.27571312, right: 14.27571312 }
-
 dia90:
   v: 300.000000
   ang: 90.000000
-  rad: 30.000000
+  rad: 35.000000
   pow_n: 2.000000
-  time: 0.130156
-  front: { left: 32.40200478, right: 32.40200478 }
-  back: { left: 2.19297391, right: 2.19297391 }
+  time: 0.151844
+  front: { left: 9.67669433, right: 9.67669433 }
+  back: { left: 9.50761983, right: 9.50761983 }

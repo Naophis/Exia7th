@@ -89,7 +89,7 @@ constexpr uint16_t BUF_SIZE = 4096;
 constexpr uint16_t MOTION_CHECK_TH = 1000;
 constexpr uint16_t ENC_OPE_V_R_TH = 175;
 
-constexpr uint16_t LOG_SIZE = 2500;
+constexpr uint16_t LOG_SIZE = 2000;
 constexpr uint16_t LINE_BUF_SIZE = 2000;
 constexpr float BATTERY_GAIN = 2.97324;
 
@@ -125,7 +125,8 @@ static const std::string format1("%d,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
 static const std::string format2("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
 static const std::string format3(
     "%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,"
-    "%0.3f,%d,%0.3f,%0.3f,%0.3f,%d\n");
+    "%0.3f,%d,%0.3f,%0.3f,");
+static const std::string format4("%0.3f,%0.3f,%0.3f,%0.3f,%d\n");
 
 // static const std::string format1("%d,%d,%d,%d,%d,%d,");
 // static const std::string format2("%d,%d,%d,%d,%d,%d,%d,");

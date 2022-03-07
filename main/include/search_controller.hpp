@@ -48,6 +48,12 @@ private:
 
   void judge_wall();
   bool is_goaled();
+  bool wall_n = false;
+  bool wall_e = false;
+  bool wall_w = false;
+  bool wall_s = false;
+  param_straight_t p;
+  param_roll_t pr;
 };
 
 #endif

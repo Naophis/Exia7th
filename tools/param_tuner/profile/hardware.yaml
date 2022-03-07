@@ -18,10 +18,27 @@ Mass: 0.015
 # Lm: 0.000025
 Lm: 0.00000025
 sakiyomi_time: 40
-clear_angle: 20
-clear_dist_order: 180
+clear_angle: 1
+clear_dist_order: 40
 front_dist_offset: 87
-front_dist_offset2: 120
+front_dist_offset2: 130
+
+front_dist_offset_dia_front: 139
+front_dist_offset_dia_45_th: 77
+# front_dist_offset_dia_right45: 74
+front_dist_offset_dia_right45: 54
+front_dist_offset_dia_left45: 50
+
+clear_dist_ragne_from: 35
+clear_dist_ragne_to: 50
+
+wall_off_hold_dist: 30
+
+wall_off_hold_dist_str_l: 15
+wall_off_hold_dist_str_r: 15
+wall_off_hold_dist_dia_l: 15 
+wall_off_hold_dist_dia_r: 15 
+
 motor_pid:
   p: 0.002
   i: 0.0035

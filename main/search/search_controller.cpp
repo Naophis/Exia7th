@@ -42,7 +42,7 @@ void SearchController::reset() {
   adachi->reset_goal();
 }
 MotionResult SearchController::go_straight_wrapper(param_set_t &p_set) {
-  param_straight_t p;
+  // param_straight_t p;
   p.v_max = p.v_end = p_set.str_map[StraightType::Search].v_max;
   p.accl = p_set.str_map[StraightType::Search].accl;
   p.decel = p_set.str_map[StraightType::Search].decel;
@@ -70,7 +70,7 @@ MotionResult SearchController::slalom(param_set_t &p_set,
   return mp->slalom(sp, td, nm);
 }
 MotionResult SearchController::pivot(param_set_t &p_set) {
-  param_straight_t p;
+  // param_straight_t p;
   MotionResult res;
   p.v_max = p_set.str_map[StraightType::Search].v_max;
   p.v_end = 20;
@@ -103,7 +103,7 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
     return MotionResult::ERROR;
 
   bool flag = false;
-  param_roll_t pr;
+ 
   pr.w_max = p_set.str_map[StraightType::Search].w_max;
   pr.alpha = p_set.str_map[StraightType::Search].alpha;
   pr.w_end = p_set.str_map[StraightType::Search].w_end;
@@ -190,7 +190,7 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
   return res;
 }
 MotionResult SearchController::finish(param_set_t &p_set) {
-  param_straight_t p;
+  // param_straight_t p;
   p.v_max = p_set.str_map[StraightType::Search].v_max;
   p.v_end = 10;
   p.accl = p_set.str_map[StraightType::Search].accl;
@@ -211,7 +211,6 @@ void SearchController::exec(param_set_t &p_set, SearchMode sm) {
         (lgc->map[p.x + p.y * lgc->maze_size] & 0x0f);
   }
 
-  param_straight_t p;
   p.v_max = p.v_end = p_set.str_map[StraightType::Search].v_max;
   p.accl = p_set.str_map[StraightType::Search].accl;
   p.decel = p_set.str_map[StraightType::Search].decel;
@@ -273,20 +272,20 @@ void SearchController::exec(param_set_t &p_set, SearchMode sm) {
   finish(p_set);
   pt->motor_disable();
   lt->stop_slalom_log();
-  // lt->save(slalom_log_file);
+  lt->save(slalom_log_file);
   mp->coin();
   while (1) {
     if (ui->button_state_hold())
       break;
     vTaskDelay(10 / portTICK_RATE_MS);
   }
-  // lt->dump_log(slalom_log_file);
+  lt->dump_log(slalom_log_file);
 }
 void SearchController::judge_wall() {
-  bool wall_n = false;
-  bool wall_e = false;
-  bool wall_w = false;
-  bool wall_s = false;
+  wall_n = false;
+  wall_e = false;
+  wall_w = false;
+  wall_s = false;
 
   // if (ego->dir == Direction::North) {
   //   wall_n =

@@ -19,32 +19,39 @@ function test_slalom(turn_mode, ego_v)
     wall_off_offset_dia = 0 * sqrt(2);
 
     if turn_mode == Normal
-        radius = 32; sla.pow_n = 4;
+        radius = 26; sla.pow_n = 2;
+        % radius = 32; sla.pow_n = 4;
         target_angle = 90; is_dia_mode = false; turn_mode_str = 'Normal';
     elseif turn_mode == Large
-        radius = 55; sla.pow_n = 2;
+        radius = 54; sla.pow_n = 2;
+        % radius = 64; sla.pow_n = 4;
         target_angle = 90; is_dia_mode = false; turn_mode_str = 'Large';
     elseif turn_mode == Orval
         radius = 40; sla.pow_n = 2;
         target_angle = 180; is_dia_mode = false; turn_mode_str = 'Orval';
     elseif turn_mode == Dia45
-        radius = 55; sla.pow_n = 2;
+        radius = 58; sla.pow_n = 2;
+        % radius = 64; sla.pow_n = 4;
         target_angle = 45; turn_mode_str = 'Dia45';
         is_dia_mode = false;
     elseif turn_mode == Dia45_2
-        radius = 55; sla.pow_n = 2;
+        radius = 58; sla.pow_n = 2;
+        % radius = 64; sla.pow_n = 4;
         target_angle = 45; turn_mode_str = 'Dia45';
         is_dia_mode = true;
     elseif turn_mode == Dia135
-        radius = 33; sla.pow_n = 2;
+        radius = 36; sla.pow_n = 2;
+        % radius = 43; sla.pow_n = 4;
         target_angle = 135; turn_mode_str = 'Dia135';
         is_dia_mode = false;
     elseif turn_mode == Dia135_2
         radius = 36; sla.pow_n = 2;
+        % radius = 43; sla.pow_n = 4;
         target_angle = 135; turn_mode_str = 'Dia135';
         is_dia_mode = true;
     elseif turn_mode == Dia90
-        radius = 30; sla.pow_n = 2;
+        radius = 35; sla.pow_n = 2;
+        % radius = 45; sla.pow_n = 4;
         target_angle = 90;
         is_dia_mode = false; turn_mode_str = 'Dia90';
     end
@@ -164,13 +171,13 @@ function test_slalom(turn_mode, ego_v)
     fprintf("  time: %f\n", sla.base_time);
 
     if turn_mode == Dia45_2 || turn_mode == Dia135_2 || turn_mode == Dia90
-        a = a + 15;
+        % a = a + 15;
     end
 
     fprintf('  front: { left: %0.8f, right : %0.8f}\n', a, a);
 
     if turn_mode == Dia45 || turn_mode == Dia135 || turn_mode == Dia90
-        b = b - 15;
+        % b = b - 15;
     end
 
     fprintf('  back: { left: %0.8f, right : %0.8f}\n', b, b);

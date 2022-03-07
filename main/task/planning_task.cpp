@@ -100,8 +100,6 @@ void PlanningTask::task() {
   const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
   init_gpio();
 
-  ledc_channel_config_t buzzer_ch;
-  ledc_timer_config_t buzzer_timer;
   memset(&buzzer_ch, 0, sizeof(buzzer_ch));
   memset(&buzzer_timer, 0, sizeof(buzzer_timer));
   buzzer_ch.channel = (ledc_channel_t)LEDC_CHANNEL_0;
@@ -120,7 +118,7 @@ void PlanningTask::task() {
   mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, A_PWM);
   mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM1A, B_PWM);
   mcpwm_gpio_init(MCPWM_UNIT_1, MCPWM2A, SUCTION_PWM);
-  mcpwm_config_t motor_pwm_conf;
+
   memset(&motor_pwm_conf, 0, sizeof(motor_pwm_conf));
   motor_pwm_conf.frequency = MOTOR_HZ; // PWM周波数= 10kHz,
   motor_pwm_conf.cmpr_a = 0; // デューティサイクルの初期値（0%）
@@ -131,7 +129,6 @@ void PlanningTask::task() {
   mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_0, &motor_pwm_conf);
   mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_1, &motor_pwm_conf);
 
-  mcpwm_config_t suction_pwm_conf;
   memset(&suction_pwm_conf, 0, sizeof(suction_pwm_conf));
   suction_pwm_conf.frequency = SUCTION_MOTOR_HZ; // PWM周波数= 10kHz,
   suction_pwm_conf.cmpr_a = 0; // デューティサイクルの初期値（0%）
@@ -242,17 +239,18 @@ float PlanningTask::check_sen_error() {
     error_entity.sen_log.gain_z = 0;
   } else {
     if (tgt_val->tgt_in.tgt_dist >= param_ro->clear_dist_order) {
-
-      // if ((ABS(tgt_val->global_pos.ang - tgt_val->global_pos.img_ang) * 180 /
-      //      PI) < 2) {
-      // if (ABS(tgt_val->ego_in.ang * 180 / PI) < param_ro->clear_angle) {
-      if ((ABS(tgt_val->ego_in.ang - tgt_val->ego_in.img_ang) * 180 / PI) <
-          param_ro->clear_angle) {
-        tgt_val->global_pos.ang = tgt_val->global_pos.img_ang;
-        error_entity.w.error_i = 0;
-        error_entity.w.error_d = 0;
-        error_entity.ang.error_i = 0;
-        error_entity.ang.error_d = 0;
+      float dist_mod = (int)(tgt_val->ego_in.dist / 90);
+      float tmp_dist = tgt_val->ego_in.dist - 90 * dist_mod;
+      if (!(param_ro->clear_dist_ragne_from <= tmp_dist &&
+            tmp_dist <= param_ro->clear_dist_ragne_to)) {
+        if ((ABS(tgt_val->ego_in.ang - tgt_val->ego_in.img_ang) * 180 / PI) <
+            param_ro->clear_angle) {
+          tgt_val->global_pos.ang = tgt_val->global_pos.img_ang;
+          error_entity.w.error_i = 0;
+          error_entity.w.error_d = 0;
+          error_entity.ang.error_i = 0;
+          error_entity.ang.error_d = 0;
+        }
       }
     }
   }
@@ -847,6 +845,28 @@ void PlanningTask::calc_sensor_dist_all() {
 }
 
 void PlanningTask::calc_sensor_dist_diff() {
+  if (sensing_result->sen.l45.sensor_dist > sensing_result->ego.left45_dist) {
+    sensing_result->sen.l45.sensor_dist = sensing_result->ego.left45_dist;
+    sensing_result->sen.l45.global_run_dist = tgt_val->global_pos.dist;
+  } else {
+    if (((tgt_val->global_pos.dist - sensing_result->sen.l45.global_run_dist) >
+         param_ro->wall_off_hold_dist) &&
+        sensing_result->ego.left45_dist < 60) {
+      sensing_result->sen.l45.sensor_dist = sensing_result->ego.left45_dist;
+    }
+  }
+
+  if (sensing_result->sen.r45.sensor_dist > sensing_result->ego.right45_dist) {
+    sensing_result->sen.r45.sensor_dist = sensing_result->ego.right45_dist;
+    sensing_result->sen.r45.global_run_dist = tgt_val->global_pos.dist;
+  } else {
+    if (((tgt_val->global_pos.dist - sensing_result->sen.r45.global_run_dist) >
+         param_ro->wall_off_hold_dist) &&
+        sensing_result->ego.right45_dist < 60) {
+      sensing_result->sen.r45.sensor_dist = sensing_result->ego.right45_dist;
+    }
+  }
+
   // sensing_result->ego.left90_dist -= 45;
   // sensing_result->ego.left45_dist -= 45;
   // sensing_result->ego.front_dist = 0;

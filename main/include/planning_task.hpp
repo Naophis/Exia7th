@@ -95,6 +95,11 @@ private:
   float error_left = 0;
   bool check_right = false;
   bool check_left = false;
+
+  ledc_channel_config_t buzzer_ch;
+  ledc_timer_config_t buzzer_timer;
+  mcpwm_config_t motor_pwm_conf;
+  mcpwm_config_t suction_pwm_conf;
 };
 
 #endif

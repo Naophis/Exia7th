@@ -120,7 +120,11 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   ps_front.decel = next_motion.decel;
   ps_front.dist = (td == TurnDirection::Right) ? sp.front.right : sp.front.left;
   ps_front.motion_type = MotionType::SLA_FRONT_STR;
-  ps_front.sct = !dia ? SensorCtrlType::Straight : SensorCtrlType::Dia;
+  ps_front.sct = SensorCtrlType::Straight;
+  if (sp.type == TurnType::Dia45_2 || sp.type == TurnType::Dia135_2 ||
+      sp.type == TurnType::Dia90) {
+    ps_front.sct = SensorCtrlType::NONE;
+  }
   // ps_front.sct = SensorCtrlType::NONE;
   ps_front.wall_off_req = WallOffReq::NONE;
 
@@ -190,18 +194,69 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
         return MotionResult::ERROR;
       }
     }
-  } else if ((sp.type == TurnType::Dia45 || sp.type == TurnType::Dia135) &&
-             !dia) {
+  } else if (sp.type == TurnType::Dia45 || sp.type == TurnType::Dia135) {
     if (sensing_result->ego.front_dist < 150) {
       ps_front.dist -=
           (param->front_dist_offset2 - sensing_result->ego.front_dist);
     }
     if (td == TurnDirection::Right) {
       if (sensing_result->ego.right90_dist < th_offset_dist) {
+        ps_back.dist += (sensing_result->ego.right90_dist - 45) * ROOT2;
       }
     } else {
       if (sensing_result->ego.left90_dist < th_offset_dist) {
+        ps_back.dist += (sensing_result->ego.left90_dist - 45) * ROOT2;
       }
+    }
+    auto res_f = go_straight(ps_front);
+    if (res_f != MotionResult::NONE) {
+      return MotionResult::ERROR;
+    }
+  } else if (sp.type == TurnType::Dia45_2 || sp.type == TurnType::Dia135_2) {
+    tgt_val->motion_type = MotionType::WALL_OFF_DIA;
+    if (td == TurnDirection::Right) {
+      while ((tgt_val->global_pos.img_dist -
+              sensing_result->sen.r45.global_run_dist) <
+             param->wall_off_dist.right_dia) {
+        vTaskDelay(1 / portTICK_RATE_MS);
+      }
+      ps_front.dist += (param->wall_off_dist.right_dia -
+                        (tgt_val->global_pos.img_dist -
+                         sensing_result->sen.r45.global_run_dist));
+    } else {
+      while ((tgt_val->global_pos.img_dist -
+              sensing_result->sen.l45.global_run_dist) <
+             param->wall_off_dist.left_dia) {
+        vTaskDelay(1 / portTICK_RATE_MS);
+      }
+      ps_front.dist += (param->wall_off_dist.left_dia -
+                        (tgt_val->global_pos.img_dist -
+                         sensing_result->sen.l45.global_run_dist));
+    }
+    auto res_f = go_straight(ps_front);
+    if (res_f != MotionResult::NONE) {
+      return MotionResult::ERROR;
+    }
+  } else if (sp.type == TurnType::Dia90) {
+    tgt_val->motion_type = MotionType::WALL_OFF_DIA;
+    if (td == TurnDirection::Right) {
+      while ((tgt_val->global_pos.img_dist -
+              sensing_result->sen.r45.global_run_dist) <
+             param->wall_off_dist.right_dia) {
+        vTaskDelay(1 / portTICK_RATE_MS);
+      }
+      ps_front.dist += (param->wall_off_dist.right_dia -
+                        (tgt_val->global_pos.img_dist -
+                         sensing_result->sen.r45.global_run_dist));
+    } else {
+      while ((tgt_val->global_pos.img_dist -
+              sensing_result->sen.l45.global_run_dist) <
+             param->wall_off_dist.left_dia) {
+        vTaskDelay(1 / portTICK_RATE_MS);
+      }
+      ps_front.dist += (param->wall_off_dist.left_dia -
+                        (tgt_val->global_pos.img_dist -
+                         sensing_result->sen.l45.global_run_dist));
     }
     auto res_f = go_straight(ps_front);
     if (res_f != MotionResult::NONE) {
@@ -302,15 +357,20 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   ps_back.accl = next_motion.accl;
   ps_back.decel = next_motion.decel;
   ps_back.motion_type = MotionType::SLA_BACK_STR;
-  ps_back.sct = !dia ? SensorCtrlType::Straight : SensorCtrlType::Dia;
+  ps_back.sct = SensorCtrlType::Straight;
+
+  if (sp.type == TurnType::Dia45 || sp.type == TurnType::Dia135 ||
+      sp.type == TurnType::Dia90) {
+    ps_back.sct = SensorCtrlType::NONE;
+  }
   // ps_back.sct = SensorCtrlType::NONE;
   ps_back.wall_off_req = WallOffReq::NONE;
   //  : SensorCtrlType::Dia;
   MotionResult res_b = MotionResult::NONE;
   if (ps_back.dist > 0) {
-    // if (sp.type != TurnType::Orval) {
-    // }
+
     res_b = go_straight(ps_back);
+
     if (res_b != MotionResult::NONE) {
       return MotionResult::ERROR;
     }
