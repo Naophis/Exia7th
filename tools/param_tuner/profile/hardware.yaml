@@ -21,7 +21,7 @@ sakiyomi_time: 40
 clear_angle: 1
 clear_dist_order: 40
 front_dist_offset: 87
-front_dist_offset2: 130
+front_dist_offset2: 120
 
 front_dist_offset_dia_front: 139
 front_dist_offset_dia_45_th: 77
@@ -34,10 +34,21 @@ clear_dist_ragne_to: 50
 
 wall_off_hold_dist: 30
 
-wall_off_hold_dist_str_l: 15
-wall_off_hold_dist_str_r: 15
-wall_off_hold_dist_dia_l: 15 
-wall_off_hold_dist_dia_r: 15 
+wall_off_hold_dist_str_l: 9.5
+wall_off_hold_dist_str_r: 9.5
+# wall_off_hold_dist_dia_l: 7
+# wall_off_hold_dist_dia_r: 5 
+wall_off_hold_dist_dia_l: 10
+wall_off_hold_dist_dia_r: 10
+
+wall_off_hold_exist_dist_l: 40
+wall_off_hold_exist_dist_r: 40
+
+wall_off_hold_noexist_th_l: 47
+wall_off_hold_noexist_th_r: 47
+
+wall_off_hold_noexist_dia_th_l: 34
+wall_off_hold_noexist_dia_th_r: 34
 
 motor_pid:
   p: 0.002

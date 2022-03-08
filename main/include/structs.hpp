@@ -218,6 +218,12 @@ typedef struct {
   float right_str;
   float left_dia;
   float right_dia;
+  float exist_dist_l;
+  float exist_dist_r;
+  float noexist_th_l;
+  float noexist_th_r;
+  float noexist_dia_th_l;
+  float noexist_dia_th_r;
 } wall_off_hold_dist_t;
 
 typedef struct {

@@ -281,6 +281,21 @@ void MainTask::load_hw_param() {
   param->wall_off_dist.right_dia =
       cJSON_GetObjectItem(root, "wall_off_hold_dist_dia_r")->valuedouble;
 
+  param->wall_off_dist.exist_dist_l =
+      cJSON_GetObjectItem(root, "wall_off_hold_exist_dist_l")->valuedouble;
+  param->wall_off_dist.exist_dist_r =
+      cJSON_GetObjectItem(root, "wall_off_hold_exist_dist_r")->valuedouble;
+
+  param->wall_off_dist.noexist_th_l =
+      cJSON_GetObjectItem(root, "wall_off_hold_noexist_th_l")->valuedouble;
+  param->wall_off_dist.noexist_th_r =
+      cJSON_GetObjectItem(root, "wall_off_hold_noexist_th_r")->valuedouble;
+
+  param->wall_off_dist.noexist_dia_th_l =
+      cJSON_GetObjectItem(root, "wall_off_hold_noexist_dia_th_l")->valuedouble;
+  param->wall_off_dist.noexist_dia_th_r =
+      cJSON_GetObjectItem(root, "wall_off_hold_noexist_dia_th_r")->valuedouble;
+
   param->front_dist_offset_dia_front =
       cJSON_GetObjectItem(root, "front_dist_offset_dia_front")->valuedouble;
   param->front_dist_offset_dia_45_th =
@@ -831,7 +846,7 @@ void MainTask::task() {
       } else if (mode_num == 2) {
         pc->path_create(false);
         pc->convert_large_path(true);
-        pc->diagonalPath(true, true);
+        // pc->diagonalPath(true, true);
         pc->print_path();
         mp->exec_path_running(paramset_list[0]);
       } else if (mode_num == 3) {
@@ -839,8 +854,26 @@ void MainTask::task() {
         pc->convert_large_path(true);
         pc->diagonalPath(true, true);
         pc->print_path();
-        mp->exec_path_running(paramset_list[1]);
+        mp->exec_path_running(paramset_list[0]);
       } else if (mode_num == 4) {
+        pc->path_create(false);
+        pc->convert_large_path(true);
+        // pc->diagonalPath(true, true);
+        pc->print_path();
+        mp->exec_path_running(paramset_list[1]);
+      } else if (mode_num == 5) {
+        pc->path_create(false);
+        pc->convert_large_path(true);
+        pc->diagonalPath(true, true);
+        pc->print_path();
+        mp->exec_path_running(paramset_list[1]);
+      } else if (mode_num == 6) {
+        pc->path_create(false);
+        pc->convert_large_path(true);
+        // pc->diagonalPath(true, true);
+        pc->print_path();
+        mp->exec_path_running(paramset_list[2]);
+      } else if (mode_num == 7) {
         pc->path_create(false);
         pc->convert_large_path(true);
         pc->diagonalPath(true, true);

@@ -18,7 +18,7 @@ test: # テスト走行時に使用するパラメータ群
   suction_duty: 99.0
   file_idx: 0
   sla_dist: 90
-  sla_type: 4
+  sla_type: 3
   # sla_type: 1 normal
   # sla_type: 2 #orval
   # sla_type: 3 #large
@@ -27,7 +27,7 @@ test: # テスト走行時に使用するパラメータ群
   # sla_type: 6 #dia90
   # sla_type: 8 #dia45_2
   # sla_type: 9 #dia135_2
-  sla_return: 1 # 往復フラグ
-  sla_type2: 9 #復路ターン種類
+  sla_return: 0 # 往復フラグ
+  sla_type2: 8 #復路ターン種類
   turn_times: 0
   ignore_opp_sen: 0
