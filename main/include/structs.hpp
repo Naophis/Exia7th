@@ -271,6 +271,10 @@ typedef struct {
   float clear_dist_ragne_to = 0;
   float wall_off_hold_dist;
   wall_off_hold_dist_t wall_off_dist;
+
+  int search_log_enable = 0;
+  int test_log_enable = 0;
+  int fast_log_enable = 0;
 } input_param_t;
 
 typedef struct {

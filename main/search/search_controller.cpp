@@ -103,7 +103,7 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
     return MotionResult::ERROR;
 
   bool flag = false;
- 
+
   pr.w_max = p_set.str_map[StraightType::Search].w_max;
   pr.alpha = p_set.str_map[StraightType::Search].alpha;
   pr.w_end = p_set.str_map[StraightType::Search].w_end;
@@ -203,7 +203,8 @@ bool SearchController::is_goaled() { return tmp_goal_list.size() == 0; }
 void SearchController::exec(param_set_t &p_set, SearchMode sm) {
 
   mp->reset_gyro_ref_with_check();
-  lt->start_slalom_log();
+  if (param->search_log_enable > 0)
+    lt->start_slalom_log();
   reset();
 
   for (const auto p : lgc->goal_list) {

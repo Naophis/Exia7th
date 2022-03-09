@@ -129,6 +129,11 @@ private:
   // std::shared_ptr<Adachi> adachi;
   std::shared_ptr<SearchController> search_ctrl;
   std::shared_ptr<PathCreator> pc;
+  int mode_num;
+  float backup_l;
+  float backup_r;
+  int file_idx;
+  slalom_param2_t sla_p;
 };
 
 #endif

@@ -152,7 +152,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   } else if (sp.type == TurnType::Large) {
     bool b = true;
     if (sensing_result->ego.front_dist < 150) {
-      ps_front.dist +=
+      ps_front.dist -=
           (param->front_dist_offset2 - sensing_result->ego.front_dist);
       b = false;
     }
@@ -166,9 +166,9 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   } else if (sp.type == TurnType::Orval) {
     bool b = true;
     if (sensing_result->ego.front_dist < 150) {
-      ps_front.dist +=
+      ps_front.dist -=
           (param->front_dist_offset2 - sensing_result->ego.front_dist);
-      ps_back.dist +=
+      ps_back.dist -=
           (param->front_dist_offset2 - sensing_result->ego.front_dist);
       b = false;
     }
@@ -199,7 +199,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   } else if (sp.type == TurnType::Dia45 || sp.type == TurnType::Dia135) {
     bool b = true;
     if (sensing_result->ego.front_dist < 150) {
-      ps_front.dist +=
+      ps_front.dist -=
           (param->front_dist_offset2 - sensing_result->ego.front_dist);
       b = false;
     }

@@ -270,6 +270,13 @@ void MainTask::load_hw_param() {
   param->clear_dist_ragne_to =
       cJSON_GetObjectItem(root, "clear_dist_ragne_to")->valuedouble;
 
+  param->search_log_enable =
+      cJSON_GetObjectItem(root, "search_log_enable")->valueint;
+  param->test_log_enable =
+      cJSON_GetObjectItem(root, "test_log_enable")->valueint;
+  param->fast_log_enable =
+      cJSON_GetObjectItem(root, "fast_log_enable")->valuedouble;
+
   param->wall_off_hold_dist =
       cJSON_GetObjectItem(root, "wall_off_hold_dist")->valuedouble;
   param->wall_off_dist.left_str =
@@ -823,7 +830,7 @@ void MainTask::task() {
     read_maze_data();
     search_ctrl->print_maze();
     while (1) {
-      int mode_num = select_mode();
+      mode_num = select_mode();
       printf("%d\n", mode_num);
       if (mode_num == 0) {
         search_ctrl->exec(paramset_list[0], SearchMode::Kata);
@@ -852,33 +859,33 @@ void MainTask::task() {
       } else if (mode_num == 3) {
         pc->path_create(false);
         pc->convert_large_path(true);
-        pc->diagonalPath(true, true);
+        // pc->diagonalPath(true, true);
         pc->print_path();
-        mp->exec_path_running(paramset_list[0]);
+        mp->exec_path_running(paramset_list[1]);
       } else if (mode_num == 4) {
         pc->path_create(false);
         pc->convert_large_path(true);
         // pc->diagonalPath(true, true);
         pc->print_path();
-        mp->exec_path_running(paramset_list[1]);
+        mp->exec_path_running(paramset_list[2]);
       } else if (mode_num == 5) {
         pc->path_create(false);
         pc->convert_large_path(true);
-        pc->diagonalPath(true, true);
+        // pc->diagonalPath(true, true);
         pc->print_path();
-        mp->exec_path_running(paramset_list[1]);
+        mp->exec_path_running(paramset_list[3]);
       } else if (mode_num == 6) {
         pc->path_create(false);
         pc->convert_large_path(true);
         // pc->diagonalPath(true, true);
         pc->print_path();
-        mp->exec_path_running(paramset_list[2]);
+        mp->exec_path_running(paramset_list[4]);
       } else if (mode_num == 7) {
-        pc->path_create(false);
-        pc->convert_large_path(true);
-        pc->diagonalPath(true, true);
-        pc->print_path();
-        mp->exec_path_running(paramset_list[2]);
+        // pc->path_create(false);
+        // pc->convert_large_path(true);
+        // pc->diagonalPath(true, true);
+        // pc->print_path();
+        // mp->exec_path_running(paramset_list[2]);
       } else if (mode_num == 14) {
         dump1(); // taskの最終行に配置すること
       } else if (mode_num == 15) {
@@ -1075,7 +1082,7 @@ void MainTask::test_turn() {
 
 void MainTask::test_sla() {
 
-  int file_idx = sys.test.file_idx;
+  file_idx = sys.test.file_idx;
 
   if (file_idx >= tpp.file_list_size) {
     printf("%d %d\n", file_idx, tpp.file_list_size);
@@ -1083,8 +1090,7 @@ void MainTask::test_sla() {
     return;
   }
 
-  auto sla_p =
-      paramset_list[file_idx].map[static_cast<TurnType>(sys.test.sla_type)];
+  sla_p = paramset_list[file_idx].map[static_cast<TurnType>(sys.test.sla_type)];
 
   printf("slalom params\n");
   printf("v = %f\n", sla_p.v);
@@ -1097,8 +1103,8 @@ void MainTask::test_sla() {
   rorl2 = (rorl == TurnDirection::Right) ? (TurnDirection::Left)
                                          : (TurnDirection::Right);
 
-  float backup_r = param->sen_ref_p.normal.exist.right45;
-  float backup_l = param->sen_ref_p.normal.exist.left45;
+  backup_r = param->sen_ref_p.normal.exist.right45;
+  backup_l = param->sen_ref_p.normal.exist.left45;
   // if (sys.test.ignore_opp_sen) {
   //   if (rorl == TurnDirection::Right) {
   //     param->sen_ref_p.normal.exist.right45 = 1;
@@ -1200,25 +1206,25 @@ void MainTask::test_sla() {
 
 void MainTask::test_search_sla() {
 
-  int file_idx = sys.test.file_idx;
+  file_idx = sys.test.file_idx;
 
   if (file_idx >= tpp.file_list_size) {
     ui->error();
     return;
   }
 
-  auto sla_p = paramset_list[file_idx].map[TurnType::Normal];
+  sla_p = paramset_list[file_idx].map[TurnType::Normal];
 
   rorl = ui->select_direction();
-  float backup_r = param->sen_ref_p.normal.exist.right45;
-  float backup_l = param->sen_ref_p.normal.exist.left45;
-  if (sys.test.ignore_opp_sen) {
-    if (rorl == TurnDirection::Right) {
-      param->sen_ref_p.normal.exist.right45 = 9999;
-    } else {
-      param->sen_ref_p.normal.exist.left45 = 9999;
-    }
-  }
+  backup_r = param->sen_ref_p.normal.exist.right45;
+  backup_l = param->sen_ref_p.normal.exist.left45;
+  // if (sys.test.ignore_opp_sen) {
+  //   if (rorl == TurnDirection::Right) {
+  //     param->sen_ref_p.normal.exist.right45 = 1;
+  //   } else {
+  //     param->sen_ref_p.normal.exist.left45 = 1;
+  //   }
+  // }
   rorl2 = (rorl == TurnDirection::Right) ? (TurnDirection::Left)
                                          : (TurnDirection::Right);
   mp->reset_gyro_ref_with_check();
@@ -1299,14 +1305,14 @@ void MainTask::test_search_sla() {
 
 // 探索中の前壁制御
 void MainTask::test_front_ctrl() {
-  int file_idx = sys.test.file_idx;
+  file_idx = sys.test.file_idx;
 
   if (file_idx >= tpp.file_list_size) {
     ui->error();
     return;
   }
 
-  auto sla_p = paramset_list[file_idx].map[TurnType::Normal];
+  sla_p = paramset_list[file_idx].map[TurnType::Normal];
 
   mp->reset_gyro_ref_with_check();
 
