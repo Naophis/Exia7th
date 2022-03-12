@@ -12,10 +12,11 @@ Simulink.importExternalCTypes('../include/bus.h');
 dt = 0.001;
 
 % test_mode = 0; % straight
-test_mode = 1; % slalom
+% test_mode = 1; % slalom
 % test_mode = 2; % pivot
-% test_mode = 3; % back_straight
-test_mode = 4; % slalom2
+ test_mode = 3; % back_straight
+% test_mode = 4; % slalom2
+% test_mode = 5; % back
 
 %default
 sla.base_alpha = 0;
@@ -41,10 +42,11 @@ slip_gain = 400;
 
 if test_mode == 0
     % tgt
-    v_max = 300;
-    end_v = 20;
+    v_max = -300;
+    end_v = -20;
     accl = 4000;
     decel = -4000;
+
     w_max = 0;
     end_w = 0;
     param_alpha = 0;
@@ -71,9 +73,7 @@ if test_mode == 0
     sla.state = 0;
     sla.counter = int32(1);
 
-end
-
-if test_mode == 1
+elseif test_mode == 1
     % tgt
     v_max = 300;
     end_v = v_max;
@@ -152,9 +152,7 @@ if test_mode == 1
     plot([96 96], [-90 270], 'r:');
 
     hold off;
-end
-
-if test_mode == 2
+elseif test_mode == 2
 
     % tgt
     v_max = 0;
@@ -182,18 +180,16 @@ if test_mode == 2
     ego_dist = 0;
     ego_state = int8(0);
 
-end
-
-if test_mode == 3
+elseif test_mode == 3
     % tgt
     v_max = -100;
-    end_v = 0;
+    end_v = -10;
     accl = -1000;
     decel = 500;
     w_max = 0;
     end_w = 0;
     param_alpha = 0;
-    tgt_dist = -180;
+    tgt_dist = -10;
     tgt_angle = 0;
 
     % ego
@@ -216,9 +212,7 @@ if test_mode == 3
     sla.state = 0;
     sla.counter = int32(1);
 
-end
-
-if test_mode == 4
+elseif test_mode == 4
     % tgt
     v_max = 1000;
     end_v = v_max;

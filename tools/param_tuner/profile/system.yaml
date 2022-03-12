@@ -1,5 +1,7 @@
 # goals: [[7, 7], [7, 8], [8, 7], [8, 8]]
-goals: [[3, 0]]
+# goals: [[3, 0]]
+goals: [[6, 9], [6, 10], [7, 9], [7, 10]]
+
 maze_size: 16
 debug: 0
 mode: 0 # モード選択
@@ -9,7 +11,7 @@ test: # テスト走行時に使用するパラメータ群
   end_v: 1
   accl: 4500
   decel: -4500
-  dist: 360 #直進全部　
+  dist: 720 #直進全部　
   # dist: 180 # スラロームテスト
   w_max: 7.0
   alpha: 20
@@ -18,7 +20,7 @@ test: # テスト走行時に使用するパラメータ群
   suction_duty: 99.0
   file_idx: 0
   sla_dist: 90
-  sla_type: 3
+  sla_type: 2
   # sla_type: 1 normal
   # sla_type: 2 #orval
   # sla_type: 3 #large

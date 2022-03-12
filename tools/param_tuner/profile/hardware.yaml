@@ -1,5 +1,5 @@
 dt: 0.001
-tire: 13.520
+tire: 13.585
 offset_start_dist: 17.0
 gear_a: 37
 gear_b: 8
@@ -18,10 +18,13 @@ Mass: 0.015
 # Lm: 0.000025
 Lm: 0.00000025
 sakiyomi_time: 40
-clear_angle: 1
-clear_dist_order: 40
-front_dist_offset: 87
-front_dist_offset2: 120
+clear_angle: 5
+clear_dist_order: 80
+front_dist_offset: 88
+front_dist_offset2: 123
+
+front_dist_offset_pivot_th: 83
+front_dist_offset_pivot: 88
 
 front_dist_offset_dia_front: 139
 front_dist_offset_dia_45_th: 77
@@ -29,8 +32,8 @@ front_dist_offset_dia_45_th: 77
 front_dist_offset_dia_right45: 54
 front_dist_offset_dia_left45: 50
 
-clear_dist_ragne_from: 35
-clear_dist_ragne_to: 50
+clear_dist_ragne_from: 20
+clear_dist_ragne_to: 45
 
 wall_off_hold_dist: 30
 
@@ -79,18 +82,18 @@ gyro_pid:
   # i: 0.0
   # d: 0
 angle_pid:
-  # p: 0.0
-  # i: 0.05
-  # d: 40.5
-  mode: 1
   p: 0.0
-  i: 0.0
-  d: 0.0
+  i: 0.05
+  d: 40.5
+  mode: 1
+  # p: 0.0
+  # i: 0.0
+  # d: 0.0
 sensor_pid:
   p: 0.125
   i: 0.0
   d: 0.0
-  mode: 0
+  mode: 1
   # p: 0.0
   # i: 0.0
   # d: 0.0

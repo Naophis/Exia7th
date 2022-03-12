@@ -77,10 +77,11 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
   p.accl = p_set.str_map[StraightType::Search].accl;
   p.decel = p_set.str_map[StraightType::Search].decel;
   p.dist = 45;
-
+  bool back_enable = false;
   if (40 < sensing_result->ego.front_dist &&
       (sensing_result->ego.front_dist < 100)) {
-    p.dist += (sensing_result->ego.front_dist - 87);
+    p.dist += (sensing_result->ego.front_dist - 85);
+    back_enable = true;
   }
   p.motion_type = MotionType::PIVOT_PRE;
   p.sct = SensorCtrlType::Straight;
@@ -103,10 +104,11 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
     return MotionResult::ERROR;
 
   bool flag = false;
-
+  float tmp_dist = 0;
   pr.w_max = p_set.str_map[StraightType::Search].w_max;
   pr.alpha = p_set.str_map[StraightType::Search].alpha;
   pr.w_end = p_set.str_map[StraightType::Search].w_end;
+
   if (sensing_result->ego.left90_dist < 45) {
     p.dist = (45 - sensing_result->ego.left90_dist);
     pr.RorL = TurnDirection::Right;
@@ -120,11 +122,13 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
     pr.RorL = TurnDirection::Right;
     flag = false;
   }
-
+  if (back_enable) {
+    tmp_dist = 20;
+  }
   mp->reset_tgt_data();
   mp->reset_ego_data();
   vTaskDelay(25 / portTICK_RATE_MS);
-  pt->motor_disable();
+  pt->motor_disable(false);
 
   mp->reset_tgt_data();
   mp->reset_ego_data();
@@ -139,7 +143,7 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
 
     res = mp->pivot_turn(pr);
     vTaskDelay(10 / portTICK_RATE_MS);
-    pt->motor_disable();
+    pt->motor_disable(false);
 
     vTaskDelay(10 / portTICK_RATE_MS);
     mp->reset_tgt_data();
@@ -149,25 +153,45 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
     mp->reset_tgt_data();
     mp->reset_ego_data();
     vTaskDelay(10 / portTICK_RATE_MS);
-    pt->motor_disable();
-
+    pt->motor_disable(false);
     vTaskDelay(10 / portTICK_RATE_MS);
     mp->reset_tgt_data();
     mp->reset_ego_data();
     pt->motor_enable();
     res = mp->pivot_turn(pr);
+    mp->reset_tgt_data();
+    mp->reset_ego_data();
+    vTaskDelay(10 / portTICK_RATE_MS);
+    pt->motor_disable(false);
   } else {
-
     res = mp->pivot_turn(pr);
+    mp->reset_tgt_data();
+    mp->reset_ego_data();
+    vTaskDelay(10 / portTICK_RATE_MS);
+    pt->motor_disable(false);
   }
 
   // if (res == MotionResult::ERROR)
   //   return MotionResult::ERROR;
 
-  mp->reset_tgt_data();
-  mp->reset_ego_data();
-  vTaskDelay(10 / portTICK_RATE_MS);
-  pt->motor_disable();
+  if (back_enable) {
+    p.v_max = -p_set.str_map[StraightType::Search].v_max;
+    p.v_end = -10; // p_set.str_map[StraightType::Search].v_max;
+    p.accl = -p_set.str_map[StraightType::Search].accl;
+    p.decel = -p_set.str_map[StraightType::Search].decel;
+    p.dist = -tmp_dist;
+    p.motion_type = MotionType::BACK_STRAIGHT;
+    p.sct = SensorCtrlType::NONE;
+    p.wall_off_req = WallOffReq::NONE;
+    mp->reset_tgt_data();
+    mp->reset_ego_data();
+    pt->motor_enable();
+    res = mp->go_straight(p);
+    mp->reset_tgt_data();
+    mp->reset_ego_data();
+    vTaskDelay(10 / portTICK_RATE_MS);
+    pt->motor_disable(false);
+  }
 
   // mp->reset_gyro_ref();
   // ui->coin(100);
@@ -180,7 +204,102 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
   p.v_end = p_set.str_map[StraightType::Search].v_max;
   p.accl = p_set.str_map[StraightType::Search].accl;
   p.decel = p_set.str_map[StraightType::Search].decel;
-  p.dist = 50;
+  if (tmp_dist > 0) {
+    p.dist = 45 + tmp_dist;
+  } else {
+    p.dist = 50;
+  }
+  p.motion_type = MotionType::PIVOT_AFTER;
+  p.sct = SensorCtrlType::Straight;
+  p.wall_off_req = WallOffReq::NONE;
+  res = mp->go_straight(p);
+  // ui->coin(100);
+
+  return res;
+}
+
+MotionResult SearchController::pivot90(param_set_t &p_set,
+                                       const TurnDirection td) {
+  // param_straight_t p;
+  MotionResult res;
+  p.v_max = p_set.str_map[StraightType::Search].v_max;
+  p.v_end = 20;
+  p.accl = p_set.str_map[StraightType::Search].accl;
+  p.decel = p_set.str_map[StraightType::Search].decel;
+  p.dist = 45;
+  if (40 < sensing_result->ego.front_dist &&
+      (sensing_result->ego.front_dist < 100)) {
+    p.dist += (sensing_result->ego.front_dist - param->front_dist_offset_pivot);
+  }
+  p.motion_type = MotionType::PIVOT_PRE;
+  p.sct = SensorCtrlType::Straight;
+  p.wall_off_req = WallOffReq::NONE;
+
+  float offset_dist = 45;
+  if (td == TurnDirection::Right) {
+    if (sensing_result->ego.left90_dist < 58) {
+      offset_dist += (45 - sensing_result->ego.left90_dist);
+    }
+  } else {
+    if (sensing_result->ego.right90_dist < 58) {
+      offset_dist += (45 - sensing_result->ego.right90_dist);
+    }
+  }
+
+  res = mp->go_straight(p);
+
+  // if (res == MotionResult::ERROR)
+  //   return MotionResult::ERROR;
+
+  p.v_max = 20;
+  p.v_end = 5;
+  p.accl = p_set.str_map[StraightType::Search].accl;
+  p.decel = p_set.str_map[StraightType::Search].decel;
+  p.dist = 2;
+  p.motion_type = MotionType::PIVOT_PRE2;
+  p.sct = SensorCtrlType::Straight;
+  p.wall_off_req = WallOffReq::NONE;
+  res = mp->go_straight(p);
+  if (res == MotionResult::ERROR)
+    return MotionResult::ERROR;
+
+  float tmp_dist = 0;
+  pr.w_max = p_set.str_map[StraightType::Search].w_max;
+  pr.alpha = p_set.str_map[StraightType::Search].alpha;
+  pr.w_end = p_set.str_map[StraightType::Search].w_end;
+  pr.ang = PI / 2;
+  pr.RorL = td;
+
+  mp->reset_tgt_data();
+  mp->reset_ego_data();
+  vTaskDelay(25 / portTICK_RATE_MS);
+  pt->motor_disable(false);
+
+  mp->reset_tgt_data();
+  mp->reset_ego_data();
+  pt->motor_enable();
+
+  vTaskDelay(5 / portTICK_RATE_MS);
+
+  res = mp->pivot_turn(pr);
+  mp->reset_tgt_data();
+  mp->reset_ego_data();
+  vTaskDelay(10 / portTICK_RATE_MS);
+  pt->motor_disable(false);
+
+  vTaskDelay(10 / portTICK_RATE_MS);
+  mp->reset_tgt_data();
+  mp->reset_ego_data();
+  pt->motor_enable();
+
+  p.v_max = p_set.str_map[StraightType::Search].v_max;
+  p.v_end = p_set.str_map[StraightType::Search].v_max;
+  p.accl = p_set.str_map[StraightType::Search].accl;
+  p.decel = p_set.str_map[StraightType::Search].decel;
+  p.dist = 45;
+  if (offset_dist != 45) {
+    p.dist = offset_dist;
+  }
   p.motion_type = MotionType::PIVOT_AFTER;
   p.sct = SensorCtrlType::Straight;
   p.wall_off_req = WallOffReq::NONE;
@@ -250,9 +369,17 @@ void SearchController::exec(param_set_t &p_set, SearchMode sm) {
     if (next_motion == Motion::Straight) {
       go_straight_wrapper(p_set);
     } else if (next_motion == Motion::TurnRight) {
-      slalom(p_set, TurnDirection::Right);
+      if (sensing_result->ego.front_dist < param->front_dist_offset_pivot_th) {
+        pivot90(p_set, TurnDirection::Right);
+      } else {
+        slalom(p_set, TurnDirection::Right);
+      }
     } else if (next_motion == Motion::TurnLeft) {
-      slalom(p_set, TurnDirection::Left);
+      if (sensing_result->ego.front_dist < param->front_dist_offset_pivot_th) {
+        pivot90(p_set, TurnDirection::Left);
+      } else {
+        slalom(p_set, TurnDirection::Left);
+      }
     } else if (next_motion == Motion::Back) {
       pivot(p_set);
       // break;
@@ -290,7 +417,8 @@ void SearchController::judge_wall() {
 
   // if (ego->dir == Direction::North) {
   //   wall_n =
-  //       sensing_result->ego.front_dist < param->sen_ref_p.search_exist.front;
+  //       sensing_result->ego.front_dist <
+  //       param->sen_ref_p.search_exist.front;
   //   wall_e = sensing_result->ego.right45_dist <
   //            param->sen_ref_p.search_exist.right45;
   //   wall_w =
@@ -298,7 +426,8 @@ void SearchController::judge_wall() {
   //       param->sen_ref_p.search_exist.left45;
   // } else if (ego->dir == Direction::East) {
   //   wall_e =
-  //       sensing_result->ego.front_dist < param->sen_ref_p.search_exist.front;
+  //       sensing_result->ego.front_dist <
+  //       param->sen_ref_p.search_exist.front;
   //   wall_s = sensing_result->ego.right45_dist <
   //            param->sen_ref_p.search_exist.right45;
   //   wall_n =
@@ -306,7 +435,8 @@ void SearchController::judge_wall() {
   //       param->sen_ref_p.search_exist.left45;
   // } else if (ego->dir == Direction::West) {
   //   wall_w =
-  //       sensing_result->ego.front_dist < param->sen_ref_p.search_exist.front;
+  //       sensing_result->ego.front_dist <
+  //       param->sen_ref_p.search_exist.front;
   //   wall_n = sensing_result->ego.right45_dist <
   //            param->sen_ref_p.search_exist.right45;
   //   wall_s =
@@ -314,7 +444,8 @@ void SearchController::judge_wall() {
   //       param->sen_ref_p.search_exist.left45;
   // } else if (ego->dir == Direction::South) {
   //   wall_s =
-  //       sensing_result->ego.front_dist < param->sen_ref_p.search_exist.front;
+  //       sensing_result->ego.front_dist <
+  //       param->sen_ref_p.search_exist.front;
   //   wall_w = sensing_result->ego.right45_dist <
   //            param->sen_ref_p.search_exist.right45;
   //   wall_e =

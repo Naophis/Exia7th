@@ -7,7 +7,7 @@ straight:
     w_end: 0.1
     alpha: 10
   fast_run:
-    v_max: 2000
+    v_max: 1500
     accl: 2500
     decel: -4500
     w_max: 5
@@ -26,8 +26,8 @@ orval:
   rad: 68.000000
   pow_n: 2.000000
   time: 0.347078
-  front: { left: 5.00000000, right: 5.00000000 }
-  back: { left: 5, right: 5 }
+  front: { left: 0, right: 0 }
+  back: { left: 0, right: 0 }
 normal:
   v: 300.000000
   ang: 90.000000

@@ -275,6 +275,8 @@ typedef struct {
   int search_log_enable = 0;
   int test_log_enable = 0;
   int fast_log_enable = 0;
+  float front_dist_offset_pivot_th = 0;
+  float front_dist_offset_pivot = 0;
 } input_param_t;
 
 typedef struct {

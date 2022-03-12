@@ -33,7 +33,7 @@ enum class MotionType : int {
   PIVOT = 2,
   SLA_FRONT_STR = 3,
   SLALOM = 4,
-  SLA_BACK_STR = 5,
+  BACK_STRAIGHT = 5,
   WALL_OFF = 6,
   READY = 7,
   PIVOT_PRE = 8,
@@ -42,6 +42,7 @@ enum class MotionType : int {
   FRONT_CTRL = 11,
   PIVOT_OFFSET = 12,
   WALL_OFF_DIA = 13,
+  SLA_BACK_STR = 14,
 };
 
 enum class FailSafe : int {

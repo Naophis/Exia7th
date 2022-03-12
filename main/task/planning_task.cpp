@@ -25,9 +25,8 @@ void PlanningTask::suction_enable(float duty) {
                       MCPWM_DUTY_MODE_0);
   mcpwm_start(MCPWM_UNIT_1, MCPWM_TIMER_2);
 }
-void PlanningTask::motor_disable() {
-  // gpio_set_level(A_PWM, 0);
-  // gpio_set_level(B_PWM, 0);
+void PlanningTask::motor_disable(bool reset_req) {
+  // if (reset_req) {
   motor_en = false;
   mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A);
   mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A);
@@ -39,9 +38,10 @@ void PlanningTask::motor_disable() {
   mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_B, 0);
   mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_B,
                       MCPWM_DUTY_MODE_0);
-
-  // gpio_set_level(A_PWM, 0);
-  // gpio_set_level(B_PWM, 0);
+  // }
+}
+void PlanningTask::motor_disable() {
+  motor_disable(true); //
 }
 void PlanningTask::suction_disable() {
   // gpio_set_level(SUCTION_PWM, 0);
@@ -251,6 +251,11 @@ float PlanningTask::check_sen_error() {
           error_entity.ang.error_i = 0;
           error_entity.ang.error_d = 0;
         }
+      } else {
+        error_entity.sen.error_i = 0;
+        error_entity.sen_log.gain_zz = 0;
+        error_entity.sen_log.gain_z = 0;
+        return 0;
       }
     }
   }
@@ -615,26 +620,29 @@ void PlanningTask::calc_tgt_duty() {
     error_entity.w_log.gain_z = 0;
   }
 
-  if (param_ro->angle_pid.mode == 1) {
-    duty_roll2 =
-        param_ro->angle_pid.p * error_entity.ang.error_p +
-        param_ro->angle_pid.i * error_entity.ang.error_i +
-        param_ro->angle_pid.d * error_entity.ang.error_d +
-        (error_entity.ang_log.gain_z - error_entity.ang_log.gain_zz) * dt;
-    // if (duty_sen == 0) {
-    //   duty_roll2 = 0;
-    // }
-    error_entity.ang_log.gain_zz = error_entity.ang_log.gain_z;
-    error_entity.ang_log.gain_z = duty_roll2;
-  } else {
-    duty_roll2 = param_ro->angle_pid.p * error_entity.ang.error_p +
-                 param_ro->angle_pid.i * error_entity.ang.error_i +
-                 param_ro->angle_pid.d * error_entity.ang.error_d;
-    // if (duty_sen == 0) {
-    //   duty_roll2 = 0;
-    // }
-    error_entity.ang_log.gain_zz = 0;
-    error_entity.ang_log.gain_z = 0;
+  if (tgt_val->motion_type == MotionType::PIVOT) {
+
+    if (param_ro->angle_pid.mode == 1) {
+      duty_roll2 =
+          param_ro->angle_pid.p * error_entity.ang.error_p +
+          param_ro->angle_pid.i * error_entity.ang.error_i +
+          param_ro->angle_pid.d * error_entity.ang.error_d +
+          (error_entity.ang_log.gain_z - error_entity.ang_log.gain_zz) * dt;
+      // if (duty_sen == 0) {
+      //   duty_roll2 = 0;
+      // }
+      error_entity.ang_log.gain_zz = error_entity.ang_log.gain_z;
+      error_entity.ang_log.gain_z = duty_roll2;
+    } else {
+      duty_roll2 = param_ro->angle_pid.p * error_entity.ang.error_p +
+                   param_ro->angle_pid.i * error_entity.ang.error_i +
+                   param_ro->angle_pid.d * error_entity.ang.error_d;
+      // if (duty_sen == 0) {
+      //   duty_roll2 = 0;
+      // }
+      error_entity.ang_log.gain_zz = 0;
+      error_entity.ang_log.gain_z = 0;
+    }
   }
 
   tgt_duty.duty_r = (duty_c + duty_c2 + duty_roll + duty_roll2 + duty_rpm_r +

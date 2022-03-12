@@ -44,6 +44,7 @@ private:
   MotionResult go_straight_wrapper(param_set_t &p_set);
   MotionResult slalom(param_set_t &p_set, const TurnDirection td);
   MotionResult pivot(param_set_t &p_set);
+  MotionResult pivot90(param_set_t &p_set, const TurnDirection td);
   MotionResult finish(param_set_t &p_set);
 
   void judge_wall();

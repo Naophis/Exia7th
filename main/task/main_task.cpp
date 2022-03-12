@@ -270,6 +270,11 @@ void MainTask::load_hw_param() {
   param->clear_dist_ragne_to =
       cJSON_GetObjectItem(root, "clear_dist_ragne_to")->valuedouble;
 
+  param->front_dist_offset_pivot_th =
+      cJSON_GetObjectItem(root, "front_dist_offset_pivot_th")->valuedouble;
+  param->front_dist_offset_pivot =
+      cJSON_GetObjectItem(root, "front_dist_offset_pivot")->valuedouble;
+
   param->search_log_enable =
       cJSON_GetObjectItem(root, "search_log_enable")->valueint;
   param->test_log_enable =
@@ -800,8 +805,8 @@ void MainTask::task() {
       printf("test_search_front_ctrl\n");
       test_front_ctrl();
     } else if (sys.user_mode == 8) {
-      printf("test_wall_off\n");
-      //
+      printf("back\n");
+      test_back();
     } else if (sys.user_mode == 13) {
       printf("keep_pivot\n");
       keep_pivot();
@@ -936,6 +941,65 @@ void MainTask::test_run() {
 
   ps.v_max = sys.test.v_max;
   ps.v_end = 20;
+  ps.dist = sys.test.dist - 5;
+  // + param->offset_start_dist;
+  ps.accl = sys.test.accl;
+  ps.decel = sys.test.decel;
+  ps.sct = SensorCtrlType::Straight;
+  ps.motion_type = MotionType::STRAIGHT;
+  ps.dia_mode = false;
+
+  mp->go_straight(ps);
+  ps.v_max = 20;
+  ps.v_end = sys.test.end_v;
+  ps.dist = 5;
+  ps.accl = sys.test.accl;
+  ps.decel = sys.test.decel;
+  mp->go_straight(ps);
+  vTaskDelay(100 / portTICK_RATE_MS);
+  pt->motor_disable();
+  reset_tgt_data();
+  reset_ego_data();
+  req_error_reset();
+  pt->suction_disable();
+
+  lt->stop_slalom_log();
+  reset_tgt_data();
+  reset_ego_data();
+  req_error_reset();
+  mp->coin();
+  lt->save(slalom_log_file);
+  ui->coin(120);
+
+  while (1) {
+    if (ui->button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
+  lt->dump_log(slalom_log_file);
+  while (1) {
+    if (ui->button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
+}
+void MainTask::test_back() {
+  mp->reset_gyro_ref_with_check();
+
+  if (sys.test.suction_active) {
+    pt->suction_enable(sys.test.suction_duty);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+  }
+
+  reset_tgt_data();
+  reset_ego_data();
+  pt->motor_enable();
+
+  req_error_reset();
+  lt->start_slalom_log();
+
+  ps.v_max = sys.test.v_max;
+  ps.v_end = -20;
   ps.dist = sys.test.dist - 5;
   // + param->offset_start_dist;
   ps.accl = sys.test.accl;
