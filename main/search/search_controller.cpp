@@ -54,7 +54,7 @@ MotionResult SearchController::go_straight_wrapper(param_set_t &p_set) {
   p.wall_off_dist_r = param->sen_ref_p.search_exist.offset_r;
   p.wall_off_dist_l = param->sen_ref_p.search_exist.offset_l;
   p.dia_mode = false;
-  return mp->go_straight(p);
+  return mp->go_straight(p, adachi);
 }
 MotionResult SearchController::slalom(param_set_t &p_set,
                                       const TurnDirection td) {
@@ -196,6 +196,8 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
   // mp->reset_gyro_ref();
   // ui->coin(100);
 
+  adachi->update();
+
   vTaskDelay(10 / portTICK_RATE_MS);
   mp->reset_tgt_data();
   mp->reset_ego_data();
@@ -274,6 +276,8 @@ MotionResult SearchController::pivot90(param_set_t &p_set,
   mp->reset_ego_data();
   vTaskDelay(25 / portTICK_RATE_MS);
   pt->motor_disable(false);
+
+  adachi->update();
 
   mp->reset_tgt_data();
   mp->reset_ego_data();
@@ -356,12 +360,17 @@ void SearchController::exec(param_set_t &p_set, SearchMode sm) {
     tmp_goal_list.erase(ego->x + ego->y * lgc->maze_size);
     // 片道モードでゴールしたらbreak
     if (sm == SearchMode::Kata)
-      if (adachi->is_goaled())
+      if (adachi->goal_step)
         break;
     //往復モードでゴールしたらbreak
     if (sm == SearchMode::Return)
-      if (adachi->is_goaled() && (ego->x == 0 && ego->y == 0))
-        break;
+      if (adachi->goal_step) {
+        if (ego->x == 0 && ego->y == 0) {
+          break;
+        } else {
+          adachi->subgoal_list.clear();
+        }
+      }
 
     // 足立法で行き先決定
     auto next_motion = adachi->exec();
@@ -385,6 +394,13 @@ void SearchController::exec(param_set_t &p_set, SearchMode sm) {
       // break;
     } else if (next_motion == Motion::NONE) {
       break;
+    }
+    if (sm == SearchMode::ALL) {
+      if (adachi->goal_step) {
+        if (adachi->subgoal_list.size() == 0) {
+          break;
+        }
+      }
     }
 
     if (next_motion == Motion::Back) {
@@ -415,43 +431,6 @@ void SearchController::judge_wall() {
   wall_w = false;
   wall_s = false;
 
-  // if (ego->dir == Direction::North) {
-  //   wall_n =
-  //       sensing_result->ego.front_dist <
-  //       param->sen_ref_p.search_exist.front;
-  //   wall_e = sensing_result->ego.right45_dist <
-  //            param->sen_ref_p.search_exist.right45;
-  //   wall_w =
-  //       sensing_result->ego.left45_dist <
-  //       param->sen_ref_p.search_exist.left45;
-  // } else if (ego->dir == Direction::East) {
-  //   wall_e =
-  //       sensing_result->ego.front_dist <
-  //       param->sen_ref_p.search_exist.front;
-  //   wall_s = sensing_result->ego.right45_dist <
-  //            param->sen_ref_p.search_exist.right45;
-  //   wall_n =
-  //       sensing_result->ego.left45_dist <
-  //       param->sen_ref_p.search_exist.left45;
-  // } else if (ego->dir == Direction::West) {
-  //   wall_w =
-  //       sensing_result->ego.front_dist <
-  //       param->sen_ref_p.search_exist.front;
-  //   wall_n = sensing_result->ego.right45_dist <
-  //            param->sen_ref_p.search_exist.right45;
-  //   wall_s =
-  //       sensing_result->ego.left45_dist <
-  //       param->sen_ref_p.search_exist.left45;
-  // } else if (ego->dir == Direction::South) {
-  //   wall_s =
-  //       sensing_result->ego.front_dist <
-  //       param->sen_ref_p.search_exist.front;
-  //   wall_w = sensing_result->ego.right45_dist <
-  //            param->sen_ref_p.search_exist.right45;
-  //   wall_e =
-  //       sensing_result->ego.left45_dist <
-  //       param->sen_ref_p.search_exist.left45;
-  // }
   if (ego->dir == Direction::North) {
     wall_n =
         sensing_result->ego.front_dist < param->sen_ref_p.search_exist.front;
@@ -507,7 +486,10 @@ void SearchController::print_maze() {
     printf("+");
     for (int i = 0; i < lgc->maze_size; i++) {
       if (lgc->existWall(i, j, Direction::North)) {
-        printf("----+");
+        if (lgc->maze_size == 16)
+          printf("---+");
+        else
+          printf("----+");
       } else {
         printf("    +");
       }
@@ -519,7 +501,10 @@ void SearchController::print_maze() {
       } else {
         printf("  ");
       }
-      printf("%2x ", lgc->dist[i + j * lgc->maze_size]);
+      if (lgc->maze_size == 16)
+        printf("%2x ", lgc->dist[i + j * lgc->maze_size]);
+      else
+        printf("%3x", lgc->dist[i + j * lgc->maze_size]);
     }
     printf("|\r\n");
   }
@@ -527,9 +512,15 @@ void SearchController::print_maze() {
 
   for (int i = 0; i < lgc->maze_size; i++) {
     if (lgc->existWall(i, 0, Direction::South)) {
-      printf("----+");
+      if (lgc->maze_size == 16)
+        printf("---+");
+      else
+        printf("----+");
     } else {
-      printf("    +");
+      if (lgc->maze_size == 16)
+        printf("    +");
+      else
+        printf("     +");
     }
   }
   printf("\r\n");

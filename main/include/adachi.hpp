@@ -28,6 +28,11 @@ public:
   bool is_goal(int x, int y);
   bool is_goaled();
   void reset_goal() { goaled = false; }
+  void goal_step_check();
+  bool goal_step = false;
+  void clear_goal() { goal_step = false; }
+  void update();
+  unordered_map<unsigned int, unsigned char> subgoal_list;
 
 private:
   void setNextDirection(int x2, int y2, Direction dir, Direction &next_dir,
@@ -49,7 +54,6 @@ private:
 
   vector<point_t> pt_list;
   vector<point_t> start_pt_list;
-  unordered_map<unsigned int, unsigned char> subgoal_list;
 };
 
 #endif

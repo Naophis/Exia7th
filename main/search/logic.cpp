@@ -31,8 +31,11 @@ void MazeSolverBaseLgc::init(const int _maze_size, const int _max_step_val) {
 
 void MazeSolverBaseLgc::set_goal_pos(const vector<point_t> &list) {
   goal_list.clear();
-  for (const auto p : list)
+  goal_list_origin.clear();
+  for (const auto p : list) {
     goal_list.emplace_back(p);
+    goal_list_origin.emplace_back(p);
+  }
 }
 
 void MazeSolverBaseLgc::set_goal_pos2(const vector<point_t> &pt_list) {

@@ -3,6 +3,7 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "include/adachi.hpp"
 #include "include/defines.hpp"
 #include "include/logging_task.hpp"
 #include "include/path_creator.hpp"
@@ -26,7 +27,11 @@ public:
   void set_userinterface(std::shared_ptr<UserInterface> &_ui);
   void set_path_creator(std::shared_ptr<PathCreator> &_pc);
 
+  std::shared_ptr<Adachi> fake_adachi;
+
   MotionResult go_straight(param_straight_t &p);
+  MotionResult go_straight(param_straight_t &p,
+                           std::shared_ptr<Adachi> &adachi);
   MotionResult pivot_turn(param_roll_t &p);
   void normal_slalom(param_normal_slalom_t &p, param_straight_t &p_str);
   void n_slalom(param_normal_slalom_t &p, param_straight_t &p_str);
@@ -35,6 +40,9 @@ public:
                       next_motionr_t &next_motion, bool dia);
   MotionResult slalom(slalom_param2_t &sp, TurnDirection dir,
                       next_motionr_t &next_motion);
+  MotionResult slalom(slalom_param2_t &sp, TurnDirection dir,
+                      next_motionr_t &next_motion, bool dia,
+                      std::shared_ptr<Adachi> &adachi);
   MotionResult search_front_ctrl(param_straight_t &p);
 
   MotionResult wall_off(param_straight_t &p, bool dia);

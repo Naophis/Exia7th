@@ -122,6 +122,7 @@ public:
   vector<point_t> goal_list;
   vector<point_t> goal_list2;
   vector<point_t> goal_list3;
+  vector<point_t> goal_list_origin;
 
   void set_param1() {
     cell_size = 180;

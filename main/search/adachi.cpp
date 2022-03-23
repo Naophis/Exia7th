@@ -236,10 +236,26 @@ bool Adachi::is_goaled() {
 // }
 
 // int Adachi::exec(path_type &path) {
+void Adachi::goal_step_check() {
+  // vector<point_t>::iterator it;
+  for (auto it = lgc->goal_list_origin.begin();
+       it != lgc->goal_list_origin.end(); it++) {
+    if ((*it).x == ego->x && (*it).y == ego->y) {
+      it = lgc->goal_list_origin.erase(it);
+      break;
+    }
+  }
+  if (lgc->goal_list_origin.size() == 0) {
+    goal_step = true;
+  } else {
+    goal_step = false;
+  }
+}
+
 Motion Adachi::exec() {
   int calc_cnt = 0;
-
-  goaled = is_goaled();
+  goal_step_check();
+  goaled = goal_step;
 
   if (!goaled) {
     pt_list.clear();
@@ -248,87 +264,73 @@ Motion Adachi::exec() {
   lgc->update_dist_map(0, goaled); // search
   deadEnd(ego->x, ego->y);
   if (goaled) {
-    if (!goal_startpos_lock) {
-      // if (lgc->is_stepped(next_goal_pt.x, next_goal_pt.y) ||
-      //     lgc->candidate_end(next_goal_pt.x, next_goal_pt.y) ||
-      //     lgc->get_dist_val(ego->x, ego->y) > limit ||
-      //     subgoal_list.size() == 0 || true) {
-      if (true) {
-        // if (subgoal_list.size() == 0)
-        {
-          lgc->set_param3();
-          calc_cnt += lgc->searchGoalPosition(true, subgoal_list);
-          cost_mode = 3;
-        }
-
-        if (subgoal_list.size() == 0) {
-          lgc->set_param4();
-          calc_cnt += lgc->searchGoalPosition(true, subgoal_list);
-          cost_mode = 4;
-        }
-        if (subgoal_list.size() == 0) {
-          lgc->set_param1();
-          calc_cnt += lgc->searchGoalPosition(true, subgoal_list);
-          // if (subgoal_list.size() <= 2)
-          //   subgoal_list.clear();
-          // else
-          cost_mode = 1;
-        }
-        if (subgoal_list.size() == 0) {
-          lgc->set_param2();
-          calc_cnt += lgc->searchGoalPosition(true, subgoal_list);
-          // if (subgoal_list.size() <= 2)
-          //   subgoal_list.clear();
-          // else
-          cost_mode = 2;
-        }
-
-        // if (subgoal_list.size() == 0) {
-        //   lgc->set_param5();
-        //   calc_cnt += lgc->searchGoalPosition(true, subgoal_list);
-        //   cost_mode = 5;
-        // }
-        if (subgoal_list.size() == 0) {
-          pt_list.clear();
-          point_t tmp_p;
-          tmp_p.x = tmp_p.y = 0;
-          pt_list.emplace_back(tmp_p);
-        } else {
-          pt_list.clear();
-          point_t tmp_p;
-          for (auto itr = subgoal_list.begin(); itr != subgoal_list.end();
-               ++itr) {
-            tmp_p.x = itr->first % lgc->maze_size;
-            tmp_p.y = itr->first / lgc->maze_size;
-            pt_list.emplace_back(tmp_p);
-          }
-        }
-
-        lgc->set_goal_pos2(pt_list);
-        lgc->update_dist_map(0, goaled); // 再更新したらもう1回歩数マップ生成
+    if (subgoal_list.size() == 0) {
+      pt_list.clear();
+      point_t tmp_p;
+      tmp_p.x = tmp_p.y = 0;
+      pt_list.emplace_back(tmp_p);
+    } else {
+      pt_list.clear();
+      point_t tmp_p;
+      for (auto itr = subgoal_list.begin(); itr != subgoal_list.end(); ++itr) {
+        tmp_p.x = itr->first % lgc->maze_size;
+        tmp_p.y = itr->first / lgc->maze_size;
+        pt_list.emplace_back(tmp_p);
       }
     }
-    if (pt_list.size() == 1 && pt_list[0].x == 0 && pt_list[0].y == 0)
+
+    lgc->set_goal_pos2(pt_list);
+    lgc->update_dist_map(0, goaled); // 再更新したらもう1回歩数マップ生成
+    if (pt_list.size() == 1 && pt_list[0].x == 0 && pt_list[0].y == 0) {
       goal_startpos_lock = true; //ゴール固定
+    } else {
+      goal_startpos_lock = false;
+    }
   }
 
-  if (goal_startpos_lock)
+  if (goal_startpos_lock) {
     if (ego->x == 0 && ego->y == 0) {
       lgc->set_param3();
       calc_cnt += lgc->searchGoalPosition(false, subgoal_list);
       lgc->update_dist_map(1, false); // search
-      cost_mode = 3;
       return Motion::NONE;
     }
-
+  }
   Direction next_dir = detect_next_direction();
   Motion next_motion = get_next_motion(next_dir);
   get_next_pos(next_dir);
   lgc->remove_goal_pos3();
+  goal_step_check();
 
   // create_path(path, next_motion);
   // ROS_INFO("calc_cnt = %d", calc_cnt);
 
   // return static_cast<int>(next_motion);
   return next_motion;
+}
+
+void Adachi::update() {
+  if (goal_step) {
+    subgoal_list.erase(ego->x + ego->y * lgc->maze_size);
+    {
+      lgc->set_param3();
+      lgc->searchGoalPosition(true, subgoal_list);
+      cost_mode = 3;
+    }
+    // if (subgoal_list.size() == 0) {
+    //   lgc->set_param4();
+    //   lgc->searchGoalPosition(true, subgoal_list);
+    //   cost_mode = 4;
+    // }
+    // if (subgoal_list.size() == 0) {
+    //   lgc->set_param1();
+    //   lgc->searchGoalPosition(true, subgoal_list);
+    //   cost_mode = 1;
+    // }
+    // if (subgoal_list.size() == 0) {
+    //   lgc->set_param2();
+    //   lgc->searchGoalPosition(true, subgoal_list);
+    //   cost_mode = 2;
+    // }
+  }
 }

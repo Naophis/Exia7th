@@ -838,7 +838,8 @@ void MainTask::task() {
       mode_num = select_mode();
       printf("%d\n", mode_num);
       if (mode_num == 0) {
-        search_ctrl->exec(paramset_list[0], SearchMode::Kata);
+        lgc->set_goal_pos(sys.goals);
+        search_ctrl->exec(paramset_list[0], SearchMode::ALL);
         save_maze_data(true);
         while (1) {
           if (ui->button_state_hold())
@@ -847,7 +848,13 @@ void MainTask::task() {
         }
         search_ctrl->print_maze();
       } else if (mode_num == 1) {
-        search_ctrl->exec(paramset_list[0], SearchMode::Return);
+        lgc->set_goal_pos(sys.goals);
+        rorl = ui->select_direction();
+        if (rorl == TurnDirection::Right) {
+          search_ctrl->exec(paramset_list[0], SearchMode::Kata);
+        } else {
+          search_ctrl->exec(paramset_list[0], SearchMode::Return);
+        }
         save_maze_data(true);
         while (1) {
           if (ui->button_state_hold())
@@ -1622,13 +1629,18 @@ void MainTask::read_maze_data() {
   if (f == NULL)
     return;
   char line_buf[LINE_BUF_SIZE];
-  while (fgets(line_buf, sizeof(line_buf), f) != NULL)
+  std::string str = "";
+  while (fgets(line_buf, sizeof(line_buf), f) != NULL) {
     printf("%s\n", line_buf);
+    printf("_______\n");
+    str += std::string(line_buf);
+  }
   fclose(f);
-  std::string str = std::string(line_buf);
+  // std::string str = std::string(line_buf);
   if (str == "null")
     return;
   auto map_list = split(str, ',');
+  printf("map_list.size = %d\n", map_list.size());
   for (int i = 0; i < map_list.size(); i++) {
     lgc->set_native_wall_data(i, stoi(map_list[i]));
   }

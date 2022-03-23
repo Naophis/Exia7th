@@ -27,7 +27,8 @@ void MotionPlanning::set_planning_task(std::shared_ptr<PlanningTask> &_pt) {
 void MotionPlanning::set_logging_task(std::shared_ptr<LoggingTask> &_lt) {
   lt = _lt; //
 }
-MotionResult MotionPlanning::go_straight(param_straight_t &p) {
+MotionResult MotionPlanning::go_straight(param_straight_t &p,
+                                         std::shared_ptr<Adachi> &adachi) {
   tgt_val->nmr.v_max = p.v_max;
   tgt_val->nmr.v_end = p.v_end;
   tgt_val->nmr.accl = p.accl;
@@ -49,23 +50,25 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p) {
   }
   tgt_val->nmr.timstamp++;
 
+  if (adachi != nullptr) {
+    adachi->update();
+  }
+
   vTaskDelay(1 / portTICK_RATE_MS);
   while (1) {
     vTaskDelay(1 / portTICK_RATE_MS);
-    // if (p.motion_type != MotionType::BACK_STRAIGHT) {
-    //   if (tgt_val->ego_in.dist >= p.dist) {
-    //     break;
-    //   }
-    // } else {
     if (ABS(tgt_val->ego_in.dist) >= ABS(p.dist)) {
       break;
     }
-    // }
     if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
       return MotionResult::ERROR;
     }
   }
   return MotionResult::NONE;
+}
+
+MotionResult MotionPlanning::go_straight(param_straight_t &p) {
+  return go_straight(p, fake_adachi);
 }
 
 MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
@@ -118,6 +121,11 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
 
 MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
                                     next_motionr_t &next_motion, bool dia) {
+  return slalom(sp, td, next_motion, dia, fake_adachi);
+}
+MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
+                                    next_motionr_t &next_motion, bool dia,
+                                    std::shared_ptr<Adachi> &adachi) {
 
   ps_front.v_max = sp.v;
   ps_front.v_end = sp.v;
@@ -287,7 +295,9 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
 
   tgt_val->ego_in.dist -= tgt_val->ego_in.img_dist;
   tgt_val->ego_in.img_dist = 0;
-
+  if (adachi != nullptr) {
+    adachi->update();
+  }
   while (1) {
     vTaskDelay(1 / portTICK_RATE_MS);
 
