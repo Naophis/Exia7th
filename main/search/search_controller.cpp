@@ -10,6 +10,7 @@ SearchController::~SearchController() {}
 void SearchController::set_lgc(std::shared_ptr<MazeSolverBaseLgc> &_lgc) {
   lgc = _lgc;
   adachi->set_logic(_lgc);
+  lgc->set_ego(ego);
 }
 
 void SearchController::set_motion_plannning(

@@ -1,6 +1,7 @@
 #ifndef MAZE_SOLVER_BASE_LGC_H
 #define MAZE_SOLVER_BASE_LGC_H
 
+#include "include/defines.hpp"
 #include "stdio.h"
 #include <vector>
 
@@ -193,8 +194,10 @@ public:
   vector<unsigned char> updateMap;
   vector<point_t> q_list;
   vector<dir_pt_t> vq_list;
+  void set_ego(std::shared_ptr<ego_t> &_ego);
 
 private:
+  std::shared_ptr<ego_t> ego;
   unsigned int maze_list_size;
   unsigned int goal_list_size;
   unsigned int vector_max_step_val = 180 * 1024;

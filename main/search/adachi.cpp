@@ -260,25 +260,24 @@ Motion Adachi::exec() {
   if (!goaled) {
     pt_list.clear();
   }
-  subgoal_list.erase(ego->x + ego->y * lgc->maze_size);
-  lgc->update_dist_map(0, goaled); // search
-  deadEnd(ego->x, ego->y);
+  if (goaled) {
+    subgoal_list.erase(ego->x + ego->y * lgc->maze_size);
+  }
+
+  // deadEnd(ego->x, ego->y);
   if (goaled) {
     if (subgoal_list.size() == 0) {
       pt_list.clear();
-      point_t tmp_p;
       tmp_p.x = tmp_p.y = 0;
       pt_list.emplace_back(tmp_p);
     } else {
       pt_list.clear();
-      point_t tmp_p;
       for (auto itr = subgoal_list.begin(); itr != subgoal_list.end(); ++itr) {
         tmp_p.x = itr->first % lgc->maze_size;
         tmp_p.y = itr->first / lgc->maze_size;
         pt_list.emplace_back(tmp_p);
       }
     }
-
     lgc->set_goal_pos2(pt_list);
     lgc->update_dist_map(0, goaled); // 再更新したらもう1回歩数マップ生成
     if (pt_list.size() == 1 && pt_list[0].x == 0 && pt_list[0].y == 0) {
@@ -286,6 +285,8 @@ Motion Adachi::exec() {
     } else {
       goal_startpos_lock = false;
     }
+  } else {
+    lgc->update_dist_map(0, goaled); // search
   }
 
   if (goal_startpos_lock) {
@@ -317,20 +318,20 @@ void Adachi::update() {
       lgc->searchGoalPosition(true, subgoal_list);
       cost_mode = 3;
     }
-    // if (subgoal_list.size() == 0) {
-    //   lgc->set_param4();
-    //   lgc->searchGoalPosition(true, subgoal_list);
-    //   cost_mode = 4;
-    // }
-    // if (subgoal_list.size() == 0) {
-    //   lgc->set_param1();
-    //   lgc->searchGoalPosition(true, subgoal_list);
-    //   cost_mode = 1;
-    // }
-    // if (subgoal_list.size() == 0) {
-    //   lgc->set_param2();
-    //   lgc->searchGoalPosition(true, subgoal_list);
-    //   cost_mode = 2;
-    // }
+    if (subgoal_list.size() == 0) {
+      lgc->set_param4();
+      lgc->searchGoalPosition(true, subgoal_list);
+      cost_mode = 4;
+    }
+    if (subgoal_list.size() == 0) {
+      lgc->set_param1();
+      lgc->searchGoalPosition(true, subgoal_list);
+      cost_mode = 1;
+    }
+    if (subgoal_list.size() == 0) {
+      lgc->set_param2();
+      lgc->searchGoalPosition(true, subgoal_list);
+      cost_mode = 2;
+    }
   }
 }

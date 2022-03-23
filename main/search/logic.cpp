@@ -29,6 +29,8 @@ void MazeSolverBaseLgc::init(const int _maze_size, const int _max_step_val) {
   // goal_list3.emplace_back(p);
 }
 
+void MazeSolverBaseLgc::set_ego(std::shared_ptr<ego_t> &_ego) { ego = _ego; }
+
 void MazeSolverBaseLgc::set_goal_pos(const vector<point_t> &list) {
   goal_list.clear();
   goal_list_origin.clear();
@@ -164,6 +166,11 @@ void MazeSolverBaseLgc::update_dist_map(const int mode,
           q_list[tail].y = Y + j;
           tail++;
         }
+      }
+    }
+    if (search_mode) {
+      if (ego->x == X && ego->y == Y) {
+        break;
       }
     }
   }

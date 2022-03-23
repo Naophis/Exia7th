@@ -54,6 +54,7 @@ private:
 
   vector<point_t> pt_list;
   vector<point_t> start_pt_list;
+  point_t tmp_p;
 };
 
 #endif
