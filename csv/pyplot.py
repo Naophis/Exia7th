@@ -24,6 +24,7 @@ def main_plot(fig, file, col_idx, str):
     sensor_raw = input_csv[input_csv.keys()[col_idx]]  # csvの何行目のデータを使うか
 
     param, cov = curve_fit(nonlinear_fit, sensor_raw, dist)
+    # print(param, cov)
     print("{}: {}" .format(str, param))
     min_x = sensor_raw.min()
     max_x = sensor_raw.max()
@@ -36,10 +37,10 @@ def main_plot(fig, file, col_idx, str):
     return param
 
 
-res_l90 = main_plot(L90, "./result_l.csv", 1, "L90")
+# res_l90 = main_plot(L90, "./result_f.csv", 1, "L90")
 res_l45 = main_plot(L45, "./result_l.csv", 2, "L45")
-res_l45 = main_plot(F, "./result_f.csv", 3, "F")
-# res_r45 = main_plot(R45, "./result_r.csv", 4, "R45")
-# res_r90 = main_plot(R90, "./result_r.csv", 5, "R90")
+# res_l45 = main_plot(F, "./result_f.csv", 3, "F")
+res_r45 = main_plot(R45, "./result_r.csv", 4, "R45")
+# res_r90 = main_plot(R90, "./result_f.csv", 5, "R90")
 
 plt.show()

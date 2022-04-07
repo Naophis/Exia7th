@@ -4,9 +4,9 @@ if [ $# -ne 2 ];then
     exit  0
 fi
 
-# 横壁から5枚で35 ~ 65
+# 横壁から5枚で38 ~ 68
 # 前壁から7枚で45 ~ 147
 
 filename="${1}_${2}.csv"
 # node tools/param_tuner/sensor.js $1 $2
-node tools/param_tuner/sensor.js $1 $2>$filename
+node ../tools/param_tuner/sensor.js $1 $2>$filename
