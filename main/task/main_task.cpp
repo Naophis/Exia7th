@@ -807,6 +807,12 @@ void MainTask::task() {
     } else if (sys.user_mode == 8) {
       printf("back\n");
       test_back();
+    } else if (sys.user_mode == 9) {
+      printf("suction\n");
+      mp->reset_gyro_ref_with_check();
+      pt->suction_enable(sys.test.suction_duty);
+      vTaskDelay(1000 * 10 / portTICK_PERIOD_MS);
+      pt->suction_disable();
     } else if (sys.user_mode == 13) {
       printf("keep_pivot\n");
       keep_pivot();
