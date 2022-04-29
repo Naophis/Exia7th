@@ -55,6 +55,9 @@ void UserInterface::motion_check() {
     } else {
       LED_off_all();
     }
+    if (button_state_hold()) {
+      break;
+    }
     float front_sensor_data = sensing_result->led_sen.front.raw;
     if (front_sensor_data > MOTION_CHECK_TH) {
       LED_off_all();

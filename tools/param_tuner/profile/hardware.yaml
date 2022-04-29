@@ -33,7 +33,7 @@ front_dist_offset_dia_right45: 54
 front_dist_offset_dia_left45: 50
 
 clear_dist_ragne_from: 20
-clear_dist_ragne_to: 45
+clear_dist_ragne_to: 40
 
 wall_off_hold_dist: 30
 
@@ -66,15 +66,15 @@ motor_pid:
   # i: 0.0
   # d: 0.0
 dist_pid:
-  # p: 0.0
-  # i: 0.0285
-  # d: 0.2
-  mode: 1
-  p: 0.0
+  p: 0.85
   i: 0.0
-  d: 0.0
+  d: 0.35
+  mode: 1
+  # p: 0.0
+  # i: 0.0
+  # d: 0.0
 gyro_pid:
-  p: 0.15
+  p: 0.125
   i: 0.0065
   d: 0.0
   mode: 1
@@ -82,15 +82,18 @@ gyro_pid:
   # i: 0.0
   # d: 0
 angle_pid:
-  p: 0.0
-  i: 0.05
-  d: 40.5
+  p: 1.5
+  i: 0.0
+  d: 0.25
+  # p: 0.0
+  # i: 0.05
+  # d: 40.5
   mode: 1
   # p: 0.0
   # i: 0.0
   # d: 0.0
 sensor_pid:
-  p: 0.125
+  p: 0.20
   i: 0.0
   d: 0.0
   mode: 1
@@ -103,7 +106,7 @@ sensor_pid_dia:
   d: 0.0
   mode: 1
 gyro_param:
-  gyro_w_gain_right: 0.0010585
+  gyro_w_gain_right: 0.0010575
   gyro_w_gain_left: 0.0010585
   lp_delay: 1
 battery_param:

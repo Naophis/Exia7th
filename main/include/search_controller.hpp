@@ -47,6 +47,8 @@ private:
   MotionResult pivot90(param_set_t &p_set, const TurnDirection td);
   MotionResult finish(param_set_t &p_set);
 
+  void front_wall_ctrl();
+
   void judge_wall();
   bool is_goaled();
   bool wall_n = false;

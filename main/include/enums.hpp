@@ -25,6 +25,7 @@ enum class RUN_MODE2 : int {
   PIVOT_TURN = 2,
   ST_RUN = 3,
   SLALOM_RUN2 = 4,
+  FRONT_CTRL = 5,
 };
 
 enum class MotionType : int {

@@ -70,7 +70,6 @@ void init_gpio() {
   io_conf.pin_bit_mask = 0;
   io_conf.pin_bit_mask |= 1ULL << LED_R90;
   io_conf.pin_bit_mask |= 1ULL << LED_R45;
-  io_conf.pin_bit_mask |= 1ULL << LED_F;
   io_conf.pin_bit_mask |= 1ULL << LED_L45;
   io_conf.pin_bit_mask |= 1ULL << LED_L90;
   io_conf.pin_bit_mask |= 1ULL << A_CW_CCW;

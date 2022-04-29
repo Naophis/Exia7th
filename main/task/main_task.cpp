@@ -802,12 +802,16 @@ void MainTask::task() {
       printf("test_search_sla_walloff\n");
       test_search_sla_walloff();
     } else if (sys.user_mode == 7) {
-      printf("test_search_front_ctrl\n");
-      test_front_ctrl();
+      printf("test_front_ctrl\n");
+      test_front_ctrl(true);
     } else if (sys.user_mode == 8) {
+      printf("test_front_ctrl2\n");
+      test_front_ctrl(false);
+    } else if (sys.user_mode == 9) {
+    } else if (sys.user_mode == 10) {
       printf("back\n");
       test_back();
-    } else if (sys.user_mode == 9) {
+    } else if (sys.user_mode == 11) {
       printf("suction\n");
       mp->reset_gyro_ref_with_check();
       pt->suction_enable(sys.test.suction_duty);
@@ -969,6 +973,7 @@ void MainTask::test_run() {
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
   mp->go_straight(ps);
+  // bool front_ctrl = (sensing_result->ego.front_dist < 60);
   vTaskDelay(100 / portTICK_RATE_MS);
   pt->motor_disable();
   reset_tgt_data();
@@ -976,10 +981,10 @@ void MainTask::test_run() {
   req_error_reset();
   pt->suction_disable();
 
-  lt->stop_slalom_log();
   reset_tgt_data();
   reset_ego_data();
   req_error_reset();
+  lt->stop_slalom_log();
   mp->coin();
   lt->save(slalom_log_file);
   ui->coin(120);
@@ -1381,7 +1386,7 @@ void MainTask::test_search_sla() {
 }
 
 // 探索中の前壁制御
-void MainTask::test_front_ctrl() {
+void MainTask::test_front_ctrl(bool mode) {
   file_idx = sys.test.file_idx;
 
   if (file_idx >= tpp.file_list_size) {
@@ -1389,58 +1394,15 @@ void MainTask::test_front_ctrl() {
     return;
   }
 
-  sla_p = paramset_list[file_idx].map[TurnType::Normal];
-
   mp->reset_gyro_ref_with_check();
-
-  if (sys.test.suction_active) {
-    pt->suction_enable(sys.test.suction_duty);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
-  }
 
   reset_tgt_data();
   reset_ego_data();
   pt->motor_enable();
-
   req_error_reset();
 
-  lt->start_slalom_log();
-
-  ps.v_max = sla_p.v;
-  ps.v_end = sla_p.v;
-  ps.dist = 45 + 80 + param->offset_start_dist;
-  ps.accl = sys.test.accl;
-  ps.decel = sys.test.decel;
-  ps.sct = SensorCtrlType::Straight;
-
-  mp->go_straight(ps);
-
-  mp->search_front_ctrl(ps);
-
-  ps.v_max = sla_p.v;
-  ps.v_end = 20;
-  ps.dist = 45 - 5;
-  ps.accl = sys.test.accl;
-  ps.decel = sys.test.decel;
-  ps.sct = SensorCtrlType::NONE;
-  mp->go_straight(ps);
-  ps.v_max = 20;
-  ps.v_end = sys.test.end_v;
-  ps.dist = 5;
-  ps.accl = sys.test.accl;
-  ps.decel = sys.test.decel;
-  ps.sct = SensorCtrlType::NONE;
-  mp->go_straight(ps);
-
-  vTaskDelay(100 / portTICK_RATE_MS);
+  mp->front_ctrl(mode);
   pt->motor_disable();
-  reset_tgt_data();
-  reset_ego_data();
-  req_error_reset();
-  pt->suction_disable();
-  lt->stop_slalom_log();
-
-  lt->save(slalom_log_file);
   ui->coin(120);
 
   while (1) {

@@ -150,12 +150,12 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
           (sensing_result->ego.front_dist - param->front_dist_offset);
     }
     if (td == TurnDirection::Right) {
-      if (sensing_result->ego.left90_dist < th_offset_dist) {
-        ps_back.dist += (45 - sensing_result->ego.left90_dist);
+      if (sensing_result->ego.left45_dist < th_offset_dist) {
+        ps_back.dist += (45 - sensing_result->ego.left45_dist);
       }
     } else {
-      if (sensing_result->ego.right90_dist < th_offset_dist) {
-        ps_back.dist += (45 - sensing_result->ego.right90_dist);
+      if (sensing_result->ego.right45_dist < th_offset_dist) {
+        ps_back.dist += (45 - sensing_result->ego.right45_dist);
       }
     }
     res_f = go_straight(ps_front);
@@ -190,15 +190,15 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
     }
 
     if (td == TurnDirection::Right) {
-      if (1 < sensing_result->ego.right90_dist &&
-          sensing_result->ego.right90_dist < th_offset_dist) {
-        float rad2 = (sensing_result->ego.right90_dist - 45) / 2;
+      if (1 < sensing_result->ego.right45_dist &&
+          sensing_result->ego.right45_dist < th_offset_dist) {
+        float rad2 = (sensing_result->ego.right45_dist - 45) / 2;
         sp.rad += rad2;
       }
     } else {
-      if (1 < sensing_result->ego.left90_dist &&
-          sensing_result->ego.left90_dist < th_offset_dist) {
-        float rad2 = (sensing_result->ego.left90_dist - 45) / 2;
+      if (1 < sensing_result->ego.left45_dist &&
+          sensing_result->ego.left45_dist < th_offset_dist) {
+        float rad2 = (sensing_result->ego.left45_dist - 45) / 2;
         sp.rad += rad2;
       }
     }
@@ -217,12 +217,12 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
       b = false;
     }
     if (td == TurnDirection::Right) {
-      if (sensing_result->ego.right90_dist < th_offset_dist) {
-        ps_back.dist += (sensing_result->ego.right90_dist - 45) * ROOT2;
+      if (sensing_result->ego.right45_dist < th_offset_dist) {
+        ps_back.dist += (sensing_result->ego.right45_dist - 45) * ROOT2;
       }
     } else {
-      if (sensing_result->ego.left90_dist < th_offset_dist) {
-        ps_back.dist += (sensing_result->ego.left90_dist - 45) * ROOT2;
+      if (sensing_result->ego.left45_dist < th_offset_dist) {
+        ps_back.dist += (sensing_result->ego.left45_dist - 45) * ROOT2;
       }
     }
     if (b) {
@@ -488,6 +488,55 @@ void MotionPlanning::reset_gyro_ref_with_check() {
 
 void MotionPlanning::coin() { ui->coin(120); }
 
+MotionResult MotionPlanning::front_ctrl(bool limit) {
+  tgt_val->nmr.v_max = 0;
+  tgt_val->nmr.v_end = 0;
+  tgt_val->nmr.accl = 0;
+  tgt_val->nmr.decel = 0;
+  tgt_val->nmr.dist = 0;
+  tgt_val->nmr.w_max = 0;
+  tgt_val->nmr.w_end = 0;
+  tgt_val->nmr.alpha = 0;
+  tgt_val->nmr.ang = 0;
+  tgt_val->nmr.sla_alpha = 0;
+  tgt_val->nmr.sla_time = 0;
+  tgt_val->nmr.sla_pow_n = 0;
+  tgt_val->nmr.motion_mode = RUN_MODE2::KEEP;
+  tgt_val->nmr.motion_type = MotionType::FRONT_CTRL;
+  tgt_val->nmr.timstamp++;
+  tgt_val->nmr.dia_mode = false;
+  tgt_val->ego_in.sla_param.counter = 1;
+
+  int cnt = 0;
+  int max_cnt = 0;
+  while (1) {
+    vTaskDelay(1 / portTICK_RATE_MS);
+    if (ui->button_state_hold()) {
+      break;
+    }
+    if (ABS(sensing_result->ego.front_dist -
+            param->sen_ref_p.search_exist.front_ctrl) <
+            param->sen_ref_p.search_exist.kireme_l &&
+        ABS((sensing_result->ego.right90_dist -
+             sensing_result->ego.left90_dist) /
+                2 -
+            param->sen_ref_p.search_exist.kireme_r) <
+            param->sen_ref_p.search_exist.offset_r) {
+      cnt++;
+    } else {
+      cnt = 0;
+    }
+    max_cnt++;
+    if (!limit) {
+      if (cnt > param->sen_ref_p.search_exist.front_ctrl_th)
+        break;
+      if (max_cnt > 500)
+        break;
+    }
+  }
+  return MotionResult::NONE;
+}
+
 void MotionPlanning::keep() {
   tgt_val->nmr.v_max = 0;
   tgt_val->nmr.v_end = 0;
@@ -618,7 +667,16 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
   ps.sct = !dia ? SensorCtrlType::Straight : SensorCtrlType::Dia;
   go_straight(ps);
 
-  pt->motor_disable();
+  reset_tgt_data();
+  reset_ego_data();
+  vTaskDelay(25 / portTICK_RATE_MS);
+  pt->motor_enable();
+  front_ctrl(false);
+  reset_tgt_data();
+  reset_ego_data();
+  vTaskDelay(25 / portTICK_RATE_MS);
+  pt->motor_disable(false);
+
   lt->stop_slalom_log();
   lt->save(slalom_log_file);
   coin();

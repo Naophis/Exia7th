@@ -71,8 +71,8 @@ private:
   bool log_active = false;
   // log_t log_list2[10];
   int log_list2_size = 0;
-  char line[1024];
-  FILE *f;
+  // char line[1024];
+  // FILE *f;
 
   std::shared_ptr<sensing_result_entity_t> sensing_result;
   std::shared_ptr<input_param_t> param_ro;
@@ -101,6 +101,10 @@ private:
   ledc_timer_config_t buzzer_timer;
   mcpwm_config_t motor_pwm_conf;
   mcpwm_config_t suction_pwm_conf;
+  float duty_c = 0;
+  float duty_c2 = 0;
+  float duty_roll = 0;
+  float duty_roll2 = 0;
 };
 
 #endif

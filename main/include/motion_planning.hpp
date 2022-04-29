@@ -59,6 +59,8 @@ public:
   void set_planning_task(std::shared_ptr<PlanningTask> &pt);
   void set_logging_task(std::shared_ptr<LoggingTask> &lt);
 
+  MotionResult front_ctrl(bool limit);
+
 private:
   std::shared_ptr<UserInterface> ui;
 

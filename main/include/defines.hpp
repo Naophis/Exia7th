@@ -29,7 +29,7 @@ constexpr float cell_size = 90;
 
 constexpr gpio_num_t LED_R90 = GPIO_NUM_9;
 constexpr gpio_num_t LED_R45 = GPIO_NUM_10;
-constexpr gpio_num_t LED_F = GPIO_NUM_13;
+// constexpr gpio_num_t LED_F = GPIO_NUM_13;
 constexpr gpio_num_t LED_L45 = GPIO_NUM_16;
 constexpr gpio_num_t LED_L90 = GPIO_NUM_18;
 
@@ -43,11 +43,11 @@ constexpr gpio_num_t B_CW_CCW = GPIO_NUM_41;
 constexpr gpio_num_t A_PWM = GPIO_NUM_40;
 constexpr gpio_num_t B_PWM = GPIO_NUM_42;
 
-constexpr gpio_num_t BUZZER = GPIO_NUM_34;
+constexpr gpio_num_t BUZZER = GPIO_NUM_1;
 
-constexpr gpio_num_t LED1 = GPIO_NUM_1;
-constexpr gpio_num_t LED2 = GPIO_NUM_46;
-constexpr gpio_num_t LED3 = GPIO_NUM_45;
+constexpr gpio_num_t LED1 = GPIO_NUM_15;
+constexpr gpio_num_t LED2 = GPIO_NUM_14;
+constexpr gpio_num_t LED3 = GPIO_NUM_13;
 constexpr gpio_num_t LED4 = GPIO_NUM_8;
 constexpr gpio_num_t LED5 = GPIO_NUM_21;
 constexpr gpio_num_t LED_R = GPIO_NUM_8;
@@ -69,7 +69,7 @@ constexpr gpio_num_t SUCTION_PWM = GPIO_NUM_37;
 
 #define SEN_R90 ADC2_CHANNEL_0
 #define SEN_R45 ADC2_CHANNEL_1
-#define SEN_F ADC2_CHANNEL_4
+// #define SEN_F ADC2_CHANNEL_4
 #define SEN_L45 ADC2_CHANNEL_6
 #define SEN_L90 ADC2_CHANNEL_8
 #define BATTERY ADC2_CHANNEL_9

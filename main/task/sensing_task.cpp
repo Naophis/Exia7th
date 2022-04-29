@@ -27,7 +27,6 @@ void SensingTask::task() {
   // sensing init
   adc2_config_channel_atten(SEN_R90, atten);
   adc2_config_channel_atten(SEN_R45, atten);
-  adc2_config_channel_atten(SEN_F, atten);
   adc2_config_channel_atten(SEN_L45, atten);
   adc2_config_channel_atten(SEN_L90, atten);
   adc2_config_channel_atten(BATTERY, atten);
@@ -40,7 +39,6 @@ void SensingTask::task() {
     // LED_OFF ADC
     adc2_get_raw(SEN_R90, width, &sensing_result->led_sen_before.right90.raw);
     adc2_get_raw(SEN_R45, width, &sensing_result->led_sen_before.right45.raw);
-    adc2_get_raw(SEN_F, width, &sensing_result->led_sen_before.front.raw);
     adc2_get_raw(SEN_L45, width, &sensing_result->led_sen_before.left45.raw);
     adc2_get_raw(SEN_L90, width, &sensing_result->led_sen_before.left90.raw);
 
@@ -50,14 +48,12 @@ void SensingTask::task() {
     }
     gpio_set_level(LED_R90, 1);
     gpio_set_level(LED_R45, 1);
-    gpio_set_level(LED_F, 1);
     gpio_set_level(LED_L45, 1);
     gpio_set_level(LED_L90, 1);
     for (int i = 0; i < 10000; i++)
       ;
     adc2_get_raw(SEN_R90, width, &sensing_result->led_sen_after.right90.raw);
     adc2_get_raw(SEN_R45, width, &sensing_result->led_sen_after.right45.raw);
-    adc2_get_raw(SEN_F, width, &sensing_result->led_sen_after.front.raw);
     adc2_get_raw(SEN_L45, width, &sensing_result->led_sen_after.left45.raw);
     adc2_get_raw(SEN_L90, width, &sensing_result->led_sen_after.left90.raw);
 
@@ -69,10 +65,10 @@ void SensingTask::task() {
         std::max(sensing_result->led_sen_after.right45.raw -
                      sensing_result->led_sen_before.right45.raw,
                  0);
-    sensing_result->led_sen.front.raw =
-        std::max(sensing_result->led_sen_after.front.raw -
-                     sensing_result->led_sen_before.front.raw,
-                 0);
+    // sensing_result->led_sen.front.raw =
+    //     std::max(sensing_result->led_sen_after.front.raw -
+    //                  sensing_result->led_sen_before.front.raw,
+    //              0);
     sensing_result->led_sen.left45.raw =
         std::max(sensing_result->led_sen_after.left45.raw -
                      sensing_result->led_sen_before.left45.raw,
@@ -81,10 +77,11 @@ void SensingTask::task() {
         std::max(sensing_result->led_sen_after.left90.raw -
                      sensing_result->led_sen_before.left90.raw,
                  0);
-
+    sensing_result->led_sen.front.raw = (sensing_result->led_sen.left90.raw +
+                                         sensing_result->led_sen.right90.raw) /
+                                        2;
     gpio_set_level(LED_R90, 0);
     gpio_set_level(LED_R45, 0);
-    gpio_set_level(LED_F, 0);
     gpio_set_level(LED_L45, 0);
     gpio_set_level(LED_L90, 0);
 
@@ -108,9 +105,8 @@ void SensingTask::task() {
 
     sensing_result->battery.data =
         BATTERY_GAIN * 2 * sensing_result->battery.raw / 4096;
-    sensing_result->encoder.right = sensing_result->encoder_raw.right;
-    sensing_result->encoder.left =
-        -1 * sensing_result->encoder_raw.left; //反転必須
+    sensing_result->encoder.right = -sensing_result->encoder_raw.right;
+    sensing_result->encoder.left = -sensing_result->encoder_raw.left; //反転必須
     vTaskDelay(xDelay);
   }
 }
