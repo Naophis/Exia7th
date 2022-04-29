@@ -203,8 +203,18 @@ float PlanningTask::check_sen_error() {
   float dist_mod = (int)(tgt_val->ego_in.dist / 90);
   float tmp_dist = tgt_val->ego_in.dist - 90 * dist_mod;
 
+  if (tmp_dist < 10) {
+    sensing_result->ego.exist_r_wall = sensing_result->ego.right45_dist <
+                                       param_ro->sen_ref_p.search_exist.right45;
+    sensing_result->ego.exist_l_wall = sensing_result->ego.left45_dist <
+                                       param_ro->sen_ref_p.search_exist.left45;
+  }
+
   //前壁が近すぎるときはエスケープ
-  if (sensing_result->ego.front_dist > param_ro->sen_ref_p.normal.exist.front) {
+  if (!(sensing_result->ego.left90_dist <
+            param_ro->sen_ref_p.normal.exist.front &&
+        sensing_result->ego.right90_dist <
+            param_ro->sen_ref_p.normal.exist.front)) {
     if (ABS(sensing_result->ego.right45_dist -
             sensing_result->ego.right45_dist_old) <
         param_ro->sen_ref_p.normal.ref.kireme_r) {

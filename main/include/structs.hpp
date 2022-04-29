@@ -105,6 +105,8 @@ typedef struct {
   float left90_dist_old = 0;
   float right45_dist_old = 0;
   float right90_dist_old = 0;
+  bool exist_r_wall = false;
+  bool exist_l_wall = false;
 
   rpm_t rpm;
   duty_t duty;

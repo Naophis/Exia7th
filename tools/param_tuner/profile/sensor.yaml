@@ -6,7 +6,7 @@ normal:
     kireme_r: 0.50
     kireme_l: 0.50
   exist:
-    right45: 5
+    right45: 50
     left45: 50
     # right45: 48
     # left45: 48
@@ -25,8 +25,8 @@ dia:
 search:
   exist:
     front: 130
-    right45: 58
-    left45: 58
+    right45: 80
+    left45: 80
 
     right90: 58
     left90: 58
