@@ -61,6 +61,9 @@ public:
 
   MotionResult front_ctrl(bool limit);
 
+  void wall_off(TurnDirection td, param_straight_t &ps_front);
+  void wall_off_dia(TurnDirection td, param_straight_t &ps_front);
+
 private:
   std::shared_ptr<UserInterface> ui;
 
@@ -80,8 +83,5 @@ private:
   param_straight_t ps;
   next_motionr_t nm;
   MotionResult res_f;
-
-  void wall_off(TurnDirection td, param_straight_t &ps_front);
-  void wall_off_dia(TurnDirection td, param_straight_t &ps_front);
 };
 #endif

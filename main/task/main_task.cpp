@@ -808,6 +808,8 @@ void MainTask::task() {
       printf("test_front_ctrl2\n");
       test_front_ctrl(false);
     } else if (sys.user_mode == 9) {
+      printf("test_sla_walloff\n");
+      test_sla_walloff();
     } else if (sys.user_mode == 10) {
       printf("back\n");
       test_back();
@@ -1505,7 +1507,7 @@ void MainTask::test_search_sla_walloff() {
 }
 
 void MainTask::test_sla_walloff() {
-
+  rorl = ui->select_direction();
   mp->reset_gyro_ref_with_check();
 
   if (sys.test.suction_active) {
@@ -1523,7 +1525,7 @@ void MainTask::test_sla_walloff() {
 
   ps.v_max = sys.test.v_max;
   ps.v_end = sys.test.v_max;
-  ps.dist = 45 + 70 + param->offset_start_dist;
+  ps.dist = 45 + 45 + param->offset_start_dist;
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
   ps.sct = SensorCtrlType::Straight;
@@ -1533,7 +1535,7 @@ void MainTask::test_sla_walloff() {
   ps.dia_mode = false;
   mp->go_straight(ps);
 
-  // walloff
+  mp->wall_off(rorl, ps);
 
   ps.v_max = sys.test.v_max;
   ps.v_end = 20;

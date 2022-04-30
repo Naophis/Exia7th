@@ -20,8 +20,11 @@ void SensingTask::set_sensing_entity(
 
 void SensingTask::task() {
   // timer_init_grp0_timer0();
-  gyro_if.init();
-  gyro_if.setup();
+
+  if (!GY_MODE) {
+    gyro_if.init();
+    gyro_if.setup();
+  }
   ready = true;
 
   // sensing init
@@ -34,6 +37,7 @@ void SensingTask::task() {
   encoder_init(PCNT_UNIT_1, ENC_L_A, ENC_L_B);
 
   while (1) {
+    gyro_if.req_read2byte_itr(0x47);
     adc2_get_raw(BATTERY, width, &sensing_result->battery.raw);
 
     // LED_OFF ADC
@@ -91,10 +95,11 @@ void SensingTask::task() {
     pcnt_counter_clear(PCNT_UNIT_1);
 
     if (GY_MODE == 0) {
-      sensing_result->gyro.raw = gyro_if.read_gyro_z();
+      // sensing_result->gyro.raw = gyro_if.read_gyro_z();
+      sensing_result->gyro.raw = gyro_if.read_2byte_itr();
     } else {
       if (gyro_q.size() == GY_DQ_SIZE) {
-        sensing_result->gyro.raw = gyro_q[0];
+        sensing_result->gyro.raw = gyro_q[gyro_q.size() - 1];
         for (int i = 0; i < GY_DQ_SIZE; i++) {
           sensing_result->gyro_list[i] = gyro_q[i];
         }

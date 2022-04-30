@@ -669,7 +669,6 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
 
   reset_tgt_data();
   reset_ego_data();
-  vTaskDelay(25 / portTICK_RATE_MS);
   pt->motor_enable();
   front_ctrl(false);
   reset_tgt_data();
@@ -802,54 +801,69 @@ MotionResult MotionPlanning::wall_off(param_straight_t &p, bool dia) {
 }
 
 void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
-  return;
   tgt_val->motion_type = MotionType::WALL_OFF;
   if (td == TurnDirection::Right) {
-    if (sensing_result->ego.right90_dist <
-        param->sen_ref_p.search_exist.right90) {
-      while (sensing_result->ego.right45_dist <
-             param->wall_off_dist.noexist_th_r) {
-        vTaskDelay(1 / portTICK_RATE_MS);
-      }
-      ps_front.dist += param->wall_off_dist.right_str;
-    } else {
-      while ((tgt_val->global_pos.img_dist -
-              sensing_result->sen.r45.global_run_dist) <
-             param->wall_off_dist.right_str) {
-        vTaskDelay(1 / portTICK_RATE_MS);
-        if (sensing_result->ego.right45_dist >
-            param->wall_off_dist.noexist_th_r) {
-          ps_front.dist += param->wall_off_dist.right_str;
-          return;
-        }
-      }
-      ps_front.dist += (param->wall_off_dist.right_str -
-                        (tgt_val->global_pos.img_dist -
-                         sensing_result->sen.r45.global_run_dist));
+    while (sensing_result->ego.right45_dist >
+           param->wall_off_dist.exist_dist_r) {
+      vTaskDelay(1 / portTICK_RATE_MS);
     }
+    while (sensing_result->ego.right45_dist <
+           param->wall_off_dist.noexist_th_r) {
+      vTaskDelay(1 / portTICK_RATE_MS);
+    }
+    // if (sensing_result->ego.right90_dist <
+    //     param->sen_ref_p.search_exist.right90) {
+    //   while (sensing_result->ego.right45_dist <
+    //          param->wall_off_dist.noexist_th_r) {
+    //     vTaskDelay(1 / portTICK_RATE_MS);
+    //   }
+    //   ps_front.dist += param->wall_off_dist.right_str;
+    // } else {
+    //   while ((tgt_val->global_pos.img_dist -
+    //           sensing_result->sen.r45.global_run_dist) <
+    //          param->wall_off_dist.right_str) {
+    //     vTaskDelay(1 / portTICK_RATE_MS);
+    //     if (sensing_result->ego.right45_dist >
+    //         param->wall_off_dist.noexist_th_r) {
+    //       ps_front.dist += param->wall_off_dist.right_str;
+    //       return;
+    //     }
+    //   }
+    //   ps_front.dist += (param->wall_off_dist.right_str -
+    //                     (tgt_val->global_pos.img_dist -
+    //                      sensing_result->sen.r45.global_run_dist));
+    // }
   } else {
-    if (sensing_result->ego.left90_dist <
-        param->sen_ref_p.search_exist.left90) {
-      while (sensing_result->ego.left45_dist <
-             param->wall_off_dist.noexist_th_l) {
-        vTaskDelay(1 / portTICK_RATE_MS);
-      }
-      ps_front.dist += param->wall_off_dist.left_str;
-    } else {
-      while ((tgt_val->global_pos.img_dist -
-              sensing_result->sen.l45.global_run_dist) <
-             param->wall_off_dist.left_str) {
-        vTaskDelay(1 / portTICK_RATE_MS);
-        if (sensing_result->ego.left45_dist >
-            param->wall_off_dist.noexist_th_l) {
-          ps_front.dist += param->wall_off_dist.left_str;
-          return;
-        }
-      }
-      ps_front.dist += (param->wall_off_dist.left_str -
-                        (tgt_val->global_pos.img_dist -
-                         sensing_result->sen.l45.global_run_dist));
+    while (sensing_result->ego.left45_dist >
+           param->wall_off_dist.exist_dist_l) {
+      vTaskDelay(1 / portTICK_RATE_MS);
     }
+    while (sensing_result->ego.left45_dist <
+           param->wall_off_dist.noexist_th_l) {
+      vTaskDelay(1 / portTICK_RATE_MS);
+    }
+    // if (sensing_result->ego.left90_dist <
+    //     param->sen_ref_p.search_exist.left90) {
+    //   while (sensing_result->ego.left45_dist <
+    //          param->wall_off_dist.noexist_th_l) {
+    //     vTaskDelay(1 / portTICK_RATE_MS);
+    //   }
+    //   ps_front.dist += param->wall_off_dist.left_str;
+    // } else {
+    //   while ((tgt_val->global_pos.img_dist -
+    //           sensing_result->sen.l45.global_run_dist) <
+    //          param->wall_off_dist.left_str) {
+    //     vTaskDelay(1 / portTICK_RATE_MS);
+    //     if (sensing_result->ego.left45_dist >
+    //         param->wall_off_dist.noexist_th_l) {
+    //       ps_front.dist += param->wall_off_dist.left_str;
+    //       return;
+    //     }
+    //   }
+    //   ps_front.dist += (param->wall_off_dist.left_str -
+    //                     (tgt_val->global_pos.img_dist -
+    //                      sensing_result->sen.l45.global_run_dist));
+    // }
   }
 }
 

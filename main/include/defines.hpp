@@ -22,8 +22,9 @@
 
 #define ABS(IN) ((IN) < 0 ? -(IN) : (IN))
 
-constexpr int GY_DQ_SIZE = 4;
-constexpr int GY_CYCLE = 2500;
+constexpr int GY_DQ_SIZE = 2;
+constexpr int GY_CYCLE = 2500; // 2500=1/4msec
+// constexpr int GY_CYCLE = 1250; // 1250=1/8msec
 constexpr int GY_MODE = 0;
 constexpr float cell_size = 90;
 

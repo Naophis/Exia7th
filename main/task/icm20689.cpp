@@ -70,14 +70,11 @@ int16_t ICM20689::read2byte(const uint8_t address) {
   memset(&t, 0, sizeof(t)); // Zero out the transaction
   t.flags = SPI_TRANS_USE_TXDATA | SPI_TRANS_USE_RXDATA;
   t.length = 24; // SPI_ADDRESS(8bit) + SPI_DATA(8bit)
-
   t.tx_data[0] = (address | READ_FLAG);
   t.tx_data[1] = 0;
   t.tx_data[2] = 0;
-
   ret = spi_device_polling_transmit(spi, &t); // Transmit!
   assert(ret == ESP_OK);                      // Should have had no issues.
-
   return (signed short)((((unsigned short)(t.rx_data[1] & 0xff)) << 8) |
                         ((unsigned short)(t.rx_data[2] & 0xff)));
 }
@@ -95,6 +92,43 @@ void ICM20689::setup() {
   vTaskDelay(10 / portTICK_PERIOD_MS);
 }
 int ICM20689::read_gyro_z() {
-  // return read2byte(0x47);
-  return (signed short)(read1byte(0x47) << 8 | read1byte(0x48));
+  return read2byte(0x47);
+  // return (signed short)(read1byte(0x47) << 8 | read1byte(0x48));
+}
+void ICM20689::req_read1byte_itr(const uint8_t address) {
+  memset(&itr_t, 0, sizeof(itr_t)); // Zero out the transaction
+  itr_t.flags = SPI_TRANS_USE_RXDATA;
+  itr_t.length = 16; // SPI_ADDRESS(8bit) + SPI_DATA(8bit)
+  uint16_t tx_data = (address | READ_FLAG) << 8;
+  tx_data = SPI_SWAP_DATA_TX(tx_data, 16);
+  itr_t.tx_buffer = &tx_data;
+  spi_device_queue_trans(spi, &itr_t, 1 / portTICK_RATE_MS); // Transmit!
+}
+uint8_t ICM20689::read_1byte_itr() {
+  spi_device_get_trans_result(spi, &r_trans, 1 / portTICK_RATE_MS);
+  return (uint8_t)(((unsigned short)(r_trans->rx_data[1] & 0xff)));
+}
+
+void ICM20689::req_read2byte_itr(const uint8_t address) {
+  memset(&itr_t, 0, sizeof(itr_t)); // Zero out the transaction
+  itr_t.flags = SPI_TRANS_USE_TXDATA | SPI_TRANS_USE_RXDATA;
+  itr_t.length = 24; // SPI_ADDRESS(8bit) + SPI_DATA(8bit)
+  itr_t.tx_data[0] = (address | READ_FLAG);
+  itr_t.tx_data[1] = 0;
+  itr_t.tx_data[2] = 0;
+  spi_device_queue_trans(spi, &itr_t, 1 / portTICK_RATE_MS); // Transmit!
+}
+int16_t ICM20689::read_2byte_itr() {
+  spi_device_get_trans_result(spi, &r_trans, 1 / portTICK_RATE_MS);
+  return (signed short)((((unsigned short)(r_trans->rx_data[1] & 0xff)) << 8) |
+                        ((unsigned short)(r_trans->rx_data[2] & 0xff)));
+}
+signed short ICM20689::read_2byte_itr2(std::vector<int> &list) {
+  spi_device_get_trans_result(spi, &r_trans, 1 / portTICK_RATE_MS);
+  list[0] = r_trans->rx_data[0];
+  list[1] = r_trans->rx_data[1];
+  list[2] = r_trans->rx_data[2];
+  list[3] = r_trans->rx_data[3];
+  return (signed short)((((unsigned short)(r_trans->rx_data[1] & 0xff)) << 8) |
+                        ((unsigned short)(r_trans->rx_data[2] & 0xff)));
 }

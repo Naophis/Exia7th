@@ -44,11 +44,11 @@ wall_off_hold_dist_str_r: 9.5
 wall_off_hold_dist_dia_l: 10
 wall_off_hold_dist_dia_r: 10
 
-wall_off_hold_exist_dist_l: 40
-wall_off_hold_exist_dist_r: 40
+wall_off_hold_exist_dist_l: 70
+wall_off_hold_exist_dist_r: 70
 
-wall_off_hold_noexist_th_l: 47
-wall_off_hold_noexist_th_r: 47
+wall_off_hold_noexist_th_l: 75
+wall_off_hold_noexist_th_r: 75
 
 wall_off_hold_noexist_dia_th_l: 34
 wall_off_hold_noexist_dia_th_r: 34
@@ -106,7 +106,7 @@ sensor_pid_dia:
   d: 0.0
   mode: 1
 gyro_param:
-  gyro_w_gain_right: 0.0010575
+  gyro_w_gain_right: 0.0010585
   gyro_w_gain_left: 0.0010585
   lp_delay: 1
 battery_param:

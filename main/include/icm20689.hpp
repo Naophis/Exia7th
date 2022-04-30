@@ -18,11 +18,20 @@ public:
   uint8_t write1byte(const uint8_t address, const uint8_t data);
   uint8_t read1byte(const uint8_t address);
   int16_t read2byte(const uint8_t address);
+
+  void req_read1byte_itr(const uint8_t address);
+  uint8_t read_1byte_itr();
+
+  void req_read2byte_itr(const uint8_t address);
+  int16_t read_2byte_itr();
+  signed short read_2byte_itr2(std::vector<int> &list);
   void setup();
   int read_gyro_z();
 
 private:
   spi_device_handle_t spi;
+  spi_transaction_t itr_t;
+  spi_transaction_t *r_trans;
 };
 
 #endif

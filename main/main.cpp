@@ -39,9 +39,8 @@
 #include <string>
 #include <vector>
 
-#include "rom/uart.h"
 #include "esp_debug_helpers.h"
-
+#include "rom/uart.h"
 SensingTask st;
 
 void init_uart() {
@@ -94,13 +93,23 @@ void init_gpio() {
   gpio_set_level(SUCTION_PWM, 0);
   // gpio_set_direction((gpio_num_t)GPIO_OUTPUT_IO_8,
 }
+int gyro_mode = 0;
+ICM20689 gyro_if;
 void timer_isr(void *parameters) {
   timer_group_clr_intr_status_in_isr(TIMER_GROUP_0, TIMER_0);
   timer_group_enable_alarm_in_isr(TIMER_GROUP_0, TIMER_0);
   if (st.is_ready()) {
-    st.gyro_q.push_back(st.gyro_if.read_gyro_z());
+    gyro_mode++;
+    if (gyro_mode == 1 || gyro_mode == 3) {
+      gyro_if.req_read2byte_itr(0x47);
+    } else if (gyro_mode == 2 || gyro_mode == 4) {
+      st.gyro_q.push_back(gyro_if.read_2byte_itr());
+    }
     if (st.gyro_q.size() > GY_DQ_SIZE) {
       st.gyro_q.pop_front();
+    }
+    if (gyro_mode == 4) {
+      gyro_mode = 0;
     }
   }
 }
@@ -119,7 +128,6 @@ void hwtimer_init(void) {
   timer_set_counter_value(TIMER_GROUP_0, TIMER_0, 0);
   timer_start(TIMER_GROUP_0, TIMER_0);
 }
-
 extern "C" void app_main() {
   // Adachi adachi;
 
@@ -131,10 +139,10 @@ extern "C" void app_main() {
 
   init_gpio();
   init_uart();
-
-  // esp_backtrace_print(0);
-
   if (GY_MODE) {
+    gyro_if.init();
+    gyro_if.setup();
+    gyro_mode = 0;
     hwtimer_init();
   }
 
