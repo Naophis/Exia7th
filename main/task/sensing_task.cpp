@@ -101,7 +101,7 @@ void SensingTask::task() {
     gpio_set_level(LED_R45, 1);
     gpio_set_level(LED_L45, 1);
     gpio_set_level(LED_L90, 1);
-    for (int i = 0; i < 10000; i++)
+    for (int i = 0; i < led_light_delay_cnt; i++)
       ;
     adc2_get_raw(SEN_R90, width, &sensing_result->led_sen_after.right90.raw);
     adc2_get_raw(SEN_R45, width, &sensing_result->led_sen_after.right45.raw);

@@ -15,7 +15,7 @@ public:
   SearchController();
   ~SearchController();
   void reset();
-  void exec(param_set_t &p_set, SearchMode sm);
+  SearchResult exec(param_set_t &p_set, SearchMode sm);
 
   void set_lgc(std::shared_ptr<MazeSolverBaseLgc> &_lgc);
   void set_motion_plannning(std::shared_ptr<MotionPlanning> &_mp);
@@ -26,8 +26,11 @@ public:
 
   void print_maze();
   void set_input_param_entity(std::shared_ptr<input_param_t> &_param);
+  void save_maze_data();
 
 private:
+  bool saved = false;
+  MotionResult mr = MotionResult::NONE;
   std::shared_ptr<MotionPlanning> mp;
   std::shared_ptr<MazeSolverBaseLgc> lgc;
   std::shared_ptr<PlanningTask> pt;

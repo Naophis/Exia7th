@@ -141,6 +141,13 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
   vTaskDelay(25 / portTICK_RATE_MS);
   pt->motor_disable(false);
 
+  if (adachi->goal_step && !saved) {
+    vTaskDelay(200 / portTICK_RATE_MS);
+    save_maze_data();
+    vTaskDelay(200 / portTICK_RATE_MS);
+    saved = true;
+  }
+
   mp->reset_tgt_data();
   mp->reset_ego_data();
 
@@ -352,7 +359,7 @@ MotionResult SearchController::finish(param_set_t &p_set) {
 }
 bool SearchController::is_goaled() { return tmp_goal_list.size() == 0; }
 
-void SearchController::exec(param_set_t &p_set, SearchMode sm) {
+SearchResult SearchController::exec(param_set_t &p_set, SearchMode sm) {
 
   mp->reset_gyro_ref_with_check();
   if (param->search_log_enable > 0)
@@ -382,17 +389,21 @@ void SearchController::exec(param_set_t &p_set, SearchMode sm) {
 
   int back_cnt = 0;
   // pivot(p_set);
+  saved = false;
   while (1) {
+    mr = MotionResult::NONE;
     // sensing(ego);
     judge_wall();
     //この探索中ゴールしたか
     tmp_goal_list.erase(ego->x + ego->y * lgc->maze_size);
     // 片道モードでゴールしたらbreak
-    if (sm == SearchMode::Kata)
-      if (adachi->goal_step)
+    if (sm == SearchMode::Kata) {
+      if (adachi->goal_step) {
         break;
+      }
+    }
     //往復モードでゴールしたらbreak
-    if (sm == SearchMode::Return)
+    if (sm == SearchMode::Return) {
       if (adachi->goal_step) {
         if (ego->x == 0 && ego->y == 0) {
           break;
@@ -400,36 +411,37 @@ void SearchController::exec(param_set_t &p_set, SearchMode sm) {
           adachi->subgoal_list.clear();
         }
       }
-
+    }
     // 足立法で行き先決定
     auto next_motion = adachi->exec();
     // go_straight_wrapper(p_set);
     if (next_motion == Motion::Straight) {
-      go_straight_wrapper(p_set);
+      mr = go_straight_wrapper(p_set);
     } else if (next_motion == Motion::TurnRight) {
       if (sensing_result->ego.front_dist < param->front_dist_offset_pivot_th) {
-        pivot90(p_set, TurnDirection::Right);
+        mr = pivot90(p_set, TurnDirection::Right);
       } else {
-        slalom(p_set, TurnDirection::Right);
+        mr = slalom(p_set, TurnDirection::Right);
       }
     } else if (next_motion == Motion::TurnLeft) {
       if (sensing_result->ego.front_dist < param->front_dist_offset_pivot_th) {
-        pivot90(p_set, TurnDirection::Left);
+        mr = pivot90(p_set, TurnDirection::Left);
       } else {
-        slalom(p_set, TurnDirection::Left);
+        mr = slalom(p_set, TurnDirection::Left);
       }
     } else if (next_motion == Motion::Back) {
-      pivot(p_set);
-      // break;
+      mr = pivot(p_set);
     } else if (next_motion == Motion::NONE) {
       break;
     }
     if (sm == SearchMode::ALL) {
-      if (adachi->goal_step) {
-        if (adachi->subgoal_list.size() == 0) {
+      if (adachi->goal_step)
+        if (adachi->subgoal_list.size() == 0)
           break;
-        }
-      }
+    }
+
+    if (mr == MotionResult::ERROR) {
+      break;
     }
 
     if (next_motion == Motion::Back) {
@@ -453,6 +465,10 @@ void SearchController::exec(param_set_t &p_set, SearchMode sm) {
     vTaskDelay(10 / portTICK_RATE_MS);
   }
   lt->dump_log(slalom_log_file);
+  if (mr == MotionResult::ERROR) {
+    return SearchResult::FAIL;
+  }
+  return SearchResult::SUCCESS;
 }
 void SearchController::judge_wall() {
   wall_n = false;
@@ -557,4 +573,13 @@ void SearchController::print_maze() {
     }
   }
   printf("\r\n");
+}
+void SearchController::save_maze_data() {
+  auto *f = fopen(maze_log_kata_file.c_str(), "wb");
+  if (f == NULL)
+    return;
+  for (const auto d : lgc->map) {
+    fprintf(f, "%d,", d);
+  }
+  fclose(f);
 }

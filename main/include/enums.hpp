@@ -54,6 +54,10 @@ enum class MotionResult : int {
   NONE = 0,
   ERROR = 1,
 };
+enum class SearchResult : int {
+  SUCCESS = 0,
+  FAIL = 1,
+};
 
 enum class MotionDirection : int {
   NONE = 0,

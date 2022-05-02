@@ -9,6 +9,7 @@
 #include "gen_code_conv_single2half/half_type.h"
 #include "gen_code_conv_single2half/rtwtypes.h"
 
+#include <deque>
 #include <initializer_list>
 #include <iostream>
 #include <memory>
@@ -126,6 +127,11 @@ typedef struct {
   sen_log_t r45;
   // sen_log_t r90;
 } sen_logs_t;
+
+typedef struct {
+  std::deque<float> l45;
+  std::deque<float> r45;
+} sen_dist_log_t;
 
 typedef struct {
   led_sensor_t led_sen;

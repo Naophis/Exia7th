@@ -123,6 +123,8 @@ private:
   void load_turn_param_profiles();
   void load_slalom_param();
   void save_maze_data(bool write);
+  void save_maze_kata_data(bool write);
+  void save_maze_return_data(bool write);
   void read_maze_data();
   std::vector<param_set_t> paramset_list;
 

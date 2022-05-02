@@ -121,6 +121,8 @@ static const std::initializer_list<std::pair<StraightType, std::string>>
 
 static const std::string slalom_log_file("/spiflash/sla.log");
 static const std::string maze_log_file("/spiflash/maze.log");
+static const std::string maze_log_kata_file("/spiflash/maze_kata.log");
+static const std::string maze_log_return_file("/spiflash/maze_return.log");
 
 static const std::string format1("%d,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
 static const std::string format2("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");

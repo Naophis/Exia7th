@@ -861,8 +861,9 @@ void MainTask::task() {
       printf("%d\n", mode_num);
       if (mode_num == 0) {
         lgc->set_goal_pos(sys.goals);
-        search_ctrl->exec(paramset_list[0], SearchMode::ALL);
-        save_maze_data(true);
+        SearchResult sr = search_ctrl->exec(paramset_list[0], SearchMode::ALL);
+        if (sr == SearchResult::SUCCESS)
+          save_maze_data(true);
         while (1) {
           if (ui->button_state_hold())
             break;
@@ -872,12 +873,13 @@ void MainTask::task() {
       } else if (mode_num == 1) {
         lgc->set_goal_pos(sys.goals);
         rorl = ui->select_direction();
-        if (rorl == TurnDirection::Right) {
-          search_ctrl->exec(paramset_list[0], SearchMode::Kata);
-        } else {
-          search_ctrl->exec(paramset_list[0], SearchMode::Return);
-        }
-        save_maze_data(true);
+        SearchResult sr = SearchResult::SUCCESS;
+        if (rorl == TurnDirection::Right)
+          sr = search_ctrl->exec(paramset_list[0], SearchMode::Kata);
+        else
+          sr = search_ctrl->exec(paramset_list[0], SearchMode::Return);
+        if (sr == SearchResult::SUCCESS)
+          save_maze_data(true);
         while (1) {
           if (ui->button_state_hold())
             break;
@@ -924,6 +926,8 @@ void MainTask::task() {
         dump1(); // taskの最終行に配置すること
       } else if (mode_num == 15) {
         save_maze_data(false);
+        save_maze_kata_data(false);
+        save_maze_return_data(false);
         lgc->init(sys.maze_size, sys.maze_size * sys.maze_size - 1);
         lgc->set_goal_pos(sys.goals);
       }
@@ -1591,6 +1595,34 @@ void MainTask::test_sla_walloff() {
 
 void MainTask::save_maze_data(bool write) {
   auto *f = fopen(maze_log_file.c_str(), "wb");
+  if (f == NULL)
+    return;
+  if (write) {
+    for (const auto d : lgc->map) {
+      fprintf(f, "%d,", d);
+    }
+  } else {
+    printf("delete maze data\n");
+    fprintf(f, "null");
+  }
+  fclose(f);
+}
+void MainTask::save_maze_kata_data(bool write) {
+  auto *f = fopen(maze_log_kata_file.c_str(), "wb");
+  if (f == NULL)
+    return;
+  if (write) {
+    for (const auto d : lgc->map) {
+      fprintf(f, "%d,", d);
+    }
+  } else {
+    printf("delete maze data\n");
+    fprintf(f, "null");
+  }
+  fclose(f);
+}
+void MainTask::save_maze_return_data(bool write) {
+  auto *f = fopen(maze_log_return_file.c_str(), "wb");
   if (f == NULL)
     return;
   if (write) {
