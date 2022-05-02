@@ -105,6 +105,7 @@ private:
   float duty_c2 = 0;
   float duty_roll = 0;
   float duty_roll2 = 0;
+  sen_log2_t sen_log;
 };
 
 #endif

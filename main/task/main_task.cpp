@@ -254,6 +254,7 @@ void MainTask::load_hw_param() {
   param->Resist = cJSON_GetObjectItem(root, "Resist")->valuedouble;
   param->Mass = cJSON_GetObjectItem(root, "Mass")->valuedouble;
   param->Lm = cJSON_GetObjectItem(root, "Lm")->valuedouble;
+  param->sen_log_size = cJSON_GetObjectItem(root, "sen_log_size")->valueint;
   param->offset_start_dist =
       cJSON_GetObjectItem(root, "offset_start_dist")->valuedouble;
   param->sakiyomi_time =
@@ -889,31 +890,31 @@ void MainTask::task() {
       } else if (mode_num == 2) {
         pc->path_create(false);
         pc->convert_large_path(true);
-        // pc->diagonalPath(true, true);
+        pc->diagonalPath(true, true);
         pc->print_path();
         mp->exec_path_running(paramset_list[0]);
       } else if (mode_num == 3) {
         pc->path_create(false);
         pc->convert_large_path(true);
-        // pc->diagonalPath(true, true);
+        pc->diagonalPath(true, true);
         pc->print_path();
         mp->exec_path_running(paramset_list[1]);
       } else if (mode_num == 4) {
         pc->path_create(false);
         pc->convert_large_path(true);
-        // pc->diagonalPath(true, true);
+        pc->diagonalPath(true, true);
         pc->print_path();
         mp->exec_path_running(paramset_list[2]);
       } else if (mode_num == 5) {
         pc->path_create(false);
         pc->convert_large_path(true);
-        // pc->diagonalPath(true, true);
+        pc->diagonalPath(true, true);
         pc->print_path();
         mp->exec_path_running(paramset_list[3]);
       } else if (mode_num == 6) {
         pc->path_create(false);
         pc->convert_large_path(true);
-        // pc->diagonalPath(true, true);
+        pc->diagonalPath(true, true);
         pc->print_path();
         mp->exec_path_running(paramset_list[4]);
       } else if (mode_num == 7) {

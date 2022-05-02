@@ -859,14 +859,8 @@ void PlanningTask::cp_request() {
   }
 }
 float PlanningTask::calc_sensor(float data, float a, float b) {
-  if ((tgt_val->motion_type == MotionType::NONE ||
-       tgt_val->motion_type == MotionType::PIVOT)) {
-    return 0;
-  }
   auto res = a / std::log(data) - b;
-  if (res < 0)
-    return 0;
-  if (res > 180)
+  if (res < 0 || res > 180)
     return 180;
   return res;
 }
@@ -934,10 +928,11 @@ void PlanningTask::calc_sensor_dist_diff() {
       sensing_result->sen.r45.sensor_dist = sensing_result->ego.right45_dist;
     }
   }
-
-  // sensing_result->ego.left90_dist -= 45;
-  // sensing_result->ego.left45_dist -= 45;
-  // sensing_result->ego.front_dist = 0;
-  // sensing_result->ego.right45_dist -= 45;
-  // sensing_result->ego.right90_dist -= 45;
+  sen_log.r45_dist = sensing_result->sen.r45.sensor_dist;
+  sen_log.l45_dist = sensing_result->sen.r45.sensor_dist;
+  sen_log.global_run_dist = tgt_val->global_pos.dist;
+  sensing_result->sen_dist_log.list.push_back(sen_log);
+  if (sensing_result->sen_dist_log.list.size() > param_ro->sen_log_size) {
+    sensing_result->sen_dist_log.list.pop_front();
+  }
 }

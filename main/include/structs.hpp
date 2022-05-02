@@ -121,6 +121,12 @@ typedef struct {
 } sen_log_t;
 
 typedef struct {
+  float r45_dist = 0;
+  float l45_dist = 0;
+  float global_run_dist = 0;
+} sen_log2_t;
+
+typedef struct {
   // sen_log_t l90;
   sen_log_t l45;
   // sen_log_t front;
@@ -129,8 +135,7 @@ typedef struct {
 } sen_logs_t;
 
 typedef struct {
-  std::deque<float> l45;
-  std::deque<float> r45;
+  std::deque<sen_log2_t> list;
 } sen_dist_log_t;
 
 typedef struct {
@@ -144,6 +149,7 @@ typedef struct {
   encoder_data_t encoder;
   ego_entity_t ego;
   sen_logs_t sen;
+  sen_dist_log_t sen_dist_log;
 } sensing_result_entity_t;
 
 typedef struct {
@@ -291,6 +297,7 @@ typedef struct {
   int fast_log_enable = 0;
   float front_dist_offset_pivot_th = 0;
   float front_dist_offset_pivot = 0;
+  int sen_log_size = 100;
 } input_param_t;
 
 typedef struct {

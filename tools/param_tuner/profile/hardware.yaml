@@ -66,6 +66,7 @@ wall_off_hold_noexist_dia_th_r: 34
 search_log_enable: 0
 test_log_enable: 0
 fast_log_enable: 1
+sen_log_size: 100
 
 motor_pid:
   p: 0.002

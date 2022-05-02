@@ -267,7 +267,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
         return MotionResult::ERROR;
       }
     }
-  } else if (sp.type == TurnType::Dia45 || sp.type == TurnType::Dia135) {
+  } else if (sp.type == TurnType::Dia45) {
     bool b = true;
     if (sensing_result->ego.left90_dist < 150 &&
         sensing_result->ego.right90_dist < 150) {
@@ -275,32 +275,79 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
           (param->front_dist_offset2 - sensing_result->ego.front_dist);
       b = false;
     }
-    if (td == TurnDirection::Right) {
-      if (sensing_result->ego.right45_dist < th_offset_dist) {
-        ps_back.dist -=
-            (param->sla_wall_ref_r - sensing_result->ego.right45_dist) * ROOT2;
-        find = true;
-      }
-      if (!find) {
-        if (sensing_result->ego.left45_dist < th_offset_dist) {
-          ps_back.dist +=
-              (param->sla_wall_ref_l - sensing_result->ego.left45_dist) * ROOT2;
-        }
-      }
-    } else {
-      if (sensing_result->ego.left45_dist < th_offset_dist) {
-        ps_back.dist -=
-            (param->sla_wall_ref_l - sensing_result->ego.left45_dist) * ROOT2;
-        find = true;
-      }
-      if (!find) {
-        if (sensing_result->ego.right45_dist < th_offset_dist) {
-          ps_back.dist +=
-              (param->sla_wall_ref_r - sensing_result->ego.right45_dist) *
-              ROOT2;
-        }
-      }
+    // if (td == TurnDirection::Right) {
+    //   if (sensing_result->ego.right45_dist < th_offset_dist) {
+    //     ps_back.dist -=
+    //         (param->sla_wall_ref_r - sensing_result->ego.right45_dist) *
+    //         ROOT2;
+    //     find = true;
+    //   }
+    //   if (!find) {
+    //     if (sensing_result->ego.left45_dist < th_offset_dist) {
+    //       ps_back.dist +=
+    //           (param->sla_wall_ref_l - sensing_result->ego.left45_dist) *
+    //           ROOT2;
+    //     }
+    //   }
+    // } else {
+    //   if (sensing_result->ego.left45_dist < th_offset_dist) {
+    //     ps_back.dist -=
+    //         (param->sla_wall_ref_l - sensing_result->ego.left45_dist) *
+    //         ROOT2;
+    //     find = true;
+    //   }
+    //   if (!find) {
+    //     if (sensing_result->ego.right45_dist < th_offset_dist) {
+    //       ps_back.dist +=
+    //           (param->sla_wall_ref_r - sensing_result->ego.right45_dist) *
+    //           ROOT2;
+    //     }
+    //   }
+    // }
+    if (b) {
+      wall_off(td, ps_front);
     }
+    res_f = go_straight(ps_front);
+    if (res_f != MotionResult::NONE) {
+      return MotionResult::ERROR;
+    }
+  } else if (sp.type == TurnType::Dia135) {
+    bool b = true;
+    if (sensing_result->ego.left90_dist < 150 &&
+        sensing_result->ego.right90_dist < 150) {
+      ps_front.dist -=
+          (param->front_dist_offset2 - sensing_result->ego.front_dist);
+      b = false;
+    }
+    // if (td == TurnDirection::Right) {
+    //   if (sensing_result->ego.right45_dist < th_offset_dist) {
+    //     ps_back.dist -=
+    //         (param->sla_wall_ref_r - sensing_result->ego.right45_dist) *
+    //         ROOT2;
+    //     find = true;
+    //   }
+    //   if (!find) {
+    //     if (sensing_result->ego.left45_dist < th_offset_dist) {
+    //       ps_back.dist +=
+    //           (param->sla_wall_ref_l - sensing_result->ego.left45_dist) *
+    //           ROOT2;
+    //     }
+    //   }
+    // } else {
+    //   if (sensing_result->ego.left45_dist < th_offset_dist) {
+    //     ps_back.dist -=
+    //         (param->sla_wall_ref_l - sensing_result->ego.left45_dist) *
+    //         ROOT2;
+    //     find = true;
+    //   }
+    //   if (!find) {
+    //     if (sensing_result->ego.right45_dist < th_offset_dist) {
+    //       ps_back.dist +=
+    //           (param->sla_wall_ref_r - sensing_result->ego.right45_dist) *
+    //           ROOT2;
+    //     }
+    //   }
+    // }
     if (b) {
       wall_off(td, ps_front);
     }
@@ -698,7 +745,6 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
     }
 
     if (!((turn_type == TurnType::None) || (turn_type == TurnType::Finish))) {
-      // TODO wall_off
       auto st = !dia ? StraightType::FastRun : StraightType::FastRunDia;
       bool exist_next_idx = (i + 1) < pc->path_size; //絶対true
       float dist3 = 0;
@@ -830,6 +876,7 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
 
 void MotionPlanning::wall_off_dia(TurnDirection td,
                                   param_straight_t &ps_front) {
+  return;
   tgt_val->nmr.v_max = ps_front.v_max;
   tgt_val->nmr.v_end = ps_front.v_end;
   tgt_val->nmr.accl = ps_front.accl;
