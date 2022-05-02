@@ -126,7 +126,9 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
 MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
                                     next_motionr_t &next_motion, bool dia,
                                     std::shared_ptr<Adachi> &adachi) {
-
+  bool find = false;
+  bool find_r = false;
+  bool find_l = false;
   ps_front.v_max = sp.v;
   ps_front.v_end = sp.v;
   ps_front.accl = next_motion.accl;
@@ -145,17 +147,20 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
 
   if (sp.type == TurnType::Normal) {
     // search_front_ctrl(ps_front); // 前壁制御
-    if (sensing_result->ego.front_dist < 130) {
+    if (sensing_result->ego.left90_dist < 130 &&
+        sensing_result->ego.right90_dist < 130) {
       ps_front.dist +=
           (sensing_result->ego.front_dist - param->front_dist_offset);
     }
     if (td == TurnDirection::Right) {
       if (sensing_result->ego.left45_dist < th_offset_dist) {
-        ps_back.dist += (45 - sensing_result->ego.left45_dist);
+        ps_back.dist +=
+            (param->sla_wall_ref_l - sensing_result->ego.left45_dist);
       }
     } else {
       if (sensing_result->ego.right45_dist < th_offset_dist) {
-        ps_back.dist += (45 - sensing_result->ego.right45_dist);
+        ps_back.dist +=
+            (param->sla_wall_ref_r - sensing_result->ego.right45_dist);
       }
     }
     res_f = go_straight(ps_front);
@@ -164,10 +169,41 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
     }
   } else if (sp.type == TurnType::Large) {
     bool b = true;
-    if (sensing_result->ego.front_dist < 150) {
+    if (sensing_result->ego.left90_dist < 150 &&
+        sensing_result->ego.right90_dist < 150) {
       ps_front.dist -=
           (param->front_dist_offset2 - sensing_result->ego.front_dist);
       b = false;
+    }
+    float dist_r = ps_back.dist;
+    float dist_l = ps_back.dist;
+    if (td == TurnDirection::Right) {
+      if (sensing_result->ego.right45_dist < th_offset_dist) {
+        dist_r -= param->sla_wall_ref_r - sensing_result->ego.right45_dist;
+        find_r = true;
+      }
+      if (sensing_result->ego.left45_dist < th_offset_dist) {
+        dist_l += param->sla_wall_ref_l - sensing_result->ego.left45_dist;
+        find_l = true;
+      }
+    } else {
+      if (sensing_result->ego.left45_dist < th_offset_dist) {
+        dist_l -= param->sla_wall_ref_l - sensing_result->ego.left45_dist;
+        find_l = true;
+      }
+      if (sensing_result->ego.right45_dist < th_offset_dist) {
+        dist_r += param->sla_wall_ref_r - sensing_result->ego.right45_dist;
+        find_r = true;
+      }
+    }
+    if (find_r && find_l) {
+      ps_back.dist = (ABS(ps_back.dist - dist_r) < ABS(ps_back.dist - dist_l))
+                         ? dist_r
+                         : dist_l;
+    } else if (find_r) {
+      ps_back.dist = dist_r;
+    } else if (find_l) {
+      ps_back.dist = dist_l;
     }
     if (b) {
       wall_off(td, ps_front);
@@ -178,31 +214,53 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
     }
   } else if (sp.type == TurnType::Orval) {
     bool b = true;
-    if (sensing_result->ego.front_dist < 150) {
+    if (sensing_result->ego.left90_dist < 150 &&
+        sensing_result->ego.right90_dist < 150) {
       ps_front.dist +=
           (sensing_result->ego.front_dist - param->front_dist_offset2);
-      // ps_back.dist +=
-      //     (sensing_result->ego.front_dist - param->front_dist_offset2);
       b = false;
+    }
+    float rad_r = sp.rad;
+    float rad_l = sp.rad;
+    if (td == TurnDirection::Right) {
+      if (sensing_result->ego.right45_dist < th_offset_dist) {
+        float rad2 =
+            (sensing_result->ego.right45_dist - param->sla_wall_ref_r) / 2;
+        rad_r += rad2;
+        find_r = true;
+      }
+      if (sensing_result->ego.left45_dist < th_offset_dist) {
+        float rad2 =
+            (param->sla_wall_ref_l - sensing_result->ego.left45_dist) / 2;
+        rad_l += rad2;
+        find_l = true;
+      }
+    } else {
+      if (sensing_result->ego.left45_dist < th_offset_dist) {
+        float rad2 =
+            (sensing_result->ego.left45_dist - param->sla_wall_ref_l) / 2;
+        rad_l += rad2;
+        find_l = true;
+      }
+      if (!find) {
+        if (sensing_result->ego.right45_dist < th_offset_dist) {
+          float rad2 =
+              (param->sla_wall_ref_r - sensing_result->ego.right45_dist) / 2;
+          rad_r += rad2;
+          find_r = true;
+        }
+      }
+    }
+    if (find_r && find_l) {
+      sp.rad = (ABS(sp.rad - rad_r) < ABS(sp.rad - rad_l)) ? rad_r : rad_l;
+    } else if (find_r) {
+      sp.rad = rad_r;
+    } else if (find_l) {
+      sp.rad = rad_l;
     }
     if (b) {
       wall_off(td, ps_front);
     }
-
-    if (td == TurnDirection::Right) {
-      if (1 < sensing_result->ego.right45_dist &&
-          sensing_result->ego.right45_dist < th_offset_dist) {
-        float rad2 = (sensing_result->ego.right45_dist - 45) / 2;
-        sp.rad += rad2;
-      }
-    } else {
-      if (1 < sensing_result->ego.left45_dist &&
-          sensing_result->ego.left45_dist < th_offset_dist) {
-        float rad2 = (sensing_result->ego.left45_dist - 45) / 2;
-        sp.rad += rad2;
-      }
-    }
-
     if (ps_front.dist > 0) {
       res_f = go_straight(ps_front);
       if (res_f != MotionResult::NONE) {
@@ -211,18 +269,36 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
     }
   } else if (sp.type == TurnType::Dia45 || sp.type == TurnType::Dia135) {
     bool b = true;
-    if (sensing_result->ego.front_dist < 150) {
+    if (sensing_result->ego.left90_dist < 150 &&
+        sensing_result->ego.right90_dist < 150) {
       ps_front.dist -=
           (param->front_dist_offset2 - sensing_result->ego.front_dist);
       b = false;
     }
     if (td == TurnDirection::Right) {
       if (sensing_result->ego.right45_dist < th_offset_dist) {
-        ps_back.dist += (sensing_result->ego.right45_dist - 45) * ROOT2;
+        ps_back.dist -=
+            (param->sla_wall_ref_r - sensing_result->ego.right45_dist) * ROOT2;
+        find = true;
+      }
+      if (!find) {
+        if (sensing_result->ego.left45_dist < th_offset_dist) {
+          ps_back.dist +=
+              (param->sla_wall_ref_l - sensing_result->ego.left45_dist) * ROOT2;
+        }
       }
     } else {
       if (sensing_result->ego.left45_dist < th_offset_dist) {
-        ps_back.dist += (sensing_result->ego.left45_dist - 45) * ROOT2;
+        ps_back.dist -=
+            (param->sla_wall_ref_l - sensing_result->ego.left45_dist) * ROOT2;
+        find = true;
+      }
+      if (!find) {
+        if (sensing_result->ego.right45_dist < th_offset_dist) {
+          ps_back.dist +=
+              (param->sla_wall_ref_r - sensing_result->ego.right45_dist) *
+              ROOT2;
+        }
       }
     }
     if (b) {
@@ -352,9 +428,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   //  : SensorCtrlType::Dia;
   MotionResult res_b = MotionResult::NONE;
   if (ps_back.dist > 0) {
-
     res_b = go_straight(ps_back);
-
     if (res_b != MotionResult::NONE) {
       return MotionResult::ERROR;
     }
@@ -507,8 +581,8 @@ MotionResult MotionPlanning::front_ctrl(bool limit) {
   tgt_val->nmr.dia_mode = false;
   tgt_val->ego_in.sla_param.counter = 1;
 
-  int cnt = 0;
-  int max_cnt = 0;
+  unsigned int cnt = 0;
+  unsigned int max_cnt = 0;
   while (1) {
     vTaskDelay(1 / portTICK_RATE_MS);
     if (ui->button_state_hold()) {
@@ -660,15 +734,22 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
   }
   float dist = sensing_result->ego.front_dist - 55;
   ps.v_max = 500;
-  ps.v_end = 1;
+  ps.v_end = 100;
   ps.dist = dist;
   ps.accl = p_set.str_map[StraightType::FastRun].accl;
   ps.decel = p_set.str_map[StraightType::FastRun].decel;
   ps.sct = !dia ? SensorCtrlType::Straight : SensorCtrlType::Dia;
-  go_straight(ps);
+  if (dist > 0)
+    go_straight(ps);
+  reset_tgt_data();
+  reset_ego_data();
+  vTaskDelay(250 / portTICK_RATE_MS);
+  pt->motor_disable(false);
 
   reset_tgt_data();
   reset_ego_data();
+  vTaskDelay(25 / portTICK_RATE_MS);
+
   pt->motor_enable();
   front_ctrl(false);
   reset_tgt_data();
@@ -688,245 +769,114 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
 }
 
 MotionResult MotionPlanning::search_front_ctrl(param_straight_t &p) {
-  // tgt_val->nmr.v_max = p.v_max;
-  // tgt_val->nmr.v_end = p.v_max;
-  // tgt_val->nmr.accl = p.accl;
-  // tgt_val->nmr.decel = p.decel;
-  // tgt_val->nmr.dist = 200; // max
-  // tgt_val->nmr.w_max = 0;
-  // tgt_val->nmr.w_end = 0;
-  // tgt_val->nmr.alpha = 0;
-  // tgt_val->nmr.ang = 0;
-  // tgt_val->nmr.motion_mode = RUN_MODE2::ST_RUN;
-  // tgt_val->nmr.motion_type = MotionType::FRONT_CTRL;
-  // tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
-  // tgt_val->nmr.dia_mode = p.dia_mode;
-  // tgt_val->nmr.sct = p.sct;
-
-  // if (p.motion_type != MotionType::NONE) {
-  //   tgt_val->nmr.motion_type = p.motion_type;
-  // }
-  // tgt_val->nmr.timstamp++;
-  // bool wall_off_req =
-  //     // sensing_result->ego.front_lp >
-  //     //                         param->sen_ref_p.search_exist.front_ctrl_th
-  //     //                         ||
-  //     (70 < sensing_result->ego.front_dist &&
-  //      sensing_result->ego.front_dist < 110);
-
-  // if (!wall_off_req) {
-  //   return MotionResult::NONE;
-  // }
-
-  // while (1) {
-  //   // if (sensing_result->ego.front_lp >
-  //   //     param->sen_ref_p.search_exist.front_ctrl) {
-  //   //   break;
-  //   // }
-  //   if (sensing_result->ego.front_dist < 87) {
-  //     break;
-  //   }
-  //   vTaskDelay(1 / portTICK_RATE_MS);
-
-  //   if (tgt_val->ego_in.dist > p.dist) {
-  //     break;
-  //   }
-  // }
   return MotionResult::NONE;
 }
 
 MotionResult MotionPlanning::wall_off(param_straight_t &p, bool dia) {
-  tgt_val->nmr.v_max = p.v_max;
-  tgt_val->nmr.v_end = p.v_end;
-  tgt_val->nmr.accl = p.accl;
-  tgt_val->nmr.decel = p.decel;
-  tgt_val->nmr.dist = p.dist;
+  return MotionResult::NONE;
+}
+
+void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
+  tgt_val->nmr.v_max = ps_front.v_max;
+  tgt_val->nmr.v_end = ps_front.v_end;
+  tgt_val->nmr.accl = ps_front.accl;
+  tgt_val->nmr.decel = ps_front.decel;
+  tgt_val->nmr.dist = 180;
   tgt_val->nmr.w_max = 0;
   tgt_val->nmr.w_end = 0;
   tgt_val->nmr.alpha = 0;
   tgt_val->nmr.ang = 0;
   tgt_val->nmr.motion_mode = RUN_MODE2::ST_RUN;
-  tgt_val->nmr.motion_type = MotionType::STRAIGHT;
+  tgt_val->motion_type = MotionType::WALL_OFF;
+  tgt_val->nmr.motion_type = MotionType::WALL_OFF;
   tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
-  tgt_val->nmr.dia_mode = p.dia_mode;
-  tgt_val->nmr.sct = p.sct;
+  tgt_val->nmr.dia_mode = ps_front.dia_mode;
+  tgt_val->nmr.sct = SensorCtrlType::Straight;
   tgt_val->ego_in.dist -= tgt_val->ego_in.img_dist;
   tgt_val->ego_in.img_dist = 0;
-  if (p.motion_type != MotionType::NONE) {
-    tgt_val->nmr.motion_type = p.motion_type;
-  }
   tgt_val->nmr.timstamp++;
-  // bool wall_off_req = p.wall_off_req == WallOffReq::SEARCH;
-  // bool exist_r = false;
-  // bool exist_l = false;
-  // if (wall_off_req) {
-  //   exist_r =
-  //       sensing_result->ego.right90_lp >
-  //       param->sen_ref_p.search_exist.right90;
-  //   exist_l =
-  //       sensing_result->ego.left90_lp >
-  //       param->sen_ref_p.search_exist.left90;
-  // }
-
-  vTaskDelay(1 / portTICK_RATE_MS);
-  while (1) {
-    // if (exist_r) {
-    //   if (sensing_result->ego.right90_lp <
-    //       param->sen_ref_p.search_exist.kireme_r) {
-    //     tgt_val->nmr.dist = p.wall_off_dist_r;
-    //     p.dist = p.wall_off_dist_r;
-    //     tgt_val->nmr.timstamp++;
-    //     exist_l = exist_r = false;
-    //   }
-    // }
-    // if (exist_l) {
-    //   if (sensing_result->ego.left90_lp <
-    //       param->sen_ref_p.search_exist.kireme_l) {
-    //     tgt_val->nmr.dist = p.wall_off_dist_l;
-    //     p.dist = p.wall_off_dist_l;
-    //     tgt_val->nmr.timstamp++;
-    //     exist_l = exist_r = false;
-    //   }
-    // }
-    vTaskDelay(1 / portTICK_RATE_MS);
-
-    if (tgt_val->ego_in.dist >= p.dist) {
-      break;
-    }
-    if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
-      return MotionResult::ERROR;
-    }
-  }
-  return MotionResult::NONE;
-}
-
-void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
-  tgt_val->motion_type = MotionType::WALL_OFF;
   if (td == TurnDirection::Right) {
-    while (sensing_result->ego.right45_dist >
-           param->wall_off_dist.exist_dist_r) {
+    while (true) {
+      if (sensing_result->ego.right45_dist <
+          param->wall_off_dist.exist_dist_r) {
+        break;
+      }
       vTaskDelay(1 / portTICK_RATE_MS);
     }
-    while (sensing_result->ego.right45_dist <
-           param->wall_off_dist.noexist_th_r) {
+    while (true) {
+      if (sensing_result->ego.right45_dist >
+          param->wall_off_dist.noexist_th_r) {
+        ps_front.dist += param->wall_off_dist.right_str;
+        return;
+      }
       vTaskDelay(1 / portTICK_RATE_MS);
     }
-    // if (sensing_result->ego.right90_dist <
-    //     param->sen_ref_p.search_exist.right90) {
-    //   while (sensing_result->ego.right45_dist <
-    //          param->wall_off_dist.noexist_th_r) {
-    //     vTaskDelay(1 / portTICK_RATE_MS);
-    //   }
-    //   ps_front.dist += param->wall_off_dist.right_str;
-    // } else {
-    //   while ((tgt_val->global_pos.img_dist -
-    //           sensing_result->sen.r45.global_run_dist) <
-    //          param->wall_off_dist.right_str) {
-    //     vTaskDelay(1 / portTICK_RATE_MS);
-    //     if (sensing_result->ego.right45_dist >
-    //         param->wall_off_dist.noexist_th_r) {
-    //       ps_front.dist += param->wall_off_dist.right_str;
-    //       return;
-    //     }
-    //   }
-    //   ps_front.dist += (param->wall_off_dist.right_str -
-    //                     (tgt_val->global_pos.img_dist -
-    //                      sensing_result->sen.r45.global_run_dist));
-    // }
   } else {
-    while (sensing_result->ego.left45_dist >
-           param->wall_off_dist.exist_dist_l) {
+    while (true) {
+      if (sensing_result->ego.left45_dist < param->wall_off_dist.exist_dist_l) {
+        break;
+      }
       vTaskDelay(1 / portTICK_RATE_MS);
     }
-    while (sensing_result->ego.left45_dist <
-           param->wall_off_dist.noexist_th_l) {
+    while (true) {
+      if (sensing_result->ego.left45_dist > param->wall_off_dist.noexist_th_l) {
+        ps_front.dist += param->wall_off_dist.left_str;
+        return;
+      }
       vTaskDelay(1 / portTICK_RATE_MS);
     }
-    // if (sensing_result->ego.left90_dist <
-    //     param->sen_ref_p.search_exist.left90) {
-    //   while (sensing_result->ego.left45_dist <
-    //          param->wall_off_dist.noexist_th_l) {
-    //     vTaskDelay(1 / portTICK_RATE_MS);
-    //   }
-    //   ps_front.dist += param->wall_off_dist.left_str;
-    // } else {
-    //   while ((tgt_val->global_pos.img_dist -
-    //           sensing_result->sen.l45.global_run_dist) <
-    //          param->wall_off_dist.left_str) {
-    //     vTaskDelay(1 / portTICK_RATE_MS);
-    //     if (sensing_result->ego.left45_dist >
-    //         param->wall_off_dist.noexist_th_l) {
-    //       ps_front.dist += param->wall_off_dist.left_str;
-    //       return;
-    //     }
-    //   }
-    //   ps_front.dist += (param->wall_off_dist.left_str -
-    //                     (tgt_val->global_pos.img_dist -
-    //                      sensing_result->sen.l45.global_run_dist));
-    // }
   }
 }
 
 void MotionPlanning::wall_off_dia(TurnDirection td,
                                   param_straight_t &ps_front) {
-  return;
+  tgt_val->nmr.v_max = ps_front.v_max;
+  tgt_val->nmr.v_end = ps_front.v_end;
+  tgt_val->nmr.accl = ps_front.accl;
+  tgt_val->nmr.decel = ps_front.decel;
+  tgt_val->nmr.dist = 180;
+  tgt_val->nmr.w_max = 0;
+  tgt_val->nmr.w_end = 0;
+  tgt_val->nmr.alpha = 0;
+  tgt_val->nmr.ang = 0;
+  tgt_val->nmr.motion_mode = RUN_MODE2::ST_RUN;
   tgt_val->motion_type = MotionType::WALL_OFF_DIA;
+  tgt_val->nmr.motion_type = MotionType::WALL_OFF_DIA;
+  tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
+  tgt_val->nmr.dia_mode = ps_front.dia_mode;
+  tgt_val->nmr.sct = SensorCtrlType::Dia;
+  tgt_val->ego_in.dist -= tgt_val->ego_in.img_dist;
+  tgt_val->ego_in.img_dist = 0;
+  tgt_val->nmr.timstamp++;
   if (td == TurnDirection::Right) {
-    if (sensing_result->ego.right90_dist <
-        param->sen_ref_p.search_exist.right90) {
-      while (sensing_result->ego.right45_dist <
-             param->wall_off_dist.noexist_dia_th_r) {
-        vTaskDelay(1 / portTICK_RATE_MS);
+    while (true) {
+      if (sensing_result->ego.right45_dist <
+          param->wall_off_dist.exist_dia_th_r) {
+        break;
       }
-      ps_front.dist += param->wall_off_dist.right_dia;
-    } else {
-      bool b = true;
-      while ((tgt_val->global_pos.img_dist -
-              sensing_result->sen.r45.global_run_dist) <
-             param->wall_off_dist.right_dia) {
-        vTaskDelay(1 / portTICK_RATE_MS);
-        if (sensing_result->ego.right45_dist >
-            param->wall_off_dist.noexist_dia_th_r) {
-          ps_front.dist += param->wall_off_dist.right_dia;
-          return;
-        }
-        b = false;
+      vTaskDelay(1 / portTICK_RATE_MS);
+    }
+    while (true) {
+      if (sensing_result->ego.right45_dist >
+          param->wall_off_dist.noexist_dia_th_r) {
+        break;
       }
-      // ps_front.dist += param->wall_off_dist.right_dia;
-      if (b) {
-        ps_front.dist += (param->wall_off_dist.right_dia -
-                          (tgt_val->global_pos.img_dist -
-                           sensing_result->sen.r45.global_run_dist));
-      }
+      vTaskDelay(1 / portTICK_RATE_MS);
     }
   } else {
-    if (sensing_result->ego.left90_dist <
-        param->sen_ref_p.search_exist.left90) {
-      while (sensing_result->ego.left45_dist <
-             param->wall_off_dist.noexist_dia_th_l) {
-        vTaskDelay(1 / portTICK_RATE_MS);
+    while (true) {
+      if (sensing_result->ego.left45_dist <
+          param->wall_off_dist.exist_dia_th_l) {
+        break;
       }
-      ps_front.dist += param->wall_off_dist.left_dia;
-    } else {
-
-      bool b = true;
-      while ((tgt_val->global_pos.img_dist -
-              sensing_result->sen.l45.global_run_dist) <
-             param->wall_off_dist.left_dia) {
-        vTaskDelay(1 / portTICK_RATE_MS);
-        if (sensing_result->ego.left45_dist >
-            param->wall_off_dist.noexist_dia_th_l) {
-          ps_front.dist += param->wall_off_dist.left_dia;
-          return;
-        }
-        b = false;
+      vTaskDelay(1 / portTICK_RATE_MS);
+    }
+    while (true) {
+      if (sensing_result->ego.left45_dist >
+          param->wall_off_dist.noexist_dia_th_l) {
+        break;
       }
-      // ps_front.dist += param->wall_off_dist.left_dia;
-      if (b) {
-        ps_front.dist += (param->wall_off_dist.left_dia -
-                          (tgt_val->global_pos.img_dist -
-                           sensing_result->sen.l45.global_run_dist));
-      }
+      vTaskDelay(1 / portTICK_RATE_MS);
     }
   }
 }

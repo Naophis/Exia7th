@@ -224,6 +224,9 @@ typedef struct {
   float exist_dist_r;
   float noexist_th_l;
   float noexist_th_r;
+
+  float exist_dia_th_l;
+  float exist_dia_th_r;
   float noexist_dia_th_l;
   float noexist_dia_th_r;
 } wall_off_hold_dist_t;
@@ -268,6 +271,9 @@ typedef struct {
   float front_dist_offset_dia_45_th = 0;
   float front_dist_offset_dia_right45 = 0;
   float front_dist_offset_dia_left45 = 0;
+
+  float sla_wall_ref_l = 45;
+  float sla_wall_ref_r = 45;
 
   float clear_dist_ragne_from = 0;
   float clear_dist_ragne_to = 0;

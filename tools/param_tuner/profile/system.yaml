@@ -1,5 +1,5 @@
 # goals: [[7, 7], [7, 8], [8, 7], [8, 8]]
-goals: [[3, 0]]
+goals: [[1, 0]]
 # goals: [[6, 9], [6, 10], [7, 9], [7, 10]]
 
 maze_size: 32
@@ -20,7 +20,7 @@ test: # テスト走行時に使用するパラメータ群
   suction_duty: 99.0
   file_idx: 0
   sla_dist: 90
-  sla_type: 2
+  sla_type: 3
   # sla_type: 1 normal
   # sla_type: 2 #orval
   # sla_type: 3 #large

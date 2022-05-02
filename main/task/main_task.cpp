@@ -280,7 +280,7 @@ void MainTask::load_hw_param() {
   param->test_log_enable =
       cJSON_GetObjectItem(root, "test_log_enable")->valueint;
   param->fast_log_enable =
-      cJSON_GetObjectItem(root, "fast_log_enable")->valuedouble;
+      cJSON_GetObjectItem(root, "fast_log_enable")->valueint;
 
   param->wall_off_hold_dist =
       cJSON_GetObjectItem(root, "wall_off_hold_dist")->valuedouble;
@@ -303,10 +303,20 @@ void MainTask::load_hw_param() {
   param->wall_off_dist.noexist_th_r =
       cJSON_GetObjectItem(root, "wall_off_hold_noexist_th_r")->valuedouble;
 
+  param->wall_off_dist.exist_dia_th_l =
+      cJSON_GetObjectItem(root, "wall_off_hold_exist_dist_dia_l")->valuedouble;
+  param->wall_off_dist.exist_dia_th_r =
+      cJSON_GetObjectItem(root, "wall_off_hold_exist_dist_dia_r")->valuedouble;
+
   param->wall_off_dist.noexist_dia_th_l =
       cJSON_GetObjectItem(root, "wall_off_hold_noexist_dia_th_l")->valuedouble;
   param->wall_off_dist.noexist_dia_th_r =
       cJSON_GetObjectItem(root, "wall_off_hold_noexist_dia_th_r")->valuedouble;
+
+  param->sla_wall_ref_l =
+      cJSON_GetObjectItem(root, "sla_wall_ref_l")->valuedouble;
+  param->sla_wall_ref_r =
+      cJSON_GetObjectItem(root, "sla_wall_ref_r")->valuedouble;
 
   param->front_dist_offset_dia_front =
       cJSON_GetObjectItem(root, "front_dist_offset_dia_front")->valuedouble;
@@ -799,13 +809,13 @@ void MainTask::task() {
       printf("test_search_sla\n");
       test_search_sla();
     } else if (sys.user_mode == 6) {
-      printf("test_search_sla_walloff\n");
-      test_search_sla_walloff();
+      // printf("test_search_sla_walloff\n");
+      // test_search_sla_walloff();
     } else if (sys.user_mode == 7) {
-      printf("test_front_ctrl\n");
+      printf("test_front_ctrl hold\n");
       test_front_ctrl(true);
     } else if (sys.user_mode == 8) {
-      printf("test_front_ctrl2\n");
+      printf("test_front_ctrl \n");
       test_front_ctrl(false);
     } else if (sys.user_mode == 9) {
       printf("test_sla_walloff\n");

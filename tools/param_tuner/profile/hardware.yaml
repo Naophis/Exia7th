@@ -33,29 +33,39 @@ front_dist_offset_dia_right45: 54
 front_dist_offset_dia_left45: 50
 
 clear_dist_ragne_from: 20
-clear_dist_ragne_to: 40
+clear_dist_ragne_to: 20
 
 wall_off_hold_dist: 30
 
-wall_off_hold_dist_str_l: 9.5
-wall_off_hold_dist_str_r: 9.5
+# スラロームオフセット距離壁補正リファレンス値
+sla_wall_ref_l: 45
+sla_wall_ref_r: 45
+
+# 壁切れ オフセット距離
+wall_off_hold_dist_str_l: -6.5
+wall_off_hold_dist_str_r: -6.5
 # wall_off_hold_dist_dia_l: 7
-# wall_off_hold_dist_dia_r: 5 
+# wall_off_hold_dist_dia_r: 5
 wall_off_hold_dist_dia_l: 10
 wall_off_hold_dist_dia_r: 10
 
+# 壁切れ In
 wall_off_hold_exist_dist_l: 70
 wall_off_hold_exist_dist_r: 70
-
+# 壁切れ Out
 wall_off_hold_noexist_th_l: 75
 wall_off_hold_noexist_th_r: 75
 
+# 壁切れ In
+wall_off_hold_exist_dist_dia_l: 70
+wall_off_hold_exist_dist_dia_r: 70
+# 壁切れ Out
 wall_off_hold_noexist_dia_th_l: 34
 wall_off_hold_noexist_dia_th_r: 34
 
 search_log_enable: 0
 test_log_enable: 0
-fast_log_enable: 0
+fast_log_enable: 1
 
 motor_pid:
   p: 0.002
@@ -67,7 +77,7 @@ motor_pid:
   # d: 0.0
 dist_pid:
   p: 0.85
-  i: 0.0
+  i: 0.01
   d: 0.35
   mode: 1
   # p: 0.0
@@ -93,7 +103,7 @@ angle_pid:
   # i: 0.0
   # d: 0.0
 sensor_pid:
-  p: 0.20
+  p: 0.125
   i: 0.0
   d: 0.0
   mode: 1
