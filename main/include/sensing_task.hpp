@@ -19,11 +19,22 @@ public:
   virtual ~SensingTask();
 
   void create_task(const BaseType_t xCoreID);
-  static void task_entry_point(void *task_instance);
 
   std::shared_ptr<sensing_result_entity_t> sensing_result;
   void set_sensing_entity(std::shared_ptr<sensing_result_entity_t> &_entity);
+
+  static void task_entry_point(void *task_instance);
   virtual void task();
+  static void task_entry_point0(void *task_instance);
+  static void task_entry_point1(void *task_instance);
+  static void task_entry_point2(void *task_instance);
+  static void task_entry_point3(void *task_instance);
+  static void task_entry_point4(void *task_instance);
+  virtual void task0();
+  virtual void task1();
+  virtual void task2();
+  virtual void task3();
+  virtual void task4();
 
   ICM20689 gyro_if;
   bool is_ready() { return ready; }
@@ -31,6 +42,7 @@ public:
   void set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val);
 
 private:
+  int led_light_delay_cnt = 10000;
   xTaskHandle handle = 0;
   bool ready;
   timer_isr_handle_t handle_isr;
