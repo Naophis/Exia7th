@@ -5,3 +5,4 @@ node_modules/
 slprj/
 *_ert_rtw/
 *.slxc
+*.pyc
