@@ -174,15 +174,26 @@ void MainTask::reset_tgt_data() { mp->reset_tgt_data(); }
 void MainTask::reset_ego_data() { mp->reset_ego_data(); }
 
 void MainTask::keep_pivot() {
+  mp->reset_gyro_ref_with_check();
   reset_tgt_data();
   reset_ego_data();
-
-  mp->reset_gyro_ref_with_check();
   pt->motor_enable();
-
   req_error_reset();
-
-  mp->keep();
+  ps.v_max = 0.000000001;
+  ps.v_end = 0.000000001;
+  ps.dist = 1000;
+  ps.accl = 0.00000001;
+  ps.decel = -1;
+  ps.sct = SensorCtrlType::NONE;
+  ps.motion_type = MotionType::STRAIGHT;
+  ps.dia_mode = false;
+  mp->go_straight(ps);
+  while (1) {
+    vTaskDelay(1 / portTICK_RATE_MS);
+    if (ui->button_state_hold()) {
+      break;
+    }
+  }
   pt->motor_disable();
 }
 void MainTask::echo_sensing_result_with_json() {
@@ -270,6 +281,12 @@ void MainTask::load_hw_param() {
       cJSON_GetObjectItem(root, "clear_dist_ragne_from")->valuedouble;
   param->clear_dist_ragne_to =
       cJSON_GetObjectItem(root, "clear_dist_ragne_to")->valuedouble;
+  param->led_light_delay_cnt =
+      cJSON_GetObjectItem(root, "led_light_delay_cnt")->valuedouble;
+
+  param->logging_time = cJSON_GetObjectItem(root, "logging_time")->valuedouble /
+                        portTICK_PERIOD_MS;
+  param->set_param = true;
 
   param->front_dist_offset_pivot_th =
       cJSON_GetObjectItem(root, "front_dist_offset_pivot_th")->valuedouble;
@@ -1215,7 +1232,7 @@ void MainTask::test_sla() {
 
   if (sys.test.suction_active) {
     pt->suction_enable(sys.test.suction_duty);
-    vTaskDelay(xDelay500 / portTICK_PERIOD_MS);
+    vTaskDelay(xDelay500 );
   }
 
   reset_tgt_data();

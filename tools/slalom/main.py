@@ -5,11 +5,12 @@ from slalom import Slalom
 from plot import Plot
 
 p = Plot()
-p.exe("normal")
-p.exe("large")
-# p.exe("orval") #not use
-p.exe("dia45")
-p.exe("dia45_2")
-p.exe("dia135")
-p.exe("dia135_2")
-p.exe("dia90")
+# p.exe("normal", 0)
+p.exe("large", 0)
+# # p.exe("orval") #not use
+# p.exe("dia45", 0)
+# p.exe("dia45_2", 0)
+# p.exe("dia135", 0)
+# p.exe("dia135_2", 0)
+# p.exe("dia90", -5)
+

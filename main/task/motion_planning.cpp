@@ -415,7 +415,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   }
   tgt_val->nmr.timstamp++;
   tgt_val->ego_in.sla_param.counter = 1;
-
+  tgt_val->ego_in.sla_param.limit_time_count = sp.time * 2 / dt;
   tgt_val->ego_in.dist -= tgt_val->ego_in.img_dist;
   tgt_val->ego_in.img_dist = 0;
   if (adachi != nullptr) {
@@ -673,9 +673,10 @@ void MotionPlanning::keep() {
   tgt_val->nmr.sla_pow_n = 0;
   tgt_val->nmr.motion_mode = RUN_MODE2::KEEP;
   tgt_val->nmr.motion_type = MotionType::NONE;
-  tgt_val->nmr.timstamp++;
+  tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
   tgt_val->nmr.dia_mode = false;
-  tgt_val->ego_in.sla_param.counter = 1;
+  tgt_val->nmr.sct = SensorCtrlType::NONE;
+  tgt_val->nmr.timstamp++;
 
   while (1) {
     vTaskDelay(1 / portTICK_RATE_MS);

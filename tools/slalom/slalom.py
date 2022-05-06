@@ -73,6 +73,7 @@ class Slalom:
             res["y"] = np.append(res["y"], tmp_y)
             res["alpha"] = np.append(res["alpha"], tmp_alpha)
             res["w"] = np.append(res["w"], tmp_w)
+        print(np.max(res["w"])**2*self.rad/9.81/1000)
         self.res = res
         return res
 

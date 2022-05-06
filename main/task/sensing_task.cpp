@@ -5,7 +5,7 @@ SensingTask::SensingTask() {}
 SensingTask::~SensingTask() {}
 
 void SensingTask::create_task(const BaseType_t xCoreID) {
-  xTaskCreatePinnedToCore(task_entry_point, "sensing_task0", 8192, this, 2,
+  xTaskCreatePinnedToCore(task_entry_point, "sensing_task", 8192, this, 2,
                           &handle, xCoreID);
   // xTaskCreatePinnedToCore(task_entry_point0, "sensing_task0", 8192, this, 2,
   //                         &handle, xCoreID);
@@ -17,6 +17,10 @@ void SensingTask::create_task(const BaseType_t xCoreID) {
   //                         &handle, xCoreID);
   // xTaskCreatePinnedToCore(task_entry_point4, "sensing_task4", 8192, this, 2,
   //                         &handle, xCoreID);
+}
+void SensingTask::set_input_param_entity(
+    std::shared_ptr<input_param_t> &_param_ro) {
+  param = _param_ro;
 }
 
 void SensingTask::task_entry_point(void *task_instance) {
@@ -101,7 +105,7 @@ void SensingTask::task() {
     gpio_set_level(LED_R45, 1);
     gpio_set_level(LED_L45, 1);
     gpio_set_level(LED_L90, 1);
-    for (int i = 0; i < led_light_delay_cnt; i++)
+    for (int i = 0; i < param->led_light_delay_cnt; i++)
       ;
     adc2_get_raw(SEN_R90, width, &sensing_result->led_sen_after.right90.raw);
     adc2_get_raw(SEN_R45, width, &sensing_result->led_sen_after.right45.raw);

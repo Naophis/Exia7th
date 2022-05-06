@@ -4,20 +4,20 @@ goals: [[0, 3]]
 
 maze_size: 32
 debug: 0
-mode: 0 # モード選択
+mode: 1 # モード選択
 
 test: # テスト走行時に使用するパラメータ群
   v_max: 300
   end_v: 1
-  accl: 4500
-  decel: -4500
-  dist: 315 #直進全部　
+  accl: 15000
+  decel: -15000
+  dist: 360 #直進全部　
   # dist: 180 # スラロームテスト
-  w_max: 7.0
-  alpha: 20
-  ang: 3600
-  suction_active: 0
-  suction_duty: 99.0
+  w_max: 14.0
+  alpha: 40
+  ang: 720
+  suction_active: 1
+  suction_duty: 3.25
   file_idx: 4
   sla_dist: 90
   sla_type: 5
@@ -29,7 +29,7 @@ test: # テスト走行時に使用するパラメータ群
   # sla_type: 6 #dia90
   # sla_type: 8 #dia45_2
   # sla_type: 9 #dia135_2
-  sla_return: 1 # 往復フラグ
+  sla_return: 0 # 往復フラグ
   sla_type2: 8 #復路ターン種類
   turn_times: 1
   ignore_opp_sen: 0

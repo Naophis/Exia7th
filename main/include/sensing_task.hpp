@@ -35,6 +35,7 @@ public:
   virtual void task2();
   virtual void task3();
   virtual void task4();
+  void set_input_param_entity(std::shared_ptr<input_param_t> &_param);
 
   ICM20689 gyro_if;
   bool is_ready() { return ready; }
@@ -42,6 +43,7 @@ public:
   void set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val);
 
 private:
+  std::shared_ptr<input_param_t> param;
   int led_light_delay_cnt = 10000;
   xTaskHandle handle = 0;
   bool ready;

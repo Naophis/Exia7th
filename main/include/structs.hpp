@@ -298,6 +298,9 @@ typedef struct {
   float front_dist_offset_pivot_th = 0;
   float front_dist_offset_pivot = 0;
   int sen_log_size = 100;
+  int led_light_delay_cnt = 10000;
+  bool set_param = false;
+  float logging_time = 4.0;
 } input_param_t;
 
 typedef struct {

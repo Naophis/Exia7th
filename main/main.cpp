@@ -178,6 +178,7 @@ extern "C" void app_main() {
 
   st.set_sensing_entity(sensing_entity);
   st.set_tgt_val(tgt_val);
+  st.set_input_param_entity(param);
   st.create_task(0);
 
   std::shared_ptr<PlanningTask> pt = std::make_shared<PlanningTask>();

@@ -16,12 +16,14 @@ Resist: 2.93
 Mass: 0.015
 # Lm: 0.0000025
 # Lm: 0.000025
-Lm: 0.00000025
+Lm: 0.0000035
 sakiyomi_time: 40
 clear_angle: 5
 clear_dist_order: 80
 front_dist_offset: 88
 front_dist_offset2: 123
+logging_time: 4.0
+led_light_delay_cnt: 5000
 
 front_dist_offset_pivot_th: 83
 front_dist_offset_pivot: 88
@@ -69,7 +71,7 @@ fast_log_enable: 1
 sen_log_size: 100
 
 motor_pid:
-  p: 0.002
+  p: 0.0035
   i: 0.0035
   d: 0.0
   mode: 1

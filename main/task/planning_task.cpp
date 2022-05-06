@@ -400,7 +400,12 @@ void PlanningTask::set_next_duty(float duty_l, float duty_r,
   }
   if (suction_en) {
     // mcpwm_set_signal_high(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A);
-    mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A, duty_suction);
+    float duty_suction_in =
+        tgt_duty.duty_suction / sensing_result->ego.battery_lp * 100;
+    if (duty_suction_in > 100) {
+      duty_suction_in = 100;
+    }
+    mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A, duty_suction_in);
     mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A,
                         MCPWM_DUTY_MODE_0);
   } else {
