@@ -10,7 +10,6 @@ void MazeSolverBaseLgc::init(const int _maze_size, const int _max_step_val) {
   dist.resize(maze_list_size);
   vector_dist.resize(maze_list_size);
   updateMap.resize(maze_list_size);
-
   q_list.resize(maze_list_size + 1);
   vq_list.resize(4 * maze_list_size + 1);
   goal_list3.clear();
@@ -27,6 +26,16 @@ void MazeSolverBaseLgc::init(const int _maze_size, const int _max_step_val) {
   // p.x = 0;
   // p.y = maze_size - 1;
   // goal_list3.emplace_back(p);
+}
+
+void MazeSolverBaseLgc::data_economize() {
+  map.clear();
+  dist.clear();
+  vector_dist.clear();
+  updateMap.clear();
+  q_list.clear();
+  vq_list.clear();
+  goal_list3.clear();
 }
 
 void MazeSolverBaseLgc::set_ego(std::shared_ptr<ego_t> &_ego) { ego = _ego; }

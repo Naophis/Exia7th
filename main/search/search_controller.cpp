@@ -121,17 +121,23 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
   pr.alpha = p_set.str_map[StraightType::Search].alpha;
   pr.w_end = p_set.str_map[StraightType::Search].w_end;
 
-  if (sensing_result->ego.left45_dist < 45) {
+  bool left_exist =
+      sensing_result->ego.left45_dist < param->sen_ref_p.search_exist.left90;
+  bool right_exist =
+      sensing_result->ego.right45_dist < param->sen_ref_p.search_exist.right90;
+
+  flag = (left_exist || right_exist);
+  pr.ang = (flag) ? PI / 2 : PI;
+
+  if (!left_exist && !right_exist) {
+    pr.RorL = TurnDirection::Right;
+    // } else if (left_exist && right_exist) {
+  } else if (left_exist) {
     pr.RorL = TurnDirection::Left;
-    flag = true;
-  } else if (sensing_result->ego.right45_dist < 45) {
+  } else if (right_exist) {
     pr.RorL = TurnDirection::Right;
-    flag = true;
-  } else {
-    pr.ang = PI;
-    pr.RorL = TurnDirection::Right;
-    flag = false;
   }
+
   if (back_enable) {
     tmp_dist = 20;
   }
@@ -157,6 +163,7 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
 
   mp->reset_tgt_data();
   mp->reset_ego_data();
+  // mp->req_error_reset();
   pt->motor_enable();
 
   vTaskDelay(5 / portTICK_RATE_MS);
@@ -176,9 +183,13 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
       front_wall_ctrl();
     }
 
+    // mp->reset_tgt_data();
+    pt->motor_enable();
     mp->reset_tgt_data();
     mp->reset_ego_data();
-    pt->motor_enable();
+    p.dist = 0.1;
+    p.motion_type = MotionType::PIVOT_PRE2;
+    p.sct = SensorCtrlType::NONE;
     res = mp->go_straight(p);
     mp->reset_tgt_data();
     mp->reset_ego_data();
@@ -188,12 +199,15 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
     mp->reset_tgt_data();
     mp->reset_ego_data();
     pt->motor_enable();
+    mp->reset_tgt_data();
+    mp->reset_ego_data();
     res = mp->pivot_turn(pr);
     mp->reset_tgt_data();
     mp->reset_ego_data();
     vTaskDelay(10 / portTICK_RATE_MS);
     pt->motor_disable(false);
   } else {
+    pr.ang = PI;
     res = mp->pivot_turn(pr);
     mp->reset_tgt_data();
     mp->reset_ego_data();
@@ -205,6 +219,9 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
   //   return MotionResult::ERROR;
 
   if (back_enable) {
+    pt->motor_enable();
+    mp->reset_tgt_data();
+    mp->reset_ego_data();
     p.v_max = -p_set.str_map[StraightType::Search].v_max;
     p.v_end = -10; // p_set.str_map[StraightType::Search].v_max;
     p.accl = -p_set.str_map[StraightType::Search].accl;
@@ -213,9 +230,6 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
     p.motion_type = MotionType::BACK_STRAIGHT;
     p.sct = SensorCtrlType::NONE;
     p.wall_off_req = WallOffReq::NONE;
-    mp->reset_tgt_data();
-    mp->reset_ego_data();
-    pt->motor_enable();
     res = mp->go_straight(p);
     mp->reset_tgt_data();
     mp->reset_ego_data();
@@ -431,6 +445,7 @@ SearchResult SearchController::exec(param_set_t &p_set, SearchMode sm) {
       }
     } else if (next_motion == Motion::Back) {
       mr = pivot(p_set);
+      // break;
     } else if (next_motion == Motion::NONE) {
       break;
     }

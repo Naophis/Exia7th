@@ -109,7 +109,7 @@ private:
   void test_sla();
   void test_run_sla();
   void test_search_sla();
-  void test_search_sla_walloff();
+  void test_front_wall_offset();
   void test_sla_walloff();
   void test_front_ctrl(bool mode);
   void rx_uart_json();

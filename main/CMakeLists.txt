@@ -2,7 +2,7 @@
 # without default 'CMakeLists.txt' file.
 
 cmake_minimum_required(VERSION 3.1)
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -std=c++17")
+set(CMAKE_CXX_FLAGS_DEBUG "-O2 -g -std=c++17")
 set(COMPONENT_ADD_INCLUDEDIRS
     "."
     "include"

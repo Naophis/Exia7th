@@ -63,6 +63,7 @@ public:
 
   void wall_off(TurnDirection td, param_straight_t &ps_front);
   void wall_off_dia(TurnDirection td, param_straight_t &ps_front);
+  void req_error_reset();
 
 private:
   std::shared_ptr<UserInterface> ui;

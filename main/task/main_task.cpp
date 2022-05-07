@@ -827,8 +827,8 @@ void MainTask::task() {
       printf("test_search_sla\n");
       test_search_sla();
     } else if (sys.user_mode == 6) {
-      // printf("test_search_sla_walloff\n");
-      // test_search_sla_walloff();
+      printf("test_front_wall_offset\n");
+      test_front_wall_offset();
     } else if (sys.user_mode == 7) {
       printf("test_front_ctrl hold\n");
       test_front_ctrl(true);
@@ -909,30 +909,35 @@ void MainTask::task() {
         pc->convert_large_path(true);
         pc->diagonalPath(true, true);
         pc->print_path();
+        lgc->data_economize();
         mp->exec_path_running(paramset_list[0]);
       } else if (mode_num == 3) {
         pc->path_create(false);
         pc->convert_large_path(true);
         pc->diagonalPath(true, true);
         pc->print_path();
+        lgc->data_economize();
         mp->exec_path_running(paramset_list[1]);
       } else if (mode_num == 4) {
         pc->path_create(false);
         pc->convert_large_path(true);
         pc->diagonalPath(true, true);
         pc->print_path();
+        lgc->data_economize();
         mp->exec_path_running(paramset_list[2]);
       } else if (mode_num == 5) {
         pc->path_create(false);
         pc->convert_large_path(true);
         pc->diagonalPath(true, true);
         pc->print_path();
+        lgc->data_economize();
         mp->exec_path_running(paramset_list[3]);
       } else if (mode_num == 6) {
         pc->path_create(false);
         pc->convert_large_path(true);
         pc->diagonalPath(true, true);
         pc->print_path();
+        lgc->data_economize();
         mp->exec_path_running(paramset_list[4]);
       } else if (mode_num == 7) {
         // pc->path_create(false);
@@ -1195,7 +1200,7 @@ void MainTask::test_turn() {
     vTaskDelay(10 / portTICK_RATE_MS);
   }
 }
-
+ 
 void MainTask::test_sla() {
 
   file_idx = sys.test.file_idx;
@@ -1232,7 +1237,7 @@ void MainTask::test_sla() {
 
   if (sys.test.suction_active) {
     pt->suction_enable(sys.test.suction_duty);
-    vTaskDelay(xDelay500 );
+    vTaskDelay(xDelay500);
   }
 
   reset_tgt_data();
@@ -1452,7 +1457,7 @@ void MainTask::test_front_ctrl(bool mode) {
   }
 }
 
-void MainTask::test_search_sla_walloff() {
+void MainTask::test_front_wall_offset() {
   printf("search_walloff_offset= %f, %f\n",
          param->sen_ref_p.search_exist.offset_l,
          param->sen_ref_p.search_exist.offset_r);
@@ -1474,7 +1479,7 @@ void MainTask::test_search_sla_walloff() {
 
   ps.v_max = sys.test.v_max;
   ps.v_end = sys.test.v_max;
-  ps.dist = 45 + param->offset_start_dist;
+  ps.dist = 90 + 45;
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
   ps.sct = SensorCtrlType::Straight;
@@ -1484,31 +1489,19 @@ void MainTask::test_search_sla_walloff() {
   ps.dia_mode = false;
   mp->go_straight(ps);
 
-  ps.v_max = sys.test.v_max;
-  ps.v_end = sys.test.v_max;
-  ps.dist = 90;
-  ps.accl = sys.test.accl;
-  ps.decel = sys.test.decel;
-  ps.sct = SensorCtrlType::Straight;
-  ps.wall_off_req = WallOffReq::SEARCH;
-  ps.wall_off_dist_r = param->sen_ref_p.search_exist.offset_r;
-  ps.wall_off_dist_l = param->sen_ref_p.search_exist.offset_l;
-  ps.dia_mode = false;
-  mp->go_straight(ps);
+  ps.dist = 85;
+  if (sensing_result->ego.left90_dist < 150 &&
+      sensing_result->ego.right90_dist < 150) {
+    ps.dist -= (param->front_dist_offset2 - sensing_result->ego.front_dist);
+  }
 
   ps.v_max = sys.test.v_max;
   ps.v_end = 20;
-  ps.dist = 40;
-  ps.accl = sys.test.accl;
-  ps.decel = sys.test.decel;
-  ps.wall_off_req = WallOffReq::NONE;
   mp->go_straight(ps);
 
   ps.v_max = 20;
   ps.v_end = sys.test.end_v;
   ps.dist = 5;
-  ps.accl = sys.test.accl;
-  ps.decel = sys.test.decel;
   mp->go_straight(ps);
 
   vTaskDelay(100 / portTICK_RATE_MS);
@@ -1540,6 +1533,12 @@ void MainTask::test_search_sla_walloff() {
 
 void MainTask::test_sla_walloff() {
   rorl = ui->select_direction();
+
+  if (rorl == TurnDirection::Right) {
+    param->sen_ref_p.normal.exist.right45 = 1;
+  } else {
+    param->sen_ref_p.normal.exist.left45 = 1;
+  }
   mp->reset_gyro_ref_with_check();
 
   if (sys.test.suction_active) {
@@ -1567,11 +1566,10 @@ void MainTask::test_sla_walloff() {
   ps.dia_mode = false;
   mp->go_straight(ps);
 
+  ps.dist = 90 - 5;
   mp->wall_off(rorl, ps);
-
   ps.v_max = sys.test.v_max;
   ps.v_end = 20;
-  ps.dist = 40;
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
   ps.wall_off_req = WallOffReq::NONE;

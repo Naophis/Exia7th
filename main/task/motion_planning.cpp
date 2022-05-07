@@ -44,7 +44,7 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p,
   tgt_val->nmr.dia_mode = p.dia_mode;
   tgt_val->nmr.sct = p.sct;
   tgt_val->ego_in.dist -= tgt_val->ego_in.img_dist;
-  tgt_val->ego_in.img_dist = 0;
+  tgt_val->ego_in.img_dist -= tgt_val->ego_in.img_dist;
   if (p.motion_type != MotionType::NONE) {
     tgt_val->nmr.motion_type = p.motion_type;
   }
@@ -73,6 +73,9 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p) {
 
 MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
   // 一度初期化
+  pt->motor_enable();
+  reset_tgt_data();
+  reset_ego_data();
   tgt_val->motion_type = MotionType::NONE;
   tgt_val->nmr.timstamp++;
   vTaskDelay(1 / portTICK_RATE_MS);
@@ -101,10 +104,12 @@ MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
   tgt_val->nmr.timstamp++;
   tgt_val->ego_in.dist -= tgt_val->ego_in.img_dist;
   tgt_val->ego_in.img_dist = 0;
+  vTaskDelay(10 / portTICK_RATE_MS);
 
   while (1) {
     vTaskDelay(1 / portTICK_RATE_MS);
-    if (ABS(tgt_val->ego_in.ang) > ABS(p.ang)) {
+    if (ABS(tgt_val->ego_in.ang) >= ABS(p.ang) &&
+        ABS(tgt_val->ego_in.ang * 180 / PI) > 10) {
       break;
     }
     if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
@@ -113,7 +118,13 @@ MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
   }
   return MotionResult::NONE;
 }
-
+void MotionPlanning::req_error_reset() {
+  tgt_val->pl_req.error_vel_reset = 1;
+  tgt_val->pl_req.error_gyro_reset = 1;
+  tgt_val->pl_req.error_ang_reset = 1;
+  tgt_val->pl_req.error_dist_reset = 1;
+  tgt_val->pl_req.time_stamp++;
+}
 MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
                                     next_motionr_t &next_motion) {
   return slalom(sp, td, next_motion, false);
@@ -415,7 +426,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   }
   tgt_val->nmr.timstamp++;
   tgt_val->ego_in.sla_param.counter = 1;
-  tgt_val->ego_in.sla_param.limit_time_count = sp.time * 2 / dt;
+  tgt_val->ego_in.sla_param.limit_time_count = (int)(sp.time * 2 / dt);
   tgt_val->ego_in.dist -= tgt_val->ego_in.img_dist;
   tgt_val->ego_in.img_dist = 0;
   if (adachi != nullptr) {
@@ -435,8 +446,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
       }
     } else {
 
-      if (tgt_val->ego_in.sla_param.counter >=
-          tgt_val->ego_in.sla_param.limit_time_count) {
+      if (tgt_val->ego_in.sla_param.counter >= (sp.time * 2 / dt)) {
         tgt_val->ego_in.w = 0;
         break;
       }
@@ -779,9 +789,9 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
            ego.dir == Direction::SouthEast || ego.dir == Direction::SouthWest);
     }
   }
-  float dist = sensing_result->ego.front_dist - 55;
+  float dist = sensing_result->ego.front_dist - 45;
   ps.v_max = 500;
-  ps.v_end = 100;
+  ps.v_end = 20;
   ps.dist = dist;
   ps.accl = p_set.str_map[StraightType::FastRun].accl;
   ps.decel = p_set.str_map[StraightType::FastRun].decel;
@@ -797,12 +807,12 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
   reset_ego_data();
   vTaskDelay(25 / portTICK_RATE_MS);
 
-  pt->motor_enable();
-  front_ctrl(false);
-  reset_tgt_data();
-  reset_ego_data();
-  vTaskDelay(25 / portTICK_RATE_MS);
-  pt->motor_disable(false);
+  // pt->motor_enable();
+  // front_ctrl(false);
+  // reset_tgt_data();
+  // reset_ego_data();
+  // vTaskDelay(25 / portTICK_RATE_MS);
+  // pt->motor_disable(false);
 
   lt->stop_slalom_log();
   lt->save(slalom_log_file);

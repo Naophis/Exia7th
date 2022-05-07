@@ -1,5 +1,5 @@
 dt: 0.001
-tire: 13.585
+tire: 13.685
 offset_start_dist: 17.0
 gear_a: 37
 gear_b: 8
@@ -22,7 +22,6 @@ clear_angle: 5
 clear_dist_order: 80
 front_dist_offset: 88
 front_dist_offset2: 123
-logging_time: 4.0
 led_light_delay_cnt: 5000
 
 front_dist_offset_pivot_th: 83
@@ -34,8 +33,8 @@ front_dist_offset_dia_45_th: 77
 front_dist_offset_dia_right45: 54
 front_dist_offset_dia_left45: 50
 
-clear_dist_ragne_from: 20
-clear_dist_ragne_to: 20
+clear_dist_ragne_from: 30
+clear_dist_ragne_to: 45
 
 wall_off_hold_dist: 30
 
@@ -45,7 +44,7 @@ sla_wall_ref_r: 45
 
 # 壁切れ オフセット距離
 wall_off_hold_dist_str_l: -6.5
-wall_off_hold_dist_str_r: -6.5
+wall_off_hold_dist_str_r: -4.25
 # wall_off_hold_dist_dia_l: 7
 # wall_off_hold_dist_dia_r: 5
 wall_off_hold_dist_dia_l: 10
@@ -65,9 +64,16 @@ wall_off_hold_exist_dist_dia_r: 70
 wall_off_hold_noexist_dia_th_l: 34
 wall_off_hold_noexist_dia_th_r: 34
 
+#ターン後オフセット距離
+offset_after_turn_l: 1
+offset_after_turn_r: 1
+offset_after_turn_dia_l: 1
+offset_after_turn_dia_r: 1
+
+logging_time: 4.0
 search_log_enable: 0
 test_log_enable: 0
-fast_log_enable: 1
+fast_log_enable: 0
 sen_log_size: 100
 
 motor_pid:

@@ -241,6 +241,7 @@ float PlanningTask::check_sen_error() {
     error_entity.sen_log.gain_zz = 0;
     error_entity.sen_log.gain_z = 0;
   } else {
+    // TODO Uターン字は別ロジックに修正
     if (tgt_val->tgt_in.tgt_dist >= param_ro->clear_dist_order) {
       if (!(param_ro->clear_dist_ragne_from <= tmp_dist &&
             tmp_dist <= param_ro->clear_dist_ragne_to)) {
@@ -253,10 +254,10 @@ float PlanningTask::check_sen_error() {
           error_entity.ang.error_d = 0;
         }
       } else {
-        error_entity.sen.error_i = 0;
-        error_entity.sen_log.gain_zz = 0;
-        error_entity.sen_log.gain_z = 0;
-        return 0;
+        // error_entity.sen.error_i = 0;
+        // error_entity.sen_log.gain_zz = 0;
+        // error_entity.sen_log.gain_z = 0;
+        return error;
       }
     }
   }
@@ -558,6 +559,8 @@ void PlanningTask::calc_tgt_duty() {
   if (tgt_val->motion_type == MotionType::FRONT_CTRL) {
     error_entity.v.error_i = error_entity.v.error_d = 0;
     error_entity.w.error_i = error_entity.w.error_d = 0;
+    // error_entity.v.error_i = 0;
+    // error_entity.w.error_i = 0;
     if (sensing_result->ego.front_dist < 90) {
       error_entity.dist.error_p = sensing_result->ego.front_dist -
                                   param_ro->sen_ref_p.search_exist.front_ctrl;

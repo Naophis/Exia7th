@@ -16,6 +16,8 @@ public:
 
   ~MazeSolverBaseLgc();
 
+  void data_economize();
+
   void step_cell(int x, int y, Direction d);
 
   void set_map_val(int idx, int val);
