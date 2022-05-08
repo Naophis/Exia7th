@@ -301,6 +301,10 @@ typedef struct {
   int led_light_delay_cnt = 10000;
   bool set_param = false;
   float logging_time = 4.0;
+  float offset_after_turn_l = 0.0;
+  float offset_after_turn_r = 0.0;
+  float offset_after_turn_dia_l = 0.0;
+  float offset_after_turn_dia_r = 0.0;
 } input_param_t;
 
 typedef struct {

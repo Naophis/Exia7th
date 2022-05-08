@@ -58,8 +58,8 @@ void UserInterface::motion_check() {
     if (button_state_hold()) {
       break;
     }
-    float front_sensor_data = sensing_result->led_sen.front.raw;
-    if (front_sensor_data > MOTION_CHECK_TH) {
+    if (sensing_result->ego.left90_dist < 60 &&
+        sensing_result->ego.right90_dist < 60) {
       LED_off_all();
       for (int i = 0; i < 2; i++) {
         music_sync(MUSIC::C6_, 100);

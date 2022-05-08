@@ -245,15 +245,20 @@ void MainTask::load_hw_param() {
     return;
   }
   char line_buf[LINE_BUF_SIZE];
-  fgets(line_buf, sizeof(line_buf), f);
+  std::string str = "";
+  while (fgets(line_buf, sizeof(line_buf), f) != NULL) {
+    printf("%s\n", line_buf);
+    printf("_______\n");
+    str += std::string(line_buf);
+  }
   fclose(f);
 
-  printf("%s\n", line_buf);
+  printf("%s\n", str.c_str());
 
   cJSON *root = cJSON_CreateObject(), *motor_pid, *gyro_pid, *gyro_param,
         *kalman_config, *battery_param, *led_param, *angle_pid, *dist_pid,
         *sen_pid, *sen_pid_dia;
-  root = cJSON_Parse(line_buf);
+  root = cJSON_Parse(str.c_str());
 
   param->dt = cJSON_GetObjectItem(root, "dt")->valuedouble;
   param->tire = cJSON_GetObjectItem(root, "tire")->valuedouble;
@@ -283,6 +288,16 @@ void MainTask::load_hw_param() {
       cJSON_GetObjectItem(root, "clear_dist_ragne_to")->valuedouble;
   param->led_light_delay_cnt =
       cJSON_GetObjectItem(root, "led_light_delay_cnt")->valuedouble;
+
+  param->offset_after_turn_l =
+      cJSON_GetObjectItem(root, "offset_after_turn_l")->valuedouble;
+  param->offset_after_turn_r =
+      cJSON_GetObjectItem(root, "offset_after_turn_r")->valuedouble;
+
+  param->offset_after_turn_dia_l =
+      cJSON_GetObjectItem(root, "offset_after_turn_dia_l")->valuedouble;
+  param->offset_after_turn_dia_r =
+      cJSON_GetObjectItem(root, "offset_after_turn_dia_r")->valuedouble;
 
   param->logging_time = cJSON_GetObjectItem(root, "logging_time")->valuedouble /
                         portTICK_PERIOD_MS;
@@ -802,10 +817,12 @@ void MainTask::task() {
   mp->set_userinterface(ui);
   search_ctrl->set_userinterface(ui);
   pt->motor_disable();
+  pt->suction_disable();
   check_battery();
   // ui->init();
 
   ui->coin(80);
+
   rx_uart_json(); // uartでファイルを受け取る
   reset_tgt_data();
   reset_ego_data();
@@ -864,6 +881,8 @@ void MainTask::task() {
         vTaskDelay(10 / portTICK_RATE_MS);
       }
     } else if (sys.user_mode == 17) {
+      printf("test_dia_walloff\n");
+      test_dia_walloff();
     }
   } else {
     ui->hello_exia();
@@ -1200,7 +1219,7 @@ void MainTask::test_turn() {
     vTaskDelay(10 / portTICK_RATE_MS);
   }
 }
- 
+
 void MainTask::test_sla() {
 
   file_idx = sys.test.file_idx;
@@ -1502,6 +1521,99 @@ void MainTask::test_front_wall_offset() {
   ps.v_max = 20;
   ps.v_end = sys.test.end_v;
   ps.dist = 5;
+  mp->go_straight(ps);
+
+  vTaskDelay(100 / portTICK_RATE_MS);
+  pt->motor_disable();
+  reset_tgt_data();
+  reset_ego_data();
+  req_error_reset();
+  pt->suction_disable();
+
+  lt->stop_slalom_log();
+  reset_tgt_data();
+  reset_ego_data();
+  req_error_reset();
+  lt->save(slalom_log_file);
+  ui->coin(120);
+
+  while (1) {
+    if (ui->button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
+  lt->dump_log(slalom_log_file);
+  while (1) {
+    if (ui->button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
+}
+
+void MainTask::test_dia_walloff() {
+  rorl = ui->select_direction();
+  rorl2 = (rorl == TurnDirection::Right) ? (TurnDirection::Left)
+                                         : (TurnDirection::Right);
+  if (rorl == TurnDirection::Right) {
+    param->sen_ref_p.normal.exist.right45 = 1;
+  } else {
+    param->sen_ref_p.normal.exist.left45 = 1;
+  }
+  mp->reset_gyro_ref_with_check();
+
+  // if (sys.test.suction_active) {
+  //   pt->suction_enable(sys.test.suction_duty);
+  //   vTaskDelay(500 / portTICK_PERIOD_MS);
+  // }
+
+  reset_tgt_data();
+  reset_ego_data();
+  pt->motor_enable();
+
+  req_error_reset();
+  lt->start_slalom_log();
+  // pt->active_logging(_f);
+
+  ps.v_max = sys.test.v_max;
+  ps.v_end = sys.test.v_max;
+  ps.dist = 90 + param->offset_start_dist;
+  ps.accl = sys.test.accl;
+  ps.decel = sys.test.decel;
+  ps.sct = SensorCtrlType::Straight;
+  ps.wall_off_req = WallOffReq::NONE;
+  ps.wall_off_dist_r = 0;
+  ps.wall_off_dist_l = 0;
+  ps.dia_mode = false;
+  mp->go_straight(ps);
+
+  sla_p = paramset_list[file_idx].map[TurnType::Dia45];
+  nm.v_max = sla_p.v;
+  nm.v_end = sla_p.v;
+  nm.accl = sys.test.accl;
+  nm.decel = sys.test.decel;
+  nm.is_turn = false;
+  mp->slalom(sla_p, rorl, nm, false);
+
+  ps.dist = 45 * std::sqrt(2);
+  ps.dia_mode = true;
+
+  mp->wall_off_dia(rorl2, ps);
+
+  ps.dist = ps.dist - 5;
+  ps.v_max = sys.test.v_max;
+  ps.v_end = 20;
+  ps.accl = sys.test.accl;
+  ps.decel = sys.test.decel;
+  ps.wall_off_req = WallOffReq::NONE;
+  ps.sct = SensorCtrlType::NONE;
+  mp->go_straight(ps);
+
+  ps.v_max = 20;
+  ps.v_end = sys.test.end_v;
+  ps.dist = 5;
+  ps.accl = sys.test.accl;
+  ps.decel = sys.test.decel;
+  ps.sct = SensorCtrlType::NONE;
   mp->go_straight(ps);
 
   vTaskDelay(100 / portTICK_RATE_MS);

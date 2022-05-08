@@ -41,8 +41,8 @@ public:
 
 private:
   xTaskHandle handle = 0;
-  bool motor_en;
-  bool suction_en;
+  bool motor_en = false;
+  bool suction_en = false;
 
   void check_fail_safe();
   void update_ego_motion();

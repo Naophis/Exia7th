@@ -78,7 +78,7 @@ dia135:
   pow_n: 2.000000
   time: 0.234281
   front: { left: 14.48645410, right: 14.48645410 }
-  back: { left: 6.55493373, right: 6.55493373 }
+  back: { left: 2.55493373, right: 2.55493373 }
 # dia135:
 #   v: 300
 #   ang: 135

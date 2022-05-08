@@ -257,7 +257,11 @@ float PlanningTask::check_sen_error() {
         // error_entity.sen.error_i = 0;
         // error_entity.sen_log.gain_zz = 0;
         // error_entity.sen_log.gain_z = 0;
-        return error;
+        // if (check == 2) {
+        //   return error;
+        // } else if (check == 1) {
+        //   return error * 2;
+        // }
       }
     }
   }
