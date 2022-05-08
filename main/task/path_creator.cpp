@@ -124,7 +124,7 @@ void PathCreator::path_create(bool is_search) {
     next_dir = Direction::Undefined;
 
     if (lgc->arrival_goal_position(x, y)) {
-      // add_path_s(idx, 1);
+      add_path_s(idx, 1);
       path_t.emplace_back(255);
       // path_t.emplace_back(0);
       path_size = idx;

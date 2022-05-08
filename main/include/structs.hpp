@@ -305,6 +305,11 @@ typedef struct {
   float offset_after_turn_r = 0.0;
   float offset_after_turn_dia_l = 0.0;
   float offset_after_turn_dia_r = 0.0;
+
+  float dia_turn_exist_th_l = 0.0;
+  float dia_turn_exist_th_r = 0.0;
+  float dia_turn_th_l = 0.0;
+  float dia_turn_th_r = 0.0;
 } input_param_t;
 
 typedef struct {

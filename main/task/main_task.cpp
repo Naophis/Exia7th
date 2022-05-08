@@ -299,6 +299,15 @@ void MainTask::load_hw_param() {
   param->offset_after_turn_dia_r =
       cJSON_GetObjectItem(root, "offset_after_turn_dia_r")->valuedouble;
 
+  param->dia_turn_exist_th_l =
+      cJSON_GetObjectItem(root, "dia_turn_exist_th_l")->valuedouble;
+  param->dia_turn_exist_th_r =
+      cJSON_GetObjectItem(root, "dia_turn_exist_th_r")->valuedouble;
+  param->dia_turn_th_l =
+      cJSON_GetObjectItem(root, "dia_turn_th_l")->valuedouble;
+  param->dia_turn_th_r =
+      cJSON_GetObjectItem(root, "dia_turn_th_r")->valuedouble;
+
   param->logging_time = cJSON_GetObjectItem(root, "logging_time")->valuedouble /
                         portTICK_PERIOD_MS;
   param->set_param = true;

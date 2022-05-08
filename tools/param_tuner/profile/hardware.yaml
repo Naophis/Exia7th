@@ -70,6 +70,12 @@ offset_after_turn_r: 15
 offset_after_turn_dia_l: 15
 offset_after_turn_dia_r: 15
 
+#斜めターン壁有り補正
+dia_turn_exist_th_l: 100
+dia_turn_exist_th_r: 100
+dia_turn_th_l: 61
+dia_turn_th_r: 62
+
 logging_time: 4.0
 search_log_enable: 0
 test_log_enable: 0
