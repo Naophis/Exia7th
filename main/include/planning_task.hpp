@@ -91,7 +91,9 @@ private:
   float get_feadforward_roll();
   float get_rpm_ff_val(TurnDirection td);
   float calc_sensor_pid();
+  float calc_sensor_pid_dia();
   float check_sen_error();
+  float check_sen_error_dia();
   float error_right = 0;
   float error_left = 0;
   bool check_right = false;

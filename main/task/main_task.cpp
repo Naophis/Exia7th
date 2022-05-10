@@ -244,7 +244,7 @@ void MainTask::load_hw_param() {
   if (f == NULL) {
     return;
   }
-  char line_buf[LINE_BUF_SIZE];
+  // char line_buf[LINE_BUF_SIZE];
   std::string str = "";
   while (fgets(line_buf, sizeof(line_buf), f) != NULL) {
     printf("%s\n", line_buf);
@@ -451,15 +451,18 @@ void MainTask::load_sensor_param() {
   if (f == NULL) {
     return;
   }
-  char line_buf[LINE_BUF_SIZE];
-  fgets(line_buf, sizeof(line_buf), f);
+  // char line_buf[LINE_BUF_SIZE];
+  std::string str = "";
+  while (fgets(line_buf, sizeof(line_buf), f) != NULL) {
+    printf("%s\n", line_buf);
+    printf("_______\n");
+    str += std::string(line_buf);
+  }
   fclose(f);
-
-  printf("%s\n", line_buf);
 
   cJSON *root = cJSON_CreateObject(), *normal, *normal_ref, *normal_exist, *dia,
         *dia_ref, *dia_exist, *search, *search_exist, *gain;
-  root = cJSON_Parse(line_buf);
+  root = cJSON_Parse(str.c_str());
 
   normal = cJSON_GetObjectItem(root, "normal");
   normal_ref = cJSON_GetObjectItem(normal, "ref");
@@ -490,15 +493,19 @@ void MainTask::load_sensor_param() {
   dia = cJSON_GetObjectItem(root, "dia");
   dia_ref = cJSON_GetObjectItem(dia, "ref");
   dia_exist = cJSON_GetObjectItem(dia, "exist");
-  param->sen_ref_p.dia.ref.right45 =
-      cJSON_GetObjectItem(dia_ref, "right45")->valuedouble;
-  param->sen_ref_p.dia.ref.left45 =
-      cJSON_GetObjectItem(dia_ref, "left45")->valuedouble;
+  param->sen_ref_p.dia.ref.right90 =
+      cJSON_GetObjectItem(dia_ref, "right90")->valuedouble;
+  param->sen_ref_p.dia.ref.left90 =
+      cJSON_GetObjectItem(dia_ref, "left90")->valuedouble;
+  param->sen_ref_p.dia.ref.kireme_r =
+      cJSON_GetObjectItem(dia_ref, "kireme_r")->valuedouble;
+  param->sen_ref_p.dia.ref.kireme_l =
+      cJSON_GetObjectItem(dia_ref, "kireme_l")->valuedouble;
 
-  param->sen_ref_p.dia.exist.right45 =
-      cJSON_GetObjectItem(dia_exist, "right45")->valuedouble;
-  param->sen_ref_p.dia.exist.left45 =
-      cJSON_GetObjectItem(dia_exist, "left45")->valuedouble;
+  param->sen_ref_p.dia.exist.right90 =
+      cJSON_GetObjectItem(dia_exist, "right90")->valuedouble;
+  param->sen_ref_p.dia.exist.left90 =
+      cJSON_GetObjectItem(dia_exist, "left90")->valuedouble;
 
   search = cJSON_GetObjectItem(root, "search");
   search_exist = cJSON_GetObjectItem(search, "exist");
@@ -564,14 +571,18 @@ void MainTask::load_sys_param() {
   if (f == NULL) {
     return;
   }
-  char line_buf[LINE_BUF_SIZE];
-  fgets(line_buf, sizeof(line_buf), f);
+  // char line_buf[LINE_BUF_SIZE];
+  std::string str = "";
+  while (fgets(line_buf, sizeof(line_buf), f) != NULL) {
+    printf("%s\n", line_buf);
+    printf("_______\n");
+    str += std::string(line_buf);
+  }
   fclose(f);
-
   printf("%s\n", line_buf);
 
   cJSON *root = cJSON_CreateObject(), *test, *goals;
-  root = cJSON_Parse(line_buf);
+  root = cJSON_Parse(str.c_str());
 
   sys.goals.clear();
   goals = cJSON_GetObjectItem(root, "goals");
@@ -588,6 +599,7 @@ void MainTask::load_sys_param() {
   test = cJSON_GetObjectItem(root, "test");
 
   sys.test.v_max = cJSON_GetObjectItem(test, "v_max")->valuedouble;
+  sys.test.dia = cJSON_GetObjectItem(test, "dia")->valuedouble;
   sys.test.end_v = cJSON_GetObjectItem(test, "end_v")->valuedouble;
   sys.test.accl = cJSON_GetObjectItem(test, "accl")->valuedouble;
   sys.test.decel = cJSON_GetObjectItem(test, "decel")->valuedouble;
@@ -618,13 +630,17 @@ void MainTask::load_turn_param_profiles() {
   FILE *f = fopen("/spiflash/profiles.txt", "rb");
   if (f == NULL)
     return;
-  char line_buf[LINE_BUF_SIZE];
-  fgets(line_buf, sizeof(line_buf), f);
+  // char line_buf[LINE_BUF_SIZE];
+  std::string str = "";
+  while (fgets(line_buf, sizeof(line_buf), f) != NULL) {
+    printf("%s\n", line_buf);
+    printf("_______\n");
+    str += std::string(line_buf);
+  }
   fclose(f);
-  printf("%s\n", line_buf);
 
   cJSON *root = cJSON_CreateObject(), *profile_list, *profile_idx;
-  root = cJSON_Parse(line_buf);
+  root = cJSON_Parse(str.c_str());
 
   tpp.file_list.clear();
   profile_list = cJSON_GetObjectItem(root, "list");
@@ -646,28 +662,31 @@ void MainTask::load_turn_param_profiles() {
   int profile_idx_size = cJSON_GetArraySize(profile_idx);
 
   for (int i = 0; i < profile_idx_size; i++) {
-    p_idx.normal =
+    p_idx[TurnType::None] =
+        cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "run_param")
+            ->valueint;
+    p_idx[TurnType::Normal] =
         cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "normal")
             ->valueint;
-    p_idx.large =
+    p_idx[TurnType::Large] =
         cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "large")
             ->valueint;
-    p_idx.orval =
+    p_idx[TurnType::Orval] =
         cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "orval")
             ->valueint;
-    p_idx.dia45 =
+    p_idx[TurnType::Dia45] =
         cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "dia45")
             ->valueint;
-    p_idx.dia45_2 =
+    p_idx[TurnType::Dia45_2] =
         cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "dia45_2")
             ->valueint;
-    p_idx.dia135 =
+    p_idx[TurnType::Dia135] =
         cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "dia135")
             ->valueint;
-    p_idx.dia135_2 =
+    p_idx[TurnType::Dia135_2] =
         cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "dia135_2")
             ->valueint;
-    p_idx.dia90 =
+    p_idx[TurnType::Dia90] =
         cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "dia90")
             ->valueint;
     tpp.profile_list.emplace_back(p_idx);
@@ -685,14 +704,17 @@ void MainTask::load_slalom_param() {
     if (f == NULL) {
       return;
     }
-    char line_buf[LINE_BUF_SIZE];
-    printf("%s\n===================\n", path.c_str());
-    fgets(line_buf, sizeof(line_buf), f);
+    // char line_buf[LINE_BUF_SIZE];
+    std::string str = "";
+    while (fgets(line_buf, sizeof(line_buf), f) != NULL) {
+      printf("%s\n", line_buf);
+      printf("_______\n");
+      str += std::string(line_buf);
+    }
     fclose(f);
-    printf("%s\n===================\n", line_buf);
 
     cJSON *root = cJSON_CreateObject();
-    root = cJSON_Parse(line_buf);
+    root = cJSON_Parse(str.c_str());
 
     sp.map.clear();
 
@@ -907,7 +929,7 @@ void MainTask::task() {
       printf("%d\n", mode_num);
       if (mode_num == 0) {
         lgc->set_goal_pos(sys.goals);
-        SearchResult sr = search_ctrl->exec(paramset_list[0], SearchMode::ALL);
+        sr = search_ctrl->exec(paramset_list[0], SearchMode::ALL);
         if (sr == SearchResult::SUCCESS)
           save_maze_data(true);
         while (1) {
@@ -919,7 +941,7 @@ void MainTask::task() {
       } else if (mode_num == 1) {
         lgc->set_goal_pos(sys.goals);
         rorl = ui->select_direction();
-        SearchResult sr = SearchResult::SUCCESS;
+        sr = SearchResult::SUCCESS;
         if (rorl == TurnDirection::Right)
           sr = search_ctrl->exec(paramset_list[0], SearchMode::Kata);
         else
@@ -933,40 +955,15 @@ void MainTask::task() {
         }
         search_ctrl->print_maze();
       } else if (mode_num == 2) {
-        pc->path_create(false);
-        pc->convert_large_path(true);
-        pc->diagonalPath(true, true);
-        pc->print_path();
-        lgc->data_economize();
-        mp->exec_path_running(paramset_list[0]);
+        path_run(0);
       } else if (mode_num == 3) {
-        pc->path_create(false);
-        pc->convert_large_path(true);
-        pc->diagonalPath(true, true);
-        pc->print_path();
-        lgc->data_economize();
-        mp->exec_path_running(paramset_list[1]);
+        path_run(1);
       } else if (mode_num == 4) {
-        pc->path_create(false);
-        pc->convert_large_path(true);
-        pc->diagonalPath(true, true);
-        pc->print_path();
-        lgc->data_economize();
-        mp->exec_path_running(paramset_list[2]);
+        path_run(2);
       } else if (mode_num == 5) {
-        pc->path_create(false);
-        pc->convert_large_path(true);
-        pc->diagonalPath(true, true);
-        pc->print_path();
-        lgc->data_economize();
-        mp->exec_path_running(paramset_list[3]);
+        path_run(3);
       } else if (mode_num == 6) {
-        pc->path_create(false);
-        pc->convert_large_path(true);
-        pc->diagonalPath(true, true);
-        pc->print_path();
-        lgc->data_economize();
-        mp->exec_path_running(paramset_list[4]);
+        path_run(4);
       } else if (mode_num == 7) {
         // pc->path_create(false);
         // pc->convert_large_path(true);
@@ -1030,6 +1027,9 @@ void MainTask::test_run() {
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
   ps.sct = SensorCtrlType::Straight;
+  if (sys.test.dia == 1) {
+    ps.sct = SensorCtrlType::Dia;
+  }
   ps.motion_type = MotionType::STRAIGHT;
   ps.dia_mode = false;
 
@@ -1321,6 +1321,9 @@ void MainTask::test_sla() {
     if (static_cast<TurnType>(sys.test.sla_type) == TurnType::Dia90) {
       ps.dist = 45 * ROOT2;
     }
+  }
+  if (sys.test.ignore_opp_sen == 1) {
+    ps.dist = sys.test.dist;
   }
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
@@ -1777,7 +1780,7 @@ void MainTask::read_maze_data() {
   auto *f = fopen(maze_log_file.c_str(), "rb");
   if (f == NULL)
     return;
-  char line_buf[LINE_BUF_SIZE];
+  // char line_buf[LINE_BUF_SIZE];
   std::string str = "";
   while (fgets(line_buf, sizeof(line_buf), f) != NULL) {
     printf("%s\n", line_buf);
@@ -1794,4 +1797,66 @@ void MainTask::read_maze_data() {
     lgc->set_native_wall_data(i, stoi(map_list[i]));
   }
   printf("read maze data!!!\n");
+}
+
+void MainTask::path_run(int idx) {
+  pc->path_create(false);
+  pc->convert_large_path(true);
+  pc->diagonalPath(true, true);
+  pc->print_path();
+  lgc->data_economize();
+
+  for (const auto p : turn_name_list) {
+    if (p.first != TurnType::None) {
+      param_set.map[p.first].v =
+          paramset_list[tpp.profile_list[idx][p.first]].map[p.first].v;
+      param_set.map[p.first].ang =
+          paramset_list[tpp.profile_list[idx][p.first]].map[p.first].ang;
+      param_set.map[p.first].rad =
+          paramset_list[tpp.profile_list[idx][p.first]].map[p.first].rad;
+      param_set.map[p.first].pow_n =
+          paramset_list[tpp.profile_list[idx][p.first]].map[p.first].pow_n;
+      param_set.map[p.first].time =
+          paramset_list[tpp.profile_list[idx][p.first]].map[p.first].time;
+      param_set.map[p.first].front.left =
+          paramset_list[tpp.profile_list[idx][p.first]].map[p.first].front.left;
+      param_set.map[p.first].front.right =
+          paramset_list[tpp.profile_list[idx][p.first]]
+              .map[p.first]
+              .front.right;
+      param_set.map[p.first].back.left =
+          paramset_list[tpp.profile_list[idx][p.first]].map[p.first].back.left;
+      param_set.map[p.first].back.right =
+          paramset_list[tpp.profile_list[idx][p.first]].map[p.first].back.right;
+    }
+  }
+
+  for (const auto p : straight_name_list) {
+    param_set.str_map[p.first].v_max =
+        paramset_list[tpp.profile_list[idx][TurnType::None]]
+            .str_map[p.first]
+            .v_max;
+    param_set.str_map[p.first].accl =
+        paramset_list[tpp.profile_list[idx][TurnType::None]]
+            .str_map[p.first]
+            .accl;
+    param_set.str_map[p.first].decel =
+        paramset_list[tpp.profile_list[idx][TurnType::None]]
+            .str_map[p.first]
+            .decel;
+    param_set.str_map[p.first].w_max =
+        paramset_list[tpp.profile_list[idx][TurnType::None]]
+            .str_map[p.first]
+            .w_max;
+    param_set.str_map[p.first].w_end =
+        paramset_list[tpp.profile_list[idx][TurnType::None]]
+            .str_map[p.first]
+            .w_end;
+    param_set.str_map[p.first].alpha =
+        paramset_list[tpp.profile_list[idx][TurnType::None]]
+            .str_map[p.first]
+            .alpha;
+  }
+
+  mp->exec_path_running(param_set);
 }

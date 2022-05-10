@@ -128,14 +128,15 @@ void hwtimer_init(void) {
   timer_set_counter_value(TIMER_GROUP_0, TIMER_0, 0);
   timer_start(TIMER_GROUP_0, TIMER_0);
 }
+std::shared_ptr<input_param_t> param;
+std::shared_ptr<sensing_result_entity_t> sensing_entity;
+std::shared_ptr<motion_tgt_val_t> tgt_val;
 extern "C" void app_main() {
   // Adachi adachi;
 
-  std::shared_ptr<input_param_t> param = std::make_shared<input_param_t>();
-  std::shared_ptr<sensing_result_entity_t> sensing_entity =
-      std::make_shared<sensing_result_entity_t>();
-  std::shared_ptr<motion_tgt_val_t> tgt_val =
-      std::make_shared<motion_tgt_val_t>();
+  param = std::make_shared<input_param_t>();
+  sensing_entity = std::make_shared<sensing_result_entity_t>();
+  tgt_val = std::make_shared<motion_tgt_val_t>();
 
   init_gpio();
   init_uart();
@@ -163,7 +164,7 @@ extern "C" void app_main() {
     printf("storage0: mount OK\n");
   }
 
-  gpio_set_level(SUCTION_PWM, 1);
+  gpio_set_level(SUCTION_PWM, 0);
   param->tire = 12.0;
   param->dt = 0.001;
   param->motor_pid.p = 0.175;
@@ -202,10 +203,9 @@ extern "C" void app_main() {
   mt.set_tgt_val(tgt_val);
   mt.set_planning_task(pt);
   mt.set_logging_task(lt);
-
   mt.create_task(1);
 
-  /* Set the GPIO as a push/pull output */
+  // /* Set the GPIO as a push/pull output */
 
   gpio_set_level(LED1, 0);
   gpio_set_level(LED2, 0);

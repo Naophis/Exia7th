@@ -21,7 +21,7 @@ sakiyomi_time: 40
 clear_angle: 5
 clear_dist_order: 80
 front_dist_offset: 88
-front_dist_offset2: 123
+front_dist_offset2: 125.5
 led_light_delay_cnt: 5000
 
 front_dist_offset_pivot_th: 83
@@ -44,7 +44,8 @@ sla_wall_ref_r: 45
 
 # 壁切れ オフセット距離
 wall_off_hold_dist_str_l: -6.5
-wall_off_hold_dist_str_r: -4.25
+# wall_off_hold_dist_str_r: -4.25
+wall_off_hold_dist_str_r: -5.5
 # wall_off_hold_dist_dia_l: 7
 # wall_off_hold_dist_dia_r: 5
 wall_off_hold_dist_dia_l: 7.5
@@ -79,7 +80,7 @@ dia_turn_th_r: 62
 logging_time: 4.0
 search_log_enable: 0
 test_log_enable: 0
-fast_log_enable: 0
+fast_log_enable: 1
 sen_log_size: 100
 
 motor_pid:
@@ -99,8 +100,8 @@ dist_pid:
   # i: 0.0
   # d: 0.0
 gyro_pid:
-  p: 0.125
-  i: 0.0065
+  p: 0.25
+  i: 0.0085
   d: 0.0
   mode: 1
   # p: 0.0
@@ -126,13 +127,16 @@ sensor_pid:
   # i: 0.0
   # d: 0.0
 sensor_pid_dia:
-  p: 0.1
+  p: 0.01
   i: 0.0
   d: 0.0
   mode: 1
+  # p: 0.0
+  # i: 0.0
+  # d: 0.0
 gyro_param:
-  gyro_w_gain_right: 0.0010585
-  gyro_w_gain_left: 0.0010585
+  gyro_w_gain_right: 0.0010600
+  gyro_w_gain_left: 0.0010600
   lp_delay: 1
 battery_param:
   lp_delay: 0.25

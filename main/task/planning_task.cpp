@@ -197,6 +197,28 @@ float PlanningTask::calc_sensor_pid() {
 
   return duty;
 }
+float PlanningTask::calc_sensor_pid_dia() {
+  float duty = 0;
+
+  error_entity.sen_dia.error_i += error_entity.sen_dia.error_p;
+  error_entity.sen_dia.error_p = check_sen_error_dia();
+  if (param_ro->sensor_pid_dia.mode == 1) {
+    duty =
+        param_ro->sensor_pid_dia.p * error_entity.sen_dia.error_p +
+        param_ro->sensor_pid_dia.i * error_entity.sen_dia.error_i +
+        param_ro->sensor_pid_dia.d * error_entity.sen_dia.error_d +
+        (error_entity.sen_log_dia.gain_z - error_entity.sen_log_dia.gain_zz) *
+            dt;
+    error_entity.sen_log_dia.gain_zz = error_entity.sen_log_dia.gain_z;
+    error_entity.sen_log_dia.gain_z = duty;
+  } else {
+    duty = param_ro->sensor_pid_dia.p * error_entity.sen_dia.error_p +
+           param_ro->sensor_pid_dia.i * error_entity.sen_dia.error_i +
+           param_ro->sensor_pid_dia.d * error_entity.sen_dia.error_d;
+  }
+
+  return duty;
+}
 float PlanningTask::check_sen_error() {
   float error = 0;
   int check = 0;
@@ -253,6 +275,70 @@ float PlanningTask::check_sen_error() {
           error_entity.ang.error_i = 0;
           error_entity.ang.error_d = 0;
         }
+      } else {
+        // error_entity.sen.error_i = 0;
+        // error_entity.sen_log.gain_zz = 0;
+        // error_entity.sen_log.gain_z = 0;
+        // if (check == 2) {
+        //   return error;
+        // } else if (check == 1) {
+        //   return error * 2;
+        // }
+      }
+    }
+  }
+
+  if (check == 2) {
+    return error;
+  } else if (check == 1) {
+    return error * 2;
+  }
+  return 0;
+}
+float PlanningTask::check_sen_error_dia() {
+  float error = 0;
+  int check = 0;
+
+  //前壁が近すぎるときはエスケープ
+  if (tgt_val->tgt_in.tgt_dist > 45 &&
+      (tgt_val->tgt_in.tgt_dist - tgt_val->ego_in.dist) > 40) {
+    // if (ABS(sensing_result->ego.right90_dist -
+    //         sensing_result->ego.right90_dist_old) <
+    //     param_ro->sen_ref_p.dia.ref.kireme_r) {
+    if (1 < sensing_result->ego.right90_dist &&
+        sensing_result->ego.right90_dist <
+            param_ro->sen_ref_p.dia.exist.right90) {
+      error += param_ro->sen_ref_p.dia.ref.right90 -
+               sensing_result->ego.right90_dist;
+      check++;
+    }
+    // }
+    // if (ABS(sensing_result->ego.left90_dist -
+    //         sensing_result->ego.left90_dist_old) <
+    //     param_ro->sen_ref_p.dia.ref.kireme_l) {
+    if (1 < sensing_result->ego.left90_dist &&
+        sensing_result->ego.left90_dist <
+            param_ro->sen_ref_p.dia.exist.left90) {
+      error -=
+          param_ro->sen_ref_p.dia.ref.left90 - sensing_result->ego.left90_dist;
+      check++;
+    }
+  }
+  // }
+  if (check == 0) {
+    error_entity.sen_dia.error_i = 0;
+    error_entity.sen_log_dia.gain_zz = 0;
+    error_entity.sen_log_dia.gain_z = 0;
+  } else {
+    // TODO Uターン字は別ロジックに修正
+    if (tgt_val->tgt_in.tgt_dist >= param_ro->clear_dist_order) {
+      if ((ABS(tgt_val->ego_in.ang - tgt_val->ego_in.img_ang) * 180 / PI) <
+          param_ro->clear_angle) {
+        tgt_val->global_pos.ang = tgt_val->global_pos.img_ang;
+        // error_entity.w.error_i = 0;
+        // error_entity.w.error_d = 0;
+        // error_entity.ang.error_i = 0;
+        // error_entity.ang.error_d = 0;
       } else {
         // error_entity.sen.error_i = 0;
         // error_entity.sen_log.gain_zz = 0;
@@ -533,9 +619,21 @@ void PlanningTask::calc_tgt_duty() {
   float duty_sen = 0;
   if (tgt_val->nmr.sct == SensorCtrlType::Straight) {
     duty_sen = calc_sensor_pid();
+    error_entity.sen_dia.error_i = 0;
+    error_entity.sen_log_dia.gain_zz = 0;
+    error_entity.sen_log_dia.gain_z = 0;
   } else if (tgt_val->nmr.sct == SensorCtrlType::Dia) {
-
+    duty_sen = calc_sensor_pid_dia();
+    error_entity.sen.error_i = 0;
+    error_entity.sen_log.gain_zz = 0;
+    error_entity.sen_log.gain_z = 0;
   } else if (tgt_val->nmr.sct == SensorCtrlType::NONE) {
+    error_entity.sen.error_i = 0;
+    error_entity.sen_log.gain_zz = 0;
+    error_entity.sen_log.gain_z = 0;
+    error_entity.sen_dia.error_i = 0;
+    error_entity.sen_log_dia.gain_zz = 0;
+    error_entity.sen_log_dia.gain_z = 0;
   }
   sensing_result->ego.duty.sen = duty_sen;
 

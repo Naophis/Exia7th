@@ -57,6 +57,7 @@ public:
   TurnType cast_turn_type(std::string str);
 
 private:
+  SearchResult sr;
   xTaskHandle handle = 0;
 
   std::shared_ptr<UserInterface> ui;
@@ -78,7 +79,8 @@ private:
   const char *base_path = "/spiflash";
   esp_vfs_fat_mount_config_t mount_config;
   wl_handle_t s_wl_handle = WL_INVALID_HANDLE;
-  profile_idx_t p_idx;
+  // profile_idx_t p_idx;
+  std::unordered_map<TurnType, int> p_idx;
   param_set_t sp;
   straight_param_t str_p;
   slalom_param2_t sp2;
@@ -114,6 +116,7 @@ private:
   void test_dia_walloff();
   void test_front_ctrl(bool mode);
   void rx_uart_json();
+  void path_run(int idx);
 
   void save_json_data(std::string &str);
   vector<string> split(const string &s, char delim);
@@ -128,7 +131,7 @@ private:
   void save_maze_return_data(bool write);
   void read_maze_data();
   std::vector<param_set_t> paramset_list;
-
+  param_set_t param_set;
   std::shared_ptr<MazeSolverBaseLgc> lgc;
   // std::shared_ptr<Adachi> adachi;
   std::shared_ptr<SearchController> search_ctrl;

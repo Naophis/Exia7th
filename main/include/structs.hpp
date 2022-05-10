@@ -462,6 +462,7 @@ typedef struct {
   int sla_type2 = 0;
   int turn_times = 0;
   int ignore_opp_sen = 0;
+  int dia = 0;
 } test_mode_t;
 
 typedef struct {
@@ -486,7 +487,7 @@ typedef struct {
   std::vector<std::string> file_list;
   int file_list_size = 0;
   int profile_idx_size = 0;
-  std::vector<profile_idx_t> profile_list;
+  std::vector<std::unordered_map<TurnType, int>> profile_list;
 } turn_param_profile_t;
 
 typedef struct {

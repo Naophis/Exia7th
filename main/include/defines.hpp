@@ -91,7 +91,7 @@ constexpr uint16_t MOTION_CHECK_TH = 1000;
 constexpr uint16_t ENC_OPE_V_R_TH = 175;
 
 constexpr uint16_t LOG_SIZE = 1500;
-constexpr uint16_t LINE_BUF_SIZE = 2000;
+constexpr uint16_t LINE_BUF_SIZE = 256;
 constexpr float BATTERY_GAIN = 2.97324;
 
 constexpr uint8_t LEDC_HIGH_SPEED_MODE = 0;
@@ -130,7 +130,7 @@ static const std::string format3(
     "%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,"
     "%0.3f,%d,%0.3f,%0.3f,");
 static const std::string format4("%0.3f,%0.3f,%0.3f,%0.3f,%d\n");
-
+static char line_buf[LINE_BUF_SIZE];
 // static const std::string format1("%d,%d,%d,%d,%d,%d,");
 // static const std::string format2("%d,%d,%d,%d,%d,%d,%d,");
 // static const std::string format3("%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n");

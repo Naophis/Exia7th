@@ -12,7 +12,7 @@ class Plot:
         trj = fig.add_subplot(111)
         trj.set(facecolor="dimgrey")
         # trj.set(facecolor="black")
-        v = 1200
+        v = 300
         rad = 54
         n = 2
         tgt_ang = 90
@@ -26,7 +26,7 @@ class Plot:
             end_pos = {"x": 45, "y": 45}
             start_ang = 0
         elif type == "large":
-            rad = 54
+            rad = 50
             n = 2
             tgt_ang = 90
             end_pos = {"x": 90, "y": 90}
@@ -38,7 +38,7 @@ class Plot:
             end_pos = {"x": 0, "y": 180}
             start_ang = 0
         elif type == "dia45":
-            rad = 54
+            rad = 50
             n = 2
             tgt_ang = 45
             end_pos = {"x": 90, "y": 45}

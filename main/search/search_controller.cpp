@@ -76,10 +76,10 @@ void SearchController::front_wall_ctrl() {
   vTaskDelay(25 / portTICK_RATE_MS);
   pt->motor_enable();
   mp->front_ctrl(false);
-  mp->reset_tgt_data();
-  mp->reset_ego_data();
   vTaskDelay(25 / portTICK_RATE_MS);
   pt->motor_disable(false);
+  mp->reset_tgt_data();
+  mp->reset_ego_data();
 }
 MotionResult SearchController::pivot(param_set_t &p_set) {
   // param_straight_t p;
@@ -142,10 +142,10 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
     tmp_dist = 20;
   }
   bool front_ctrl = (sensing_result->ego.front_dist < 60);
+  pt->motor_disable(false);
   mp->reset_tgt_data();
   mp->reset_ego_data();
   vTaskDelay(25 / portTICK_RATE_MS);
-  pt->motor_disable(false);
 
   if (adachi->goal_step && !saved) {
     vTaskDelay(200 / portTICK_RATE_MS);
@@ -191,10 +191,10 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
     p.motion_type = MotionType::PIVOT_PRE2;
     p.sct = SensorCtrlType::NONE;
     res = mp->go_straight(p);
+    pt->motor_disable(false);
     mp->reset_tgt_data();
     mp->reset_ego_data();
     vTaskDelay(10 / portTICK_RATE_MS);
-    pt->motor_disable(false);
     vTaskDelay(10 / portTICK_RATE_MS);
     mp->reset_tgt_data();
     mp->reset_ego_data();
@@ -202,17 +202,17 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
     mp->reset_tgt_data();
     mp->reset_ego_data();
     res = mp->pivot_turn(pr);
+    pt->motor_disable(false);
     mp->reset_tgt_data();
     mp->reset_ego_data();
     vTaskDelay(10 / portTICK_RATE_MS);
-    pt->motor_disable(false);
   } else {
     pr.ang = PI;
     res = mp->pivot_turn(pr);
+    pt->motor_disable(false);
     mp->reset_tgt_data();
     mp->reset_ego_data();
     vTaskDelay(10 / portTICK_RATE_MS);
-    pt->motor_disable(false);
   }
 
   // if (res == MotionResult::ERROR)
@@ -322,10 +322,10 @@ MotionResult SearchController::pivot90(param_set_t &p_set,
   pr.ang = PI / 2;
   pr.RorL = td;
 
+  pt->motor_disable(false);
   mp->reset_tgt_data();
   mp->reset_ego_data();
   vTaskDelay(25 / portTICK_RATE_MS);
-  pt->motor_disable(false);
 
   adachi->update();
 
@@ -336,10 +336,10 @@ MotionResult SearchController::pivot90(param_set_t &p_set,
   vTaskDelay(5 / portTICK_RATE_MS);
 
   res = mp->pivot_turn(pr);
+  pt->motor_disable(false);
   mp->reset_tgt_data();
   mp->reset_ego_data();
   vTaskDelay(10 / portTICK_RATE_MS);
-  pt->motor_disable(false);
 
   vTaskDelay(10 / portTICK_RATE_MS);
   mp->reset_tgt_data();

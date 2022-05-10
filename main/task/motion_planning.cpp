@@ -113,7 +113,7 @@ MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
       break;
     }
     if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
-      return MotionResult::ERROR;
+      // return MotionResult::ERROR;
     }
   }
   return MotionResult::NONE;
@@ -507,6 +507,7 @@ void MotionPlanning::reset_tgt_data() {
   tgt_val->global_pos.img_ang = 0;
   tgt_val->global_pos.dist = 0;
   tgt_val->global_pos.img_dist = 0;
+  req_error_reset();
 }
 
 void MotionPlanning::reset_ego_data() {
@@ -536,6 +537,7 @@ void MotionPlanning::reset_ego_data() {
   // 一度初期化
   tgt_val->motion_type = MotionType::NONE;
   tgt_val->nmr.timstamp++;
+  req_error_reset();
   vTaskDelay(1 / portTICK_RATE_MS);
 }
 
@@ -681,12 +683,16 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
         }
       }
       if (turn_type == TurnType::Finish) {
-        ps.dist += 40;
+        ps.dist -= 45;
         ps.v_end = 500;
       }
       ps.motion_type = MotionType::STRAIGHT;
       ps.sct = !dia ? SensorCtrlType::Straight : SensorCtrlType::Dia;
-      go_straight(ps);
+
+      auto res = go_straight(ps);
+      if (res == MotionResult::ERROR) {
+        break;
+      }
       if (turn_type == TurnType::Finish) {
         break;
       }
@@ -703,7 +709,6 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
       }
       // スラロームの後距離の目標速度を指定
 
-      //　TODO
       nm.v_max = p_set.map[turn_type].v;
       nm.v_end = p_set.map[turn_type].v;
       nm.accl = p_set.str_map[st].accl;
@@ -718,7 +723,10 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
         nm.is_turn = true;
       }
 
-      slalom(p_set.map[turn_type], turn_dir, nm, dia);
+      auto res = slalom(p_set.map[turn_type], turn_dir, nm, dia);
+      if (res == MotionResult::ERROR) {
+        break;
+      }
       ego.dir = tc.get_next_dir(ego.dir, turn_type, turn_dir);
       // ego.ang = trj_ele.ang;
       dia =
@@ -727,22 +735,20 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
     }
   }
   float dist = sensing_result->ego.front_dist - 45;
+  if (dist < 0) {
+    dist = 1;
+  }
   ps.v_max = 500;
   ps.v_end = 20;
   ps.dist = dist;
   ps.accl = p_set.str_map[StraightType::FastRun].accl;
   ps.decel = p_set.str_map[StraightType::FastRun].decel;
   ps.sct = !dia ? SensorCtrlType::Straight : SensorCtrlType::Dia;
-  if (dist > 0)
-    go_straight(ps);
+  go_straight(ps);
   reset_tgt_data();
   reset_ego_data();
   vTaskDelay(250 / portTICK_RATE_MS);
   pt->motor_disable(false);
-
-  reset_tgt_data();
-  reset_ego_data();
-  vTaskDelay(25 / portTICK_RATE_MS);
 
   // pt->motor_enable();
   // front_ctrl(false);
