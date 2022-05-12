@@ -77,7 +77,7 @@ void SearchController::front_wall_ctrl() {
   pt->motor_enable();
   mp->front_ctrl(false);
   vTaskDelay(25 / portTICK_RATE_MS);
-  pt->motor_disable(false);
+  pt->motor_disable();
   mp->reset_tgt_data();
   mp->reset_ego_data();
 }
@@ -142,7 +142,7 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
     tmp_dist = 20;
   }
   bool front_ctrl = (sensing_result->ego.front_dist < 60);
-  pt->motor_disable(false);
+  pt->motor_disable();
   mp->reset_tgt_data();
   mp->reset_ego_data();
   vTaskDelay(25 / portTICK_RATE_MS);
@@ -176,7 +176,7 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
     res = mp->pivot_turn(pr);
     vTaskDelay(10 / portTICK_RATE_MS);
     front_ctrl = (sensing_result->ego.front_dist < 60);
-    pt->motor_disable(false);
+    pt->motor_disable();
     vTaskDelay(10 / portTICK_RATE_MS);
 
     if (front_ctrl) {
@@ -191,7 +191,7 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
     p.motion_type = MotionType::PIVOT_PRE2;
     p.sct = SensorCtrlType::NONE;
     res = mp->go_straight(p);
-    pt->motor_disable(false);
+    pt->motor_disable();
     mp->reset_tgt_data();
     mp->reset_ego_data();
     vTaskDelay(10 / portTICK_RATE_MS);
@@ -202,14 +202,14 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
     mp->reset_tgt_data();
     mp->reset_ego_data();
     res = mp->pivot_turn(pr);
-    pt->motor_disable(false);
+    pt->motor_disable();
     mp->reset_tgt_data();
     mp->reset_ego_data();
     vTaskDelay(10 / portTICK_RATE_MS);
   } else {
     pr.ang = PI;
     res = mp->pivot_turn(pr);
-    pt->motor_disable(false);
+    pt->motor_disable();
     mp->reset_tgt_data();
     mp->reset_ego_data();
     vTaskDelay(10 / portTICK_RATE_MS);
@@ -234,7 +234,7 @@ MotionResult SearchController::pivot(param_set_t &p_set) {
     mp->reset_tgt_data();
     mp->reset_ego_data();
     vTaskDelay(10 / portTICK_RATE_MS);
-    pt->motor_disable(false);
+    pt->motor_disable();
   }
 
   // mp->reset_gyro_ref();
@@ -322,7 +322,7 @@ MotionResult SearchController::pivot90(param_set_t &p_set,
   pr.ang = PI / 2;
   pr.RorL = td;
 
-  pt->motor_disable(false);
+  pt->motor_disable();
   mp->reset_tgt_data();
   mp->reset_ego_data();
   vTaskDelay(25 / portTICK_RATE_MS);
@@ -336,7 +336,7 @@ MotionResult SearchController::pivot90(param_set_t &p_set,
   vTaskDelay(5 / portTICK_RATE_MS);
 
   res = mp->pivot_turn(pr);
-  pt->motor_disable(false);
+  pt->motor_disable();
   mp->reset_tgt_data();
   mp->reset_ego_data();
   vTaskDelay(10 / portTICK_RATE_MS);

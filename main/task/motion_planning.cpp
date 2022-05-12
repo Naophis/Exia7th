@@ -507,7 +507,6 @@ void MotionPlanning::reset_tgt_data() {
   tgt_val->global_pos.img_ang = 0;
   tgt_val->global_pos.dist = 0;
   tgt_val->global_pos.img_dist = 0;
-  req_error_reset();
 }
 
 void MotionPlanning::reset_ego_data() {
@@ -748,7 +747,7 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
   reset_tgt_data();
   reset_ego_data();
   vTaskDelay(250 / portTICK_RATE_MS);
-  pt->motor_disable(false);
+  pt->motor_disable();
 
   // pt->motor_enable();
   // front_ctrl(false);
@@ -849,14 +848,14 @@ void MotionPlanning::wall_off_dia(TurnDirection td,
   tgt_val->ego_in.img_dist = 0;
   tgt_val->nmr.timstamp++;
   if (td == TurnDirection::Right) {
-    if (sensing_result->ego.left45_dist < param->dia_turn_exist_th_l) {
-      while (true) {
-        if (sensing_result->ego.left45_dist < param->dia_turn_th_l) {
-          return;
-        }
-        vTaskDelay(1 / portTICK_RATE_MS);
-      }
-    }
+    // if (sensing_result->ego.left45_dist < param->dia_turn_exist_th_l) {
+    //   while (true) {
+    //     if (sensing_result->ego.left45_dist < param->dia_turn_th_l) {
+    //       return;
+    //     }
+    //     vTaskDelay(1 / portTICK_RATE_MS);
+    //   }
+    // }
     while (true) {
       if (sensing_result->ego.right45_dist <
           param->wall_off_dist.exist_dia_th_r) {
@@ -873,14 +872,14 @@ void MotionPlanning::wall_off_dia(TurnDirection td,
       vTaskDelay(1 / portTICK_RATE_MS);
     }
   } else {
-    if (sensing_result->ego.right45_dist < param->dia_turn_exist_th_r) {
-      while (true) {
-        if (sensing_result->ego.right45_dist < param->dia_turn_th_r) {
-          return;
-        }
-        vTaskDelay(1 / portTICK_RATE_MS);
-      }
-    }
+    // if (sensing_result->ego.right45_dist < param->dia_turn_exist_th_r) {
+    //   while (true) {
+    //     if (sensing_result->ego.right45_dist < param->dia_turn_th_r) {
+    //       return;
+    //     }
+    //     vTaskDelay(1 / portTICK_RATE_MS);
+    //   }
+    // }
     while (true) {
       if (sensing_result->ego.left45_dist <
           param->wall_off_dist.exist_dia_th_l) {

@@ -39,7 +39,7 @@ class Plot:
             start_ang = 0
         elif type == "dia45":
             rad = 50
-            n = 2
+            n = 4
             tgt_ang = 45
             end_pos = {"x": 90, "y": 45}
             start_ang = 0

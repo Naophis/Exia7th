@@ -614,6 +614,7 @@ void MainTask::load_sys_param() {
       cJSON_GetObjectItem(test, "suction_duty")->valuedouble;
   sys.test.file_idx = cJSON_GetObjectItem(test, "file_idx")->valueint;
   printf("sys.test.file_idx = %d\n", sys.test.file_idx);
+  file_idx = sys.test.file_idx;
   sys.test.sla_type = cJSON_GetObjectItem(test, "sla_type")->valueint;
   sys.test.sla_return = cJSON_GetObjectItem(test, "sla_return")->valueint;
   sys.test.sla_type2 = cJSON_GetObjectItem(test, "sla_type2")->valueint;
@@ -1231,8 +1232,6 @@ void MainTask::test_turn() {
 
 void MainTask::test_sla() {
 
-  file_idx = sys.test.file_idx;
-
   if (file_idx >= tpp.file_list_size) {
     printf("%d %d\n", file_idx, tpp.file_list_size);
     ui->error();
@@ -1335,6 +1334,7 @@ void MainTask::test_sla() {
   reset_tgt_data();
   reset_ego_data();
   req_error_reset();
+  pt->motor_disable();
   pt->suction_disable();
   lt->stop_slalom_log();
 

@@ -28,20 +28,33 @@ void PlanningTask::suction_enable(float duty) {
 void PlanningTask::motor_disable(bool reset_req) {
   // if (reset_req) {
   motor_en = false;
-  mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A);
-  mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A);
-  mcpwm_stop(MCPWM_UNIT_0, MCPWM_TIMER_0);
-  mcpwm_stop(MCPWM_UNIT_0, MCPWM_TIMER_1);
+
   mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_B, 0);
   mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_B,
                       MCPWM_DUTY_MODE_0);
   mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_B, 0);
   mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_B,
                       MCPWM_DUTY_MODE_0);
+  mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, 0);
+  mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A,
+                      MCPWM_DUTY_MODE_0);
+  mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A, 0);
+  mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A,
+                      MCPWM_DUTY_MODE_0);
+  mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A);
+  mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A);
+  mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_B);
+  mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_B);
+  mcpwm_stop(MCPWM_UNIT_0, MCPWM_TIMER_0);
+  mcpwm_stop(MCPWM_UNIT_0, MCPWM_TIMER_1);
+  gpio_set_level(A_PWM, 0);
+  gpio_set_level(B_PWM, 0);
+
   // }
 }
 void PlanningTask::motor_disable() {
   motor_disable(true); //
+  vTaskDelay(1 / portTICK_PERIOD_MS);
 }
 void PlanningTask::suction_disable() {
   // gpio_set_level(SUCTION_PWM, 0);
@@ -487,7 +500,7 @@ void PlanningTask::set_next_duty(float duty_l, float duty_r,
     mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A,
                         MCPWM_DUTY_MODE_0);
   } else {
-    motor_disable();
+    motor_disable(true);
   }
   if (suction_en) {
     // mcpwm_set_signal_high(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A);
@@ -899,8 +912,8 @@ void PlanningTask::check_fail_safe() {
     fail_safe.invalid_duty_l_cnt = 0;
     tgt_val->fss.error = 0;
   } else {
-    if (ABS(fail_safe.invalid_duty_r_cnt) > 50 ||
-        ABS(fail_safe.invalid_duty_l_cnt) > 50) {
+    if (ABS(fail_safe.invalid_duty_r_cnt) > 100 ||
+        ABS(fail_safe.invalid_duty_l_cnt) > 100) {
       tgt_val->fss.error = 1;
     }
   }
@@ -1023,7 +1036,8 @@ void PlanningTask::calc_sensor_dist_diff() {
   } else {
     if (((tgt_val->global_pos.dist - sensing_result->sen.l45.global_run_dist) >
          param_ro->wall_off_hold_dist) &&
-        sensing_result->ego.left45_dist < 60) {
+        sensing_result->ego.left45_dist <
+            param_ro->wall_off_dist.exist_dia_th_l) {
       sensing_result->sen.l45.sensor_dist = sensing_result->ego.left45_dist;
     }
   }
@@ -1034,7 +1048,8 @@ void PlanningTask::calc_sensor_dist_diff() {
   } else {
     if (((tgt_val->global_pos.dist - sensing_result->sen.r45.global_run_dist) >
          param_ro->wall_off_hold_dist) &&
-        sensing_result->ego.right45_dist < 60) {
+        sensing_result->ego.right45_dist <
+            param_ro->wall_off_dist.exist_dia_th_r) {
       sensing_result->sen.r45.sensor_dist = sensing_result->ego.right45_dist;
     }
   }
