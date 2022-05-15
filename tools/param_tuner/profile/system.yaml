@@ -16,7 +16,7 @@ test: # テスト走行時に使用するパラメータ群
   dia: 0
   w_max: 14.0
   alpha: 40
-  ang: 3600
+  ang: 360
   suction_active: 0
   suction_duty: 3.25
   file_idx: 0

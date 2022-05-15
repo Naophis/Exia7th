@@ -61,7 +61,7 @@ MotionResult SearchController::slalom(param_set_t &p_set,
                                       const TurnDirection td) {
   slalom_param2_t sp = p_set.map[TurnType::Normal];
 
-  next_motionr_t nm;
+  next_motion_t nm;
   nm.v_max = p_set.map[TurnType::Normal].v;
   nm.v_end = p_set.map[TurnType::Normal].v;
   nm.accl = p_set.str_map[StraightType::Search].accl;

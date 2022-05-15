@@ -37,11 +37,11 @@ public:
   void n_slalom(param_normal_slalom_t &p, param_straight_t &p_str);
 
   MotionResult slalom(slalom_param2_t &sp, TurnDirection dir,
-                      next_motionr_t &next_motion, bool dia);
+                      next_motion_t &next_motion, bool dia);
   MotionResult slalom(slalom_param2_t &sp, TurnDirection dir,
-                      next_motionr_t &next_motion);
+                      next_motion_t &next_motion);
   MotionResult slalom(slalom_param2_t &sp, TurnDirection dir,
-                      next_motionr_t &next_motion, bool dia,
+                      next_motion_t &next_motion, bool dia,
                       std::shared_ptr<Adachi> &adachi);
   MotionResult search_front_ctrl(param_straight_t &p);
 
@@ -82,7 +82,7 @@ private:
   ego_odom_t ego;
   bool dia = false;
   param_straight_t ps;
-  next_motionr_t nm;
+  next_motion_t nm;
   MotionResult res_f;
 };
 #endif

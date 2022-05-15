@@ -956,15 +956,15 @@ void MainTask::task() {
         }
         search_ctrl->print_maze();
       } else if (mode_num == 2) {
-        path_run(0);
+        path_run(0, 0);
       } else if (mode_num == 3) {
-        path_run(1);
+        path_run(1, 0);
       } else if (mode_num == 4) {
-        path_run(2);
+        path_run(2, 0);
       } else if (mode_num == 5) {
-        path_run(3);
+        path_run(3, 0);
       } else if (mode_num == 6) {
-        path_run(4);
+        path_run(4, 0);
       } else if (mode_num == 7) {
         // pc->path_create(false);
         // pc->convert_large_path(true);
@@ -1799,7 +1799,7 @@ void MainTask::read_maze_data() {
   printf("read maze data!!!\n");
 }
 
-void MainTask::path_run(int idx) {
+void MainTask::path_run(int idx, int idx2) {
   pc->path_create(false);
   pc->convert_large_path(true);
   pc->diagonalPath(true, true);
@@ -1828,6 +1828,34 @@ void MainTask::path_run(int idx) {
           paramset_list[tpp.profile_list[idx][p.first]].map[p.first].back.left;
       param_set.map[p.first].back.right =
           paramset_list[tpp.profile_list[idx][p.first]].map[p.first].back.right;
+    }
+  }
+  for (const auto p : turn_name_list) {
+    if (p.first != TurnType::None) {
+      param_set.map_slow[p.first].v =
+          paramset_list[tpp.profile_list[idx2][p.first]].map[p.first].v;
+      param_set.map_slow[p.first].ang =
+          paramset_list[tpp.profile_list[idx2][p.first]].map[p.first].ang;
+      param_set.map_slow[p.first].rad =
+          paramset_list[tpp.profile_list[idx2][p.first]].map[p.first].rad;
+      param_set.map_slow[p.first].pow_n =
+          paramset_list[tpp.profile_list[idx2][p.first]].map[p.first].pow_n;
+      param_set.map_slow[p.first].time =
+          paramset_list[tpp.profile_list[idx2][p.first]].map[p.first].time;
+      param_set.map_slow[p.first].front.left =
+          paramset_list[tpp.profile_list[idx2][p.first]]
+              .map[p.first]
+              .front.left;
+      param_set.map_slow[p.first].front.right =
+          paramset_list[tpp.profile_list[idx2][p.first]]
+              .map[p.first]
+              .front.right;
+      param_set.map_slow[p.first].back.left =
+          paramset_list[tpp.profile_list[idx2][p.first]].map[p.first].back.left;
+      param_set.map_slow[p.first].back.right =
+          paramset_list[tpp.profile_list[idx2][p.first]]
+              .map[p.first]
+              .back.right;
     }
   }
 

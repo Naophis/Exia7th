@@ -1,7 +1,7 @@
 
 #include "include/planning_task.hpp"
 
-constexpr int MOTOR_HZ = 100000;
+constexpr int MOTOR_HZ = 200000;
 constexpr int SUCTION_MOTOR_HZ = 10000;
 PlanningTask::PlanningTask() {}
 

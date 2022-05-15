@@ -126,16 +126,16 @@ void MotionPlanning::req_error_reset() {
   tgt_val->pl_req.time_stamp++;
 }
 MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
-                                    next_motionr_t &next_motion) {
+                                    next_motion_t &next_motion) {
   return slalom(sp, td, next_motion, false);
 }
 
 MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
-                                    next_motionr_t &next_motion, bool dia) {
+                                    next_motion_t &next_motion, bool dia) {
   return slalom(sp, td, next_motion, dia, fake_adachi);
 }
 MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
-                                    next_motionr_t &next_motion, bool dia,
+                                    next_motion_t &next_motion, bool dia,
                                     std::shared_ptr<Adachi> &adachi) {
   bool find = false;
   bool find_r = false;
@@ -637,6 +637,7 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
   ego.x = ego.y = ego.ang = 0;
   ego.dir = Direction::North;
   dia = false;
+  bool fast_mode = false;
 
   // default straight parma
   ps.v_max = p_set.str_map[StraightType::FastRun].v_max;
@@ -658,11 +659,14 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
     float dist = 0.5 * pc->path_s[i] - 1;
     auto turn_dir = tc.get_turn_dir(pc->path_t[i]);
     auto turn_type = tc.get_turn_type(pc->path_t[i], dia);
-
+    if (dist > 0) {
+      fast_mode = true;
+    }
     if (dist > 0 || i == 0) {
       auto st = !dia ? StraightType::FastRun : StraightType::FastRunDia;
       ps.v_max = p_set.str_map[st].v_max;
-      ps.v_end = p_set.map[turn_type].v;
+      ps.v_end =
+          fast_mode ? p_set.map[turn_type].v : p_set.map_slow[turn_type].v;
       ps.accl = p_set.str_map[st].accl;
       ps.decel = p_set.str_map[st].decel;
       ps.dia_mode = dia;
@@ -670,9 +674,15 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
       ps.dist = !dia ? (dist * cell_size) : (dist * cell_size * ROOT2);
       if (i == 0) {
         if (dist == 0) { // 初手ターンの場合は距離合成して加速区間を増やす
-          dist = (turn_dir == TurnDirection::Left)
-                     ? p_set.map[turn_type].front.left
-                     : p_set.map[turn_type].front.right;
+          if (fast_mode) {
+            dist = (turn_dir == TurnDirection::Left)
+                       ? p_set.map[turn_type].front.left
+                       : p_set.map[turn_type].front.right;
+          } else {
+            dist = (turn_dir == TurnDirection::Left)
+                       ? p_set.map_slow[turn_type].front.left
+                       : p_set.map_slow[turn_type].front.right;
+          }
         }
         ps.dist += param->offset_start_dist; // 初期加速距離を加算
         auto tmp_v2 = 2 * ps.accl * ps.dist;
@@ -708,8 +718,10 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
       }
       // スラロームの後距離の目標速度を指定
 
-      nm.v_max = p_set.map[turn_type].v;
-      nm.v_end = p_set.map[turn_type].v;
+      nm.v_max =
+          fast_mode ? p_set.map[turn_type].v : p_set.map_slow[turn_type].v;
+      nm.v_end =
+          fast_mode ? p_set.map[turn_type].v : p_set.map_slow[turn_type].v;
       nm.accl = p_set.str_map[st].accl;
       nm.decel = p_set.str_map[st].decel;
       nm.is_turn = false;
@@ -717,12 +729,15 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
       if (exist_next_idx && !(dist3 > 0 && dist4 > 0)) {
         //連続スラロームのとき、次のスラロームの速度になるように加速
         auto next_turn_type = tc.get_turn_type(pc->path_t[i + 1]);
-        nm.v_max = p_set.map[next_turn_type].v;
-        nm.v_end = p_set.map[next_turn_type].v;
+        nm.v_max = fast_mode ? p_set.map[next_turn_type].v
+                             : p_set.map_slow[next_turn_type].v;
+        nm.v_end = fast_mode ? p_set.map[next_turn_type].v
+                             : p_set.map_slow[next_turn_type].v;
         nm.is_turn = true;
       }
-
-      auto res = slalom(p_set.map[turn_type], turn_dir, nm, dia);
+      auto res =
+          slalom(fast_mode ? p_set.map[turn_type] : p_set.map_slow[turn_type],
+                 turn_dir, nm, dia);
       if (res == MotionResult::ERROR) {
         break;
       }

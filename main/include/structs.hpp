@@ -517,17 +517,18 @@ typedef struct {
 
 typedef struct {
   std::unordered_map<TurnType, slalom_param2_t> map;
+  std::unordered_map<TurnType, slalom_param2_t> map_slow;
   std::unordered_map<StraightType, straight_param_t> str_map;
 } param_set_t;
 
 typedef struct {
   bool is_turn = false;
-  TurnType next_turn_type;
+  TurnType next_turn_type = TurnType::None;
   float v_max = 0;
   float v_end = 0;
   float accl = 0;
   float decel = 0;
-} next_motionr_t;
+} next_motion_t;
 
 typedef struct {
   // int idx;

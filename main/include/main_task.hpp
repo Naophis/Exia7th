@@ -87,7 +87,7 @@ private:
   LED_bit lbit;
   TurnDirection rorl;
   TurnDirection rorl2;
-  next_motionr_t nm;
+  next_motion_t nm;
 
   const TickType_t xDelay500 = 500 / portTICK_PERIOD_MS;
   const TickType_t xDelay100 = 100 / portTICK_PERIOD_MS;
@@ -116,7 +116,7 @@ private:
   void test_dia_walloff();
   void test_front_ctrl(bool mode);
   void rx_uart_json();
-  void path_run(int idx);
+  void path_run(int idx, int idx2);
 
   void save_json_data(std::string &str);
   vector<string> split(const string &s, char delim);
