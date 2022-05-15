@@ -8,14 +8,15 @@ class Plot:
     def exe(self, type, offset):
 
         # fig = plt.figure(figsize=(5, 5), dpi=500)
-        fig = plt.figure()
+        fig = plt.figure(dpi=100)
         trj = fig.add_subplot(111)
         trj.set(facecolor="dimgrey")
         # trj.set(facecolor="black")
-        v = 300
+        v = 500
         rad = 54
         n = 2
         tgt_ang = 90
+        slip_gain = 75
         start_pos = {"x": 0, "y": 0}
         end_pos = {"x": 90, "y": 90}
         start_ang = 0
@@ -26,8 +27,8 @@ class Plot:
             end_pos = {"x": 45, "y": 45}
             start_ang = 0
         elif type == "large":
-            rad = 50
-            n = 2
+            rad = 60
+            n = 4
             tgt_ang = 90
             end_pos = {"x": 90, "y": 90}
             start_ang = 0
@@ -68,7 +69,7 @@ class Plot:
             end_pos = {"x": 0, "y": 90}
             start_ang = 0
 
-        sla = Slalom(v, rad, n, tgt_ang, end_pos, type)
+        sla = Slalom(v, rad, n, tgt_ang, end_pos, slip_gain, type)
         sla.calc_base_time()
         res = sla.calc(start_ang)
         # sla.calc_offset_front()
@@ -119,6 +120,15 @@ class Plot:
         # 後距離
         trj.plot(sla.end_offset_list[0], sla.end_offset_list[1],
                  ls="-", color="coral", lw=trj_width, alpha=trj_alpha)
+
+        res = sla.calc_slip(start_ang)
+        sla.calc_offset_dist()
+        trj.plot(sla.start_offset_list[0], sla.start_offset_list[1],
+                 ls="--", color="red", lw=1.5, alpha=trj_alpha)
+        trj.plot(res["x"] + sla.turn_offset["x"], res["y"] + + sla.turn_offset["y"], color="blue", lw=1.5,
+                 alpha=trj_alpha, ls="--")
+        trj.plot(sla.end_offset_list[0], sla.end_offset_list[1],
+                 ls="--", color="red", lw=1.5, alpha=trj_alpha)
 
         trj.set_aspect('1.0')
         plot_range = [-60, 180]

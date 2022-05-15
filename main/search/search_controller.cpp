@@ -332,9 +332,6 @@ MotionResult SearchController::pivot90(param_set_t &p_set,
   mp->reset_tgt_data();
   mp->reset_ego_data();
   pt->motor_enable();
-
-  vTaskDelay(5 / portTICK_RATE_MS);
-
   res = mp->pivot_turn(pr);
   pt->motor_disable();
   mp->reset_tgt_data();
@@ -344,7 +341,6 @@ MotionResult SearchController::pivot90(param_set_t &p_set,
   vTaskDelay(10 / portTICK_RATE_MS);
   mp->reset_tgt_data();
   mp->reset_ego_data();
-  pt->motor_enable();
 
   p.v_max = p_set.str_map[StraightType::Search].v_max;
   p.v_end = p_set.str_map[StraightType::Search].v_max;
@@ -357,6 +353,7 @@ MotionResult SearchController::pivot90(param_set_t &p_set,
   p.motion_type = MotionType::PIVOT_AFTER;
   p.sct = SensorCtrlType::Straight;
   p.wall_off_req = WallOffReq::NONE;
+  pt->motor_enable();
   res = mp->go_straight(p);
   // ui->coin(100);
 
@@ -432,13 +429,15 @@ SearchResult SearchController::exec(param_set_t &p_set, SearchMode sm) {
     if (next_motion == Motion::Straight) {
       mr = go_straight_wrapper(p_set);
     } else if (next_motion == Motion::TurnRight) {
-      if (sensing_result->ego.front_dist < param->front_dist_offset_pivot_th) {
+      if (sensing_result->ego.front_dist <
+          (90 - p_set.map[TurnType::Normal].front.right)) {
         mr = pivot90(p_set, TurnDirection::Right);
       } else {
         mr = slalom(p_set, TurnDirection::Right);
       }
     } else if (next_motion == Motion::TurnLeft) {
-      if (sensing_result->ego.front_dist < param->front_dist_offset_pivot_th) {
+      if (sensing_result->ego.front_dist <
+          (90 - p_set.map[TurnType::Normal].front.left)) {
         mr = pivot90(p_set, TurnDirection::Left);
       } else {
         mr = slalom(p_set, TurnDirection::Left);
@@ -590,7 +589,8 @@ void SearchController::print_maze() {
   printf("\r\n");
 }
 void SearchController::save_maze_data() {
-  auto *f = fopen(maze_log_kata_file.c_str(), "wb");
+  // auto *f = fopen(maze_log_kata_file.c_str(), "wb");
+  auto *f = fopen(maze_log_file.c_str(), "wb");
   if (f == NULL)
     return;
   for (const auto d : lgc->map) {

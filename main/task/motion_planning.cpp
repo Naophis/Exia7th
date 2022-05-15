@@ -595,6 +595,8 @@ MotionResult MotionPlanning::front_ctrl(bool limit) {
     } else {
       cnt = 0;
     }
+    // printf("%f %f %f\n", sensing_result->ego.front_dist,
+    //        sensing_result->ego.duty.duty_l, sensing_result->ego.duty.duty_r);
     max_cnt++;
     if (!limit) {
       if (cnt > param->sen_ref_p.search_exist.front_ctrl_th)

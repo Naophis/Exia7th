@@ -20,7 +20,7 @@ Lm: 0.0000035
 sakiyomi_time: 40
 clear_angle: 5
 clear_dist_order: 80
-front_dist_offset: 88
+front_dist_offset: 90
 front_dist_offset2: 130.5
 led_light_delay_cnt: 5000
 

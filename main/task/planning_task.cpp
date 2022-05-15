@@ -897,11 +897,11 @@ void PlanningTask::cp_tgt_val() {
 void PlanningTask::check_fail_safe() {
   bool no_problem = true;
   if (motor_en) {
-    if (ABS(sensing_result->ego.duty.duty_r) > 90) {
+    if (ABS(sensing_result->ego.duty.duty_r) > 100) {
       fail_safe.invalid_duty_r_cnt++;
       no_problem = false;
     }
-    if (ABS(sensing_result->ego.duty.duty_l) > 90) {
+    if (ABS(sensing_result->ego.duty.duty_l) > 100) {
       fail_safe.invalid_duty_l_cnt++;
       no_problem = false;
     }
