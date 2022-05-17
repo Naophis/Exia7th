@@ -355,6 +355,11 @@ void MainTask::load_hw_param() {
   param->wall_off_dist.noexist_dia_th_r =
       cJSON_GetObjectItem(root, "wall_off_hold_noexist_dia_th_r")->valuedouble;
 
+  param->dia_wall_off_ref_l =
+      cJSON_GetObjectItem(root, "dia_wall_off_ref_l")->valuedouble;
+  param->dia_wall_off_ref_r =
+      cJSON_GetObjectItem(root, "dia_wall_off_ref_r")->valuedouble;
+
   param->sla_wall_ref_l =
       cJSON_GetObjectItem(root, "sla_wall_ref_l")->valuedouble;
   param->sla_wall_ref_r =
@@ -665,6 +670,9 @@ void MainTask::load_turn_param_profiles() {
   for (int i = 0; i < profile_idx_size; i++) {
     p_idx[TurnType::None] =
         cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "run_param")
+            ->valueint;
+    p_idx[TurnType::Finish] =
+        cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "suction")
             ->valueint;
     p_idx[TurnType::Normal] =
         cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "normal")
@@ -1277,15 +1285,12 @@ void MainTask::test_sla() {
 
   ps.v_max = sla_p.v;
   ps.v_end = sla_p.v;
-  ps.dist = 45 + param->offset_start_dist;
+  ps.dist = 90 + param->offset_start_dist;
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
   ps.sct = SensorCtrlType::Straight;
   ps.motion_type = MotionType::STRAIGHT;
   ps.dia_mode = false;
-  mp->go_straight(ps);
-
-  ps.dist = 45;
   mp->go_straight(ps);
 
   nm.v_max = sla_p.v;
@@ -1806,6 +1811,8 @@ void MainTask::path_run(int idx, int idx2) {
   pc->print_path();
   lgc->data_economize();
 
+  param_set.suction = tpp.profile_list[idx][TurnType::Finish] > 0;
+  param_set.suction_duty = sys.test.suction_duty;
   for (const auto p : turn_name_list) {
     if (p.first != TurnType::None) {
       param_set.map[p.first].v =
@@ -1828,6 +1835,8 @@ void MainTask::path_run(int idx, int idx2) {
           paramset_list[tpp.profile_list[idx][p.first]].map[p.first].back.left;
       param_set.map[p.first].back.right =
           paramset_list[tpp.profile_list[idx][p.first]].map[p.first].back.right;
+      param_set.map[p.first].type =
+          paramset_list[tpp.profile_list[idx][p.first]].map[p.first].type;
     }
   }
   for (const auto p : turn_name_list) {
@@ -1856,6 +1865,8 @@ void MainTask::path_run(int idx, int idx2) {
           paramset_list[tpp.profile_list[idx2][p.first]]
               .map[p.first]
               .back.right;
+      param_set.map_slow[p.first].type =
+          paramset_list[tpp.profile_list[idx2][p.first]].map[p.first].type;
     }
   }
 

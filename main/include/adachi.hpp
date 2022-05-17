@@ -34,6 +34,8 @@ public:
   void update();
   unordered_map<unsigned int, unsigned char> subgoal_list;
 
+  vector<point_t> pt_list;
+
 private:
   void setNextDirection(int x2, int y2, Direction dir, Direction &next_dir,
                         int &val);
@@ -52,7 +54,6 @@ private:
   std::shared_ptr<MazeSolverBaseLgc> lgc;
   std::shared_ptr<ego_t> ego;
 
-  vector<point_t> pt_list;
   vector<point_t> start_pt_list;
   point_t tmp_p;
 };

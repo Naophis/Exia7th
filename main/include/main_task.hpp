@@ -55,12 +55,12 @@ public:
   void check_battery();
 
   TurnType cast_turn_type(std::string str);
+  std::shared_ptr<UserInterface> ui;
 
 private:
   SearchResult sr;
   xTaskHandle handle = 0;
 
-  std::shared_ptr<UserInterface> ui;
   std::shared_ptr<MotionPlanning> mp;
 
   std::shared_ptr<PlanningTask> pt;

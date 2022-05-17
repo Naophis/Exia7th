@@ -12,11 +12,11 @@ class Plot:
         trj = fig.add_subplot(111)
         trj.set(facecolor="dimgrey")
         # trj.set(facecolor="black")
-        v = 500
+        v = 1000
         rad = 54
         n = 2
         tgt_ang = 90
-        slip_gain = 75
+        slip_gain = 250
         start_pos = {"x": 0, "y": 0}
         end_pos = {"x": 90, "y": 90}
         start_ang = 0
@@ -57,8 +57,8 @@ class Plot:
             end_pos = {"x": 90, "y": 45}
             start_ang = 45
         elif type == "dia135_2":
-            rad = 35
-            n = 2
+            rad = 36
+            n = 4
             tgt_ang = 135
             end_pos = {"x": -45, "y": 90}
             start_ang = 45
@@ -82,7 +82,7 @@ class Plot:
         sub_line_color = "silver"
         subline_width = 0.75
         subline_alpha = 0.5
-        trj_width = 2
+        trj_width = 5
         trj_alpha = 1
 
         # 壁境界
@@ -120,15 +120,25 @@ class Plot:
         # 後距離
         trj.plot(sla.end_offset_list[0], sla.end_offset_list[1],
                  ls="-", color="coral", lw=trj_width, alpha=trj_alpha)
+        print('{}:'.format(type))
+        print('  v: {}'.format(sla.v))
+        print('  ang: {}'.format(sla.base_ang))
+        print('  rad: {}'.format(sla.rad))
+        print('  pow_n: {}'.format(sla.pow_n))
+        print('  time: {}'.format(sla.base_time))
+        print('  front: {{ left: {}, right: {} }}'.format(
+            sla.start_offset, sla.start_offset))
+        print('  back: {{ left: {}, right: {} }}'.format(
+            sla.end_offset+offset, sla.end_offset+offset))
 
         res = sla.calc_slip(start_ang)
         sla.calc_offset_dist()
         trj.plot(sla.start_offset_list[0], sla.start_offset_list[1],
-                 ls="--", color="red", lw=1.5, alpha=trj_alpha)
+                 ls="--", color="cyan", lw=1.5, alpha=trj_alpha)
         trj.plot(res["x"] + sla.turn_offset["x"], res["y"] + + sla.turn_offset["y"], color="blue", lw=1.5,
                  alpha=trj_alpha, ls="--")
         trj.plot(sla.end_offset_list[0], sla.end_offset_list[1],
-                 ls="--", color="red", lw=1.5, alpha=trj_alpha)
+                 ls="--", color="cyan", lw=1.5, alpha=trj_alpha)
 
         trj.set_aspect('1.0')
         plot_range = [-60, 180]

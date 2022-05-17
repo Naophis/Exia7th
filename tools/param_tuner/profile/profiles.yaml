@@ -12,6 +12,7 @@ profile_idx: [
     {
       # 0: 探索パラメータindex&最短 300
       run_param: 0,
+      suction: 0,
       normal: 0,
       large: 0,
       orval: 0,
@@ -24,6 +25,7 @@ profile_idx: [
     {
       # 1: 最短パラメータ 400
       run_param: 1,
+      suction: 0,
       normal: 1,
       large: 1,
       orval: 1,
@@ -36,6 +38,7 @@ profile_idx: [
     {
       # 2: 最短パラメータ 500
       run_param: 2,
+      suction: 0,
       normal: 0,
       large: 2,
       orval: 2,
@@ -48,8 +51,9 @@ profile_idx: [
     {
       # 3: 最短パラメータ 600
       run_param: 3,
+      suction: 1,
       normal: 0,
-      large: 3,
+      large: 4,
       orval: 3,
       dia45: 3,
       dia45_2: 3,
@@ -60,8 +64,9 @@ profile_idx: [
     {
       # 4: 最短パラメータ 700
       run_param: 4,
+      suction: 1,
       normal: 0,
-      large: 4,
+      large: ,
       orval: 4,
       dia45: 4,
       dia45_2: 4,

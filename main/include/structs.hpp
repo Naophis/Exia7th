@@ -310,6 +310,9 @@ typedef struct {
   float dia_turn_exist_th_r = 0.0;
   float dia_turn_th_l = 0.0;
   float dia_turn_th_r = 0.0;
+
+  float dia_wall_off_ref_l = 0;
+  float dia_wall_off_ref_r = 0;
 } input_param_t;
 
 typedef struct {
@@ -519,6 +522,8 @@ typedef struct {
   std::unordered_map<TurnType, slalom_param2_t> map;
   std::unordered_map<TurnType, slalom_param2_t> map_slow;
   std::unordered_map<StraightType, straight_param_t> str_map;
+  bool suction = false;
+  float suction_duty = 0;
 } param_set_t;
 
 typedef struct {
@@ -620,6 +625,8 @@ typedef struct {
 typedef struct {
   int invalid_duty_r_cnt;
   int invalid_duty_l_cnt;
+  int invalid_v_cnt;
+  int invalid_w_cnt;
 } fail_safe_t;
 
 #endif

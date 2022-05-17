@@ -229,6 +229,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
         sensing_result->ego.right90_dist < 150) {
       ps_front.dist +=
           (sensing_result->ego.front_dist - param->front_dist_offset2);
+      // ps_front.dist = 0;
       b = false;
     }
     float rad_r = sp.rad;
@@ -295,19 +296,29 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
     if (res_f != MotionResult::NONE) {
       return MotionResult::ERROR;
     }
-  } else if (sp.type == TurnType::Dia45_2 || sp.type == TurnType::Dia135_2) {
-    // TODO front wall offset
+  } else if (sp.type == TurnType::Dia45_2 || sp.type == TurnType::Dia135_2 ||
+             sp.type == TurnType::Dia90) {
     wall_off_dia(td, ps_front);
-    res_f = go_straight(ps_front);
-    ps_back.dist -= (td == TurnDirection::Right)
-                        ? param->offset_after_turn_dia_r
-                        : param->offset_after_turn_dia_l;
-    if (res_f != MotionResult::NONE) {
-      return MotionResult::ERROR;
+    // L
+    // +5: 26    25
+    // 0 : 28.7  30
+    // -5: 35    35
+
+    // R
+    // +5: 21
+    // 0 : 28.75
+    // -5: 32
+    auto dist = ps_front.dist;
+    if (td == TurnDirection::Right) {
+      dist -=
+          (param->dia_wall_off_ref_r - sensing_result->sen.r45.sensor_dist) /
+          ROOT2;
+    } else {
+      dist -=
+          (param->dia_wall_off_ref_l - sensing_result->sen.l45.sensor_dist) /
+          ROOT2;
     }
-  } else if (sp.type == TurnType::Dia90) {
-    // TODO front wall offset
-    wall_off_dia(td, ps_front);
+    ps_front.dist = dist;
     res_f = go_straight(ps_front);
     ps_back.dist -= (td == TurnDirection::Right)
                         ? param->offset_after_turn_dia_r
@@ -339,33 +350,31 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   tgt_val->nmr.sla_pow_n = sp.pow_n;
 
   tgt_val->nmr.motion_mode = RUN_MODE2::SLAROM_RUN;
-  tgt_val->nmr.ang = 0;
-  tgt_val->nmr.w_max = 0;
-  tgt_val->nmr.w_end = 0;
-  tgt_val->nmr.alpha = 0;
-
   tgt_val->nmr.motion_type = MotionType::SLALOM;
   tgt_val->nmr.sct = SensorCtrlType::NONE;
 
-  if (sp.type == TurnType::Orval) {
+  if (sp.type != TurnType::Orval) {
+    tgt_val->nmr.ang = 0;
+    tgt_val->nmr.w_max = 0;
+    tgt_val->nmr.w_end = 0;
+    tgt_val->nmr.alpha = 0;
+  } else if (sp.type == TurnType::Orval) {
     tgt_val->nmr.motion_mode = RUN_MODE2::SLALOM_RUN2;
     tgt_val->nmr.ang = sp.ang;
     tgt_val->nmr.sla_rad = sp.rad;
+    tgt_val->nmr.w_end = 0;
+    tgt_val->nmr.alpha = (2 * sp.v * sp.v / (sp.rad * sp.rad * sp.ang / 2));
+    tgt_val->nmr.w_max = 200000;
     if (td == TurnDirection::Right) {
       tgt_val->nmr.w_max = -200000;
-      tgt_val->nmr.w_end = 0;
       tgt_val->nmr.alpha = -(2 * sp.v * sp.v / (sp.rad * sp.rad * sp.ang / 2));
-    } else {
-      tgt_val->nmr.w_max = 200000;
-      tgt_val->nmr.w_end = 0;
-      tgt_val->nmr.alpha = (2 * sp.v * sp.v / (sp.rad * sp.rad * sp.ang / 2));
     }
   }
-  tgt_val->nmr.timstamp++;
   tgt_val->ego_in.sla_param.counter = 1;
   tgt_val->ego_in.sla_param.limit_time_count = (int)(sp.time * 2 / dt);
   tgt_val->ego_in.dist -= tgt_val->ego_in.img_dist;
   tgt_val->ego_in.img_dist = 0;
+  tgt_val->nmr.timstamp++;
   if (adachi != nullptr) {
     adachi->update();
   }
@@ -373,7 +382,8 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
     vTaskDelay(1 / portTICK_RATE_MS);
 
     if (sp.type == TurnType::Orval) {
-      if (tgt_val->ego_in.pivot_state == 3) {
+      if (tgt_val->ego_in.pivot_state == 3 &&
+          ABS(tgt_val->ego_in.ang * 180 / PI) > 10) {
         tgt_val->ego_in.w = 0;
         break;
       }
@@ -650,6 +660,11 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
   ps.sct = SensorCtrlType::Straight;
 
   reset_gyro_ref_with_check();
+
+  if (p_set.suction) {
+    pt->suction_enable(p_set.suction_duty);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+  }
   if (param->fast_log_enable > 0)
     lt->start_slalom_log();
   // reset();
@@ -765,6 +780,7 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
   reset_ego_data();
   vTaskDelay(250 / portTICK_RATE_MS);
   pt->motor_disable();
+  pt->suction_disable();
 
   // pt->motor_enable();
   // front_ctrl(false);

@@ -14,6 +14,43 @@ void PlanningTask::motor_enable() {
   motor_en = true;
   mcpwm_start(MCPWM_UNIT_0, MCPWM_TIMER_0);
   mcpwm_start(MCPWM_UNIT_0, MCPWM_TIMER_1);
+  tgt_val->nmr.v_max = 0;
+  tgt_val->nmr.v_end = 0;
+  tgt_val->nmr.accl = 0;
+  tgt_val->nmr.decel = 0;
+  tgt_val->nmr.dist = 0;
+  tgt_val->nmr.motion_mode = RUN_MODE2::NONE_MODE;
+  tgt_val->nmr.motion_type = MotionType::NONE;
+  tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
+  tgt_val->nmr.sct = SensorCtrlType::NONE;
+  tgt_val->motion_type = MotionType::NONE;
+  tgt_val->ego_in.dist = 0;
+  tgt_val->ego_in.img_dist = 0;
+  tgt_val->nmr.w_max = 0;
+  tgt_val->nmr.w_end = 0;
+  tgt_val->nmr.alpha = 0;
+  tgt_val->nmr.ang = 0;
+
+  tgt_val->tgt_in.v_max = 0;
+  tgt_val->tgt_in.end_v = 0;
+  tgt_val->tgt_in.accl = 0;
+  tgt_val->tgt_in.decel = 0;
+  tgt_val->tgt_in.w_max = 0;
+  tgt_val->tgt_in.end_w = 0;
+  tgt_val->tgt_in.alpha = 0;
+  tgt_val->tgt_in.tgt_dist = 0;
+  tgt_val->tgt_in.tgt_angle = 0;
+
+  tgt_val->motion_mode = 0;
+
+  tgt_val->tgt_in.accl_param.limit = 2500;
+  tgt_val->tgt_in.accl_param.n = 4;
+  tgt_val->global_pos.ang = 0;
+  tgt_val->global_pos.img_ang = 0;
+  tgt_val->global_pos.dist = 0;
+  tgt_val->global_pos.img_dist = 0;
+
+  tgt_val->nmr.timstamp++;
 }
 void PlanningTask::suction_enable(float duty) {
   suction_en = true;
@@ -185,7 +222,7 @@ void PlanningTask::task() {
     set_next_duty(tgt_duty.duty_l, tgt_duty.duty_r, tgt_duty.duty_suction);
 
     buzzer(buzzer_ch, buzzer_timer);
-
+    global_msec_timer++;
     vTaskDelay(xDelay);
   }
 }
@@ -477,6 +514,8 @@ void PlanningTask::update_ego_motion() {
 void PlanningTask::set_next_duty(float duty_l, float duty_r,
                                  float duty_suction) {
   if (motor_en) {
+    mcpwm_start(MCPWM_UNIT_0, MCPWM_TIMER_0);
+    mcpwm_start(MCPWM_UNIT_0, MCPWM_TIMER_1);
     if (duty_r < 0) {
       gpio_set_level(A_CW_CCW, 0);
     } else {
@@ -905,15 +944,28 @@ void PlanningTask::check_fail_safe() {
       fail_safe.invalid_duty_l_cnt++;
       no_problem = false;
     }
+
+    if (ABS(tgt_val->ego_in.v - sensing_result->ego.v_c) > 50) {
+      fail_safe.invalid_v_cnt++;
+      no_problem = false;
+    }
+    if (ABS(tgt_val->ego_in.w - sensing_result->ego.w_lp) > 5) {
+      fail_safe.invalid_w_cnt++;
+      no_problem = false;
+    }
   }
 
   if (no_problem) {
     fail_safe.invalid_duty_r_cnt = 0;
     fail_safe.invalid_duty_l_cnt = 0;
+    fail_safe.invalid_v_cnt = 0;
+    fail_safe.invalid_w_cnt = 0;
     tgt_val->fss.error = 0;
   } else {
-    if (ABS(fail_safe.invalid_duty_r_cnt) > 100 ||
-        ABS(fail_safe.invalid_duty_l_cnt) > 100) {
+    if (ABS(fail_safe.invalid_duty_r_cnt) > 50 ||
+        ABS(fail_safe.invalid_duty_l_cnt) > 50 ||
+        ABS(fail_safe.invalid_v_cnt) > 50 ||
+        ABS(fail_safe.invalid_w_cnt) > 100) {
       tgt_val->fss.error = 1;
     }
   }

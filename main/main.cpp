@@ -131,6 +131,9 @@ void hwtimer_init(void) {
 std::shared_ptr<input_param_t> param;
 std::shared_ptr<sensing_result_entity_t> sensing_entity;
 std::shared_ptr<motion_tgt_val_t> tgt_val;
+std::shared_ptr<PlanningTask> pt;
+std::shared_ptr<LoggingTask> lt;
+MainTask mt;
 extern "C" void app_main() {
   // Adachi adachi;
 
@@ -182,21 +185,20 @@ extern "C" void app_main() {
   st.set_input_param_entity(param);
   st.create_task(0);
 
-  std::shared_ptr<PlanningTask> pt = std::make_shared<PlanningTask>();
+  pt = std::make_shared<PlanningTask>();
   pt->set_sensing_entity(sensing_entity);
   pt->set_input_param_entity(param);
   // pt->set_ego_entity(ego);
   pt->set_tgt_val(tgt_val);
   pt->create_task(0);
 
-  std::shared_ptr<LoggingTask> lt = std::make_shared<LoggingTask>();
+  lt = std::make_shared<LoggingTask>();
   lt->set_sensing_entity(sensing_entity);
   lt->set_input_param_entity(param);
   // lt->set_ego_entity(ego);
   lt->set_tgt_val(tgt_val);
   lt->create_task(1);
 
-  MainTask mt;
   mt.set_sensing_entity(sensing_entity);
   mt.set_input_param_entity(param);
   // mt.set_ego_entity(ego);
@@ -214,6 +216,10 @@ extern "C" void app_main() {
   gpio_set_level(LED5, 0);
 
   while (1) {
-    vTaskDelay(1000 / portTICK_RATE_MS);
+    vTaskDelay(5000 / portTICK_RATE_MS);
+    if (mt.ui->button_state()) {
+      printf("time_stamp: %d\n", tgt_val->nmr.timstamp);
+      printf("motion_type: %d\n", static_cast<int>(tgt_val->motion_type));
+    }
   }
 }

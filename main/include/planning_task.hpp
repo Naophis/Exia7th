@@ -39,9 +39,11 @@ public:
   void inactive_logging();
   void dump_log();
 
+  unsigned long long global_msec_timer = 0;
+
+  bool motor_en = false;
 private:
   xTaskHandle handle = 0;
-  bool motor_en = false;
   bool suction_en = false;
 
   void check_fail_safe();
