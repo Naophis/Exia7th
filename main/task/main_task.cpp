@@ -330,10 +330,15 @@ void MainTask::load_hw_param() {
       cJSON_GetObjectItem(root, "wall_off_hold_dist_str_l")->valuedouble;
   param->wall_off_dist.right_str =
       cJSON_GetObjectItem(root, "wall_off_hold_dist_str_r")->valuedouble;
+
   param->wall_off_dist.left_dia =
       cJSON_GetObjectItem(root, "wall_off_hold_dist_dia_l")->valuedouble;
   param->wall_off_dist.right_dia =
       cJSON_GetObjectItem(root, "wall_off_hold_dist_dia_r")->valuedouble;
+  param->wall_off_dist.left_dia2 =
+      cJSON_GetObjectItem(root, "wall_off_hold_dist_dia_l2")->valuedouble;
+  param->wall_off_dist.right_dia2 =
+      cJSON_GetObjectItem(root, "wall_off_hold_dist_dia_r2")->valuedouble;
 
   param->wall_off_dist.exist_dist_l =
       cJSON_GetObjectItem(root, "wall_off_hold_exist_dist_l")->valuedouble;

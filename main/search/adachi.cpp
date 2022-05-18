@@ -311,6 +311,7 @@ Motion Adachi::exec() {
 }
 
 void Adachi::update() {
+  goal_step_check();
   if (goal_step) {
     subgoal_list.erase(ego->x + ego->y * lgc->maze_size);
     {

@@ -232,6 +232,8 @@ typedef struct {
   float right_str;
   float left_dia;
   float right_dia;
+  float left_dia2;
+  float right_dia2;
   float exist_dist_l;
   float exist_dist_r;
   float noexist_th_l;

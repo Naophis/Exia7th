@@ -44,12 +44,13 @@ sla_wall_ref_r: 45
 
 # 壁切れ オフセット距離
 wall_off_hold_dist_str_l: -5.0
-# wall_off_hold_dist_str_r: -4.25
-wall_off_hold_dist_str_r: -8.0
-# wall_off_hold_dist_dia_l: 7
-# wall_off_hold_dist_dia_r: 5
-wall_off_hold_dist_dia_l: 3.0
-wall_off_hold_dist_dia_r: 2.5
+wall_off_hold_dist_str_r: -4.0
+# 壁切れ オフセット距離(斜め壁有り)
+wall_off_hold_dist_dia_l: -3.0
+wall_off_hold_dist_dia_r: -4.0
+# 壁切れ オフセット距離(柱)
+wall_off_hold_dist_dia_l2: -0.5
+wall_off_hold_dist_dia_r2: 1.0
 
 # 壁切れ In
 wall_off_hold_exist_dist_l: 70
@@ -74,11 +75,12 @@ offset_after_turn_dia_r: 15
 #斜めターン壁有り補正
 dia_turn_exist_th_l: 100
 dia_turn_exist_th_r: 100
-dia_turn_th_l: 61
-dia_turn_th_r: 62
+dia_turn_th_l: 63
+dia_turn_th_r: 60
 
-dia_wall_off_ref_l: 34.0
-dia_wall_off_ref_r: 30.5
+#斜め壁切れ時のmax接近距離
+dia_wall_off_ref_l: 36.0
+dia_wall_off_ref_r: 37.0
 
 #ログON_OFF
 logging_time: 5.0

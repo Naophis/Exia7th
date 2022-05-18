@@ -298,25 +298,20 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
     }
   } else if (sp.type == TurnType::Dia45_2 || sp.type == TurnType::Dia135_2 ||
              sp.type == TurnType::Dia90) {
-    wall_off_dia(td, ps_front);
-    // L
-    // +5: 26    25
-    // 0 : 28.7  30
-    // -5: 35    35
-
-    // R
-    // +5: 21
-    // 0 : 28.75
-    // -5: 32
+    bool result = wall_off_dia(td, ps_front);
     auto dist = ps_front.dist;
-    if (td == TurnDirection::Right) {
-      dist -=
-          (param->dia_wall_off_ref_r - sensing_result->sen.r45.sensor_dist) /
-          ROOT2;
-    } else {
-      dist -=
-          (param->dia_wall_off_ref_l - sensing_result->sen.l45.sensor_dist) /
-          ROOT2;
+    if (result) {
+      if (sp.type == TurnType::Dia135_2 || sp.type == TurnType::Dia90) {
+        if (td == TurnDirection::Right) {
+          dist -= (param->dia_wall_off_ref_r -
+                   sensing_result->sen.r45.sensor_dist) /
+                  ROOT2;
+        } else {
+          dist -= (param->dia_wall_off_ref_l -
+                   sensing_result->sen.l45.sensor_dist) /
+                  ROOT2;
+        }
+      }
     }
     ps_front.dist = dist;
     res_f = go_straight(ps_front);
@@ -568,6 +563,8 @@ void MotionPlanning::reset_gyro_ref_with_check() {
 void MotionPlanning::coin() { ui->coin(120); }
 
 MotionResult MotionPlanning::front_ctrl(bool limit) {
+  req_error_reset();
+  vTaskDelay(2 / portTICK_PERIOD_MS);
   tgt_val->nmr.v_max = 0;
   tgt_val->nmr.v_end = 0;
   tgt_val->nmr.accl = 0;
@@ -582,9 +579,9 @@ MotionResult MotionPlanning::front_ctrl(bool limit) {
   tgt_val->nmr.sla_pow_n = 0;
   tgt_val->nmr.motion_mode = RUN_MODE2::KEEP;
   tgt_val->nmr.motion_type = MotionType::FRONT_CTRL;
-  tgt_val->nmr.timstamp++;
   tgt_val->nmr.dia_mode = false;
   tgt_val->ego_in.sla_param.counter = 1;
+  tgt_val->nmr.timstamp++;
 
   unsigned int cnt = 0;
   unsigned int max_cnt = 0;
@@ -860,7 +857,7 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
   }
 }
 
-void MotionPlanning::wall_off_dia(TurnDirection td,
+bool MotionPlanning::wall_off_dia(TurnDirection td,
                                   param_straight_t &ps_front) {
   tgt_val->nmr.v_max = ps_front.v_max;
   tgt_val->nmr.v_end = ps_front.v_end;
@@ -881,50 +878,42 @@ void MotionPlanning::wall_off_dia(TurnDirection td,
   tgt_val->ego_in.img_dist = 0;
   tgt_val->nmr.timstamp++;
   if (td == TurnDirection::Right) {
-    // if (sensing_result->ego.left45_dist < param->dia_turn_exist_th_l) {
-    //   while (true) {
-    //     if (sensing_result->ego.left45_dist < param->dia_turn_th_l) {
-    //       return;
-    //     }
-    //     vTaskDelay(1 / portTICK_RATE_MS);
-    //   }
-    // }
     while (true) {
       if (sensing_result->ego.right45_dist <
           param->wall_off_dist.exist_dia_th_r) {
         break;
+      }
+      if (sensing_result->ego.left45_dist < param->dia_turn_th_l) {
+        ps_front.dist += param->wall_off_dist.right_dia;
+        return false;
       }
       vTaskDelay(1 / portTICK_RATE_MS);
     }
     while (true) {
       if (sensing_result->ego.right45_dist >
           param->wall_off_dist.noexist_dia_th_r) {
-        ps_front.dist += param->wall_off_dist.right_dia;
-        return;
+        ps_front.dist += param->wall_off_dist.right_dia2;
+        return true;
       }
       vTaskDelay(1 / portTICK_RATE_MS);
     }
   } else {
-    // if (sensing_result->ego.right45_dist < param->dia_turn_exist_th_r) {
-    //   while (true) {
-    //     if (sensing_result->ego.right45_dist < param->dia_turn_th_r) {
-    //       return;
-    //     }
-    //     vTaskDelay(1 / portTICK_RATE_MS);
-    //   }
-    // }
     while (true) {
       if (sensing_result->ego.left45_dist <
           param->wall_off_dist.exist_dia_th_l) {
         break;
+      }
+      if (sensing_result->ego.right45_dist < param->dia_turn_th_r) {
+        ps_front.dist += param->wall_off_dist.left_dia;
+        return false;
       }
       vTaskDelay(1 / portTICK_RATE_MS);
     }
     while (true) {
       if (sensing_result->ego.left45_dist >
           param->wall_off_dist.noexist_dia_th_l) {
-        ps_front.dist += param->wall_off_dist.left_dia;
-        return;
+        ps_front.dist += param->wall_off_dist.left_dia2;
+        return true;
       }
       vTaskDelay(1 / portTICK_RATE_MS);
     }

@@ -123,13 +123,15 @@ class Slalom:
             math.pow(math.exp(1), z + z / (Q - z)) / s
         return res
 
-    def calc_offset_dist(self):
+    def calc_offset_dist(self, start_pos_x, start_pos_y):
         a = math.sin(self.ang)
         b = math.cos(self.ang)
         if self.ang == 0:
             a = 1
             b = 0
-        self.end_offset = (self.end_pos["y"] - self.res["y"][-1]) / a
+
+        self.end_offset = (self.end_pos["y"] -
+                           self.res["y"][-1]-start_pos_y[0]) / a
         self.start_offset = (
             self.end_pos["x"] - self.res["x"][-1]) - self.end_offset * b
         if self.type == "normal":
@@ -146,10 +148,10 @@ class Slalom:
             self.start_offset_list = [[0, 0], [0, 0]]
             self.end_offset_list = [[0, 0], [0, 0]]
         elif self.type == "dia45":
-            self.start_offset_list = [[0, self.start_offset], [0, 0]]
+            self.start_offset_list = [[0, self.start_offset], start_pos_y]
             self.end_offset_list = [[self.res["x"][-1] + self.start_offset,
                                      self.res["x"][-1] + self.start_offset + self.end_offset / math.sqrt(2)],
-                                    [self.res["y"][-1], self.res["y"][-1] + self.end_offset / math.sqrt(2)]]
+                                    [self.res["y"][-1]+start_pos_y[0], self.res["y"][-1] + self.end_offset / math.sqrt(2)+start_pos_y[0]]]
         elif self.type == "dia135":
             self.start_offset_list = [[0, self.start_offset], [0, 0]]
             self.end_offset_list = [[self.res["x"][-1] + self.start_offset,
