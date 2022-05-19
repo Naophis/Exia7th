@@ -293,7 +293,8 @@ float PlanningTask::check_sen_error() {
       if ((1 < sensing_result->ego.right45_dist &&
            sensing_result->ego.right45_dist <
                param_ro->sen_ref_p.normal.exist.right45)) {
-        error += 45 - sensing_result->ego.right45_dist;
+        error += param_ro->sen_ref_p.normal.ref.right45 -
+                 sensing_result->ego.right45_dist;
         check++;
       }
     }
@@ -303,7 +304,8 @@ float PlanningTask::check_sen_error() {
       if ((1 < sensing_result->ego.left45_dist &&
            sensing_result->ego.left45_dist <
                param_ro->sen_ref_p.normal.exist.left45)) {
-        error -= 45 - sensing_result->ego.left45_dist;
+        error -= param_ro->sen_ref_p.normal.ref.left45 -
+                 sensing_result->ego.left45_dist;
         check++;
       }
     }

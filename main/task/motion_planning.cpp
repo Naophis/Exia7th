@@ -281,14 +281,19 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
     }
   } else if (sp.type == TurnType::Dia45 || sp.type == TurnType::Dia135) {
     bool b = true;
-    if (sensing_result->ego.left90_dist < 150 &&
-        sensing_result->ego.right90_dist < 150) {
-      ps_front.dist -=
-          (param->front_dist_offset2 - sensing_result->ego.front_dist);
-      b = false;
-    }
+    // if (sensing_result->ego.left90_dist < 150 &&
+    //     sensing_result->ego.right90_dist < 150) {
+    //   ps_front.dist -=
+    //       (param->front_dist_offset2 - sensing_result->ego.front_dist);
+    //   b = false;
+    // }
     if (b) {
       wall_off(td, ps_front);
+    }
+    if (sp.type == TurnType::Dia135) {
+      calc_dia135_offset(ps_front, ps_back, td, !b);
+    } else if (sp.type == TurnType::Dia45) {
+      calc_dia45_offset(ps_front, ps_back, td, !b);
     }
     res_f = go_straight(ps_front);
     ps_back.dist -= (td == TurnDirection::Right) ? param->offset_after_turn_r
@@ -918,4 +923,112 @@ bool MotionPlanning::wall_off_dia(TurnDirection td,
       vTaskDelay(1 / portTICK_RATE_MS);
     }
   }
+}
+
+void MotionPlanning::calc_dia135_offset(param_straight_t &front,
+                                        param_straight_t &back,
+                                        TurnDirection dir, bool exec_wall_off) {
+  float offset_l = 0;
+  float offset_r = 0;
+  float offset = 0;
+  bool valid_l = false;
+  bool valid_r = false;
+  if (dir == TurnDirection::Left) {
+    if (exec_wall_off) {
+      if (sensing_result->sen.l45.sensor_dist < 60) {
+        offset_l = sensing_result->sen.l45.sensor_dist - 45;
+        valid_l = true;
+      }
+    } else {
+      if (sensing_result->ego.left45_dist < 60) {
+        offset_l = sensing_result->ego.left45_dist - 45;
+        valid_l = true;
+      }
+    }
+    if (sensing_result->ego.right45_dist < 60) {
+      offset_r = 45 - sensing_result->ego.right45_dist;
+      valid_r = true;
+    }
+  } else {
+    if (exec_wall_off) {
+      if (sensing_result->sen.r45.sensor_dist < 60) {
+        offset_r = sensing_result->sen.r45.sensor_dist - 45;
+        valid_r = true;
+      }
+    } else {
+      if (sensing_result->ego.right45_dist < 60) {
+        offset_r = sensing_result->ego.right45_dist - 45;
+        valid_r = true;
+      }
+    }
+    if (sensing_result->ego.left45_dist < 60) {
+      offset_l = 45 - sensing_result->ego.left45_dist;
+      valid_l = true;
+    }
+  }
+  if (valid_l && valid_r) {
+    offset = (ABS(offset_l) < ABS(offset_r)) ? offset_l : offset_r;
+  } else if (valid_l) {
+    offset = offset_l;
+  } else if (valid_r) {
+    offset = offset_r;
+  }
+  front.dist += offset;
+  back.dist += offset * ROOT2;
+}
+
+void MotionPlanning::calc_dia45_offset(param_straight_t &front,
+                                       param_straight_t &back,
+                                       TurnDirection dir, bool exec_wall_off) {
+  float offset_l = 0;
+  float offset_r = 0;
+  float offset = 0;
+  bool valid_l = false;
+  bool valid_r = false;
+  if (dir == TurnDirection::Left) {
+    if (exec_wall_off) {
+      if (sensing_result->sen.l45.sensor_dist < 60) {
+        offset_l = sensing_result->sen.l45.sensor_dist - 45;
+        valid_l = true;
+      }
+    } else {
+      if (sensing_result->ego.left45_dist < 60) {
+        offset_l = sensing_result->ego.left45_dist - 45;
+        valid_l = true;
+      }
+    }
+    if (sensing_result->ego.right45_dist < 60) {
+      offset_r = 45 - sensing_result->ego.right45_dist;
+      valid_r = true;
+    }
+  } else {
+    if (exec_wall_off) {
+      if (sensing_result->sen.r45.sensor_dist < 60) {
+        offset_r = sensing_result->sen.r45.sensor_dist - 45;
+        valid_r = true;
+      }
+    } else {
+      if (sensing_result->ego.right45_dist < 60) {
+        offset_r = sensing_result->ego.right45_dist - 45;
+        valid_r = true;
+      }
+    }
+    if (sensing_result->ego.left45_dist < 60) {
+      offset_l = 45 - sensing_result->ego.left45_dist;
+      valid_l = true;
+    }
+  }
+  if (valid_l && valid_r) {
+    if (ABS(offset_l) < ABS(offset_r)) {
+      offset = offset_l;
+    } else {
+      offset = offset_r;
+    }
+  } else if (valid_l) {
+    offset = offset_l;
+  } else if (valid_r) {
+    offset = offset_r;
+  }
+  front.dist -= offset;
+  back.dist += offset * ROOT2;
 }

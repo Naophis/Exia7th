@@ -1,7 +1,7 @@
 normal:
   ref:
-    right45: 400
-    left45: 260
+    right45: 45
+    left45: 45
     front: 47
     kireme_r: 0.50
     kireme_l: 0.50

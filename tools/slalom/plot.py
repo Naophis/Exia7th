@@ -41,13 +41,13 @@ class Plot:
             start_ang = 0
         elif type == "dia45":
             rad = 50
-            n = 2
+            n = 4
             tgt_ang = 45
             end_pos = {"x": 90, "y": 45}
             start_ang = 0
         elif type == "dia135":
-            rad = 36
-            n = 2
+            rad = 39
+            n = 4
             tgt_ang = 135
             end_pos = {"x": 45, "y": 90}
             start_ang = 0
@@ -124,12 +124,12 @@ class Plot:
         # trj.plot(sla.end_offset_list[0], sla.end_offset_list[1],
         #          ls="-", color="coral", lw=trj_width, alpha=trj_alpha)
 
-        trj.plot(sla.start_offset_list[0], sla.start_offset_list[1],
-                 ls="--", color="cyan", lw=1, alpha=trj_alpha)
-        trj.plot(res["x"] + sla.turn_offset["x"], res["y"] + + sla.turn_offset["y"], color="blue", lw=1,
-                 alpha=trj_alpha, ls="--")
-        trj.plot(sla.end_offset_list[0], sla.end_offset_list[1],
-                 ls="--", color="cyan", lw=1, alpha=trj_alpha)
+        # trj.plot(sla.start_offset_list[0], sla.start_offset_list[1],
+        #          ls="--", color="cyan", lw=1, alpha=trj_alpha)
+        # trj.plot(res["x"] + sla.turn_offset["x"], res["y"] + + sla.turn_offset["y"], color="blue", lw=1,
+        #          alpha=trj_alpha, ls="--")
+        # trj.plot(sla.end_offset_list[0], sla.end_offset_list[1],
+        #          ls="--", color="cyan", lw=1, alpha=trj_alpha)
 
         print('{}:'.format(type))
         print('  v: {}'.format(sla.v))
@@ -173,12 +173,12 @@ class Plot:
 
         # res = sla.calc_slip(start_ang)
         # sla.calc_offset_dist()
-        trj.plot(sla.start_offset_list[0], sla.start_offset_list[1],
-                 ls="--", color="cyan", lw=1, alpha=trj_alpha)
-        trj.plot(res["x"] + sla.turn_offset["x"], res["y"] + + sla.turn_offset["y"], color="blue", lw=1,
-                 alpha=trj_alpha, ls="--")
-        trj.plot(sla.end_offset_list[0], sla.end_offset_list[1],
-                 ls="--", color="cyan", lw=1, alpha=trj_alpha)
+        # trj.plot(sla.start_offset_list[0], sla.start_offset_list[1],
+        #          ls="--", color="cyan", lw=1, alpha=trj_alpha)
+        # trj.plot(res["x"] + sla.turn_offset["x"], res["y"] + + sla.turn_offset["y"], color="blue", lw=1,
+        #          alpha=trj_alpha, ls="--")
+        # trj.plot(sla.end_offset_list[0], sla.end_offset_list[1],
+        #          ls="--", color="cyan", lw=1, alpha=trj_alpha)
 
         print('{}:'.format(type))
         print('  v: {}'.format(sla.v))
@@ -193,8 +193,8 @@ class Plot:
 
         third = [sla.start_offset,  sla.end_offset]
 
-        print('{}'.format(second[0]-first[0]))
-        print('{}'.format((second[1]-first[1])/math.sqrt(2)))
+        print('front: {}'.format(second[0]-first[0]))
+        print('back:{} x sqrt(2)'.format((second[1]-first[1])/math.sqrt(2)))
 
         trj.set_aspect('1.0')
         plot_range = [-60, 180]

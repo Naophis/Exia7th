@@ -153,10 +153,10 @@ class Slalom:
                                      self.res["x"][-1] + self.start_offset + self.end_offset / math.sqrt(2)],
                                     [self.res["y"][-1]+start_pos_y[0], self.res["y"][-1] + self.end_offset / math.sqrt(2)+start_pos_y[0]]]
         elif self.type == "dia135":
-            self.start_offset_list = [[0, self.start_offset], [0, 0]]
+            self.start_offset_list = [[0, self.start_offset], start_pos_y]
             self.end_offset_list = [[self.res["x"][-1] + self.start_offset,
                                      self.res["x"][-1] + self.start_offset - self.end_offset / math.sqrt(2)],
-                                    [self.res["y"][-1], self.res["y"][-1] + self.end_offset / math.sqrt(2)]]
+                                    [self.res["y"][-1]+start_pos_y[0], self.res["y"][-1] + self.end_offset / math.sqrt(2)+start_pos_y[0]]]
         elif self.type == "dia45_2":
             self.start_offset = (self.half_cell_size -
                                  self.res["x"][-1]) / math.sin(math.pi / 4)

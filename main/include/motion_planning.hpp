@@ -66,6 +66,10 @@ public:
   void req_error_reset();
 
 private:
+  void calc_dia135_offset(param_straight_t &front, param_straight_t &back,
+                          TurnDirection dir, bool exec_wall_off);
+  void calc_dia45_offset(param_straight_t &front, param_straight_t &back,
+                         TurnDirection dir, bool exec_wall_off);
   std::shared_ptr<UserInterface> ui;
 
   std::shared_ptr<motion_tgt_val_t> tgt_val;
