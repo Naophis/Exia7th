@@ -116,7 +116,7 @@ typedef struct {
 } ego_entity_t;
 
 typedef struct {
-  float sensor_dist = 0;
+  float sensor_dist = 300;
   float global_run_dist = 0;
 } sen_log_t;
 
@@ -206,6 +206,7 @@ typedef struct {
 
 typedef struct {
   sen_ref_param2_t normal;
+  sen_ref_param2_t normal2;
   sen_ref_param2_t dia;
   sen_search_param_t search_exist;
 } sen_ref_param_t;
@@ -264,6 +265,8 @@ typedef struct {
   int FF_roll = 0;
   int FF_keV = 0;
   float offset_start_dist = 0;
+  float cell = 90;
+  float cell2 = 90;
   pid_param_t motor_pid;
   pid_param_t dist_pid;
   pid_param_t gyro_pid;

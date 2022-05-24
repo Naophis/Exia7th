@@ -35,6 +35,9 @@ public:
   unordered_map<unsigned int, unsigned char> subgoal_list;
 
   vector<point_t> pt_list;
+  std::shared_ptr<MazeSolverBaseLgc> lgc;
+
+  float diff = 0;
 
 private:
   void setNextDirection(int x2, int y2, Direction dir, Direction &next_dir,
@@ -51,7 +54,6 @@ private:
 
   point_t next_goal_pt;
 
-  std::shared_ptr<MazeSolverBaseLgc> lgc;
   std::shared_ptr<ego_t> ego;
 
   vector<point_t> start_pt_list;

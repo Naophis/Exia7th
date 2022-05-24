@@ -314,6 +314,38 @@ float PlanningTask::check_sen_error() {
     error_entity.sen.error_i = 0;
     error_entity.sen_log.gain_zz = 0;
     error_entity.sen_log.gain_z = 0;
+
+    if (!(sensing_result->ego.left90_dist <
+              param_ro->sen_ref_p.normal.exist.front &&
+          sensing_result->ego.right90_dist <
+              param_ro->sen_ref_p.normal.exist.front)) {
+      if (sensing_result->ego.right45_dist >
+              param_ro->sen_ref_p.normal2.ref.kireme_r &&
+          sensing_result->ego.left45_dist >
+              param_ro->sen_ref_p.normal2.ref.kireme_l) {
+        if ((1 < sensing_result->sen.r45.sensor_dist &&
+             sensing_result->sen.r45.sensor_dist <
+                 param_ro->sen_ref_p.normal2.exist.right45)) {
+          error += param_ro->sen_ref_p.normal2.ref.right45 -
+                   sensing_result->sen.r45.sensor_dist;
+          check++;
+        }
+      }
+      if (sensing_result->ego.right45_dist >
+              param_ro->sen_ref_p.normal2.ref.kireme_r &&
+          sensing_result->ego.left45_dist >
+              param_ro->sen_ref_p.normal2.ref.kireme_l) {
+        if ((1 < sensing_result->sen.l45.sensor_dist &&
+             sensing_result->sen.l45.sensor_dist <
+                 param_ro->sen_ref_p.normal2.exist.left45)) {
+          error -= param_ro->sen_ref_p.normal2.ref.left45 -
+                   sensing_result->sen.l45.sensor_dist;
+          check++;
+        }
+      }
+      error *= param_ro->sen_ref_p.normal2.exist.front;
+    }
+
   } else {
     // TODO Uターン字は別ロジックに修正
     if (tgt_val->tgt_in.tgt_dist >= param_ro->clear_dist_order) {
@@ -345,6 +377,9 @@ float PlanningTask::check_sen_error() {
   } else if (check == 1) {
     return error * 2;
   }
+  error_entity.sen.error_i = 0;
+  error_entity.sen_log.gain_zz = 0;
+  error_entity.sen_log.gain_z = 0;
   return 0;
 }
 float PlanningTask::check_sen_error_dia() {
@@ -541,7 +576,14 @@ void PlanningTask::set_next_duty(float duty_l, float duty_r,
     mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A,
                         MCPWM_DUTY_MODE_0);
   } else {
-    motor_disable(true);
+    mcpwm_start(MCPWM_UNIT_0, MCPWM_TIMER_0);
+    mcpwm_start(MCPWM_UNIT_0, MCPWM_TIMER_1);
+    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, 0);
+    mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A,
+                        MCPWM_DUTY_MODE_0);
+    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A, 0);
+    mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A,
+                        MCPWM_DUTY_MODE_0);
   }
   if (suction_en) {
     // mcpwm_set_signal_high(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A);
@@ -554,6 +596,9 @@ void PlanningTask::set_next_duty(float duty_l, float duty_r,
     mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A,
                         MCPWM_DUTY_MODE_0);
   } else {
+    // mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A, 0);
+    // mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A,
+    //                     MCPWM_DUTY_MODE_0);
     suction_disable();
   }
 }
@@ -704,8 +749,8 @@ void PlanningTask::calc_tgt_duty() {
   // tgt_val->global_pos.img_dist += mpc_next_ego.v;
 
   // error_entity.dist.error_p = tgt_val->ego_in.img_dist -
-  // tgt_val->ego_in.dist; error_entity.ang.error_p = tgt_val->ego_in.img_ang -
-  // tgt_val->ego_in.ang;
+  // tgt_val->ego_in.dist; error_entity.ang.error_p = tgt_val->ego_in.img_ang
+  // - tgt_val->ego_in.ang;
 
   error_entity.dist.error_p =
       tgt_val->global_pos.img_dist - tgt_val->global_pos.dist;
@@ -974,70 +1019,79 @@ void PlanningTask::check_fail_safe() {
 }
 
 void PlanningTask::cp_request() {
-  if (motion_req_timestamp != tgt_val->nmr.timstamp) {
-    float dt = param_ro->dt;
-    motion_req_timestamp = tgt_val->nmr.timstamp;
-
-    tgt_val->tgt_in.v_max = tgt_val->nmr.v_max;
-    tgt_val->tgt_in.end_v = tgt_val->nmr.v_end;
-    tgt_val->tgt_in.accl = tgt_val->nmr.accl;
-    tgt_val->tgt_in.decel = tgt_val->nmr.decel;
-    tgt_val->tgt_in.w_max = tgt_val->nmr.w_max;
-    tgt_val->tgt_in.end_w = tgt_val->nmr.w_end;
-    tgt_val->tgt_in.alpha = tgt_val->nmr.alpha;
-
-    tgt_val->tgt_in.tgt_dist = tgt_val->nmr.dist;
-    tgt_val->tgt_in.tgt_angle = tgt_val->nmr.ang;
-
-    tgt_val->motion_mode = (int)(tgt_val->nmr.motion_mode);
-    tgt_val->motion_type = tgt_val->nmr.motion_type;
-
-    tgt_val->ego_in.sla_param.base_alpha = tgt_val->nmr.sla_alpha;
-    tgt_val->ego_in.sla_param.base_time = tgt_val->nmr.sla_time;
-    tgt_val->ego_in.sla_param.limit_time_count = tgt_val->nmr.sla_time * 2 / dt;
-    tgt_val->ego_in.sla_param.pow_n = tgt_val->nmr.sla_pow_n;
-
-    tgt_val->ego_in.state = 0;
-    tgt_val->ego_in.pivot_state = 0;
-
-    if (!(tgt_val->motion_type == MotionType::NONE ||
-          tgt_val->motion_type == MotionType::STRAIGHT ||
-          tgt_val->motion_type == MotionType::PIVOT_PRE ||
-          tgt_val->motion_type == MotionType::PIVOT_AFTER ||
-          tgt_val->motion_type == MotionType::READY ||
-          tgt_val->motion_type == MotionType::WALL_OFF)) {
-      tgt_val->ego_in.ang -= tgt_val->ego_in.img_ang;
-      tgt_val->ego_in.img_ang = 0;
-    }
-
-    if (tgt_val->motion_type == MotionType::NONE ||
-        tgt_val->motion_type == MotionType::READY) {
-      tgt_val->global_pos.ang -= tgt_val->global_pos.img_ang;
-      tgt_val->global_pos.img_ang = 0;
-
-      tgt_val->global_pos.dist -= tgt_val->global_pos.img_dist;
-      tgt_val->global_pos.img_dist = 0;
-    }
-
-    if (tgt_val->tgt_in.tgt_angle != 0) {
-      tgt_val->ego_in.ang -= tgt_val->ego_in.img_ang;
-      tgt_val->ego_in.ang = 0;
-    }
-    if (tgt_val->tgt_in.tgt_dist != 0) {
-      // tgt_val->ego_in.dist -= tgt_val->ego_in.img_dist;
-      tgt_val->ego_in.img_dist = 0;
-      tgt_val->ego_in.dist = 0;
-    }
-    tgt_val->ego_in.sla_param.counter = 1;
-    tgt_val->ego_in.sla_param.state = 0;
-
-    tgt_val->motion_dir = tgt_val->nmr.motion_dir;
-    tgt_val->dia_mode = tgt_val->nmr.dia_mode;
+  if (motion_req_timestamp == tgt_val->nmr.timstamp) {
+    return;
   }
+  const float dt = param_ro->dt;
+  motion_req_timestamp = tgt_val->nmr.timstamp;
+
+  tgt_val->tgt_in.v_max = tgt_val->nmr.v_max;
+  tgt_val->tgt_in.end_v = tgt_val->nmr.v_end;
+  tgt_val->tgt_in.accl = tgt_val->nmr.accl;
+  tgt_val->tgt_in.decel = tgt_val->nmr.decel;
+  tgt_val->tgt_in.w_max = tgt_val->nmr.w_max;
+  tgt_val->tgt_in.end_w = tgt_val->nmr.w_end;
+  tgt_val->tgt_in.alpha = tgt_val->nmr.alpha;
+
+  tgt_val->tgt_in.tgt_dist = tgt_val->nmr.dist;
+  tgt_val->tgt_in.tgt_angle = tgt_val->nmr.ang;
+
+  tgt_val->motion_mode = (int)(tgt_val->nmr.motion_mode);
+  tgt_val->motion_type = tgt_val->nmr.motion_type;
+
+  tgt_val->ego_in.sla_param.base_alpha = tgt_val->nmr.sla_alpha;
+  tgt_val->ego_in.sla_param.base_time = tgt_val->nmr.sla_time;
+  tgt_val->ego_in.sla_param.limit_time_count = tgt_val->nmr.sla_time * 2 / dt;
+  tgt_val->ego_in.sla_param.pow_n = tgt_val->nmr.sla_pow_n;
+
+  tgt_val->ego_in.state = 0;
+  tgt_val->ego_in.pivot_state = 0;
+
+  if (!(tgt_val->motion_type == MotionType::NONE ||
+        tgt_val->motion_type == MotionType::STRAIGHT ||
+        tgt_val->motion_type == MotionType::PIVOT_PRE ||
+        tgt_val->motion_type == MotionType::PIVOT_AFTER ||
+        tgt_val->motion_type == MotionType::READY ||
+        tgt_val->motion_type == MotionType::WALL_OFF)) {
+    tgt_val->ego_in.ang -= tgt_val->ego_in.img_ang;
+    tgt_val->ego_in.img_ang = 0;
+  }
+
+  if (tgt_val->motion_type == MotionType::NONE ||
+      tgt_val->motion_type == MotionType::READY) {
+    tgt_val->global_pos.ang -= tgt_val->global_pos.img_ang;
+    tgt_val->global_pos.img_ang = 0;
+
+    tgt_val->global_pos.dist -= tgt_val->global_pos.img_dist;
+    tgt_val->global_pos.img_dist = 0;
+  }
+
+  if (tgt_val->tgt_in.tgt_angle != 0) {
+    tgt_val->ego_in.ang -= tgt_val->ego_in.img_ang;
+    tgt_val->ego_in.ang = 0;
+  }
+  if (tgt_val->tgt_in.tgt_dist != 0) {
+    // tgt_val->ego_in.dist -= tgt_val->ego_in.img_dist;
+    // tgt_val->ego_in.img_dist -= tgt_val->ego_in.img_dist;
+    // if (tgt_val->ego_in.dist < 0) {
+    //   tgt_val->ego_in.dist = 0;
+    // }
+    // if (tgt_val->ego_in.img_dist < 0) {
+    //   tgt_val->ego_in.img_dist = 0;
+    // }
+    // tgt_val->ego_in.dist -= tgt_val->ego_in.img_dist;
+    tgt_val->ego_in.img_dist = 0;
+    tgt_val->ego_in.dist = 0;
+  }
+  tgt_val->ego_in.sla_param.counter = 1;
+  tgt_val->ego_in.sla_param.state = 0;
+
+  tgt_val->motion_dir = tgt_val->nmr.motion_dir;
+  tgt_val->dia_mode = tgt_val->nmr.dia_mode;
 }
 float PlanningTask::calc_sensor(float data, float a, float b) {
   auto res = a / std::log(data) - b;
-  if (res < 0 || res > 180)
+  if (res < 5 || res > 180)
     return 180;
   return res;
 }
@@ -1091,7 +1145,7 @@ void PlanningTask::calc_sensor_dist_diff() {
     if (((tgt_val->global_pos.dist - sensing_result->sen.l45.global_run_dist) >
          param_ro->wall_off_hold_dist) &&
         sensing_result->ego.left45_dist <
-            param_ro->wall_off_dist.exist_dia_th_l) {
+            param_ro->sen_ref_p.normal2.exist.left90) {
       sensing_result->sen.l45.sensor_dist = sensing_result->ego.left45_dist;
     }
   }
@@ -1103,7 +1157,7 @@ void PlanningTask::calc_sensor_dist_diff() {
     if (((tgt_val->global_pos.dist - sensing_result->sen.r45.global_run_dist) >
          param_ro->wall_off_hold_dist) &&
         sensing_result->ego.right45_dist <
-            param_ro->wall_off_dist.exist_dia_th_r) {
+            param_ro->sen_ref_p.normal2.exist.right90) {
       sensing_result->sen.r45.sensor_dist = sensing_result->ego.right45_dist;
     }
   }

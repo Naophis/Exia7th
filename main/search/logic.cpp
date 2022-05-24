@@ -99,12 +99,25 @@ void MazeSolverBaseLgc::remove_goal_pos3() {
   }
 }
 
-void MazeSolverBaseLgc::update_dist_map(const int mode,
-                                        const bool search_mode) {
+void MazeSolverBaseLgc::reset_dist_map() {
   int c = 0;
   for (int i = 0; i < maze_size; i++)
     for (int j = 0; j < maze_size; j++)
       dist[c++] = max_step_val;
+  reset_done = true;
+}
+
+void MazeSolverBaseLgc::update_dist_map(const int mode,
+                                        const bool search_mode) {
+  int c = 0;
+  if (!reset_done) {
+    for (int i = 0; i < maze_size; i++) {
+      for (int j = 0; j < maze_size; j++) {
+        dist[c++] = max_step_val;
+      }
+    }
+  }
+  reset_done = false;
 
   int head = 0;
   int tail = 0;

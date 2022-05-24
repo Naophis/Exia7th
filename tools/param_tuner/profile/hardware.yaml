@@ -1,5 +1,5 @@
 dt: 0.001
-tire: 13.685
+tire: 13.65
 offset_start_dist: 17.0
 gear_a: 37
 gear_b: 8
@@ -83,15 +83,18 @@ dia_wall_off_ref_l: 36.0
 dia_wall_off_ref_r: 37.0
 
 #ログON_OFF
-logging_time: 5.0
-search_log_enable: 0
+logging_time: 3.0
+search_log_enable: 1
 test_log_enable: 0
 fast_log_enable: 1
 sen_log_size: 100
 
+cell: 90
+cell2: 90
+
 motor_pid:
   p: 0.0025
-  i: 0.00325
+  i: 0.0032
   d: 0.0
   mode: 1
   # p: 0.0
@@ -125,7 +128,7 @@ angle_pid:
   # i: 0.0
   # d: 0.0
 sensor_pid:
-  p: 0.125
+  p: 0.25
   i: 0.0
   d: 0.0
   mode: 1

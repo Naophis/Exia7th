@@ -16,6 +16,9 @@ public:
 
   ~MazeSolverBaseLgc();
 
+  void reset_dist_map();
+  bool reset_done = true;
+
   void data_economize();
 
   void step_cell(int x, int y, Direction d);

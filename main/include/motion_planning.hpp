@@ -65,14 +65,14 @@ public:
   bool wall_off_dia(TurnDirection td, param_straight_t &ps_front);
   void req_error_reset();
 
+  std::shared_ptr<motion_tgt_val_t> tgt_val;
+
 private:
   void calc_dia135_offset(param_straight_t &front, param_straight_t &back,
                           TurnDirection dir, bool exec_wall_off);
   void calc_dia45_offset(param_straight_t &front, param_straight_t &back,
                          TurnDirection dir, bool exec_wall_off);
   std::shared_ptr<UserInterface> ui;
-
-  std::shared_ptr<motion_tgt_val_t> tgt_val;
 
   std::shared_ptr<sensing_result_entity_t> sensing_result;
   std::shared_ptr<input_param_t> param;

@@ -335,4 +335,5 @@ void Adachi::update() {
       cost_mode = 2;
     }
   }
+  lgc->reset_dist_map();
 }

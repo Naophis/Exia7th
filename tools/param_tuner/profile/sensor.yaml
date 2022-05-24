@@ -15,6 +15,23 @@ normal:
     kireme_l: 100 #左90壁有無
     right90: 60
     left90: 60
+normal2: #壁なし補正時
+  ref:
+    right45: 59
+    left45: 61
+    # front: 47
+    kireme_r: 90
+    kireme_l: 90
+  exist:
+    right45: 59
+    left45: 61
+    # right45: 48
+    # left45: 48
+    front: 0.125 #80
+    # kireme_r: 100 #右90壁有無
+    # kireme_l: 100 #左90壁有無
+    right90: 100
+    left90: 100
 dia:
   ref:
     right90: 100

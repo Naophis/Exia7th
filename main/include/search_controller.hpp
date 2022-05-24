@@ -44,10 +44,10 @@ private:
   std::shared_ptr<ego_t> ego;
   std::shared_ptr<sensing_result_entity_t> sensing_result;
 
-  MotionResult go_straight_wrapper(param_set_t &p_set);
-  MotionResult slalom(param_set_t &p_set, const TurnDirection td);
-  MotionResult pivot(param_set_t &p_set);
-  MotionResult pivot90(param_set_t &p_set, const TurnDirection td);
+  MotionResult go_straight_wrapper(param_set_t &p_set, float diff);
+  MotionResult slalom(param_set_t &p_set, const TurnDirection td, float diff);
+  MotionResult pivot(param_set_t &p_set, float diff);
+  MotionResult pivot90(param_set_t &p_set, const TurnDirection td, float diff);
   MotionResult finish(param_set_t &p_set);
 
   void front_wall_ctrl();

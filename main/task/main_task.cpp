@@ -262,6 +262,8 @@ void MainTask::load_hw_param() {
 
   param->dt = cJSON_GetObjectItem(root, "dt")->valuedouble;
   param->tire = cJSON_GetObjectItem(root, "tire")->valuedouble;
+  param->cell = cJSON_GetObjectItem(root, "cell")->valuedouble;
+  param->cell2 = cJSON_GetObjectItem(root, "cell2")->valuedouble;
   param->gear_a = cJSON_GetObjectItem(root, "gear_a")->valuedouble;
   param->gear_b = cJSON_GetObjectItem(root, "gear_b")->valuedouble;
   param->max_duty = cJSON_GetObjectItem(root, "max_duty")->valuedouble;
@@ -471,12 +473,16 @@ void MainTask::load_sensor_param() {
   fclose(f);
 
   cJSON *root = cJSON_CreateObject(), *normal, *normal_ref, *normal_exist, *dia,
-        *dia_ref, *dia_exist, *search, *search_exist, *gain;
+        *normal2, *normal2_ref, *normal2_exist, *dia_ref, *dia_exist, *search,
+        *search_exist, *gain;
   root = cJSON_Parse(str.c_str());
 
   normal = cJSON_GetObjectItem(root, "normal");
   normal_ref = cJSON_GetObjectItem(normal, "ref");
   normal_exist = cJSON_GetObjectItem(normal, "exist");
+  normal2 = cJSON_GetObjectItem(root, "normal2");
+  normal2_ref = cJSON_GetObjectItem(normal2, "ref");
+  normal2_exist = cJSON_GetObjectItem(normal2, "exist");
   param->sen_ref_p.normal.ref.right45 =
       cJSON_GetObjectItem(normal_ref, "right45")->valuedouble;
   param->sen_ref_p.normal.ref.left45 =
@@ -485,9 +491,6 @@ void MainTask::load_sensor_param() {
       cJSON_GetObjectItem(normal_ref, "kireme_r")->valuedouble;
   param->sen_ref_p.normal.ref.kireme_l =
       cJSON_GetObjectItem(normal_ref, "kireme_l")->valuedouble;
-
-  printf("%f,%f\n", param->sen_ref_p.normal.ref.kireme_l,
-         param->sen_ref_p.normal.ref.kireme_r);
 
   param->sen_ref_p.normal.exist.right45 =
       cJSON_GetObjectItem(normal_exist, "right45")->valuedouble;
@@ -499,6 +502,29 @@ void MainTask::load_sensor_param() {
       cJSON_GetObjectItem(normal_exist, "right90")->valuedouble;
   param->sen_ref_p.normal.exist.left90 =
       cJSON_GetObjectItem(normal_exist, "left90")->valuedouble;
+
+  param->sen_ref_p.normal2.ref.right45 =
+      cJSON_GetObjectItem(normal2_ref, "right45")->valuedouble;
+  param->sen_ref_p.normal2.ref.left45 =
+      cJSON_GetObjectItem(normal2_ref, "left45")->valuedouble;
+  param->sen_ref_p.normal2.ref.kireme_r =
+      cJSON_GetObjectItem(normal2_ref, "kireme_r")->valuedouble;
+  param->sen_ref_p.normal2.ref.kireme_l =
+      cJSON_GetObjectItem(normal2_ref, "kireme_l")->valuedouble;
+
+  param->sen_ref_p.normal2.exist.right45 =
+      cJSON_GetObjectItem(normal2_exist, "right45")->valuedouble;
+  param->sen_ref_p.normal2.exist.left45 =
+      cJSON_GetObjectItem(normal2_exist, "left45")->valuedouble;
+  param->sen_ref_p.normal2.exist.front =
+      cJSON_GetObjectItem(normal2_exist, "front")->valuedouble;
+  param->sen_ref_p.normal2.exist.right90 =
+      cJSON_GetObjectItem(normal2_exist, "right90")->valuedouble;
+  param->sen_ref_p.normal2.exist.left90 =
+      cJSON_GetObjectItem(normal2_exist, "left90")->valuedouble;
+
+  printf("normal2.exist.left90=%f\n", param->sen_ref_p.normal2.exist.left90);
+  printf("normal2.exist.right90=%f\n", param->sen_ref_p.normal2.exist.right90);
 
   dia = cJSON_GetObjectItem(root, "dia");
   dia_ref = cJSON_GetObjectItem(dia, "ref");
@@ -568,6 +594,9 @@ void MainTask::load_sensor_param() {
   cJSON_free(normal);
   cJSON_free(normal_ref);
   cJSON_free(normal_exist);
+  cJSON_free(normal2);
+  cJSON_free(normal2_ref);
+  cJSON_free(normal2_exist);
   cJSON_free(dia);
   cJSON_free(dia_ref);
   cJSON_free(dia_exist);
