@@ -39,8 +39,6 @@ private:
   std::shared_ptr<UserInterface> ui;
   std::shared_ptr<input_param_t> param;
 
-  unordered_map<unsigned int, unsigned char> tmp_goal_list;
-
   std::shared_ptr<ego_t> ego;
   std::shared_ptr<sensing_result_entity_t> sensing_result;
 
@@ -53,7 +51,6 @@ private:
   void front_wall_ctrl();
 
   void judge_wall();
-  bool is_goaled();
   bool wall_n = false;
   bool wall_e = false;
   bool wall_w = false;

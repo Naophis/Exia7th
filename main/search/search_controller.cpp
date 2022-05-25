@@ -390,7 +390,6 @@ MotionResult SearchController::finish(param_set_t &p_set) {
   p.dist = 2;
   return mp->go_straight(p);
 }
-bool SearchController::is_goaled() { return tmp_goal_list.size() == 0; }
 
 SearchResult SearchController::exec(param_set_t &p_set, SearchMode sm) {
   unsigned long long start_time = pt->global_msec_timer;
@@ -433,8 +432,6 @@ SearchResult SearchController::exec(param_set_t &p_set, SearchMode sm) {
     // sensing(ego);
     bool is_stepped = lgc->is_stepped(ego->x, ego->y);
     judge_wall();
-    //この探索中ゴールしたか
-    tmp_goal_list.erase(ego->x + ego->y * lgc->maze_size);
     // 片道モードでゴールしたらbreak
     if (sm == SearchMode::Kata) {
       if (adachi->goal_step) {

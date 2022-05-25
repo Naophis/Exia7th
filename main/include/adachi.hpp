@@ -26,7 +26,6 @@ public:
   bool is_go_home();
   void deadEnd(int egox, int egoy);
   bool is_goal(int x, int y);
-  bool is_goaled();
   void reset_goal() { goaled = false; }
   void goal_step_check();
   bool goal_step = false;

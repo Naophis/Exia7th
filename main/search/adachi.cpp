@@ -206,13 +206,6 @@ bool Adachi::is_go_home() {
     return true;
   return false;
 }
-bool Adachi::is_goaled() {
-  if (!goaled)
-    for (const auto g : lgc->goal_list)
-      if (!lgc->is_stepped(g.x, g.y))
-        return false;
-  return true;
-}
 void Adachi::goal_step_check() {
   for (auto it = lgc->goal_list_origin.begin();
        it != lgc->goal_list_origin.end(); it++) {
@@ -293,7 +286,10 @@ Motion Adachi::exec(bool is_stepped) {
 void Adachi::update() {
   goal_step_check();
   if (goal_step && sm == SearchMode::ALL) {
-    subgoal_list.erase(ego->x + ego->y * lgc->maze_size);
+    if ((subgoal_list.find(ego->x + ego->y * lgc->maze_size) !=
+         subgoal_list.end())) {
+      subgoal_list.erase(ego->x + ego->y * lgc->maze_size);
+    }
     {
       lgc->set_param3();
       lgc->searchGoalPosition(true, subgoal_list);
