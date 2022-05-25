@@ -43,10 +43,6 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p,
   tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
   tgt_val->nmr.dia_mode = p.dia_mode;
   tgt_val->nmr.sct = p.sct;
-  tgt_val->ego_in.dist -= tgt_val->ego_in.img_dist;
-  tgt_val->ego_in.img_dist -= tgt_val->ego_in.img_dist;
-  // tgt_val->ego_in.dist = 0;
-  // tgt_val->ego_in.img_dist = 0;
   if (p.motion_type != MotionType::NONE) {
     tgt_val->nmr.motion_type = p.motion_type;
   }
@@ -105,9 +101,6 @@ MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
   tgt_val->nmr.motion_type = MotionType::PIVOT;
   tgt_val->nmr.sct = SensorCtrlType::NONE;
   tgt_val->nmr.timstamp++;
-  tgt_val->ego_in.dist -= tgt_val->ego_in.img_dist;
-  // tgt_val->ego_in.dist =0;// tgt_val->ego_in.img_dist;
-  tgt_val->ego_in.img_dist = 0;
   vTaskDelay(10 / portTICK_RATE_MS);
 
   while (1) {
@@ -385,8 +378,6 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   }
   tgt_val->ego_in.sla_param.counter = 1;
   tgt_val->ego_in.sla_param.limit_time_count = (int)(sp.time * 2 / dt);
-  tgt_val->ego_in.dist -= tgt_val->ego_in.img_dist;
-  tgt_val->ego_in.img_dist = 0;
   tgt_val->nmr.timstamp++;
   if (adachi != nullptr) {
     adachi->update();
@@ -453,63 +444,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   return MotionResult::NONE;
 }
 void MotionPlanning::normal_slalom(param_normal_slalom_t &p,
-                                   param_straight_t &p_str) {
-  float alpha = (2 * p.v_max * p.v_max / (p.radius * p.radius * p.ang / 2));
-
-  if (p.RorL == TurnDirection::Left) {
-    tgt_val->tgt_in.w_max = 200000;
-    tgt_val->tgt_in.end_w = 0;
-    tgt_val->tgt_in.alpha = alpha;
-    tgt_val->tgt_in.tgt_angle = p.ang;
-  } else {
-    tgt_val->tgt_in.w_max = -200000;
-    tgt_val->tgt_in.end_w = -0;
-    tgt_val->tgt_in.alpha = -alpha;
-    tgt_val->tgt_in.tgt_angle = p.ang;
-  }
-
-  tgt_val->motion_mode = (int32_t)RUN_MODE2::SLALOM_RUN2;
-
-  tgt_val->tgt_in.v_max = p.v_max;
-  tgt_val->tgt_in.end_v = p.v_max;
-  tgt_val->tgt_in.accl = 0;
-  tgt_val->tgt_in.decel = 0;
-  tgt_val->tgt_in.tgt_dist = 0;
-
-  tgt_val->ego_in.state = 0;
-  tgt_val->ego_in.pivot_state = 0;
-
-  tgt_val->ego_in.img_ang = 0;
-  tgt_val->ego_in.ang = 0;
-  tgt_val->ego_in.dist -= tgt_val->ego_in.img_dist;
-  tgt_val->ego_in.img_dist = 0;
-
-  while (1) {
-    vTaskDelay(1 / portTICK_RATE_MS);
-    if (tgt_val->ego_in.pivot_state == 3) {
-      tgt_val->ego_in.w = 0;
-      break;
-    }
-
-    if (tgt_val->ego_in.img_dist >= p.ang * p.radius) {
-      tgt_val->ego_in.w = 0;
-      break;
-    }
-    if (ABS(tgt_val->ego_in.img_ang) + 0.001 >= ABS(p.ang)) {
-      tgt_val->ego_in.w = 0;
-      break;
-    }
-    // if (type != Dia90) {
-    //   if (!fail) {
-    //     alphaMode = 0;
-    //     alphaTemp = 0;
-    //     slaTerm = 0;
-    //     omegaTemp = 0;
-    //     return 0;
-    //   }
-    // }
-  }
-}
+                                   param_straight_t &p_str) {}
 
 void MotionPlanning::reset_tgt_data() {
   tgt_val->tgt_in.v_max = 0;
@@ -842,8 +777,6 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
   tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
   tgt_val->nmr.dia_mode = ps_front.dia_mode;
   tgt_val->nmr.sct = SensorCtrlType::Straight;
-  tgt_val->ego_in.dist -= tgt_val->ego_in.img_dist;
-  tgt_val->ego_in.img_dist = 0;
   tgt_val->nmr.timstamp++;
   if (td == TurnDirection::Right) {
     while (true) {
@@ -895,8 +828,6 @@ bool MotionPlanning::wall_off_dia(TurnDirection td,
   tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
   tgt_val->nmr.dia_mode = ps_front.dia_mode;
   tgt_val->nmr.sct = SensorCtrlType::Dia;
-  tgt_val->ego_in.dist -= tgt_val->ego_in.img_dist;
-  tgt_val->ego_in.img_dist = 0;
   tgt_val->nmr.timstamp++;
   if (td == TurnDirection::Right) {
     while (true) {

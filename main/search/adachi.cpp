@@ -252,7 +252,7 @@ void Adachi::goal_step_check() {
   }
 }
 
-Motion Adachi::exec() {
+Motion Adachi::exec(bool is_stepped) {
   int calc_cnt = 0;
   goal_step_check();
   goaled = goal_step;
@@ -279,14 +279,18 @@ Motion Adachi::exec() {
       }
     }
     lgc->set_goal_pos2(pt_list);
+    // if (!is_stepped) {
     lgc->update_dist_map(0, goaled); // 再更新したらもう1回歩数マップ生成
+    // }
     if (pt_list.size() == 1 && pt_list[0].x == 0 && pt_list[0].y == 0) {
       goal_startpos_lock = true; //ゴール固定
     } else {
       goal_startpos_lock = false;
     }
   } else {
+    // if (!is_stepped) {
     lgc->update_dist_map(0, goaled); // search
+    // }
   }
 
   if (goal_startpos_lock) {
@@ -312,28 +316,42 @@ Motion Adachi::exec() {
 
 void Adachi::update() {
   goal_step_check();
-  if (goal_step) {
+  if (goal_step && sm == SearchMode::ALL) {
     subgoal_list.erase(ego->x + ego->y * lgc->maze_size);
     {
       lgc->set_param3();
       lgc->searchGoalPosition(true, subgoal_list);
       cost_mode = 3;
     }
-    if (subgoal_list.size() == 0) {
-      lgc->set_param4();
-      lgc->searchGoalPosition(true, subgoal_list);
-      cost_mode = 4;
-    }
-    if (subgoal_list.size() == 0) {
-      lgc->set_param1();
-      lgc->searchGoalPosition(true, subgoal_list);
-      cost_mode = 1;
-    }
-    if (subgoal_list.size() == 0) {
-      lgc->set_param2();
-      lgc->searchGoalPosition(true, subgoal_list);
-      cost_mode = 2;
-    }
+    // if (subgoal_list.size() == 0) {
+    //   lgc->set_param4();
+    //   lgc->searchGoalPosition(true, subgoal_list);
+    //   cost_mode = 4;
+    // }
+    // if (subgoal_list.size() == 0) {
+    //   lgc->set_param1();
+    //   lgc->searchGoalPosition(true, subgoal_list);
+    //   cost_mode = 1;
+    // }
+    // if (subgoal_list.size() == 0) {
+    //   lgc->set_param2();
+    //   lgc->searchGoalPosition(true, subgoal_list);
+    //   cost_mode = 2;
+    // }
   }
-  lgc->reset_dist_map();
+  // lgc->reset_dist_map();
+  // if (subgoal_list.size() == 0) {
+  //   pt_list.clear();
+  //   tmp_p.x = tmp_p.y = 0;
+  //   pt_list.emplace_back(tmp_p);
+  // } else {
+  //   pt_list.clear();
+  //   for (auto itr = subgoal_list.begin(); itr != subgoal_list.end(); ++itr) {
+  //     tmp_p.x = itr->first % lgc->maze_size;
+  //     tmp_p.y = itr->first / lgc->maze_size;
+  //     pt_list.emplace_back(tmp_p);
+  //   }
+  // }
+  // lgc->set_goal_pos2(pt_list);
+  // lgc->update_dist_map(0, goaled); // 再更新したらもう1回歩数マップ生成
 }

@@ -262,6 +262,7 @@ void MainTask::load_hw_param() {
 
   param->dt = cJSON_GetObjectItem(root, "dt")->valuedouble;
   param->tire = cJSON_GetObjectItem(root, "tire")->valuedouble;
+  param->log_size = cJSON_GetObjectItem(root, "log_size")->valueint;
   param->cell = cJSON_GetObjectItem(root, "cell")->valuedouble;
   param->cell2 = cJSON_GetObjectItem(root, "cell2")->valuedouble;
   param->gear_a = cJSON_GetObjectItem(root, "gear_a")->valuedouble;

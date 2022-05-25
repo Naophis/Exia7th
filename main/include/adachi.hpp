@@ -21,7 +21,7 @@ public:
   Motion get_next_motion(Direction next_dir);
   void get_next_pos(Direction next_dir);
   // int exec(path_type &path);
-  Motion exec();
+  Motion exec(bool is_stepped);
   void back_home();
   bool is_go_home();
   void deadEnd(int egox, int egoy);
@@ -38,6 +38,7 @@ public:
   std::shared_ptr<MazeSolverBaseLgc> lgc;
 
   float diff = 0;
+  SearchMode sm;
 
 private:
   void setNextDirection(int x2, int y2, Direction dir, Direction &next_dir,

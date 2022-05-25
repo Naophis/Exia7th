@@ -37,7 +37,7 @@ void LoggingTask::task() {
   while (1) {
     logging_active = active_slalom_log;
     if (logging_active) {
-      if (active_slalom_log && idx_slalom_log <= LOG_SIZE) {
+      if (active_slalom_log && idx_slalom_log <= param->log_size) {
         auto ld = std::make_shared<log_data_t2>();
 
         ld->img_v = floatToHalf(tgt_val->ego_in.v);

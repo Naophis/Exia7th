@@ -1009,10 +1009,10 @@ void PlanningTask::check_fail_safe() {
     fail_safe.invalid_w_cnt = 0;
     tgt_val->fss.error = 0;
   } else {
-    if (ABS(fail_safe.invalid_duty_r_cnt) > 50 ||
-        ABS(fail_safe.invalid_duty_l_cnt) > 50 ||
-        ABS(fail_safe.invalid_v_cnt) > 50 ||
-        ABS(fail_safe.invalid_w_cnt) > 100) {
+    if (ABS(fail_safe.invalid_duty_r_cnt) > 100 ||
+        ABS(fail_safe.invalid_duty_l_cnt) > 100 ||
+        ABS(fail_safe.invalid_v_cnt) > 100 ||
+        ABS(fail_safe.invalid_w_cnt) > 50) {
       tgt_val->fss.error = 1;
     }
   }
@@ -1067,20 +1067,11 @@ void PlanningTask::cp_request() {
   }
 
   if (tgt_val->tgt_in.tgt_angle != 0) {
-    tgt_val->ego_in.ang -= tgt_val->ego_in.img_ang;
+    tgt_val->ego_in.img_ang -= tgt_val->ego_in.ang;
     tgt_val->ego_in.ang = 0;
   }
   if (tgt_val->tgt_in.tgt_dist != 0) {
-    // tgt_val->ego_in.dist -= tgt_val->ego_in.img_dist;
-    // tgt_val->ego_in.img_dist -= tgt_val->ego_in.img_dist;
-    // if (tgt_val->ego_in.dist < 0) {
-    //   tgt_val->ego_in.dist = 0;
-    // }
-    // if (tgt_val->ego_in.img_dist < 0) {
-    //   tgt_val->ego_in.img_dist = 0;
-    // }
-    // tgt_val->ego_in.dist -= tgt_val->ego_in.img_dist;
-    tgt_val->ego_in.img_dist = 0;
+    tgt_val->ego_in.img_dist -= tgt_val->ego_in.dist;
     tgt_val->ego_in.dist = 0;
   }
   tgt_val->ego_in.sla_param.counter = 1;
