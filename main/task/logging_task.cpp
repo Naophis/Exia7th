@@ -77,7 +77,7 @@ void LoggingTask::task() {
 
         ld->motion_timestamp = tgt_val->nmr.timstamp;
 
-        log_vec.push_back(ld);
+        log_vec.emplace_back(ld);
         idx_slalom_log++;
       }
       if (param->set_param) {

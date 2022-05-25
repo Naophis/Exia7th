@@ -1155,8 +1155,8 @@ void PlanningTask::calc_sensor_dist_diff() {
   sen_log.r45_dist = sensing_result->sen.r45.sensor_dist;
   sen_log.l45_dist = sensing_result->sen.r45.sensor_dist;
   sen_log.global_run_dist = tgt_val->global_pos.dist;
-  sensing_result->sen_dist_log.list.push_back(sen_log);
-  if (sensing_result->sen_dist_log.list.size() > param_ro->sen_log_size) {
-    sensing_result->sen_dist_log.list.pop_front();
-  }
+  // sensing_result->sen_dist_log.list.push_back(sen_log);
+  // if (sensing_result->sen_dist_log.list.size() > param_ro->sen_log_size) {
+  //   sensing_result->sen_dist_log.list.pop_front();
+  // }
 }

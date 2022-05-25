@@ -213,31 +213,7 @@ bool Adachi::is_goaled() {
         return false;
   return true;
 }
-// void Adachi::clear_path(path_type &path) {
-//   path.s.clear();
-//   path.t.clear();
-// }
-
-// void Adachi::create_path(path_type &path, Motion motion) {
-//   clear_path(path);
-//   if (next_motion == Motion::Straight) {
-//     path.s.push_back(2);
-//   } else if (next_motion == Motion::TurnRight) {
-//     path.s.push_back(0);
-//     path.t.push_back(static_cast<int>(PathMotion::Right));
-//   } else if (next_motion == Motion::TurnLeft) {
-//     path.s.push_back(0);
-//     path.t.push_back(static_cast<int>(PathMotion::Left));
-//   } else if (next_motion == Motion::Back) {
-//     path.s.push_back(1);
-//     path.t.push_back(static_cast<int>(PathMotion::Pivot180));
-//     path.s.push_back(1);
-//   }
-// }
-
-// int Adachi::exec(path_type &path) {
 void Adachi::goal_step_check() {
-  // vector<point_t>::iterator it;
   for (auto it = lgc->goal_list_origin.begin();
        it != lgc->goal_list_origin.end(); it++) {
     if ((*it).x == ego->x && (*it).y == ego->y) {

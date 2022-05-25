@@ -2,7 +2,8 @@
 # without default 'CMakeLists.txt' file.
 
 cmake_minimum_required(VERSION 3.1)
-set(CMAKE_CXX_FLAGS_DEBUG "-O2 -g -std=c++17")
+# set(CMAKE_CXX_FLAGS_DEBUG "-O2 -g -std=c++17")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -g -std=c++17")
 set(COMPONENT_ADD_INCLUDEDIRS
     "."
     "include"
@@ -28,5 +29,4 @@ set(COMPONENT_SRCS
     "gen_code_mpc/rtGetNaN.cpp"
     "gen_code_conv_single2half/half_type.cpp"
     )
-      
 register_component()

@@ -689,7 +689,7 @@ void MainTask::load_turn_param_profiles() {
   printf("profile_list\n");
   tpp.file_list_size = 0;
   for (int i = 0; i < profile_list_size; i++) {
-    tpp.file_list.push_back(cJSON_GetArrayItem(profile_list, i)->valuestring);
+    tpp.file_list.emplace_back(cJSON_GetArrayItem(profile_list, i)->valuestring);
     tpp.file_list_size++;
   }
   printf("tpp.file_list.size() = %d\n", tpp.file_list.size());
