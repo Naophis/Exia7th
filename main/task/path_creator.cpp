@@ -104,7 +104,11 @@ void PathCreator::path_create(bool is_search) {
   Direction next_dir = Direction::North;
   Direction now_dir = next_dir;
   unsigned int idx = 0;
-  Direction dirLog[3];
+  Direction dirLog[3] = {
+      Direction::North,
+      Direction::North,
+      Direction::North,
+  };
 
   int x = 0;
   int y = 1;
@@ -139,10 +143,11 @@ void PathCreator::path_create(bool is_search) {
                              next_dir);
     setNextRootDirectionPath(x, y, now_dir, Direction::South, dist_val,
                              next_dir);
-    if (dirLog[0] == dirLog[1] || dirLog[0] != dirLog[2])
+    if ((dirLog[0] == dirLog[1]) || (dirLog[0] != dirLog[2])) {
       priorityStraight2(x, y, now_dir, dirLog[0], dist_val, next_dir);
-    else
+    } else {
       priorityStraight2(x, y, now_dir, dirLog[1], dist_val, next_dir);
+    }
 
     Motion nextMotion = get_next_motion(now_dir, next_dir);
 
