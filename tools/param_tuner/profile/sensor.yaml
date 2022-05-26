@@ -50,14 +50,14 @@ search:
     right90: 58
     left90: 58
 
-    kireme_r: -0.250 #切れ目しきい値 R
+    kireme_r: 1.50 #切れ目しきい値 R
     kireme_l: 1.0 #切れ目しきい値 L
 
     offset_r: 25 #前壁制御　左右値差　しきい値
     offset_l: 40 #前壁制御　duty max値
 
     front_ctrl_th: 200
-    front_ctrl: 45
+    front_ctrl: 48
 gain:
   F: [896.44499125, 61.32583049]
 
