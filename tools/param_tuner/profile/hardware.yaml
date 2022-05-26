@@ -22,7 +22,7 @@ clear_angle: 5
 clear_dist_order: 80
 front_dist_offset: 90
 front_dist_offset2: 130.5
-led_light_delay_cnt: 5000
+led_light_delay_cnt: 500
 
 front_dist_offset_pivot_th: 80
 front_dist_offset_pivot: 88
@@ -91,7 +91,7 @@ sen_log_size: 100
 log_size: 1500
 
 cell: 90
-cell2: 89
+cell2: 90
 
 motor_pid:
   p: 0.0025

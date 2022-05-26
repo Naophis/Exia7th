@@ -304,7 +304,7 @@ typedef struct {
   float front_dist_offset_pivot_th = 0;
   float front_dist_offset_pivot = 0;
   int sen_log_size = 100;
-  int led_light_delay_cnt = 10000;
+  int led_light_delay_cnt = 1000;
   bool set_param = false;
   float logging_time = 4.0;
   float offset_after_turn_l = 0.0;

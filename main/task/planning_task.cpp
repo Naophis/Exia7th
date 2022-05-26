@@ -1103,11 +1103,6 @@ void PlanningTask::calc_sensor_dist_all() {
     sensing_result->ego.left45_dist =
         calc_sensor(sensing_result->ego.left45_lp, param_ro->sensor_gain.l45.a,
                     param_ro->sensor_gain.l45.b);
-    // sensing_result->ego.front_dist =
-    //     calc_sensor(sensing_result->ego.front_lp,
-    //     param_ro->sensor_gain.front.a,
-    //                 param_ro->sensor_gain.front.b);
-    // +        param_ro->front_dist_offset;
     sensing_result->ego.right45_dist =
         calc_sensor(sensing_result->ego.right45_lp, param_ro->sensor_gain.r45.a,
                     param_ro->sensor_gain.r45.b);

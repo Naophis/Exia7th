@@ -43,6 +43,7 @@ public:
   void set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val);
 
 private:
+  volatile int lec_cnt = 0;
   std::shared_ptr<input_param_t> param;
   int led_light_delay_cnt = 10000;
   xTaskHandle handle = 0;
