@@ -292,6 +292,10 @@ void MainTask::load_hw_param() {
   param->led_light_delay_cnt =
       cJSON_GetObjectItem(root, "led_light_delay_cnt")->valuedouble;
 
+  param->offset_after_turn_l2 =
+      cJSON_GetObjectItem(root, "offset_after_turn_l2")->valuedouble;
+  param->offset_after_turn_r2 =
+      cJSON_GetObjectItem(root, "offset_after_turn_r2")->valuedouble;
   param->offset_after_turn_l =
       cJSON_GetObjectItem(root, "offset_after_turn_l")->valuedouble;
   param->offset_after_turn_r =
@@ -960,7 +964,8 @@ void MainTask::task() {
       test_dia_walloff();
     }
   } else {
-    ui->hello_exia();
+    // ui->hello_exia();
+    ui->coin(200);
     lgc->init(sys.maze_size, sys.maze_size * sys.maze_size - 1);
     lgc->set_goal_pos(sys.goals);
     search_ctrl->set_lgc(lgc);
@@ -1844,7 +1849,7 @@ void MainTask::path_run(int idx, int idx2) {
   pc->convert_large_path(true);
   pc->diagonalPath(true, true);
   pc->print_path();
-  lgc->data_economize();
+  // lgc->data_economize();
 
   param_set.suction = tpp.profile_list[idx][TurnType::Finish] > 0;
   param_set.suction_duty = sys.test.suction_duty;

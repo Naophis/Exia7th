@@ -176,20 +176,14 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
             (param->sla_wall_ref_r - sensing_result->ego.right45_dist);
       }
     }
-    res_f = go_straight(ps_front);
-    if (res_f != MotionResult::NONE) {
-      return MotionResult::ERROR;
+    if (ps_front.dist > 0) {
+      res_f = go_straight(ps_front);
+      if (res_f != MotionResult::NONE) {
+        return MotionResult::ERROR;
+      }
     }
   } else if (sp.type == TurnType::Large) {
     bool b = true;
-    if (40 < sensing_result->ego.left90_dist &&
-        sensing_result->ego.left90_dist < 150 &&
-        40 < sensing_result->ego.right90_dist &&
-        sensing_result->ego.right90_dist < 150) {
-      ps_front.dist -=
-          (param->front_dist_offset2 - sensing_result->ego.front_dist);
-      b = false;
-    }
     float dist_r = ps_back.dist;
     float dist_l = ps_back.dist;
     if (td == TurnDirection::Right) {
@@ -220,12 +214,16 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
     } else if (find_l) {
       ps_back.dist = dist_l;
     }
+    ps_back.dist -= (td == TurnDirection::Right) ? param->offset_after_turn_r2
+                                                 : param->offset_after_turn_l2;
     if (b) {
       wall_off(td, ps_front);
     }
-    res_f = go_straight(ps_front);
-    if (res_f != MotionResult::NONE) {
-      return MotionResult::ERROR;
+    if (ps_front.dist > 0) {
+      res_f = go_straight(ps_front);
+      if (res_f != MotionResult::NONE) {
+        return MotionResult::ERROR;
+      }
     }
   } else if (sp.type == TurnType::Orval) {
     bool b = true;
@@ -276,6 +274,8 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
     } else if (find_l) {
       sp.rad = rad_l;
     }
+    ps_back.dist -= (td == TurnDirection::Right) ? param->offset_after_turn_r2
+                                                 : param->offset_after_turn_l2;
     if (b) {
       wall_off(td, ps_front);
     }
@@ -784,6 +784,14 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
           param->wall_off_dist.exist_dist_r) {
         break;
       }
+      if (40 < sensing_result->ego.left90_dist &&
+          sensing_result->ego.left90_dist < 150 &&
+          40 < sensing_result->ego.right90_dist &&
+          sensing_result->ego.right90_dist < 150) {
+        ps_front.dist -=
+            (param->front_dist_offset2 - sensing_result->ego.front_dist);
+        return;
+      }
       vTaskDelay(1 / portTICK_RATE_MS);
     }
     while (true) {
@@ -798,6 +806,14 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
     while (true) {
       if (sensing_result->ego.left45_dist < param->wall_off_dist.exist_dist_l) {
         break;
+      }
+      if (40 < sensing_result->ego.left90_dist &&
+          sensing_result->ego.left90_dist < 150 &&
+          40 < sensing_result->ego.right90_dist &&
+          sensing_result->ego.right90_dist < 150) {
+        ps_front.dist -=
+            (param->front_dist_offset2 - sensing_result->ego.front_dist);
+        return;
       }
       vTaskDelay(1 / portTICK_RATE_MS);
     }
