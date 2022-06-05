@@ -128,18 +128,16 @@ void hwtimer_init(void) {
   timer_set_counter_value(TIMER_GROUP_0, TIMER_0, 0);
   timer_start(TIMER_GROUP_0, TIMER_0);
 }
-std::shared_ptr<input_param_t> param;
-std::shared_ptr<sensing_result_entity_t> sensing_entity;
-std::shared_ptr<motion_tgt_val_t> tgt_val;
-std::shared_ptr<PlanningTask> pt;
-std::shared_ptr<LoggingTask> lt;
+std::shared_ptr<input_param_t> param = std::make_shared<input_param_t>();
+std::shared_ptr<sensing_result_entity_t> sensing_entity =
+    std::make_shared<sensing_result_entity_t>();
+std::shared_ptr<motion_tgt_val_t> tgt_val =
+    std::make_shared<motion_tgt_val_t>();
+std::shared_ptr<PlanningTask> pt = std::make_shared<PlanningTask>();
+std::shared_ptr<LoggingTask> lt = std::make_shared<LoggingTask>();
 MainTask mt;
 extern "C" void app_main() {
   // Adachi adachi;
-
-  param = std::make_shared<input_param_t>();
-  sensing_entity = std::make_shared<sensing_result_entity_t>();
-  tgt_val = std::make_shared<motion_tgt_val_t>();
 
   init_gpio();
   init_uart();
@@ -185,14 +183,12 @@ extern "C" void app_main() {
   st.set_input_param_entity(param);
   st.create_task(0);
 
-  pt = std::make_shared<PlanningTask>();
   pt->set_sensing_entity(sensing_entity);
   pt->set_input_param_entity(param);
   // pt->set_ego_entity(ego);
   pt->set_tgt_val(tgt_val);
   pt->create_task(0);
 
-  lt = std::make_shared<LoggingTask>();
   lt->set_sensing_entity(sensing_entity);
   lt->set_input_param_entity(param);
   // lt->set_ego_entity(ego);
