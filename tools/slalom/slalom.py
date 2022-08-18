@@ -1,7 +1,10 @@
 import numpy as np
 import math
+import matplotlib.pyplot as plt
 
-dt = 0.001 / 4
+dt = 0.001/4
+m = 0.015
+Tc = 0.001
 
 
 class Slalom:
@@ -78,7 +81,7 @@ class Slalom:
             res["y"] = np.append(res["y"], tmp_y)
             res["alpha"] = np.append(res["alpha"], tmp_alpha)
             res["w"] = np.append(res["w"], tmp_w)
-        print(np.max(res["w"])**2*self.rad/9.81/1000)
+        # print(np.max(res["w"]) ** 2 * self.rad / 9.81 / 1000)
         self.res = res
         return res
 
@@ -88,30 +91,83 @@ class Slalom:
         res["y"] = np.array([0])
         res["alpha"] = np.array([0])
         res["w"] = np.array([0])
+        res["v"] = np.array([])
+        res["vx"] = np.array([])
+        res["vy"] = np.array([])
         tmp_w = 0
         tmp_theta = start_ang * math.pi / 180
         tmp_x = 0
         tmp_y = 0
         slip_theta = 0
+        ax = 0
+        ay = 0
+        vx = self.v / 1000
+        vy = 0
+        Fx = 0
+        Fy = 0
+        beta = 0
+        K = 50
+        s = 0
         for i in range(1, int(self.limit_time_count + 1)):
             tmp_alpha = self.base_alpha * \
                 self.calc_neipire(dt * i, self.base_time, self.pow_n)
+            old_w = tmp_w
+
             tmp_w = tmp_w + tmp_alpha * dt
-
-            slip_theta = (1 / dt * slip_theta - tmp_w) / \
-                (1 / dt + self.slip_gain / (self.v / 1000))
-
             tmp_theta = tmp_theta + tmp_w * dt
-            tmp_x = tmp_x + self.v * \
-                math.cos(self.start_theta + tmp_theta + slip_theta) * dt
-            tmp_y = tmp_y + self.v * \
-                math.sin(self.start_theta + tmp_theta + slip_theta) * dt
+
+            # Fx = 0
+
+            err = self.v / 1000 - np.sqrt(vx ** 2 + vy ** 2)
+            s = s + err
+            Fx = 100.0 * err + 0.01 * s
+
+            Fx = 0
+            Fy = -K * beta
+
+            ax = Fx / m + old_w * vy
+            ay = Fy / m - old_w * vx
+
+            vy = vy + ay * dt
+            vx = vx + ax * dt
+
+            tmp_v = np.sqrt(vx ** 2 + vy ** 2)
+
+            tmp_x = tmp_x + tmp_v * 1000 * \
+                    np.cos(self.start_theta + tmp_theta) * dt
+            tmp_y = tmp_y + tmp_v * 1000 * \
+                    np.sin(self.start_theta + tmp_theta) * dt
+
+            # tmp_x = tmp_x + vx * 1000 * dt
+            # tmp_y = tmp_y + vy * 1000 * dt
+            
+            res["v"] = np.append(res["v"], tmp_v)
+            res["vx"] = np.append(res["vx"], vx)
+            res["vy"] = np.append(res["vy"], vy)
+
             res["x"] = np.append(res["x"], tmp_x)
             res["y"] = np.append(res["y"], tmp_y)
             res["alpha"] = np.append(res["alpha"], tmp_alpha)
             res["w"] = np.append(res["w"], tmp_w)
-        print(np.max(res["w"])**2*self.rad/9.81/1000)
+            beta = np.arctan2(vy, vx)
+
+        # fig = plt.figure(dpi=100)
+        # plV = fig.add_subplot(3, 1, 1)
+        # plVx = fig.add_subplot(3, 1, 2)
+        # plVy = fig.add_subplot(3, 1, 3)
+        # plV.plot(res["v"] )
+        # plVx.plot(res["vx"] )
+        # plVy.plot(np.abs(res["vy"]) )
+        # print(res["v"])
+        # print(res["vx"])
+        # print(res["vy"])
+
+        # plt.xlim([0, self.limit_time_count + 1])
+        # plt.ylim([0, self.v * 1.02])
+        # plt.show()
+        # print(np.max(res["w"]) ** 2 * self.rad / 9.81 / 1000)
         self.res = res
+
         return res
 
     def calc_neipire(self, t, s, N):
@@ -121,6 +177,8 @@ class Slalom:
         Q = P * (t - z)
         res = -N * P / ((Q - z) * (Q - z)) * \
             math.pow(math.exp(1), z + z / (Q - z)) / s
+        if t == 0:
+            return 0
         return res
 
     def calc_offset_dist(self, start_pos_x, start_pos_y):
@@ -131,7 +189,7 @@ class Slalom:
             b = 0
 
         self.end_offset = (self.end_pos["y"] -
-                           self.res["y"][-1]-start_pos_y[0]) / a
+                           self.res["y"][-1] - start_pos_y[0]) / a
         self.start_offset = (
             self.end_pos["x"] - self.res["x"][-1]) - self.end_offset * b
         if self.type == "normal":
@@ -151,19 +209,23 @@ class Slalom:
             self.start_offset_list = [[0, self.start_offset], start_pos_y]
             self.end_offset_list = [[self.res["x"][-1] + self.start_offset,
                                      self.res["x"][-1] + self.start_offset + self.end_offset / math.sqrt(2)],
-                                    [self.res["y"][-1]+start_pos_y[0], self.res["y"][-1] + self.end_offset / math.sqrt(2)+start_pos_y[0]]]
+                                    [self.res["y"][-1] + start_pos_y[0],
+                                     self.res["y"][-1] + self.end_offset / math.sqrt(2) + start_pos_y[0]]]
         elif self.type == "dia135":
             self.start_offset_list = [[0, self.start_offset], start_pos_y]
             self.end_offset_list = [[self.res["x"][-1] + self.start_offset,
                                      self.res["x"][-1] + self.start_offset - self.end_offset / math.sqrt(2)],
-                                    [self.res["y"][-1]+start_pos_y[0], self.res["y"][-1] + self.end_offset / math.sqrt(2)+start_pos_y[0]]]
+                                    [self.res["y"][-1] + start_pos_y[0],
+                                     self.res["y"][-1] + self.end_offset / math.sqrt(2) + start_pos_y[0]]]
         elif self.type == "dia45_2":
             self.start_offset = (self.half_cell_size -
                                  self.res["x"][-1]) / math.sin(math.pi / 4)
             self.end_offset = self.cell_size - \
                 self.res["y"][-1] - self.start_offset * math.sin(math.pi / 4)
             self.start_offset_list = [
-                [self.half_cell_size, self.start_offset * math.sin(math.pi / 4) + self.half_cell_size], [0, self.start_offset * math.sin(math.pi / 4)]]
+                [self.half_cell_size, self.start_offset *
+                    math.sin(math.pi / 4) + self.half_cell_size],
+                [0, self.start_offset * math.sin(math.pi / 4)]]
             self.end_offset_list = [
                 [self.res["x"][-1] + self.start_offset * math.sin(math.pi / 4) + self.half_cell_size,
                  self.res["x"][-1] + self.start_offset * math.sin(math.pi / 4) + self.half_cell_size],
@@ -177,7 +239,7 @@ class Slalom:
 
             self.start_offset_list = [
                 [self.half_cell_size, self.start_offset *
-                    math.sin(math.pi / 4) + self.half_cell_size],
+                 math.sin(math.pi / 4) + self.half_cell_size],
                 [0, self.start_offset * math.sin(math.pi / 4)]]
             self.end_offset_list = [
                 [self.res["x"][-1] + self.start_offset * math.sin(math.pi / 4) + self.half_cell_size,

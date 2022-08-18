@@ -6,3 +6,4 @@ slprj/
 *_ert_rtw/
 *.slxc
 *.pyc
+.idea/

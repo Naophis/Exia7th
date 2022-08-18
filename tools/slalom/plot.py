@@ -9,11 +9,11 @@ class Plot:
     def exe(self, type, offset):
 
         # fig = plt.figure(figsize=(5, 5), dpi=500)
-        fig = plt.figure(dpi=100)
+        fig = plt.figure(dpi=200)
         trj = fig.add_subplot(111)
         trj.set(facecolor="dimgrey")
         # trj.set(facecolor="black")
-        v = 300
+        v = 1200
         rad = 54
         n = 2
         tgt_ang = 90
@@ -85,7 +85,7 @@ class Plot:
         sub_line_color = "silver"
         subline_width = 0.75
         subline_alpha = 0.5
-        trj_width = 5
+        trj_width = 3
         trj_alpha = 1
 
         # 壁境界
@@ -114,15 +114,15 @@ class Plot:
         trj.plot([90, 90], range, ls="--", c=sub_line_color,
                  lw=subline_width, alpha=subline_alpha)
 
-        # # 前距離
-        # trj.plot(sla.start_offset_list[0], sla.start_offset_list[1],
-        #          ls="-", color="coral", lw=trj_width, alpha=trj_alpha)
-        # # メイン
-        # trj.plot(res["x"] + sla.turn_offset["x"], res["y"] + + sla.turn_offset["y"], color="yellow", lw=trj_width,
-        #          alpha=trj_alpha)
+        # 前距離
+        trj.plot(sla.start_offset_list[0], sla.start_offset_list[1],
+                 ls="-", color="coral", lw=trj_width, alpha=trj_alpha)
+        # メイン
+        trj.plot(res["x"] + sla.turn_offset["x"], res["y"] + + sla.turn_offset["y"], color="yellow", lw=trj_width,
+                 alpha=trj_alpha)
         # # 後距離
-        # trj.plot(sla.end_offset_list[0], sla.end_offset_list[1],
-        #          ls="-", color="coral", lw=trj_width, alpha=trj_alpha)
+        trj.plot(sla.end_offset_list[0], sla.end_offset_list[1],
+                 ls="-", color="coral", lw=trj_width, alpha=trj_alpha)
 
         # trj.plot(sla.start_offset_list[0], sla.start_offset_list[1],
         #          ls="--", color="cyan", lw=1, alpha=trj_alpha)
@@ -131,22 +131,23 @@ class Plot:
         # trj.plot(sla.end_offset_list[0], sla.end_offset_list[1],
         #          ls="--", color="cyan", lw=1, alpha=trj_alpha)
 
-        print('{}:'.format(type))
-        print('  v: {}'.format(sla.v))
-        print('  ang: {}'.format(sla.base_ang))
-        print('  rad: {}'.format(sla.rad))
-        print('  pow_n: {}'.format(sla.pow_n))
-        print('  time: {}'.format(sla.base_time))
-        print('  front: {{ left: {}, right: {} }}'.format(
-            sla.start_offset, sla.start_offset))
-        print('  back: {{ left: {}, right: {} }}'.format(
-            sla.end_offset+offset, sla.end_offset+offset))
+        # print('{}:'.format(type))
+        # print('  v: {}'.format(sla.v))
+        # print('  ang: {}'.format(sla.base_ang))
+        # print('  rad: {}'.format(sla.rad))
+        # print('  pow_n: {}'.format(sla.pow_n))
+        # print('  time: {}'.format(sla.base_time))
+        # print('  front: {{ left: {}, right: {} }}'.format(
+        #     sla.start_offset, sla.start_offset))
+        # print('  back: {{ left: {}, right: {} }}'.format(
+        #     sla.end_offset+offset, sla.end_offset+offset))
         first = [sla.start_offset,  sla.end_offset]
         start_pos_x = [0, 0]
-        start_pos_y = [-10, -10]
+        start_pos_y = [0, 0]
+        # start_pos_y = [-10, -10]
+        res = sla.calc_slip(start_ang)
         sla.calc_offset_dist(start_pos_x, start_pos_y)
 
-        # res = sla.calc_slip(start_ang)
         # sla.calc_offset_dist()
         trj.plot(sla.start_offset_list[0], sla.start_offset_list[1],
                  ls="--", color="cyan", lw=1, alpha=trj_alpha)
@@ -166,10 +167,10 @@ class Plot:
         print('  back: {{ left: {}, right: {} }}'.format(
             sla.end_offset+offset, sla.end_offset+offset))
 
-        second = [sla.start_offset,  sla.end_offset]
-        start_pos_x = [0, 0]
-        start_pos_y = [10, 10]
-        sla.calc_offset_dist(start_pos_x, start_pos_y)
+        # second = [sla.start_offset,  sla.end_offset]
+        # start_pos_x = [0, 0]
+        # start_pos_y = [10, 10]
+        # sla.calc_offset_dist(start_pos_x, start_pos_y)
 
         # res = sla.calc_slip(start_ang)
         # sla.calc_offset_dist()
@@ -180,21 +181,21 @@ class Plot:
         # trj.plot(sla.end_offset_list[0], sla.end_offset_list[1],
         #          ls="--", color="cyan", lw=1, alpha=trj_alpha)
 
-        print('{}:'.format(type))
-        print('  v: {}'.format(sla.v))
-        print('  ang: {}'.format(sla.base_ang))
-        print('  rad: {}'.format(sla.rad))
-        print('  pow_n: {}'.format(sla.pow_n))
-        print('  time: {}'.format(sla.base_time))
-        print('  front: {{ left: {}, right: {} }}'.format(
-            sla.start_offset, sla.start_offset))
-        print('  back: {{ left: {}, right: {} }}'.format(
-            sla.end_offset+offset, sla.end_offset+offset))
+        # print('{}:'.format(type))
+        # print('  v: {}'.format(sla.v))
+        # print('  ang: {}'.format(sla.base_ang))
+        # print('  rad: {}'.format(sla.rad))
+        # print('  pow_n: {}'.format(sla.pow_n))
+        # print('  time: {}'.format(sla.base_time))
+        # print('  front: {{ left: {}, right: {} }}'.format(
+        #     sla.start_offset, sla.start_offset))
+        # print('  back: {{ left: {}, right: {} }}'.format(
+        #     sla.end_offset+offset, sla.end_offset+offset))
 
-        third = [sla.start_offset,  sla.end_offset]
+        # third = [sla.start_offset,  sla.end_offset]
 
-        print('front: {}'.format(second[0]-first[0]))
-        print('back:{} x sqrt(2)'.format((second[1]-first[1])/math.sqrt(2)))
+        # print('front: {}'.format(second[0]-first[0]))
+        # print('back:{} x sqrt(2)'.format((second[1]-first[1])/math.sqrt(2)))
 
         trj.set_aspect('1.0')
         plot_range = [-60, 180]
