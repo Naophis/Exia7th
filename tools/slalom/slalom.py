@@ -1,10 +1,16 @@
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+from scipy import signal
 
 dt = 0.001/4
 m = 0.015
 Tc = 0.001
+
+K = 8
+
+list_K_x = [0, 300, 600, 900, 1000, 1200]
+list_K_y = [0, 33, 33, 1, 1, 1]
 
 
 class Slalom:
@@ -106,16 +112,16 @@ class Slalom:
         Fx = 0
         Fy = 0
         beta = 0
-        K = 50
         s = 0
+        delta_beta = 0
+        old_beta = 0
         for i in range(1, int(self.limit_time_count + 1)):
             tmp_alpha = self.base_alpha * \
                 self.calc_neipire(dt * i, self.base_time, self.pow_n)
             old_w = tmp_w
 
             tmp_w = tmp_w + tmp_alpha * dt
-            tmp_theta = tmp_theta + tmp_w * dt
-
+            tmp_theta = tmp_theta + tmp_w * dt + delta_beta
             # Fx = 0
 
             err = self.v / 1000 - np.sqrt(vx ** 2 + vy ** 2)
@@ -123,8 +129,10 @@ class Slalom:
             Fx = 100.0 * err + 0.01 * s
 
             Fx = 0
-            Fy = -K * beta
-
+            v2 = np.sqrt(vx ** 2 + vy ** 2)
+            tmpK = np.interp(v2*1000, list_K_x, list_K_y)
+            Fy = -tmpK * beta
+            # print(Fy, tmpK, v2)
             ax = Fx / m + old_w * vy
             ay = Fy / m - old_w * vx
 
@@ -134,13 +142,13 @@ class Slalom:
             tmp_v = np.sqrt(vx ** 2 + vy ** 2)
 
             tmp_x = tmp_x + tmp_v * 1000 * \
-                    np.cos(self.start_theta + tmp_theta) * dt
+                np.cos(self.start_theta + tmp_theta) * dt
             tmp_y = tmp_y + tmp_v * 1000 * \
-                    np.sin(self.start_theta + tmp_theta) * dt
+                np.sin(self.start_theta + tmp_theta) * dt
 
             # tmp_x = tmp_x + vx * 1000 * dt
             # tmp_y = tmp_y + vy * 1000 * dt
-            
+
             res["v"] = np.append(res["v"], tmp_v)
             res["vx"] = np.append(res["vx"], vx)
             res["vy"] = np.append(res["vy"], vy)
@@ -149,22 +157,29 @@ class Slalom:
             res["y"] = np.append(res["y"], tmp_y)
             res["alpha"] = np.append(res["alpha"], tmp_alpha)
             res["w"] = np.append(res["w"], tmp_w)
+            old_beta = beta
             beta = np.arctan2(vy, vx)
+            delta_beta = beta-old_beta
+            # beta = tmp_v * tmp_w
 
-        # fig = plt.figure(dpi=100)
-        # plV = fig.add_subplot(3, 1, 1)
-        # plVx = fig.add_subplot(3, 1, 2)
-        # plVy = fig.add_subplot(3, 1, 3)
-        # plV.plot(res["v"] )
-        # plVx.plot(res["vx"] )
-        # plVy.plot(np.abs(res["vy"]) )
-        # print(res["v"])
-        # print(res["vx"])
-        # print(res["vy"])
+        if True:
+        # if False:
+            fig = plt.figure(dpi=100)
+            plV = fig.add_subplot(3, 1, 1)
+            plVx = fig.add_subplot(3, 1, 2)
+            plVy = fig.add_subplot(3, 1, 3)
+            plV.plot(res["v"])
+            plVx.plot(res["vx"])
 
-        # plt.xlim([0, self.limit_time_count + 1])
-        # plt.ylim([0, self.v * 1.02])
-        # plt.show()
+            # plVy.plot(np.abs(res["w"]))
+            plVy.plot((res["vy"]))
+            # print(res["v"])
+            # print(res["vx"])
+            # print(res["vy"])
+
+            plt.xlim([0, self.limit_time_count + 1])
+            # plt.ylim([0, self.v * 1.02])
+            plt.show()
         # print(np.max(res["w"]) ** 2 * self.rad / 9.81 / 1000)
         self.res = res
 

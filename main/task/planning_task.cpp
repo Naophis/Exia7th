@@ -1,7 +1,7 @@
 
 #include "include/planning_task.hpp"
 
-constexpr int MOTOR_HZ = 200000;
+constexpr int MOTOR_HZ = 250000;
 constexpr int SUCTION_MOTOR_HZ = 10000;
 PlanningTask::PlanningTask() {}
 
@@ -962,7 +962,26 @@ void PlanningTask::cp_tgt_val() {
   tgt_val->ego_in.pivot_state = mpc_next_ego.pivot_state;
   tgt_val->ego_in.sla_param = mpc_next_ego.sla_param;
   tgt_val->ego_in.state = mpc_next_ego.state;
-  tgt_val->ego_in.v = mpc_next_ego.v;
+
+  slip_param.K = param_ro->slip_param_K;
+  const auto Fx = 0;
+  const auto Fy = -slip_param.K * slip_param.beta;
+  if (tgt_val->motion_type == MotionType::SLALOM ){
+    const auto ax = Fx / param_ro->Mass + tgt_val->ego_in.w * slip_param.vy;
+    const auto ay = Fy / param_ro->Mass - tgt_val->ego_in.w * slip_param.vx;
+    const auto old_v = tgt_val->ego_in.v;
+    slip_param.vx += ax * dt;
+    slip_param.vy += ay * dt;
+    // tgt_val->ego_in.v = mpc_next_ego.v;
+    tgt_val->ego_in.v = std::sqrt(slip_param.vx * slip_param.vx + slip_param.vy * slip_param.vy)*1000;
+    tgt_val->ego_in.accl = (tgt_val->ego_in.v - old_v) / dt;
+  }else{
+    tgt_val->ego_in.v = mpc_next_ego.v;
+    slip_param.vx = mpc_next_ego.v/1000;
+    slip_param.vy = 0;
+  }
+  slip_param.beta = std::atan2(slip_param.vy, slip_param.vx);
+
   tgt_val->ego_in.w = mpc_next_ego.w;
   tgt_val->ego_in.sla_param.state = mpc_next_ego.sla_param.state;
   tgt_val->ego_in.sla_param.counter = mpc_next_ego.sla_param.counter;

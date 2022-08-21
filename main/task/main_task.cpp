@@ -273,6 +273,7 @@ void MainTask::load_hw_param() {
   param->Resist = cJSON_GetObjectItem(root, "Resist")->valuedouble;
   param->Mass = cJSON_GetObjectItem(root, "Mass")->valuedouble;
   param->Lm = cJSON_GetObjectItem(root, "Lm")->valuedouble;
+  param->slip_param_K = cJSON_GetObjectItem(root, "slip_param_K")->valuedouble;
   param->sen_log_size = cJSON_GetObjectItem(root, "sen_log_size")->valueint;
   param->offset_start_dist =
       cJSON_GetObjectItem(root, "offset_start_dist")->valuedouble;
@@ -678,8 +679,8 @@ void MainTask::load_turn_param_profiles() {
   // char line_buf[LINE_BUF_SIZE];
   std::string str = "";
   while (fgets(line_buf, sizeof(line_buf), f) != NULL) {
-    printf("%s\n", line_buf);
-    printf("_______\n");
+    // printf("%s\n", line_buf);
+    // printf("_______\n");
     str += std::string(line_buf);
   }
   fclose(f);
@@ -755,8 +756,8 @@ void MainTask::load_slalom_param() {
     // char line_buf[LINE_BUF_SIZE];
     std::string str = "";
     while (fgets(line_buf, sizeof(line_buf), f) != NULL) {
-      printf("%s\n", line_buf);
-      printf("_______\n");
+      // printf("%s\n", line_buf);
+      // printf("_______\n");
       str += std::string(line_buf);
     }
     fclose(f);
@@ -1014,11 +1015,13 @@ void MainTask::task() {
       } else if (mode_num == 6) {
         path_run(4, 0);
       } else if (mode_num == 7) {
-        // pc->path_create(false);
-        // pc->convert_large_path(true);
-        // pc->diagonalPath(true, true);
-        // pc->print_path();
-        // mp->exec_path_running(paramset_list[2]);
+        path_run(5, 0);
+      } else if (mode_num == 8) {
+        path_run(6, 0);
+      } else if (mode_num == 9) {
+        path_run(7, 0);
+      } else if (mode_num == 10) {
+        path_run(8, 0);
       } else if (mode_num == 14) {
         dump1(); // taskの最終行に配置すること
       } else if (mode_num == 15) {

@@ -14,7 +14,7 @@ test: # テスト走行時に使用するパラメータ群
   end_v: 1
   accl: 8000
   decel: -8000
-  dist: 1350 #直進全部　
+  dist: 180 #直進全部　
   # dist: 180 # スラロームテスト
   dia: 0
   w_max: 14.0
@@ -22,7 +22,7 @@ test: # テスト走行時に使用するパラメータ群
   ang: 360
   suction_active: 1
   suction_duty: 3.25
-  file_idx: 0
+  file_idx: 7
   sla_dist: 90
   sla_type: 3
   # sla_type: 1 normal

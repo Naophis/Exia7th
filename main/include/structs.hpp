@@ -321,6 +321,8 @@ typedef struct {
 
   float dia_wall_off_ref_l = 0;
   float dia_wall_off_ref_r = 0;
+
+  float slip_param_K=0;
 } input_param_t;
 
 typedef struct {
@@ -637,4 +639,11 @@ typedef struct {
   int invalid_w_cnt;
 } fail_safe_t;
 
+
+typedef struct{
+  float K ;
+  float beta;
+  float vx =0;
+  float vy=0;
+}slip_t;
 #endif

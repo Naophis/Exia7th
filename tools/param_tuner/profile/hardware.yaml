@@ -14,6 +14,7 @@ Ke: 0.00305
 Km: 0.0005
 Resist: 2.93
 Mass: 0.015
+slip_param_K: 8
 # Lm: 0.0000025
 # Lm: 0.000025
 Lm: 0.0000035
@@ -85,12 +86,12 @@ dia_wall_off_ref_l: 36.0
 dia_wall_off_ref_r: 37.0
 
 #ログON_OFF
-logging_time: 5.0
-search_log_enable: 0
+logging_time: 2.0
+search_log_enable: 1
 test_log_enable: 0
-fast_log_enable: 1
+fast_log_enable: 0
 sen_log_size: 100
-log_size: 1400
+log_size: 1000
 
 cell: 90
 cell2: 90

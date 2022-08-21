@@ -6,14 +6,14 @@ from slalom import Slalom
 
 
 class Plot:
-    def exe(self, type, offset):
+    def exe(self, type, tgt_v, show):
 
         # fig = plt.figure(figsize=(5, 5), dpi=500)
         fig = plt.figure(dpi=200)
         trj = fig.add_subplot(111)
         trj.set(facecolor="dimgrey")
         # trj.set(facecolor="black")
-        v = 1200
+        v = tgt_v
         rad = 54
         n = 2
         tgt_ang = 90
@@ -165,7 +165,7 @@ class Plot:
         print('  front: {{ left: {}, right: {} }}'.format(
             sla.start_offset, sla.start_offset))
         print('  back: {{ left: {}, right: {} }}'.format(
-            sla.end_offset+offset, sla.end_offset+offset))
+            sla.end_offset, sla.end_offset))
 
         # second = [sla.start_offset,  sla.end_offset]
         # start_pos_x = [0, 0]
@@ -203,4 +203,5 @@ class Plot:
         plt.xlim(plot_range)
         plt.ylim(plot_range)
 
-        plt.show()
+        if show:
+            plt.show()

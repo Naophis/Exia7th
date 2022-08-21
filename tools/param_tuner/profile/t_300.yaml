@@ -1,0 +1,87 @@
+straight:
+  search:
+    v_max: 300
+    accl: 2500
+    decel: -2500
+    w_max: 20
+    w_end: 0.1
+    alpha: 100
+  fast_run:
+    v_max: 1500
+    accl: 2500
+    decel: -4500
+    w_max: 7
+    w_end: 0.1
+    alpha: 20
+  fast_run_dia:
+    v_max: 1500
+    accl: 2500
+    decel: -4000
+    w_max: 5
+    w_end: 0.1
+    alpha: 10
+
+orval:
+  v: 300.000000
+  ang: 180.000000
+  rad: 68.000000
+  pow_n: 2.000000
+  time: 0.347078
+  front: { left: 10, right: 10 }
+  back: { left: 5, right: 5 }
+normal:
+  v: 300
+  ang: 90
+  rad: 26
+  pow_n: 2
+  time: 0.11281250000001165
+  front: { left: 5.0254112446660955, right: 5.0254112446660955 }
+  back: { left: 4.994423279103813, right: 4.994423279103813 }
+large:
+  v: 300
+  ang: 90
+  rad: 60
+  pow_n: 4
+  time: 0.2058281249999709
+  front: { left: 14.978461881187512, right: 14.978461881187512 }
+  back: { left: 14.914907078653513, right: 14.914907078653513 }
+dia45:
+  v: 300
+  ang: 45
+  rad: 50
+  pow_n: 4
+  time: 0.08576562500000262
+  front: { left: 18.275613315830352, right: 18.275613315830352 }
+  back: { left: 36.72393168364807, right: 36.72393168364807 }
+dia45_2:
+  v: 300
+  ang: 45
+  rad: 54
+  pow_n: 2
+  time: 0.1171406250000131
+  front: { left: 27.306784545169926, right: 27.306784545169926 }
+  back: { left: 8.48965586025577, right: 8.48965586025577 }
+dia135:
+  v: 300
+  ang: 135
+  rad: 39
+  pow_n: 4
+  time: 0.20067187499997377
+  front: { left: 24.88173148922076, right: 24.88173148922076 }
+  back: { left: 17.248674073756078, right: 17.248674073756078 }
+dia135_2:
+  v: 300
+  ang: 135
+  rad: 36
+  pow_n: 4
+  time: 0.18523437499998233
+  front: { left: 25.667227612242254, right: 25.667227612242254 }
+  back: { left: 33.51351535210505, right: 33.51351535210505 }
+dia90:
+  v: 300
+  ang: 90
+  rad: 35
+  pow_n: 2
+  time: 0.15184375000000083
+  front: { left: 9.759569983891211, right: 9.759569983891211 }
+  back: { left: 4.755239205106548, right: 4.755239205106548 }

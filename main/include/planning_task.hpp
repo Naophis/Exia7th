@@ -110,6 +110,7 @@ private:
   float duty_roll = 0;
   float duty_roll2 = 0;
   sen_log2_t sen_log;
+  slip_t slip_param;
 };
 
 #endif

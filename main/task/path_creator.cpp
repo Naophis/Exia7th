@@ -178,11 +178,11 @@ void PathCreator::convert_large_path(bool b1) {
       if ((path_s[i] > 2) && path_s[i + 2] > 2) {
         if (path_t[i] == path_t[i + 1]) {
           if (path_t[i] == 1) {
-            path_t[i] = 3;
-            path_t[i + 1] = 254;
+            path_t[i] = (unsigned int)3;
+            path_t[i + 1] = (unsigned int)254;
           } else if (path_t[i] == 2) {
-            path_t[i] = 4;
-            path_t[i + 1] = 254;
+            path_t[i] = (unsigned int)4;
+            path_t[i + 1] = (unsigned int)254;
           }
           path_s[i] -= 1;
           path_s[i + 2] -= 1;
@@ -197,11 +197,11 @@ void PathCreator::convert_large_path(bool b1) {
   for (i = 0; i < path_size; i++) {
     if ((path_s[i] > 2) && (path_s[i + 1] > 2)) {
       if (path_t[i] == 1) {
-        path_t[i] = 5;
+        path_t[i] = (unsigned int)5;
         path_s[i + 1] -= 1;
         path_s[i] -= 1;
       } else if (path_t[i] == 2) {
-        path_t[i] = 6;
+        path_t[i] = (unsigned int)6;
         path_s[i + 1] -= 1;
         path_s[i] -= 1;
       }
@@ -214,7 +214,7 @@ void PathCreator::convert_large_path(bool b1) {
     if (path_size >= 2 && path_s[0] == 2 && path_t[0] == 1 && path_s[1] > 2) {
       path_s[0] -= 1;
       path_s[1] -= 1;
-      path_t[0] = 5;
+      path_t[0] = (unsigned int)5;
     }
     i = 0;
     while (path_t[i] != 0) {
@@ -227,9 +227,9 @@ void PathCreator::convert_large_path(bool b1) {
         path_s[finish - 1] -= 1;
         path_s[finish] -= 1;
         if (path_t[finish - 1] == 1) {
-          path_t[finish - 1] = 5;
+          path_t[finish - 1] = (unsigned int)5;
         } else if (path_t[finish - 1] == 2) {
-          path_t[finish - 1] = 6;
+          path_t[finish - 1] = (unsigned int)6;
         }
       }
     }
@@ -239,16 +239,16 @@ void PathCreator::convert_large_path(bool b1) {
           path_t[finish - 2] == 1) {
         path_s[finish - 2] -= 1;
         path_s[finish] -= 1;
-        path_t[finish - 2] = 3;
-        path_t[finish - 1] = 254;
+        path_t[finish - 2] = (unsigned int)3;
+        path_t[finish - 1] = (unsigned int)254;
       }
       if (path_s[finish] == 2 && path_s[finish - 1] == 2 &&
           path_s[finish - 2] > 2 && path_t[finish - 1] == 2 &&
           path_t[finish - 2] == 2) {
         path_s[finish - 2] -= 1;
         path_s[finish] -= 1;
-        path_t[finish - 2] = 4;
-        path_t[finish - 1] = 254;
+        path_t[finish - 2] = (unsigned int)4;
+        path_t[finish - 1] = (unsigned int)254;
       }
     }
     if (finish == 2) {
@@ -257,16 +257,16 @@ void PathCreator::convert_large_path(bool b1) {
           path_t[finish - 2] == 1) {
         path_s[finish - 2] -= 1;
         path_s[finish] -= 1;
-        path_t[finish - 2] = 3;
-        path_t[finish - 1] = 254;
+        path_t[finish - 2] = (unsigned int)3;
+        path_t[finish - 1] = (unsigned int)254;
       }
       if (path_s[finish] == 2 && path_s[finish - 1] == 2 &&
           path_s[finish - 2] >= 2 && path_t[finish - 1] == 2 &&
           path_t[finish - 2] == 2) {
         path_s[finish - 2] -= 1;
         path_s[finish] -= 1;
-        path_t[finish - 2] = 4;
-        path_t[finish - 1] = 254;
+        path_t[finish - 2] = (unsigned int)4;
+        path_t[finish - 1] = (unsigned int)254;
       }
     }
   }
@@ -340,44 +340,44 @@ void PathCreator::diagonalPath(bool isFull, bool a1) {
         //      ||    (i == 1 && path_s[i] == 2 && path_t[i] == path_t[i - 1] &&
         //      path_s[i - 1] > 0)) {
         if (path_t[i] == R) {
-          path_t[i - 1] = 9;
+          path_t[i - 1] = (unsigned int)9;
           check3 = true;
         } else if (path_t[i] == L) {
-          path_t[i - 1] = 10;
+          path_t[i - 1] = (unsigned int)10;
           check3 = true;
         }
         if (j != 0 && path_s[j + 2] > 2 && path_t[j] == path_t[j + 1]) {
           if (path_t[j] == R) {
-            path_t[j + 1] = 9;
+            path_t[j + 1] = (unsigned int)9;
             check2 = true;
           } else if (path_t[j] == L) {
-            path_t[j + 1] = 10;
+            path_t[j + 1] = (unsigned int)10;
             check2 = true;
           }
           path_s[j + 1] = check + 1;
         } else {
           if (path_t[j] == R) {
-            path_t[j] = 7;
+            path_t[j] = (unsigned int)7;
           } else if (path_t[j] == L) {
-            path_t[j] = 8;
+            path_t[j] = (unsigned int)8;
           }
           path_s[j] = check + 1;
         }
       } else {
         int memory = 0;
         if (path_t[i] == R) {
-          path_t[i] = 7;
+          path_t[i] = (unsigned int)7;
           memory = R;
         } else if (path_t[i] == L) {
-          path_t[i] = 8;
+          path_t[i] = (unsigned int)8;
           memory = L;
         }
         if (j != 0 && path_s[j + 2] > 2 && path_t[j] == path_t[j + 1]) {
           if (path_t[j] == R) {
-            path_t[j + 1] = 9;
+            path_t[j + 1] = (unsigned int)9;
             check2 = true;
           } else if (path_t[j] == L) {
-            path_t[j + 1] = 10;
+            path_t[j + 1] = (unsigned int)10;
             check2 = true;
           }
           path_s[j + 1] = check + 1;
@@ -385,9 +385,9 @@ void PathCreator::diagonalPath(bool isFull, bool a1) {
           if (!a1) {
             if (path_s[j + 1] > 2) {
               if (path_t[j] == R) {
-                path_t[j] = 7;
+                path_t[j] = (unsigned int)7;
               } else if (path_t[j] == L) {
-                path_t[j] = 8;
+                path_t[j] = (unsigned int)8;
               }
               path_s[j] = check + 1;
             } else {
@@ -400,9 +400,9 @@ void PathCreator::diagonalPath(bool isFull, bool a1) {
             }
           } else {
             if (path_t[j] == R) {
-              path_t[j] = 7;
+              path_t[j] = (unsigned int)7;
             } else if (path_t[j] == L) {
-              path_t[j] = 8;
+              path_t[j] = (unsigned int)8;
             }
             path_s[j] = check + 1;
           }
@@ -410,15 +410,15 @@ void PathCreator::diagonalPath(bool isFull, bool a1) {
       }
       if (check3) {
         for (int k = i; k < j; k++) {
-          path_t[k] = 254;
+          path_t[k] = (unsigned int)254;
         }
       } else {
         for (int k = i + 1; k < j; k++) {
-          path_t[k] = 254;
+          path_t[k] = (unsigned int)254;
         }
       }
       if (check2) {
-        path_t[j] = 254;
+        path_t[j] = (unsigned int)254;
       }
       check3 = false;
       check2 = false;
@@ -430,12 +430,12 @@ void PathCreator::diagonalPath(bool isFull, bool a1) {
 
   while (path_t[i] != 0) {
     if (path_t[i] == 7 && path_t[i + 1] == 7 && path_s[i + 1] == 2) {
-      path_t[i] = 11;
-      path_t[i + 1] = 254;
+      path_t[i] = (unsigned int)11;
+      path_t[i + 1] = (unsigned int)254;
     }
     if (path_t[i] == 8 && path_t[i + 1] == 8 && path_s[i + 1] == 2) {
-      path_t[i] = 12;
-      path_t[i + 1] = 254;
+      path_t[i] = (unsigned int)12;
+      path_t[i + 1] = (unsigned int)254;
     }
     i++;
   }
@@ -479,7 +479,7 @@ void PathCreator::pathOffset() {
   int i = 0;
   for (i = 0; i < path_size; i++) {
     if (path_t[i] == 0) {
-      path_t[i] = 0xff;
+      path_t[i] = (unsigned int)0xff;
       break;
     }
   }
@@ -488,7 +488,7 @@ void PathCreator::pathOffset() {
     if (i > 0) {
       if (path_t[i] == 254) {
         path_s[i] = 0;
-        path_t[i] = 0;
+        path_t[i] = (unsigned int)0;
       }
     }
     i++;
@@ -498,7 +498,7 @@ void PathCreator::pathOffset() {
     while (path_t[i] == 0) {
       for (int j = i; path_t[j] != 0xff; j++) {
         path_s[j] = path_s[j + 1];
-        path_t[j] = path_t[j + 1];
+        path_t[j] = (unsigned int)path_t[j + 1];
       }
     }
     i++;
