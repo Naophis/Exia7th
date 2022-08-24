@@ -114,7 +114,7 @@ void PathCreator::path_create(bool is_search) {
   int y = 1;
 
   path_reflash();
-  lgc->set_param2();
+  lgc->set_param3();
   lgc->updateVectorMap(is_search);
 
   path_s.emplace_back(3);

@@ -12,14 +12,14 @@ mode: 0 # モード選択
 test: # テスト走行時に使用するパラメータ群
   v_max: 500
   end_v: 1
-  accl: 800
-  decel: -800
-  dist: 720 #直進全部　
+  accl: 2500
+  decel: -2500
+  dist: 200 #直進全部　
   # dist: 180 # スラロームテスト
   dia: 0
   w_max: 14.0
   alpha: 40
-  ang: 360
+  ang: 180
   suction_active: 1
   suction_duty: 3.25
   file_idx: 0

@@ -26,7 +26,7 @@ sakiyomi_time: 40
 clear_angle: 5
 clear_dist_order: 80
 front_dist_offset: 91.5
-front_dist_offset2: 140.5
+front_dist_offset2: 152.0
 led_light_delay_cnt: 500
 
 front_dist_offset_pivot_th: 80
@@ -48,7 +48,7 @@ sla_wall_ref_l: 44
 sla_wall_ref_r: 45
 
 # 壁切れ オフセット距離
-wall_off_hold_dist_str_l: -5.0
+wall_off_hold_dist_str_l: -8.0
 wall_off_hold_dist_str_r: -4.0
 # 壁切れ オフセット距離(斜め壁有り)
 wall_off_hold_dist_dia_l: -3.0
@@ -72,8 +72,8 @@ wall_off_hold_noexist_dia_th_l: 60
 wall_off_hold_noexist_dia_th_r: 65
 
 #ターン後オフセット距離
-offset_after_turn_l: 25
-offset_after_turn_r: 25
+offset_after_turn_l: 30
+offset_after_turn_r: 30
 offset_after_turn_l2: 10
 offset_after_turn_r2: 10
 offset_after_turn_dia_l: 15

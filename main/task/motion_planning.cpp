@@ -797,6 +797,14 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
       vTaskDelay(1 / portTICK_RATE_MS);
     }
     while (true) {
+      if (40 < sensing_result->ego.left90_dist &&
+          sensing_result->ego.left90_dist < 150 &&
+          40 < sensing_result->ego.right90_dist &&
+          sensing_result->ego.right90_dist < 150) {
+        ps_front.dist -=
+            (param->front_dist_offset2 - sensing_result->ego.front_dist);
+        return;
+      }
       if (sensing_result->ego.right45_dist >
           param->wall_off_dist.noexist_th_r) {
         ps_front.dist += param->wall_off_dist.right_str;
@@ -822,6 +830,14 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
     while (true) {
       if (sensing_result->ego.left45_dist > param->wall_off_dist.noexist_th_l) {
         ps_front.dist += param->wall_off_dist.left_str;
+        return;
+      }
+      if (40 < sensing_result->ego.left90_dist &&
+          sensing_result->ego.left90_dist < 150 &&
+          40 < sensing_result->ego.right90_dist &&
+          sensing_result->ego.right90_dist < 150) {
+        ps_front.dist -=
+            (param->front_dist_offset2 - sensing_result->ego.front_dist);
         return;
       }
       vTaskDelay(1 / portTICK_RATE_MS);
@@ -901,33 +917,39 @@ void MotionPlanning::calc_dia135_offset(param_straight_t &front,
   if (dir == TurnDirection::Left) {
     if (exec_wall_off) {
       if (sensing_result->sen.l45.sensor_dist < 60) {
-        offset_l = sensing_result->sen.l45.sensor_dist - 45;
+        offset_l = sensing_result->sen.l45.sensor_dist -
+                   param->sen_ref_p.normal.ref.left45;
         valid_l = true;
       }
     } else {
       if (sensing_result->ego.left45_dist < 60) {
-        offset_l = sensing_result->ego.left45_dist - 45;
+        offset_l = sensing_result->ego.left45_dist -
+                   param->sen_ref_p.normal.ref.left45;
         valid_l = true;
       }
     }
     if (sensing_result->ego.right45_dist < 60) {
-      offset_r = 45 - sensing_result->ego.right45_dist;
+      offset_r = param->sen_ref_p.normal.ref.right45 -
+                 sensing_result->ego.right45_dist;
       valid_r = true;
     }
   } else {
     if (exec_wall_off) {
       if (sensing_result->sen.r45.sensor_dist < 60) {
-        offset_r = sensing_result->sen.r45.sensor_dist - 45;
+        offset_r = sensing_result->sen.r45.sensor_dist -
+                   param->sen_ref_p.normal.ref.right45;
         valid_r = true;
       }
     } else {
       if (sensing_result->ego.right45_dist < 60) {
-        offset_r = sensing_result->ego.right45_dist - 45;
+        offset_r = sensing_result->ego.right45_dist -
+                   param->sen_ref_p.normal.ref.right45;
         valid_r = true;
       }
     }
     if (sensing_result->ego.left45_dist < 60) {
-      offset_l = 45 - sensing_result->ego.left45_dist;
+      offset_l =
+          param->sen_ref_p.normal.ref.left45 - sensing_result->ego.left45_dist;
       valid_l = true;
     }
   }
@@ -953,33 +975,39 @@ void MotionPlanning::calc_dia45_offset(param_straight_t &front,
   if (dir == TurnDirection::Left) {
     if (exec_wall_off) {
       if (sensing_result->sen.l45.sensor_dist < 60) {
-        offset_l = sensing_result->sen.l45.sensor_dist - 45;
+        offset_l = sensing_result->sen.l45.sensor_dist -
+                   param->sen_ref_p.normal.ref.left45;
         valid_l = true;
       }
     } else {
       if (sensing_result->ego.left45_dist < 60) {
-        offset_l = sensing_result->ego.left45_dist - 45;
+        offset_l = sensing_result->ego.left45_dist -
+                   param->sen_ref_p.normal.ref.left45;
         valid_l = true;
       }
     }
     if (sensing_result->ego.right45_dist < 60) {
-      offset_r = 45 - sensing_result->ego.right45_dist;
+      offset_r = param->sen_ref_p.normal.ref.right45 -
+                 sensing_result->ego.right45_dist;
       valid_r = true;
     }
   } else {
     if (exec_wall_off) {
       if (sensing_result->sen.r45.sensor_dist < 60) {
-        offset_r = sensing_result->sen.r45.sensor_dist - 45;
+        offset_r = sensing_result->sen.r45.sensor_dist -
+                   param->sen_ref_p.normal.ref.right45;
         valid_r = true;
       }
     } else {
       if (sensing_result->ego.right45_dist < 60) {
-        offset_r = sensing_result->ego.right45_dist - 45;
+        offset_r = sensing_result->ego.right45_dist -
+                   param->sen_ref_p.normal.ref.right45;
         valid_r = true;
       }
     }
     if (sensing_result->ego.left45_dist < 60) {
-      offset_l = 45 - sensing_result->ego.left45_dist;
+      offset_l =
+          param->sen_ref_p.normal.ref.left45 - sensing_result->ego.left45_dist;
       valid_l = true;
     }
   }
