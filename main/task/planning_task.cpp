@@ -969,24 +969,27 @@ void PlanningTask::cp_tgt_val() {
   const auto Fx = 0;
   const auto Fy = -slip_param.K * slip_param.beta;
 
-  if (tgt_val->motion_type == MotionType::SLALOM && tgt_val->motion_mode !=(int)(RUN_MODE2::SLALOM_RUN2)) {
+  if (tgt_val->motion_type == MotionType::SLALOM &&
+      tgt_val->motion_mode != (int)(RUN_MODE2::SLALOM_RUN2)) {
     const auto ax = Fx / param_ro->Mass + tgt_val->ego_in.w * slip_param.vy;
     const auto ay = Fy / param_ro->Mass - tgt_val->ego_in.w * slip_param.vx;
     const auto old_v = slip_param.v;
     slip_param.vx += ax * dt;
     slip_param.vy += ay * dt;
     // tgt_val->ego_in.v = mpc_next_ego.v;
-    slip_param.v = std::sqrt(slip_param.vx * slip_param.vx + slip_param.vy * slip_param.vy);
+    slip_param.v = std::sqrt(slip_param.vx * slip_param.vx +
+                             slip_param.vy * slip_param.vy);
     tgt_val->ego_in.v = slip_param.v * 1000;
     tgt_val->ego_in.accl = (slip_param.v - old_v) * 1000 / dt;
     // slip_param.beta = std::atan2(slip_param.vy, slip_param.vx);
-    slip_param.beta = (slip_param.beta / dt - mpc_next_ego.w) / (1.0 / dt + slip_param.k / slip_param.v );
-  }else{
+    slip_param.beta = (slip_param.beta / dt - mpc_next_ego.w) /
+                      (1.0 / dt + slip_param.k / slip_param.v);
+  } else {
     tgt_val->ego_in.v = mpc_next_ego.v;
-    slip_param.vx = mpc_next_ego.v/1000;
+    slip_param.vx = mpc_next_ego.v / 1000;
     slip_param.vy = 0;
     slip_param.beta = 0;
-    slip_param.v = mpc_next_ego.v/1000;
+    slip_param.v = mpc_next_ego.v / 1000;
   }
 
   tgt_val->ego_in.w = mpc_next_ego.w;
@@ -1004,6 +1007,12 @@ void PlanningTask::cp_tgt_val() {
 
   tgt_val->ego_in.cnt_delay_accl_ratio = mpc_next_ego.cnt_delay_accl_ratio;
   tgt_val->ego_in.cnt_delay_decel_ratio = mpc_next_ego.cnt_delay_decel_ratio;
+
+  const auto theta = tgt_val->ego_in.img_ang + slip_param.beta;
+  const auto x = tgt_val->ego_in.v * std::cos(theta);
+  const auto y = tgt_val->ego_in.v * std::sin(theta);
+  tgt_val->p.x += x;
+  tgt_val->p.y += y;
 }
 
 void PlanningTask::check_fail_safe() {

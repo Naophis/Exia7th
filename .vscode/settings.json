@@ -66,5 +66,11 @@
         "typeindex": "cpp",
         "variant": "cpp"
     },
-    "idf.adapterTargetName": "esp32s3"
+    "idf.adapterTargetName": "esp32s3",
+    "clang-format.executable": "/usr/bin/clang-format",
+    "editor.formatOnSave": false,
+    "editor.formatOnType": false,
+    "[cpp]": {
+        "editor.defaultFormatter": "xaver.clang-format"
+    },
 }

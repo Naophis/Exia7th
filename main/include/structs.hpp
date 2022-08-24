@@ -411,6 +411,11 @@ typedef struct {
   float ang;
 } global_ego_pos_t;
 
+typedef struct{
+  float x = 0;
+  float y = 0;
+} pos_t;
+
 typedef struct {
   t_tgt tgt_in;
   t_ego ego_in;
@@ -424,6 +429,7 @@ typedef struct {
   float gyro_zero_p_offset = 0;
   buzzer_t buzzer;
   new_motion_req_t nmr;
+  pos_t p;
 } motion_tgt_val_t;
 
 typedef struct {
