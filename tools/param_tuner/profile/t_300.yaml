@@ -8,14 +8,14 @@ straight:
     alpha: 100
   fast_run:
     v_max: 1500
-    accl: 2500
+    accl: 4500
     decel: -4500
     w_max: 7
     w_end: 0.1
     alpha: 20
   fast_run_dia:
-    v_max: 1500
-    accl: 2500
+    v_max: 2000
+    accl: 4500
     decel: -4000
     w_max: 5
     w_end: 0.1
@@ -29,14 +29,22 @@ orval:
   time: 0.347078
   front: { left: 10, right: 10 }
   back: { left: 5, right: 5 }
+# normal:
+#   v: 300
+#   ang: 90
+#   rad: 26
+#   pow_n: 2
+#   time: 0.11281250000001165
+#   front: { left: 5.0254112446660955, right: 5.0254112446660955 }
+#   back: { left: 4.994423279103813, right: 4.994423279103813 }
 normal:
   v: 300
   ang: 90
   rad: 26
   pow_n: 2
   time: 0.11281250000001165
-  front: { left: 5.0254112446660955, right: 5.0254112446660955 }
-  back: { left: 4.994423279103813, right: 4.994423279103813 }
+  front: { left: 5.410879761848853, right: 5.410879761848853 }
+  back: { left: 8.721348836295533, right: 8.721348836295533 }
 large:
   v: 300
   ang: 90

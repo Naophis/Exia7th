@@ -59,7 +59,12 @@
         "condition_variable": "cpp",
         "set": "cpp",
         "mutex": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "strstream": "cpp",
+        "list": "cpp",
+        "cfenv": "cpp",
+        "typeindex": "cpp",
+        "variant": "cpp"
     },
     "idf.adapterTargetName": "esp32s3"
 }

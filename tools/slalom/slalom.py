@@ -3,14 +3,17 @@ import math
 import matplotlib.pyplot as plt
 from scipy import signal
 
-dt = 0.001/4
+dt = 0.001
 m = 0.015
 Tc = 0.001
 
-K = 8
+K = 200
 
-list_K_x = [0, 300, 600, 900, 1000, 1200]
-list_K_y = [0, 33, 33, 1, 1, 1]
+list_K_x = [300, 900, 1000, 1200]
+list_K_y = [0.5, 0.5, 0.5, 2]
+# list_K_y = [1, 1, 1, 2]
+
+# list_K_y = [10, 20, 20]
 
 
 class Slalom:
@@ -93,13 +96,15 @@ class Slalom:
 
     def calc_slip(self, start_ang):
         res = {}
-        res["x"] = np.array([0])
-        res["y"] = np.array([0])
-        res["alpha"] = np.array([0])
-        res["w"] = np.array([0])
+        res["x"] = np.array([])
+        res["y"] = np.array([])
+        res["alpha"] = np.array([])
+        res["w"] = np.array([])
         res["v"] = np.array([])
         res["vx"] = np.array([])
         res["vy"] = np.array([])
+        res["beta"] = np.array([])
+        res["acc_y"] = np.array([])
         tmp_w = 0
         tmp_theta = start_ang * math.pi / 180
         tmp_x = 0
@@ -130,7 +135,7 @@ class Slalom:
 
             Fx = 0
             v2 = np.sqrt(vx ** 2 + vy ** 2)
-            tmpK = np.interp(v2*1000, list_K_x, list_K_y)
+            tmpK = np.interp(v2 * 1000, list_K_x, list_K_y)
             Fy = -tmpK * beta
             # print(Fy, tmpK, v2)
             ax = Fx / m + old_w * vy
@@ -140,7 +145,7 @@ class Slalom:
             vx = vx + ax * dt
 
             tmp_v = np.sqrt(vx ** 2 + vy ** 2)
-
+            
             tmp_x = tmp_x + tmp_v * 1000 * \
                 np.cos(self.start_theta + tmp_theta) * dt
             tmp_y = tmp_y + tmp_v * 1000 * \
@@ -157,30 +162,15 @@ class Slalom:
             res["y"] = np.append(res["y"], tmp_y)
             res["alpha"] = np.append(res["alpha"], tmp_alpha)
             res["w"] = np.append(res["w"], tmp_w)
+            res["acc_y"] = np.append(res["acc_y"], (tmp_v * tmp_w))
             old_beta = beta
             beta = np.arctan2(vy, vx)
-            delta_beta = beta-old_beta
+            beta = (old_beta / dt - tmp_w) / (1.0 / dt + K / tmp_v)
+            res["beta"] = np.append(res["beta"], beta)
+
+            delta_beta = beta - old_beta
             # beta = tmp_v * tmp_w
 
-        if True:
-        # if False:
-            fig = plt.figure(dpi=100)
-            plV = fig.add_subplot(3, 1, 1)
-            plVx = fig.add_subplot(3, 1, 2)
-            plVy = fig.add_subplot(3, 1, 3)
-            plV.plot(res["v"])
-            plVx.plot(res["vx"])
-
-            # plVy.plot(np.abs(res["w"]))
-            plVy.plot((res["vy"]))
-            # print(res["v"])
-            # print(res["vx"])
-            # print(res["vy"])
-
-            plt.xlim([0, self.limit_time_count + 1])
-            # plt.ylim([0, self.v * 1.02])
-            plt.show()
-        # print(np.max(res["w"]) ** 2 * self.rad / 9.81 / 1000)
         self.res = res
 
         return res
@@ -196,7 +186,7 @@ class Slalom:
             return 0
         return res
 
-    def calc_offset_dist(self, start_pos_x, start_pos_y):
+    def calc_offset_dist(self, start_pos_x, start_pos_y, type):
         a = math.sin(self.ang)
         b = math.cos(self.ang)
         if self.ang == 0:
@@ -239,7 +229,7 @@ class Slalom:
                 self.res["y"][-1] - self.start_offset * math.sin(math.pi / 4)
             self.start_offset_list = [
                 [self.half_cell_size, self.start_offset *
-                    math.sin(math.pi / 4) + self.half_cell_size],
+                 math.sin(math.pi / 4) + self.half_cell_size],
                 [0, self.start_offset * math.sin(math.pi / 4)]]
             self.end_offset_list = [
                 [self.res["x"][-1] + self.start_offset * math.sin(math.pi / 4) + self.half_cell_size,

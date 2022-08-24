@@ -3,14 +3,20 @@ import matplotlib.pyplot as plt
 import math
 
 from slalom import Slalom
+from matplotlib import gridspec
+
+plot_row = 5
+plot_col = 2
 
 
 class Plot:
     def exe(self, type, tgt_v, show):
 
         # fig = plt.figure(figsize=(5, 5), dpi=500)
-        fig = plt.figure(dpi=200)
-        trj = fig.add_subplot(111)
+        fig = plt.figure(dpi=200, tight_layout=True)
+        spec = gridspec.GridSpec(ncols=2, nrows=1,
+                                 width_ratios=[2, 1])
+        trj = plt.subplot2grid((plot_row, plot_col), (0, 0), rowspan=4)
         trj.set(facecolor="dimgrey")
         # trj.set(facecolor="black")
         v = tgt_v
@@ -40,14 +46,14 @@ class Plot:
             end_pos = {"x": 0, "y": 180}
             start_ang = 0
         elif type == "dia45":
-            rad = 50
-            n = 4
+            rad = 58
+            n = 2
             tgt_ang = 45
             end_pos = {"x": 90, "y": 45}
             start_ang = 0
         elif type == "dia135":
-            rad = 39
-            n = 4
+            rad = 40
+            n = 2
             tgt_ang = 135
             end_pos = {"x": 45, "y": 90}
             start_ang = 0
@@ -58,7 +64,7 @@ class Plot:
             end_pos = {"x": 90, "y": 45}
             start_ang = 45
         elif type == "dia135_2":
-            rad = 36
+            rad = 42
             n = 4
             tgt_ang = 135
             end_pos = {"x": -45, "y": 90}
@@ -76,7 +82,7 @@ class Plot:
         # sla.calc_offset_front()
         start_pos_x = [0, 0]
         start_pos_y = [0, 0]
-        sla.calc_offset_dist(start_pos_x, start_pos_y)
+        sla.calc_offset_dist(start_pos_x, start_pos_y, type)
         range = [-1000, 1000]
 
         wall_color = "red"
@@ -124,38 +130,32 @@ class Plot:
         trj.plot(sla.end_offset_list[0], sla.end_offset_list[1],
                  ls="-", color="coral", lw=trj_width, alpha=trj_alpha)
 
-        # trj.plot(sla.start_offset_list[0], sla.start_offset_list[1],
-        #          ls="--", color="cyan", lw=1, alpha=trj_alpha)
-        # trj.plot(res["x"] + sla.turn_offset["x"], res["y"] + + sla.turn_offset["y"], color="blue", lw=1,
-        #          alpha=trj_alpha, ls="--")
-        # trj.plot(sla.end_offset_list[0], sla.end_offset_list[1],
-        #          ls="--", color="cyan", lw=1, alpha=trj_alpha)
-
-        # print('{}:'.format(type))
-        # print('  v: {}'.format(sla.v))
-        # print('  ang: {}'.format(sla.base_ang))
-        # print('  rad: {}'.format(sla.rad))
-        # print('  pow_n: {}'.format(sla.pow_n))
-        # print('  time: {}'.format(sla.base_time))
-        # print('  front: {{ left: {}, right: {} }}'.format(
-        #     sla.start_offset, sla.start_offset))
-        # print('  back: {{ left: {}, right: {} }}'.format(
-        #     sla.end_offset+offset, sla.end_offset+offset))
-        first = [sla.start_offset,  sla.end_offset]
+        first = [sla.start_offset, sla.end_offset]
         start_pos_x = [0, 0]
         start_pos_y = [0, 0]
         # start_pos_y = [-10, -10]
         res = sla.calc_slip(start_ang)
-        sla.calc_offset_dist(start_pos_x, start_pos_y)
+        sla.calc_offset_dist(start_pos_x, start_pos_y, type)
 
-        # sla.calc_offset_dist()
         trj.plot(sla.start_offset_list[0], sla.start_offset_list[1],
                  ls="--", color="cyan", lw=1, alpha=trj_alpha)
-        trj.plot(res["x"] + sla.turn_offset["x"], res["y"] + + sla.turn_offset["y"], color="blue", lw=1,
+        trj.plot(res["x"] + sla.turn_offset["x"], res["y"] + sla.turn_offset["y"], color="blue", lw=1,
                  alpha=trj_alpha, ls="--")
         trj.plot(sla.end_offset_list[0], sla.end_offset_list[1],
                  ls="--", color="cyan", lw=1, alpha=trj_alpha)
 
+        # plV = plt.subplot2grid((plot_row, plot_col), (1, 0), rowspan=plot_col)
+        plV = plt.subplot2grid((plot_row, plot_col), (0, 1), rowspan=1)
+        plV.plot(res["v"] * 1000)
+        plVx = plt.subplot2grid((plot_row, plot_col), (1, 1), rowspan=1)
+        plVx.plot(res["vx"] * 1000)
+        plVy = plt.subplot2grid((plot_row, plot_col), (2, 1), rowspan=1)
+        plVy.plot(res["vy"] * 1000)
+        plW = plt.subplot2grid((plot_row, plot_col), (3, 1), rowspan=1)
+        plW.plot(res["w"])
+        plBeta = plt.subplot2grid((plot_row, plot_col), (4, 1), rowspan=1)
+        plBeta.plot(res["beta"] * 180 / np.pi)
+        # plVx.plot(res["vx"])
         print('{}:'.format(type))
         print('  v: {}'.format(sla.v))
         print('  ang: {}'.format(sla.base_ang))
@@ -167,41 +167,17 @@ class Plot:
         print('  back: {{ left: {}, right: {} }}'.format(
             sla.end_offset, sla.end_offset))
 
-        # second = [sla.start_offset,  sla.end_offset]
-        # start_pos_x = [0, 0]
-        # start_pos_y = [10, 10]
-        # sla.calc_offset_dist(start_pos_x, start_pos_y)
-
-        # res = sla.calc_slip(start_ang)
-        # sla.calc_offset_dist()
-        # trj.plot(sla.start_offset_list[0], sla.start_offset_list[1],
-        #          ls="--", color="cyan", lw=1, alpha=trj_alpha)
-        # trj.plot(res["x"] + sla.turn_offset["x"], res["y"] + + sla.turn_offset["y"], color="blue", lw=1,
-        #          alpha=trj_alpha, ls="--")
-        # trj.plot(sla.end_offset_list[0], sla.end_offset_list[1],
-        #          ls="--", color="cyan", lw=1, alpha=trj_alpha)
-
-        # print('{}:'.format(type))
-        # print('  v: {}'.format(sla.v))
-        # print('  ang: {}'.format(sla.base_ang))
-        # print('  rad: {}'.format(sla.rad))
-        # print('  pow_n: {}'.format(sla.pow_n))
-        # print('  time: {}'.format(sla.base_time))
-        # print('  front: {{ left: {}, right: {} }}'.format(
-        #     sla.start_offset, sla.start_offset))
-        # print('  back: {{ left: {}, right: {} }}'.format(
-        #     sla.end_offset+offset, sla.end_offset+offset))
-
-        # third = [sla.start_offset,  sla.end_offset]
-
-        # print('front: {}'.format(second[0]-first[0]))
-        # print('back:{} x sqrt(2)'.format((second[1]-first[1])/math.sqrt(2)))
+        accY = plt.subplot2grid((plot_row, plot_col), (4, 0), rowspan=1)
+        accY.plot(res["acc_y"]/9.8)
 
         trj.set_aspect('1.0')
         plot_range = [-60, 180]
-
-        plt.xlim(plot_range)
-        plt.ylim(plot_range)
+        trj.set_xlim(plot_range)
+        trj.set_ylim(plot_range)
+        # plt.xlim(plot_range)
+        # plt.ylim(plot_range)
 
         if show:
+            acc_y = np.abs(res["acc_y"]).max()
+            plt.suptitle("{}[G]".format(acc_y/9.8))
             plt.show()

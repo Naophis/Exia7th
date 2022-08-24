@@ -274,6 +274,7 @@ void MainTask::load_hw_param() {
   param->Mass = cJSON_GetObjectItem(root, "Mass")->valuedouble;
   param->Lm = cJSON_GetObjectItem(root, "Lm")->valuedouble;
   param->slip_param_K = cJSON_GetObjectItem(root, "slip_param_K")->valuedouble;
+  param->slip_param_k2 = cJSON_GetObjectItem(root, "slip_param_k2")->valuedouble;
   param->sen_log_size = cJSON_GetObjectItem(root, "sen_log_size")->valueint;
   param->offset_start_dist =
       cJSON_GetObjectItem(root, "offset_start_dist")->valuedouble;

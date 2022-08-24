@@ -236,6 +236,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
       // ps_front.dist = 0;
       b = false;
     }
+    float default_rad = sp.rad;
     float rad_r = sp.rad;
     float rad_l = sp.rad;
     if (td == TurnDirection::Right) {
@@ -274,6 +275,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
     } else if (find_l) {
       sp.rad = rad_l;
     }
+    // sp.rad=default_rad ;
     ps_back.dist -= (td == TurnDirection::Right) ? param->offset_after_turn_r2
                                                  : param->offset_after_turn_l2;
     if (b) {
