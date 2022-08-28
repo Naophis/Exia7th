@@ -768,7 +768,7 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
   tgt_val->nmr.v_end = ps_front.v_end;
   tgt_val->nmr.accl = ps_front.accl;
   tgt_val->nmr.decel = ps_front.decel;
-  tgt_val->nmr.dist = 180;
+  tgt_val->nmr.dist = 40;
   tgt_val->nmr.w_max = 0;
   tgt_val->nmr.w_end = 0;
   tgt_val->nmr.alpha = 0;
@@ -780,6 +780,7 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
   tgt_val->nmr.dia_mode = ps_front.dia_mode;
   tgt_val->nmr.sct = SensorCtrlType::Straight;
   tgt_val->nmr.timstamp++;
+  vTaskDelay(1 / portTICK_RATE_MS);
   if (td == TurnDirection::Right) {
     while (true) {
       if (sensing_result->ego.right45_dist <
@@ -792,6 +793,9 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
           sensing_result->ego.right90_dist < 150) {
         ps_front.dist -=
             (param->front_dist_offset2 - sensing_result->ego.front_dist);
+        return;
+      }
+      if (ABS(tgt_val->ego_in.dist) >= ABS(tgt_val->nmr.dist)) {
         return;
       }
       vTaskDelay(1 / portTICK_RATE_MS);
@@ -823,6 +827,9 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
           sensing_result->ego.right90_dist < 150) {
         ps_front.dist -=
             (param->front_dist_offset2 - sensing_result->ego.front_dist);
+        return;
+      }
+      if (ABS(tgt_val->ego_in.dist) >= ABS(tgt_val->nmr.dist)) {
         return;
       }
       vTaskDelay(1 / portTICK_RATE_MS);

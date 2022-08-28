@@ -58,8 +58,8 @@ wall_off_hold_dist_dia_l2: -0.5
 wall_off_hold_dist_dia_r2: 1.0
 
 # 壁切れ In
-wall_off_hold_exist_dist_l: 70
-wall_off_hold_exist_dist_r: 70
+wall_off_hold_exist_dist_l: 73
+wall_off_hold_exist_dist_r: 73
 # 壁切れ Out
 wall_off_hold_noexist_th_l: 75
 wall_off_hold_noexist_th_r: 75
@@ -74,10 +74,10 @@ wall_off_hold_noexist_dia_th_r: 65
 #ターン後オフセット距離
 offset_after_turn_l: 30
 offset_after_turn_r: 30
-offset_after_turn_l2: 10
-offset_after_turn_r2: 10
-offset_after_turn_dia_l: 15
-offset_after_turn_dia_r: 15
+offset_after_turn_l2: 15
+offset_after_turn_r2: 15
+offset_after_turn_dia_l: 10
+offset_after_turn_dia_r: 10
 
 #斜めターン壁有り補正
 dia_turn_exist_th_l: 100
@@ -96,6 +96,10 @@ test_log_enable: 0
 fast_log_enable: 1
 sen_log_size: 100
 log_size: 900
+
+fail_duty_cnt: 300
+fail_v_cnt: 200
+fail_w_cnt: 50
 
 cell: 90
 cell2: 90
@@ -144,7 +148,7 @@ sensor_pid:
   # i: 0.0
   # d: 0.0
 sensor_pid_dia:
-  p: 0.01
+  p: 0.0125
   i: 0.0
   d: 0.0
   mode: 1

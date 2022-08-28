@@ -1044,10 +1044,10 @@ void PlanningTask::check_fail_safe() {
     fail_safe.invalid_w_cnt = 0;
     tgt_val->fss.error = 0;
   } else {
-    if (ABS(fail_safe.invalid_duty_r_cnt) > 100 ||
-        ABS(fail_safe.invalid_duty_l_cnt) > 100 ||
-        ABS(fail_safe.invalid_v_cnt) > 100 ||
-        ABS(fail_safe.invalid_w_cnt) > 50) {
+    if (ABS(fail_safe.invalid_duty_r_cnt) > param_ro->fail_check.duty ||
+        ABS(fail_safe.invalid_duty_l_cnt) > param_ro->fail_check.duty ||
+        ABS(fail_safe.invalid_v_cnt) > param_ro->fail_check.v ||
+        ABS(fail_safe.invalid_w_cnt) > param_ro->fail_check.w) {
       tgt_val->fss.error = 1;
     }
   }

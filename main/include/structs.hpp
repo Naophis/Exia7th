@@ -247,6 +247,12 @@ typedef struct {
 } wall_off_hold_dist_t;
 
 typedef struct {
+  int duty;
+  int v;
+  int w;
+} fail_check_cnt_t;
+
+typedef struct {
   float dt = 0.001;
   float tire = 12;
   int log_size = 1300;
@@ -322,8 +328,11 @@ typedef struct {
   float dia_wall_off_ref_l = 0;
   float dia_wall_off_ref_r = 0;
 
-  float slip_param_K=0;
-  float slip_param_k2=0;
+  float slip_param_K = 0;
+  float slip_param_k2 = 0;
+  
+  fail_check_cnt_t fail_check;
+
 } input_param_t;
 
 typedef struct {
@@ -411,7 +420,7 @@ typedef struct {
   float ang;
 } global_ego_pos_t;
 
-typedef struct{
+typedef struct {
   float x = 0;
   float y = 0;
 } pos_t;
@@ -646,13 +655,12 @@ typedef struct {
   int invalid_w_cnt;
 } fail_safe_t;
 
-
-typedef struct{
+typedef struct {
   float K;
   float k;
   float beta;
   float vx = 0;
   float vy = 0;
   float v = 0;
-}slip_t;
+} slip_t;
 #endif

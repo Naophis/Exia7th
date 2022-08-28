@@ -274,7 +274,8 @@ void MainTask::load_hw_param() {
   param->Mass = cJSON_GetObjectItem(root, "Mass")->valuedouble;
   param->Lm = cJSON_GetObjectItem(root, "Lm")->valuedouble;
   param->slip_param_K = cJSON_GetObjectItem(root, "slip_param_K")->valuedouble;
-  param->slip_param_k2 = cJSON_GetObjectItem(root, "slip_param_k2")->valuedouble;
+  param->slip_param_k2 =
+      cJSON_GetObjectItem(root, "slip_param_k2")->valuedouble;
   param->sen_log_size = cJSON_GetObjectItem(root, "sen_log_size")->valueint;
   param->offset_start_dist =
       cJSON_GetObjectItem(root, "offset_start_dist")->valuedouble;
@@ -293,6 +294,10 @@ void MainTask::load_hw_param() {
       cJSON_GetObjectItem(root, "clear_dist_ragne_to")->valuedouble;
   param->led_light_delay_cnt =
       cJSON_GetObjectItem(root, "led_light_delay_cnt")->valuedouble;
+
+  param->fail_check.duty = cJSON_GetObjectItem(root, "fail_duty_cnt")->valueint;
+  param->fail_check.v = cJSON_GetObjectItem(root, "fail_v_cnt")->valueint;
+  param->fail_check.w = cJSON_GetObjectItem(root, "fail_w_cnt")->valueint;
 
   param->offset_after_turn_l2 =
       cJSON_GetObjectItem(root, "offset_after_turn_l2")->valuedouble;
@@ -695,7 +700,8 @@ void MainTask::load_turn_param_profiles() {
   printf("profile_list\n");
   tpp.file_list_size = 0;
   for (int i = 0; i < profile_list_size; i++) {
-    tpp.file_list.emplace_back(cJSON_GetArrayItem(profile_list, i)->valuestring);
+    tpp.file_list.emplace_back(
+        cJSON_GetArrayItem(profile_list, i)->valuestring);
     tpp.file_list_size++;
   }
   printf("tpp.file_list.size() = %d\n", tpp.file_list.size());
