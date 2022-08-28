@@ -1,9 +1,14 @@
 #ifndef RTW_HEADER_mpc_tgt_calc_h_
 #define RTW_HEADER_mpc_tgt_calc_h_
-#include <cmath>
 #include "rtwtypes.h"
+#include "bus.h"
 #include "mpc_tgt_calc_types.h"
+
+extern "C" {
+
 #include "rt_nonfinite.h"
+
+}
 
 #ifndef rtmGetErrorStatus
 #define rtmGetErrorStatus(rtm)         ((rtm)->errorStatus)
@@ -15,7 +20,8 @@
 
 #include "bus.h"
 
-class mpc_tgt_calcModelClass {
+class mpc_tgt_calcModelClass
+{
  public:
   struct P_keep_mpc_tgt_calc_T {
     real_T Constant_Value;
@@ -87,6 +93,7 @@ class mpc_tgt_calcModelClass {
     real32_T Gain1_Gain_hy;
     real32_T Gain_Gain_m;
     real32_T Gain4_Gain;
+    real32_T Gain5_Gain;
     real32_T Gain_Gain_c;
     real32_T Constant_Value_m;
     real32_T Constant_Value_e;
@@ -120,7 +127,7 @@ class mpc_tgt_calcModelClass {
     real32_T Gain4_Gain_o;
     real32_T Gain1_Gain_cq;
     real32_T Gain2_Gain_c;
-    real32_T Gain5_Gain;
+    real32_T Gain5_Gain_e;
     real32_T Gain6_Gain;
     real32_T Gain_Gain_kq;
     real32_T DataStoreMemory_InitialValue;
@@ -138,24 +145,24 @@ class mpc_tgt_calcModelClass {
     const char_T * volatile errorStatus;
   };
 
-  typedef struct {
+  struct self_keep_mpc_tgt_calc_T {
     P_keep_mpc_tgt_calc_T* defaultParam;
-  } self_keep_mpc_tgt_calc_T;
+  };
 
+  mpc_tgt_calcModelClass::RT_MODEL_mpc_tgt_calc_T * getRTM();
   void initialize();
   void step(const t_tgt *arg_tgt, const t_ego *arg_ego, int32_T arg_mode,
             int32_T arg_time_step, t_ego *arg_next_ego);
-  void terminate();
+  static void terminate();
   mpc_tgt_calcModelClass();
   ~mpc_tgt_calcModelClass();
-  mpc_tgt_calcModelClass::RT_MODEL_mpc_tgt_calc_T * getRTM();
  private:
   static P_mpc_tgt_calc_T mpc_tgt_calc_P;
   self_keep_mpc_tgt_calc_T self_keep_p;
   self_keep_mpc_tgt_calc_T self_keep_h;
-  RT_MODEL_mpc_tgt_calc_T mpc_tgt_calc_M;
   static void mpc_tgt_calc_keep(self_keep_mpc_tgt_calc_T *mpc_tgt_calc_self_arg,
     real32_T *rty_accl_out, int32_T *rty_state_out);
+  RT_MODEL_mpc_tgt_calc_T mpc_tgt_calc_M;
 };
 
 #endif

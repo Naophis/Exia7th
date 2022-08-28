@@ -1,8 +1,6 @@
 #ifndef RTW_HEADER_rtGetInf_h_
 #define RTW_HEADER_rtGetInf_h_
-#include <stddef.h>
 #include "rtwtypes.h"
-#include "rt_nonfinite.h"
 #ifdef __cplusplus
 
 extern "C" {

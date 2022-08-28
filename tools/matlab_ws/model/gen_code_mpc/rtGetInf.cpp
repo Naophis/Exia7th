@@ -1,4 +1,17 @@
+#include "rtwtypes.h"
+
+extern "C" {
+
 #include "rtGetInf.h"
+
+}
+#include <stddef.h>
+
+extern "C" {
+
+#include "rt_nonfinite.h"
+
+}
 #define NumBitsPerChar                 8U
 
 extern "C" {

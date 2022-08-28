@@ -1,7 +1,6 @@
 #include <stddef.h>
 #include <stdio.h>
 #include "mpc_tgt_calc.h"
-#include "rtwtypes.h"
 
 static mpc_tgt_calcModelClass mpc_tgt_calc_Obj;
 static t_tgt arg_tgt = {
@@ -29,7 +28,7 @@ static t_tgt arg_tgt = {
   0.0F,
   0.0F,
   0.0F
-} ;
+};
 
 static t_ego arg_ego = {
   0.0F,
@@ -87,7 +86,7 @@ static t_ego arg_ego = {
   0.0F,
   0.0F,
   0.0F
-} ;
+};
 
 static int32_T arg_mode = 0;
 static int32_T arg_time_step = 0;

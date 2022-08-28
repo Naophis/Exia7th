@@ -371,11 +371,11 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
     tgt_val->nmr.ang = sp.ang;
     tgt_val->nmr.sla_rad = sp.rad;
     tgt_val->nmr.w_end = 0;
-    tgt_val->nmr.alpha = (2 * sp.v * sp.v / (sp.rad * sp.rad * sp.ang / 2));
+    tgt_val->nmr.alpha = (2 * sp.v * sp.v / (sp.rad * sp.rad * sp.ang / 3));
     tgt_val->nmr.w_max = 200000;
     if (td == TurnDirection::Right) {
       tgt_val->nmr.w_max = -200000;
-      tgt_val->nmr.alpha = -(2 * sp.v * sp.v / (sp.rad * sp.rad * sp.ang / 2));
+      tgt_val->nmr.alpha = -(2 * sp.v * sp.v / (sp.rad * sp.rad * sp.ang / 3));
     }
   }
   tgt_val->ego_in.sla_param.counter = 1;

@@ -1,4 +1,17 @@
+#include "rtwtypes.h"
+
+extern "C" {
+
 #include "rtGetNaN.h"
+
+}
+#include <stddef.h>
+
+extern "C" {
+
+#include "rt_nonfinite.h"
+
+}
 #define NumBitsPerChar                 8U
 
 extern "C" {
@@ -24,7 +37,7 @@ extern "C" {
 
   real32_T rtGetNaNF(void)
   {
-    IEEESingle nanF = { { 0 } };
+    IEEESingle nanF = { { 0.0F } };
 
     nanF.wordL.wordLuint = 0xFFC00000U;
     return nanF.wordL.wordLreal;

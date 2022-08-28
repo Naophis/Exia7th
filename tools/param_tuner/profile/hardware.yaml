@@ -7,21 +7,22 @@ max_duty: 99.9
 FF_front: 1
 FF_roll: 1
 FF_keV: 1
-# Ke: 0.00275
-# Ke: 0.0045
-# Km: 0.00275
+
 Ke: 0.00305
 Km: 0.0005
-Resist: 2.93
+
+# Ke: 0.00105
+# Km: 0.0025
+# Resist: 2.93
+Resist: 1.7
 Mass: 0.015
 
 slip_param_K: 0.5
 slip_param_k2: 200
 # slip_param_k2: 5
 
-# Lm: 0.0000025
-# Lm: 0.000025
-Lm: 0.0000035
+# Lm: 0.0000035
+Lm: 0.00000175
 sakiyomi_time: 40
 clear_angle: 5
 clear_dist_order: 80
@@ -95,7 +96,7 @@ search_log_enable: 0
 test_log_enable: 0
 fast_log_enable: 1
 sen_log_size: 100
-log_size: 900
+log_size: 1000
 
 fail_duty_cnt: 300
 fail_v_cnt: 200
@@ -106,7 +107,7 @@ cell2: 90
 
 motor_pid:
   p: 0.0025
-  i: 0.00325
+  i: 0.0022
   d: 0.0
   mode: 1
   # p: 0.0
@@ -121,9 +122,12 @@ dist_pid:
   # i: 0.0
   # d: 0.0
 gyro_pid:
-  p: 0.25
+  p: 0.225
   i: 0.025
   d: 0.0
+  # p: 0.025
+  # i: 0.0065
+  # d: 0.0
   mode: 1
   # p: 0.0
   # i: 0.0
@@ -140,7 +144,7 @@ angle_pid:
   # i: 0.0
   # d: 0.0
 sensor_pid:
-  p: 0.25
+  p: 0.05
   i: 0.0
   d: 0.0
   mode: 1

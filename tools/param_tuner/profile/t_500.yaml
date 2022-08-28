@@ -8,8 +8,8 @@ straight:
     alpha: 10
   fast_run:
     v_max: 2500
-    accl: 5500
-    decel: -4500
+    accl: 12500
+    decel: -10500
     w_max: 5
     w_end: 0.1
     alpha: 10
@@ -23,7 +23,7 @@ straight:
 orval:
   v: 500.000000
   ang: 180.000000
-  rad: 68.000000
+  rad: 80.000000
   pow_n: 2.000000
   time: 0.347078
   front: { left: 10, right: 10 }

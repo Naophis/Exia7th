@@ -1,6 +1,23 @@
-#include "rt_nonfinite.h"
+extern "C" {
+
 #include "rtGetNaN.h"
+
+}
+  extern "C"
+{
+
 #include "rtGetInf.h"
+
+}
+
+#include <stddef.h>
+#include "rtwtypes.h"
+
+extern "C" {
+
+#include "rt_nonfinite.h"
+
+}
 #define NumBitsPerChar                 8U
 
 extern "C" {

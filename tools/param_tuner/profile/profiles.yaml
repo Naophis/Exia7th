@@ -98,11 +98,11 @@ profile_idx: [
       normal: 0,
       large: 6,
       orval: 6,
-      dia45: 5,
-      dia45_2: 5,
-      dia135: 5,
-      dia135_2: 5,
-      dia90: 5,
+      dia45: 6,
+      dia45_2: 6,
+      dia135: 6,
+      dia135_2: 6,
+      dia90: 6,
     },
     {
       # 7: 最短パラメータ 1000
@@ -111,11 +111,11 @@ profile_idx: [
       normal: 0,
       large: 7,
       orval: 6,
-      dia45: 5,
-      dia45_2: 5,
-      dia135: 5,
-      dia135_2: 5,
-      dia90: 5,
+      dia45: 6,
+      dia45_2: 6,
+      dia135: 6,
+      dia135_2: 6,
+      dia90: 6,
     },
     {
       # 8: 最短パラメータ 1100

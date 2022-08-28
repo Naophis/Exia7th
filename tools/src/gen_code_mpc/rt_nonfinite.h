@@ -19,26 +19,26 @@ extern "C" {
   extern boolean_T rtIsInfF(real32_T value);
   extern boolean_T rtIsNaN(real_T value);
   extern boolean_T rtIsNaNF(real32_T value);
-  typedef struct {
+  struct BigEndianIEEEDouble {
     struct {
       uint32_T wordH;
       uint32_T wordL;
     } words;
-  } BigEndianIEEEDouble;
+  };
 
-  typedef struct {
+  struct LittleEndianIEEEDouble {
     struct {
       uint32_T wordL;
       uint32_T wordH;
     } words;
-  } LittleEndianIEEEDouble;
+  };
 
-  typedef struct {
+  struct IEEESingle {
     union {
       real32_T wordLreal;
       uint32_T wordLuint;
     } wordL;
-  } IEEESingle;
+  };
 
 #ifdef __cplusplus
 
