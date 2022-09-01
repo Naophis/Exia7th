@@ -106,8 +106,8 @@ cell: 90
 cell2: 90
 
 motor_pid:
-  p: 0.0025
-  i: 0.0022
+  p: 0.00275
+  i: 0.00275
   d: 0.0
   mode: 1
   # p: 0.0
@@ -144,7 +144,7 @@ angle_pid:
   # i: 0.0
   # d: 0.0
 sensor_pid:
-  p: 0.05
+  p: 0.1
   i: 0.0
   d: 0.0
   mode: 1
