@@ -57,6 +57,9 @@ typedef struct {
   float slip_gain;
   float limit_accl_ratio_cnt;
   float limit_decel_ratio_cnt;
+  float slip_gain_K1;
+  float slip_gain_K2;
+  float mass;
 } t_tgt;
 
 typedef struct {
@@ -78,6 +81,14 @@ typedef struct {
 } t_point;
 
 typedef struct {
+  float beta;
+  float vx;
+  float vy;
+  float v;
+  float accl;
+} t_slip;
+
+typedef struct {
   float v;
   float accl;
   float w;
@@ -97,6 +108,7 @@ typedef struct {
   float delay_v;
   float cnt_delay_accl_ratio;
   float cnt_delay_decel_ratio;
+  t_slip slip;
 } t_ego;
 
 typedef struct {

@@ -98,8 +98,16 @@ class mpc_tgt_calcModelClass
     real32_T Constant_Value_m;
     real32_T Constant_Value_e;
     real32_T Gain_Gain_b;
-    real32_T Constant3_Value_c;
+    real32_T Constant_Value_o;
+    real32_T Gain_Gain_p;
+    real32_T Gain3_Gain_d;
+    real32_T Constant1_Value_i;
     real32_T Gain1_Gain_o;
+    real32_T Constant_Value_nu;
+    real32_T Gain1_Gain_i;
+    real32_T Gain_Gain_h;
+    real32_T Constant3_Value_c;
+    real32_T Gain1_Gain_o0;
     real32_T Merge_InitialOutput;
     real32_T Gain_Gain_ca;
     real32_T Constant_Value_nex;
@@ -109,7 +117,7 @@ class mpc_tgt_calcModelClass
     real32_T Merge_InitialOutput_m;
     real32_T Gain_Gain_k;
     real32_T Constant_Value_hs;
-    real32_T Constant1_Value_i;
+    real32_T Constant1_Value_ii;
     real32_T Constant_Value_hn;
     real32_T Saturation_UpperSat;
     real32_T Saturation_LowerSat;
