@@ -1014,21 +1014,21 @@ void MainTask::task() {
       } else if (mode_num == 2) {
         path_run(0, 0);
       } else if (mode_num == 3) {
-        path_run(1, 0);
+        path_run(1, 1);
       } else if (mode_num == 4) {
-        path_run(2, 0);
+        path_run(2, 2);
       } else if (mode_num == 5) {
-        path_run(3, 0);
+        path_run(3, 3);
       } else if (mode_num == 6) {
-        path_run(4, 0);
+        path_run(4, 4);
       } else if (mode_num == 7) {
-        path_run(5, 0);
+        path_run(5, 4);
       } else if (mode_num == 8) {
-        path_run(6, 0);
+        path_run(6, 4);
       } else if (mode_num == 9) {
-        path_run(7, 0);
+        path_run(7, 4);
       } else if (mode_num == 10) {
-        path_run(8, 0);
+        path_run(8, 4);
       } else if (mode_num == 14) {
         dump1(); // taskの最終行に配置すること
       } else if (mode_num == 15) {

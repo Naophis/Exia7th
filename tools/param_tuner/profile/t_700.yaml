@@ -8,8 +8,8 @@ straight:
     alpha: 10
   fast_run:
     v_max: 2750
-    accl: 15000
-    decel: -15000
+    accl: 13000
+    decel: -12000
     w_max: 5
     w_end: 0.1
     alpha: 10

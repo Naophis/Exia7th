@@ -58,6 +58,8 @@ private:
 
   void calc_sensor_dist_all();
 
+  float satuate_sen_duty(float duty_sen);
+
   float calc_sensor(float date, float a, float b);
 
   duty_t tgt_duty;

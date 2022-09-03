@@ -42,6 +42,13 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p,
   tgt_val->nmr.motion_type = MotionType::STRAIGHT;
   tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
   tgt_val->nmr.dia_mode = p.dia_mode;
+
+  const auto ego_v = tgt_val->ego_in.v;
+  const auto req_dist = ABS((ego_v * ego_v - p.v_end * p.v_end) / (2 * p.accl));
+  if (req_dist > p.dist) {
+    p.accl = (ego_v * ego_v - p.v_end * p.v_end) / (2 * p.dist) + 100;
+  }
+
   tgt_val->nmr.sct = p.sct;
   if (p.motion_type != MotionType::NONE) {
     tgt_val->nmr.motion_type = p.motion_type;

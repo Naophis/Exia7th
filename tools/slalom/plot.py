@@ -46,32 +46,32 @@ class Plot:
             end_pos = {"x": 0, "y": 180}
             start_ang = 0
         elif type == "dia45":
-            rad = 58
-            n = 2
+            rad = 66
+            n = 4
             tgt_ang = 45
             end_pos = {"x": 90, "y": 45}
             start_ang = 0
         elif type == "dia135":
-            rad = 40
-            n = 2
+            rad = 48
+            n = 4
             tgt_ang = 135
             end_pos = {"x": 45, "y": 90}
             start_ang = 0
         elif type == "dia45_2":
-            rad = 54
+            rad = 66
             n = 2
             tgt_ang = 45
             end_pos = {"x": 90, "y": 45}
             start_ang = 45
         elif type == "dia135_2":
-            rad = 42
+            rad = 45
             n = 4
             tgt_ang = 135
             end_pos = {"x": -45, "y": 90}
             start_ang = 45
         elif type == "dia90":
-            rad = 35
-            n = 2
+            rad = 46
+            n = 4
             tgt_ang = 90
             end_pos = {"x": 0, "y": 90}
             start_ang = 0

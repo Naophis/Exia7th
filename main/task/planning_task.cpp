@@ -576,14 +576,15 @@ void PlanningTask::set_next_duty(float duty_l, float duty_r,
     mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A,
                         MCPWM_DUTY_MODE_0);
   } else {
-    mcpwm_start(MCPWM_UNIT_0, MCPWM_TIMER_0);
-    mcpwm_start(MCPWM_UNIT_0, MCPWM_TIMER_1);
-    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, 0);
-    mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A,
-                        MCPWM_DUTY_MODE_0);
-    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A, 0);
-    mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A,
-                        MCPWM_DUTY_MODE_0);
+    motor_disable(false);
+    // mcpwm_start(MCPWM_UNIT_0, MCPWM_TIMER_0);
+    // mcpwm_start(MCPWM_UNIT_0, MCPWM_TIMER_1);
+    // mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, 0);
+    // mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A,
+    //                     MCPWM_DUTY_MODE_0);
+    // mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A, 0);
+    // mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A,
+    //                     MCPWM_DUTY_MODE_0);
   }
   if (suction_en) {
     // mcpwm_set_signal_high(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A);
@@ -712,6 +713,9 @@ float PlanningTask::get_rpm_ff_val(TurnDirection td) {
   return param_ro->Ke *
          (tgt_val->ego_in.v - param_ro->tread / 2 * tgt_val->ego_in.w) /
          (param_ro->tire / 2) * 30.0 / PI;
+}
+float PlanningTask::satuate_sen_duty(float duty_sen) {
+  return duty_sen;
 }
 void PlanningTask::calc_tgt_duty() {
 

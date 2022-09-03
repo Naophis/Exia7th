@@ -74,12 +74,12 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
   real32_T Merge_k;
   real32_T rtb_Abs6;
   real32_T rtb_Abs7;
+  real32_T rtb_Add1_c;
   real32_T rtb_Add1_e;
   real32_T rtb_Add_d;
   real32_T rtb_Add_nd;
   real32_T rtb_BusAssignment_o_slip_point_;
   real32_T rtb_Gain2_p;
-  real32_T rtb_Gain_di;
   real32_T rtb_Merge1_o;
   real32_T rtb_Merge_f;
   real32_T rtb_Merge_l;
@@ -204,7 +204,7 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
 
   rtb_Abs6 = rtb_Add1_e * static_cast<real32_T>(arg_time_step) *
     mpc_tgt_calc_P.Gain1_Gain_e;
-  rtb_Gain_di = rtb_Add1_e;
+  rtb_Add1_c = rtb_Add1_e;
   rtb_Abs7 = arg_ego->dist + rtb_Abs6;
   if (arg_mode == 1) {
     if (arg_ego->sla_param.state != 0) {
@@ -403,11 +403,11 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
   rtb_Add1_e = arg_ego->ang + rtb_Add_nd;
   rtb_Switch_ju = arg_ego->img_dist + rtb_Abs6;
   rtb_Merge1_o = arg_ego->img_ang + rtb_Add_nd;
-  if (rtb_Gain_di != 0.0F) {
+  if (rtb_Add1_c != 0.0F) {
     rtb_Product_b = (mpc_tgt_calc_P.Constant_Value_g / static_cast<real32_T>
                      (arg_time_step) * arg_ego->slip_point.slip_angle -
                      arg_ego->slip_point.w) / (arg_tgt->slip_gain /
-      (mpc_tgt_calc_P.mms2ms_Gain * rtb_Gain_di) +
+      (mpc_tgt_calc_P.mms2ms_Gain * rtb_Add1_c) +
       mpc_tgt_calc_P.Constant1_Value_hj / static_cast<real32_T>(arg_time_step));
   } else {
     rtb_Product_b = mpc_tgt_calc_P.Constant3_Value_a;
@@ -415,16 +415,15 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
 
   rtb_Merge_f = rtb_Merge1_o + rtb_Product_b;
   rtb_BusAssignment_o_slip_point_ = rtb_Merge_f;
-  rtb_Product_h = rtb_Gain_di * std::cos(rtb_Merge_f) *
+  rtb_Product_h = rtb_Add1_c * std::cos(rtb_Merge_f) *
     mpc_tgt_calc_P.Gain3_Gain_m * static_cast<real32_T>(arg_time_step) +
     arg_ego->slip_point.x;
-  rtb_Merge_l = rtb_Gain_di * std::sin(rtb_Merge_f) *
-    mpc_tgt_calc_P.Gain4_Gain_o * static_cast<real32_T>(arg_time_step) +
-    arg_ego->slip_point.y;
-  rtb_Product_g = rtb_Gain_di * std::cos(rtb_Merge1_o) *
+  rtb_Merge_l = rtb_Add1_c * std::sin(rtb_Merge_f) * mpc_tgt_calc_P.Gain4_Gain_o
+    * static_cast<real32_T>(arg_time_step) + arg_ego->slip_point.y;
+  rtb_Product_g = rtb_Add1_c * std::cos(rtb_Merge1_o) *
     mpc_tgt_calc_P.Gain1_Gain_cq * static_cast<real32_T>(arg_time_step) +
     arg_ego->ideal_point.x;
-  rtb_Merge_p5 = rtb_Gain_di * std::sin(rtb_Merge1_o) *
+  rtb_Merge_p5 = rtb_Add1_c * std::sin(rtb_Merge1_o) *
     mpc_tgt_calc_P.Gain2_Gain_c * static_cast<real32_T>(arg_time_step) +
     arg_ego->ideal_point.y;
   if (Merge_k > 0.0F) {
@@ -471,16 +470,15 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
   if (arg_mode == 1) {
     real32_T rtb_Add3;
     real32_T rtb_Gain1_mg;
-    rtb_Gain_di = mpc_tgt_calc_P.Gain_Gain_p * static_cast<real32_T>
-      (arg_time_step);
-    Merge_k = (mpc_tgt_calc_P.Constant_Value_o / arg_tgt->mass + rtb_Add_d *
-               arg_ego->slip.vy) * rtb_Gain_di + arg_ego->slip.vx;
+    Merge_k = mpc_tgt_calc_P.Gain_Gain_p * static_cast<real32_T>(arg_time_step);
+    rtb_Add1_c = (mpc_tgt_calc_P.Constant_Value_o / arg_tgt->mass + rtb_Add_d *
+                  arg_ego->slip.vy) * Merge_k + arg_ego->slip.vx;
     rtb_Add3 = (mpc_tgt_calc_P.Gain3_Gain_d * arg_tgt->slip_gain_K1 *
                 arg_ego->slip.beta / arg_tgt->mass - rtb_Add_d *
-                arg_ego->slip.vx) * rtb_Gain_di + arg_ego->slip.vy;
-    rtb_Gain1_mg = std::sqrt(Merge_k * Merge_k + rtb_Add3 * rtb_Add3);
-    arg_next_ego->slip.beta = (arg_ego->slip.beta / rtb_Gain_di - rtb_Add_d) /
-      (mpc_tgt_calc_P.Constant1_Value_i / rtb_Gain_di + arg_tgt->slip_gain_K2 /
+                arg_ego->slip.vx) * Merge_k + arg_ego->slip.vy;
+    rtb_Gain1_mg = std::sqrt(rtb_Add1_c * rtb_Add1_c + rtb_Add3 * rtb_Add3);
+    arg_next_ego->slip.beta = (arg_ego->slip.beta / Merge_k - rtb_Add_d) /
+      (mpc_tgt_calc_P.Constant1_Value_i / Merge_k + arg_tgt->slip_gain_K2 /
        rtb_Gain1_mg);
     arg_next_ego->slip.v = rtb_Gain1_mg;
     rtb_Gain1_mg *= mpc_tgt_calc_P.Gain1_Gain_o;
@@ -521,13 +519,14 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
       static_cast<real32_T>(arg_time_step);
     arg_next_ego->cnt_delay_accl_ratio = rtb_Add_nd;
     arg_next_ego->cnt_delay_decel_ratio = rtb_Abs6;
-    arg_next_ego->slip.vx = Merge_k;
+    arg_next_ego->slip.vx = rtb_Add1_c;
     arg_next_ego->slip.vy = rtb_Add3;
     arg_next_ego->slip.accl = arg_ego->slip.accl;
     arg_next_ego->v = rtb_Gain1_mg;
-    arg_next_ego->accl = (rtb_Gain1_mg - arg_ego->v) / rtb_Gain_di;
+    arg_next_ego->accl = (rtb_Gain1_mg - arg_ego->v) / Merge_k;
   } else {
-    Merge_k = mpc_tgt_calc_P.Gain_Gain_h * rtb_Gain_di;
+    arg_next_ego->v = rtb_Add1_c;
+    arg_next_ego->accl = Merge_k;
     arg_next_ego->w = rtb_Add_d;
     arg_next_ego->alpha = rtb_Gain2_p;
     arg_next_ego->dist = rtb_Abs7;
@@ -566,12 +565,10 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
     arg_next_ego->cnt_delay_accl_ratio = rtb_Add_nd;
     arg_next_ego->cnt_delay_decel_ratio = rtb_Abs6;
     arg_next_ego->slip.beta = mpc_tgt_calc_P.Constant_Value_nu;
-    arg_next_ego->slip.vx = mpc_tgt_calc_P.Gain1_Gain_i * rtb_Gain_di;
+    arg_next_ego->slip.vx = mpc_tgt_calc_P.Gain1_Gain_i * rtb_Add1_c;
     arg_next_ego->slip.vy = mpc_tgt_calc_P.Constant_Value_nu;
-    arg_next_ego->slip.v = Merge_k;
+    arg_next_ego->slip.v = mpc_tgt_calc_P.Gain_Gain_h * rtb_Add1_c;
     arg_next_ego->slip.accl = arg_ego->slip.accl;
-    arg_next_ego->v = Merge_k;
-    arg_next_ego->accl = arg_ego->slip.accl;
   }
 }
 

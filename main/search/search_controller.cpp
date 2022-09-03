@@ -536,7 +536,9 @@ SearchResult SearchController::exec(param_set_t &p_set, SearchMode sm) {
       break;
     vTaskDelay(10 / portTICK_RATE_MS);
   }
-  lt->dump_log(slalom_log_file);
+  if (param->search_log_enable > 0) {
+    lt->dump_log(slalom_log_file);
+  }
   if (mr == MotionResult::ERROR) {
     return SearchResult::FAIL;
   }
