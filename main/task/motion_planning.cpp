@@ -46,7 +46,7 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p,
   const auto ego_v = tgt_val->ego_in.v;
   const auto req_dist = ABS((ego_v * ego_v - p.v_end * p.v_end) / (2 * p.accl));
   if (req_dist > p.dist) {
-    p.accl = (ego_v * ego_v - p.v_end * p.v_end) / (2 * p.dist) + 100;
+    p.accl = ABS((ego_v * ego_v - p.v_end * p.v_end) / (2 * p.dist)) + 1000;
   }
 
   tgt_val->nmr.sct = p.sct;
@@ -152,6 +152,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   if (adachi != nullptr) {
     ps_front.dist -= adachi->diff;
   }
+  ps_front.skil_wall_off = next_motion.skip_wall_off;
   ps_front.motion_type = MotionType::SLA_FRONT_STR;
   ps_front.sct = SensorCtrlType::Straight;
   if (sp.type == TurnType::Dia45_2 || sp.type == TurnType::Dia135_2 ||
@@ -612,6 +613,7 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
   ego.dir = Direction::North;
   dia = false;
   bool fast_mode = false;
+  bool start_turn = false;
 
   // default straight parma
   ps.v_max = p_set.str_map[StraightType::FastRun].v_max;
@@ -638,6 +640,7 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
     float dist = 0.5 * pc->path_s[i] - 1;
     auto turn_dir = tc.get_turn_dir(pc->path_t[i]);
     auto turn_type = tc.get_turn_type(pc->path_t[i], dia);
+    start_turn = false;
     if (dist > 0) {
       fast_mode = true;
     }
@@ -662,11 +665,12 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
                        ? p_set.map_slow[turn_type].front.left
                        : p_set.map_slow[turn_type].front.right;
           }
+          start_turn = true;
         }
         ps.dist += param->offset_start_dist; // 初期加速距離を加算
         auto tmp_v2 = 2 * ps.accl * ps.dist;
         if (ps.v_end * ps.v_end > tmp_v2) {
-          ps.accl = (ps.v_end * ps.v_end) / (2 * ps.dist) + 100;
+          ps.accl = (ps.v_end * ps.v_end) / (2 * ps.dist) + 1000;
           ps.decel = -ps.accl;
         }
       }
@@ -704,6 +708,7 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
       nm.accl = p_set.str_map[st].accl;
       nm.decel = p_set.str_map[st].decel;
       nm.is_turn = false;
+      nm.skip_wall_off = start_turn;
 
       if (exist_next_idx && !(dist3 > 0 && dist4 > 0)) {
         //連続スラロームのとき、次のスラロームの速度になるように加速
@@ -771,6 +776,9 @@ MotionResult MotionPlanning::wall_off(param_straight_t &p, bool dia) {
 }
 
 void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
+  if (ps_front.skil_wall_off) {
+    // return;
+  }
   tgt_val->nmr.v_max = ps_front.v_max;
   tgt_val->nmr.v_end = ps_front.v_end;
   tgt_val->nmr.accl = ps_front.accl;

@@ -43,7 +43,7 @@ public:
 
   PathCreator(/* args */);
   ~PathCreator();
-  void path_create(bool is_search);
+  bool path_create(bool is_search);
   void path_reflash();
   void convert_large_path(bool b1);
   void diagonalPath(bool isFull, bool a1);

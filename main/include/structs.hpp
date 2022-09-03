@@ -330,7 +330,7 @@ typedef struct {
 
   float slip_param_K = 0;
   float slip_param_k2 = 0;
-  
+
   fail_check_cnt_t fail_check;
 
 } input_param_t;
@@ -453,6 +453,7 @@ typedef struct {
   float wall_off_dist_r = 0;
   float wall_off_dist_l = 0;
   bool dia_mode = false;
+  bool skil_wall_off = false;
 } param_straight_t;
 
 typedef struct {
@@ -559,6 +560,7 @@ typedef struct {
   float v_end = 0;
   float accl = 0;
   float decel = 0;
+  bool skip_wall_off = false;
 } next_motion_t;
 
 typedef struct {

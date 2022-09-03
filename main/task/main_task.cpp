@@ -1855,7 +1855,11 @@ void MainTask::read_maze_data() {
 }
 
 void MainTask::path_run(int idx, int idx2) {
-  pc->path_create(false);
+  const bool res = pc->path_create(false);
+  if (!res) {
+    ui->error();
+    return;
+  }
   pc->convert_large_path(true);
   pc->diagonalPath(true, true);
   pc->print_path();

@@ -100,7 +100,7 @@ void PathCreator::priorityStraight2(int x, int y, Direction now_dir,
     dist_val = dist;
   }
 }
-void PathCreator::path_create(bool is_search) {
+bool PathCreator::path_create(bool is_search) {
   Direction next_dir = Direction::North;
   Direction now_dir = next_dir;
   unsigned int idx = 0;
@@ -133,7 +133,7 @@ void PathCreator::path_create(bool is_search) {
       path_t.emplace_back(255);
       // path_t.emplace_back(0);
       path_size = idx;
-      return;
+      return true;
     }
 
     setNextRootDirectionPath(x, y, now_dir, Direction::North, dist_val,
@@ -169,6 +169,7 @@ void PathCreator::path_create(bool is_search) {
     next_dir = get_next_pos(x, y, now_dir, next_dir);
   }
   path_size = idx;
+  return false;
 }
 
 void PathCreator::convert_large_path(bool b1) {
