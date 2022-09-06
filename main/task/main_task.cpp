@@ -1322,7 +1322,7 @@ void MainTask::test_sla() {
 
   if (sys.test.suction_active) {
     pt->suction_enable(sys.test.suction_duty);
-    vTaskDelay(xDelay500);
+    vTaskDelay(xDelay1000);
   }
 
   reset_tgt_data();
@@ -1376,12 +1376,20 @@ void MainTask::test_sla() {
       ps.dist = 45 * ROOT2;
     }
   }
-  if (sys.test.ignore_opp_sen == 1) {
+  if (sys.test.ignore_opp_sen > 0) {
+    ps.v_max = sys.test.v_max;
     ps.dist = sys.test.dist;
+  }
+  ps.sct = SensorCtrlType::NONE;
+  if (static_cast<TurnType>(sys.test.sla_type) == TurnType::Dia45 ||
+      static_cast<TurnType>(sys.test.sla_type) == TurnType::Dia135) {
+    if (sys.test.ignore_opp_sen == 2) {
+      ps.sct = SensorCtrlType::Dia;
+    }
   }
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
-  ps.sct = SensorCtrlType::NONE;
+
   mp->go_straight(ps);
 
   vTaskDelay(100 / portTICK_RATE_MS);
@@ -1438,7 +1446,7 @@ void MainTask::test_search_sla() {
 
   if (sys.test.suction_active) {
     pt->suction_enable(sys.test.suction_duty);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
+    vTaskDelay(xDelay1000);
   }
 
   reset_tgt_data();
@@ -1552,7 +1560,7 @@ void MainTask::test_front_wall_offset() {
 
   if (sys.test.suction_active) {
     pt->suction_enable(sys.test.suction_duty);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
+    vTaskDelay(xDelay1000);
   }
 
   reset_tgt_data();

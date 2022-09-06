@@ -426,6 +426,13 @@ typedef struct {
 } pos_t;
 
 typedef struct {
+  float right_old;
+  float left_old;
+  float right_save;
+  float left_save;
+} dia_state_t;
+
+typedef struct {
   t_tgt tgt_in;
   t_ego ego_in;
   global_ego_pos_t global_pos;
@@ -439,6 +446,7 @@ typedef struct {
   buzzer_t buzzer;
   new_motion_req_t nmr;
   pos_t p;
+  dia_state_t dia_state;
 } motion_tgt_val_t;
 
 typedef struct {

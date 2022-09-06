@@ -446,6 +446,10 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   //  : SensorCtrlType::Dia;
   MotionResult res_b = MotionResult::NONE;
   if (ps_back.dist > 0) {
+    const auto ego_v = tgt_val->ego_in.v;
+    ps_back.accl = ABS((ego_v * ego_v - ps_back.v_end * ps_back.v_end) /
+                       (2 * ps_back.dist)) +
+                   1000;
     res_b = go_straight(ps_back);
     if (res_b != MotionResult::NONE) {
       return MotionResult::ERROR;
@@ -627,7 +631,7 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
 
   if (p_set.suction) {
     pt->suction_enable(p_set.suction_duty);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
   if (param->fast_log_enable > 0)
     lt->start_slalom_log();

@@ -397,7 +397,17 @@ float PlanningTask::check_sen_error_dia() {
             param_ro->sen_ref_p.dia.exist.right90) {
       error += param_ro->sen_ref_p.dia.ref.right90 -
                sensing_result->ego.right90_dist;
+
+      tgt_val->dia_state.right_old = param_ro->sen_ref_p.dia.ref.right90 -
+                                     sensing_result->ego.right90_dist;
+      tgt_val->dia_state.right_save = true;
+
       check++;
+    } else {
+      if (tgt_val->dia_state.right_save) {
+        error += tgt_val->dia_state.right_old;
+        check++;
+      }
     }
     // }
     // if (ABS(sensing_result->ego.left90_dist -
@@ -408,7 +418,15 @@ float PlanningTask::check_sen_error_dia() {
             param_ro->sen_ref_p.dia.exist.left90) {
       error -=
           param_ro->sen_ref_p.dia.ref.left90 - sensing_result->ego.left90_dist;
+      tgt_val->dia_state.left_old =
+          param_ro->sen_ref_p.dia.ref.left90 - sensing_result->ego.left90_dist;
+      tgt_val->dia_state.left_save = true;
       check++;
+    } else {
+      if (tgt_val->dia_state.left_save) {
+        error -= tgt_val->dia_state.left_old;
+        check++;
+      }
     }
   }
   // }
@@ -421,7 +439,7 @@ float PlanningTask::check_sen_error_dia() {
     if (tgt_val->tgt_in.tgt_dist >= param_ro->clear_dist_order) {
       if ((ABS(tgt_val->ego_in.ang - tgt_val->ego_in.img_ang) * 180 / PI) <
           param_ro->clear_angle) {
-        tgt_val->global_pos.ang = tgt_val->global_pos.img_ang;
+        // tgt_val->global_pos.ang = tgt_val->global_pos.img_ang;
         // error_entity.w.error_i = 0;
         // error_entity.w.error_d = 0;
         // error_entity.ang.error_i = 0;
@@ -714,9 +732,7 @@ float PlanningTask::get_rpm_ff_val(TurnDirection td) {
          (tgt_val->ego_in.v - param_ro->tread / 2 * tgt_val->ego_in.w) /
          (param_ro->tire / 2) * 30.0 / PI;
 }
-float PlanningTask::satuate_sen_duty(float duty_sen) {
-  return duty_sen;
-}
+float PlanningTask::satuate_sen_duty(float duty_sen) { return duty_sen; }
 void PlanningTask::calc_tgt_duty() {
 
   float duty_sen = 0;
@@ -1029,14 +1045,14 @@ void PlanningTask::cp_tgt_val() {
 void PlanningTask::check_fail_safe() {
   bool no_problem = true;
   if (motor_en) {
-    if (ABS(sensing_result->ego.duty.duty_r) > 100) {
-      fail_safe.invalid_duty_r_cnt++;
-      no_problem = false;
-    }
-    if (ABS(sensing_result->ego.duty.duty_l) > 100) {
-      fail_safe.invalid_duty_l_cnt++;
-      no_problem = false;
-    }
+    // if (ABS(sensing_result->ego.duty.duty_r) > 100) {
+    //   fail_safe.invalid_duty_r_cnt++;
+    //   no_problem = false;
+    // }
+    // if (ABS(sensing_result->ego.duty.duty_l) > 100) {
+    //   fail_safe.invalid_duty_l_cnt++;
+    //   no_problem = false;
+    // }
 
     if (ABS(tgt_val->ego_in.v - sensing_result->ego.v_c) > 50) {
       fail_safe.invalid_v_cnt++;
@@ -1095,6 +1111,9 @@ void PlanningTask::cp_request() {
 
   tgt_val->ego_in.state = 0;
   tgt_val->ego_in.pivot_state = 0;
+
+  tgt_val->dia_state.left_save = tgt_val->dia_state.right_save = false;
+  tgt_val->dia_state.left_old = tgt_val->dia_state.right_old = 0;
 
   if (!(tgt_val->motion_type == MotionType::NONE ||
         tgt_val->motion_type == MotionType::STRAIGHT ||

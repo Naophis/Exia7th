@@ -7,6 +7,9 @@ max_duty: 99.9
 FF_front: 1
 FF_roll: 1
 FF_keV: 1
+# FF_front: 0
+# FF_roll: 0
+# FF_keV: 0
 
 Ke: 0.00305
 Km: 0.0005
@@ -108,9 +111,10 @@ cell2: 90
 motor_pid:
   # p: 0.0005
   # i: 0.00125
-  p: 0.00275
-  i: 0.00275
-  d: 0.0
+  p: 0.003125
+  # i: 0.003125
+  i: 0.0020
+  d: 0.001
   mode: 1
   # p: 0.0
   # i: 0.0
@@ -124,10 +128,9 @@ dist_pid:
   # i: 0.0
   # d: 0.0
 gyro_pid:
-  # p: 0.225
   p: 0.175
   i: 0.025
-  d: 0.0
+  d: 0.01
   # p: 0.025
   # i: 0.0065
   # d: 0.0
@@ -136,9 +139,9 @@ gyro_pid:
   # i: 0.0
   # d: 0
 angle_pid:
-  p: 1.5
+  p: 1.75
   i: 0.0
-  d: 0.25
+  d: 0.35
   # p: 0.0
   # i: 0.05
   # d: 40.5
@@ -155,7 +158,8 @@ sensor_pid:
   # i: 0.0
   # d: 0.0
 sensor_pid_dia:
-  p: 0.0125
+  # p: 0.075
+  p: 0.025
   i: 0.0
   d: 0.0
   mode: 1
@@ -163,8 +167,8 @@ sensor_pid_dia:
   # i: 0.0
   # d: 0.0
 gyro_param:
-  gyro_w_gain_right: 0.00106095
-  gyro_w_gain_left: 0.00106095
+  gyro_w_gain_right: 0.001061
+  gyro_w_gain_left: 0.0010612
   lp_delay: 1
 battery_param:
   lp_delay: 0.25

@@ -90,6 +90,12 @@ void SearchController::front_wall_ctrl() {
 MotionResult SearchController::pivot(param_set_t &p_set, float diff) {
   // param_straight_t p;
   MotionResult res;
+
+  bool left_exist =
+      sensing_result->ego.left45_dist < param->sen_ref_p.search_exist.left90;
+  bool right_exist =
+      sensing_result->ego.right45_dist < param->sen_ref_p.search_exist.right90;
+
   p.v_max = p_set.str_map[StraightType::Search].v_max;
   p.v_end = 20;
   p.accl = p_set.str_map[StraightType::Search].accl;
@@ -131,11 +137,6 @@ MotionResult SearchController::pivot(param_set_t &p_set, float diff) {
   pr.w_max = p_set.str_map[StraightType::Search].w_max;
   pr.alpha = p_set.str_map[StraightType::Search].alpha;
   pr.w_end = p_set.str_map[StraightType::Search].w_end;
-
-  bool left_exist =
-      sensing_result->ego.left45_dist < param->sen_ref_p.search_exist.left90;
-  bool right_exist =
-      sensing_result->ego.right45_dist < param->sen_ref_p.search_exist.right90;
 
   flag = (left_exist || right_exist);
   pr.ang = (flag) ? PI / 2 : PI;
