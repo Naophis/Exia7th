@@ -90,10 +90,21 @@ void ICM20689::setup() {
   vTaskDelay(10 / portTICK_PERIOD_MS);
   write1byte(0x1B, 0x18); // 2000
   vTaskDelay(10 / portTICK_PERIOD_MS);
+  // write1byte(0x1C, 0x08); // 4g
+  // write1byte(0x1C, 0x10); // 8g
+  // write1byte(0x1C, 0x18); // 16g
+  // vTaskDelay(10 / portTICK_PERIOD_MS);
+  // write1byte(0x1D, 0x00); // 4kHz
+  // vTaskDelay(10 / portTICK_PERIOD_MS);
 }
 int ICM20689::read_gyro_z() {
   return read2byte(0x47);
-  // return (signed short)(read1byte(0x47) << 8 | read1byte(0x48));
+}
+int ICM20689::read_accel_x() {
+  return read2byte(0x3B);
+}
+int ICM20689::read_accel_y() {
+  return read2byte(0x3D);
 }
 void ICM20689::req_read1byte_itr(const uint8_t address) {
   memset(&itr_t, 0, sizeof(itr_t)); // Zero out the transaction

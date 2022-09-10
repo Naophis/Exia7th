@@ -45,6 +45,8 @@ void LoggingTask::task() {
         ld->v_c = floatToHalf(sensing_result->ego.v_c);
         ld->v_r = floatToHalf(sensing_result->ego.v_r);
         ld->accl = floatToHalf(tgt_val->ego_in.accl);
+        ld->accl_x = floatToHalf(sensing_result->ego.accel_x_raw);
+        ld->v_main = floatToHalf(sensing_result->ego.main_v);
 
         ld->img_w = floatToHalf(tgt_val->ego_in.w);
         ld->w_lp = floatToHalf(sensing_result->ego.w_lp);
@@ -119,13 +121,15 @@ void LoggingTask::save(std::string file_name) {
 
   for (const auto ld : log_vec) {
 
-    fprintf(f_slalom_log, f1,       //
-            i++,                    //
-            halfToFloat(ld->img_v), //
-            halfToFloat(ld->v_c),   //
-            halfToFloat(ld->v_l),   //
-            halfToFloat(ld->v_r),   //
-            halfToFloat(ld->accl)); // 6
+    fprintf(f_slalom_log, f1,         //
+            i++,                      //
+            halfToFloat(ld->img_v),   //
+            halfToFloat(ld->v_c),     //
+            halfToFloat(ld->v_l),     //
+            halfToFloat(ld->v_r),     //
+            halfToFloat(ld->v_main),  //
+            halfToFloat(ld->accl),    //
+            halfToFloat(ld->accl_x)); // 8
 
     fprintf(f_slalom_log, f2,          //
             halfToFloat(ld->img_w),    //
@@ -190,7 +194,9 @@ void LoggingTask::dump_log(std::string file_name) {
   char line_buf[LINE_BUF_SIZE];
   printf("start___\n"); // csvファイル作成トリガー
   vTaskDelay(xDelay2);
-  printf("index,ideal_v,v_c,v_l,v_r,accl,ideal_w,w_lp,alpha,ideal_dist,dist,"
+  printf("index,ideal_v,v_c,v_l,v_r,v_main,accl,accl_x,ideal_w,w_lp,alpha,"
+         "ideal_dist,"
+         "dist,"
          "ideal_ang,ang,left90,left45,front,right45,right90,left90_d,left45_d,"
          "front_d,right45_d,right90_d,battery,duty_l,"
          "duty_r,motion_state,ff_duty_front,ff_duty_roll,duty_sen,dist_mod90,"

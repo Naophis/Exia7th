@@ -71,4 +71,11 @@ enum class WallOffReq : int {
   FAST_RUN = 2,
 };
 
+enum class WallCtrlMode : int {
+  NONE = 0,
+  LEFT_ONLY = 1,
+  RIGHT_ONLY = 2,
+  BOTH = 3,
+};
+
 #endif

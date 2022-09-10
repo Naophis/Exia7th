@@ -1,7 +1,7 @@
 
 #include "include/planning_task.hpp"
 
-constexpr int MOTOR_HZ = 250000;
+constexpr int MOTOR_HZ = 200000;
 constexpr int SUCTION_MOTOR_HZ = 10000;
 PlanningTask::PlanningTask() {}
 
@@ -146,6 +146,14 @@ void PlanningTask::buzzer(ledc_channel_config_t &buzzer_ch,
   ledc_set_duty(buzzer_ch.speed_mode, buzzer_ch.channel, duty);
   ledc_update_duty(buzzer_ch.speed_mode, buzzer_ch.channel);
 }
+void PlanningTask::calc_filter() {
+  enc_v_q.push_back(sensing_result->ego.v_c);
+  sum_v += sensing_result->ego.v_c;
+  if (enc_v_q.size() > param_ro->comp_param.accl_x_hp_gain) {
+    sum_v -= enc_v_q.front();
+    enc_v_q.pop_front();
+  }
+}
 void PlanningTask::task() {
   const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
   init_gpio();
@@ -192,6 +200,8 @@ void PlanningTask::task() {
   set_next_duty(0, 0, 0);
   gpio_set_level(SUCTION_PWM, 0);
   mpc_tgt_calc.initialize();
+  enc_v_q.clear();
+  accl_x_q.clear();
 
   while (1) {
     // 自己位置更新
@@ -345,7 +355,6 @@ float PlanningTask::check_sen_error() {
       }
       error *= param_ro->sen_ref_p.normal2.exist.front;
     }
-
   } else {
     // TODO Uターン字は別ロジックに修正
     if (tgt_val->tgt_in.tgt_dist >= param_ro->clear_dist_order) {
@@ -468,7 +477,6 @@ float PlanningTask::check_sen_error_dia() {
 void PlanningTask::update_ego_motion() {
   const float dt = param_ro->dt;
   const float tire = param_ro->tire;
-
   if (!motor_en) {
     tgt_val->ego_in.v = 0;
     tgt_val->ego_in.w = 0;
@@ -482,13 +490,12 @@ void PlanningTask::update_ego_motion() {
   sensing_result->ego.v_c =
       (sensing_result->ego.v_l + sensing_result->ego.v_r) / 2;
 
+  // calc_filter();
+
   sensing_result->ego.rpm.right =
       30.0 * sensing_result->ego.v_r / (PI * tire / 2);
   sensing_result->ego.rpm.left =
       30.0 * sensing_result->ego.v_l / (PI * tire / 2);
-
-  tgt_val->ego_in.dist += sensing_result->ego.v_c * dt;
-  tgt_val->global_pos.dist += sensing_result->ego.v_c * dt;
 
   if (GY_MODE) {
     sensing_result->gyro.data = 0;
@@ -519,6 +526,35 @@ void PlanningTask::update_ego_motion() {
           (sensing_result->gyro.raw - tgt_val->gyro_zero_p_offset);
     }
   }
+  sensing_result->ego.accel_x_raw =
+      param_ro->accel_x_param.gain *
+      (sensing_result->accel_x.raw - tgt_val->accel_x_zero_p_offset);
+
+  if (param_ro->comp_param.enable == 1) {
+    sensing_result->ego.v_lp =
+        (1 - param_ro->comp_param.v_lp_gain) * sensing_result->ego.v_c +
+        param_ro->comp_param.v_lp_gain * sensing_result->ego.v_lp;
+  } else if (param_ro->comp_param.enable == 2) {
+    sensing_result->ego.v_lp =
+        (1 - param_ro->comp_param.v_lp_gain) * sum_v / enc_v_q.size() +
+        param_ro->comp_param.v_lp_gain * sensing_result->ego.v_lp;
+    // printf("%f, %f %f %d\n", sensing_result->ego.v_lp,
+    // sensing_result->ego.v_c,
+    //        sum_v, enc_v_q.size());
+  }
+
+  sensing_result->ego.main_v = sum_v / enc_v_q.size();
+  // param_ro->comp_param.gain *
+  //     (sensing_result->ego.main_v + sensing_result->ego.accel_x_raw * dt) +
+  // (1 - param_ro->comp_param.gain) * sensing_result->ego.v_lp;
+
+  // if (param_ro->comp_param.enable == 0) {
+  // } else {
+  //   tgt_val->ego_in.dist += sensing_result->ego.main_v * dt;
+  //   tgt_val->global_pos.dist += sensing_result->ego.main_v * dt;
+  // }
+  tgt_val->ego_in.dist += sensing_result->ego.v_c * dt;
+  tgt_val->global_pos.dist += sensing_result->ego.v_c * dt;
 
   sensing_result->ego.w_lp =
       sensing_result->ego.w_lp * (1 - param_ro->gyro_param.lp_delay) +
@@ -762,7 +798,11 @@ void PlanningTask::calc_tgt_duty() {
   error_entity.w.error_d = error_entity.w.error_p;
   error_entity.ang.error_d = error_entity.ang.error_p;
 
-  error_entity.v.error_p = tgt_val->ego_in.v - sensing_result->ego.v_c;
+  if (param_ro->comp_param.enable == 0) {
+    error_entity.v.error_p = tgt_val->ego_in.v - sensing_result->ego.v_c;
+  } else {
+    error_entity.v.error_p = tgt_val->ego_in.v - sensing_result->ego.main_v;
+  }
   error_entity.w.error_p = tgt_val->ego_in.w - sensing_result->ego.w_lp;
 
   // tgt_val->global_pos.img_ang += mpc_next_ego.w;
@@ -1054,16 +1094,38 @@ void PlanningTask::check_fail_safe() {
     //   no_problem = false;
     // }
 
-    if (ABS(tgt_val->ego_in.v - sensing_result->ego.v_c) > 50) {
+    if (ABS(tgt_val->ego_in.v - sensing_result->ego.v_c) > 200) {
       fail_safe.invalid_v_cnt++;
       no_problem = false;
     }
-    if (ABS(tgt_val->ego_in.w - sensing_result->ego.w_lp) > 5) {
+    // if (ABS(tgt_val->ego_in.w - sensing_result->ego.w_lp) > 10) {
+    //   fail_safe.invalid_w_cnt++;
+    //   no_problem = false;
+    // }
+
+    if (ABS((tgt_val->ego_in.img_ang - tgt_val->ego_in.ang) * 180 / PI) > 10) {
       fail_safe.invalid_w_cnt++;
       no_problem = false;
     }
-  }
 
+    if (tgt_val->motion_type == MotionType::STRAIGHT ||
+        tgt_val->motion_type == MotionType::SLA_FRONT_STR ||
+        tgt_val->motion_type == MotionType::BACK_STRAIGHT ||
+        tgt_val->motion_type == MotionType::WALL_OFF ||
+        tgt_val->motion_type == MotionType::WALL_OFF_DIA ||
+        tgt_val->motion_type == MotionType::SLA_BACK_STR)
+    {
+      if (tgt_val->ego_in.v > 100) {
+        if (10 < sensing_result->ego.left90_dist &&
+            sensing_result->ego.left90_dist < 45 &&
+            10 < sensing_result->ego.right90_dist &&
+            sensing_result->ego.right90_dist < 45) {
+          fail_safe.invalid_front_led++;
+          no_problem = false;
+        }
+      }
+    }
+  }
   if (no_problem) {
     fail_safe.invalid_duty_r_cnt = 0;
     fail_safe.invalid_duty_l_cnt = 0;
@@ -1071,10 +1133,24 @@ void PlanningTask::check_fail_safe() {
     fail_safe.invalid_w_cnt = 0;
     tgt_val->fss.error = 0;
   } else {
-    if (ABS(fail_safe.invalid_duty_r_cnt) > param_ro->fail_check.duty ||
-        ABS(fail_safe.invalid_duty_l_cnt) > param_ro->fail_check.duty ||
-        ABS(fail_safe.invalid_v_cnt) > param_ro->fail_check.v ||
-        ABS(fail_safe.invalid_w_cnt) > param_ro->fail_check.w) {
+    bool error = false;
+
+    // if (ABS(fail_safe.invalid_front_led) > param_ro->fail_check.duty) {
+    //   error = true;
+    // }
+    // if (ABS(fail_safe.invalid_duty_r_cnt) > param_ro->fail_check.duty) {
+    //   error = true;
+    // }
+    // if (ABS(fail_safe.invalid_duty_l_cnt) > param_ro->fail_check.duty) {
+    //   error = true;
+    // }
+    if (ABS(fail_safe.invalid_v_cnt) > param_ro->fail_check.v) {
+      error = true;
+    }
+    if (ABS(fail_safe.invalid_w_cnt) > param_ro->fail_check.w) {
+      error = true;
+    }
+    if (error) {
       tgt_val->fss.error = 1;
     }
   }

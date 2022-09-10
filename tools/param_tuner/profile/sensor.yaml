@@ -1,6 +1,6 @@
 normal:
   ref:
-    right45: 46.5
+    right45: 44.0
     left45: 44.0
     front: 47
     kireme_r: 0.50
@@ -50,11 +50,12 @@ search:
     right90: 58
     left90: 58
 
-    kireme_r: 1.50 #切れ目しきい値 R
+    # kireme_r: 1.5 #前壁補正：角度
+    kireme_r: 0.45 #前壁補正：角度
     kireme_l: 1.0 #切れ目しきい値 L
 
     offset_r: 25 #前壁制御　左右値差　しきい値
-    offset_l: 40 #前壁制御　duty max値
+    offset_l: 30 #前壁制御　duty max値
 
     front_ctrl_th: 200
     front_ctrl: 48

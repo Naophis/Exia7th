@@ -70,8 +70,20 @@ typedef struct {
   float v_r = 0;
   float v_l = 0;
   float v_c = 0;
+
+  float main_v = 0;
+
   float w_raw = 0;
   float w_lp = 0;
+  float accel_x_raw = 0;
+
+  float v_ave = 0;
+  float v_lp = 0;
+  float integrate_accl_x_ave = 0;
+
+  float sum_v_ave = 0;
+  float sum_integrate_accl_x_ave = 0;
+
   float w_kalman = 0;
   float ang_kalman = 0;
   float battery_raw = 0;
@@ -143,6 +155,8 @@ typedef struct {
   led_sensor_t led_sen_after;
   led_sensor_t led_sen_before;
   sensing_data_t gyro;
+  sensing_data_t accel_x;
+  sensing_data_t accel_y;
   int gyro_list[4];
   sensing_data_t battery;
   encoder_data_t encoder_raw;
@@ -170,6 +184,10 @@ typedef struct {
   float gyro_w_gain_left = 0;
   float lp_delay = 0;
 } gyro_param_t;
+
+typedef struct {
+  float gain = 0;
+} accel_param_t;
 
 typedef struct {
   float lp_delay = 0;
@@ -253,6 +271,13 @@ typedef struct {
 } fail_check_cnt_t;
 
 typedef struct {
+  float v_lp_gain = 0;
+  float accl_x_hp_gain = 0;
+  float gain = 0;
+  int enable = 0;
+} comp_param_t;
+
+typedef struct {
   float dt = 0.001;
   float tire = 12;
   int log_size = 1300;
@@ -281,6 +306,8 @@ typedef struct {
   pid_param_t sensor_pid;
   pid_param_t sensor_pid_dia;
   gyro_param_t gyro_param;
+  accel_param_t accel_x_param;
+  comp_param_t comp_param;
   sen_param_t battery_param;
   sen_param_t led_param;
   MotionDirection motion_dir;
@@ -443,6 +470,8 @@ typedef struct {
   planning_req_t pl_req;
   fail_safe_state_t fss;
   float gyro_zero_p_offset = 0;
+  float accel_x_zero_p_offset = 0;
+  float accel_y_zero_p_offset = 0;
   buzzer_t buzzer;
   new_motion_req_t nmr;
   pos_t p;
@@ -458,6 +487,7 @@ typedef struct {
   MotionType motion_type = MotionType::NONE;
   SensorCtrlType sct = SensorCtrlType::NONE;
   WallOffReq wall_off_req = WallOffReq::NONE;
+  WallCtrlMode wall_ctrl_mode = WallCtrlMode::NONE;
   float wall_off_dist_r = 0;
   float wall_off_dist_l = 0;
   bool dia_mode = false;
@@ -628,7 +658,9 @@ typedef struct {
   real16_T v_l;
   real16_T v_c;
   real16_T v_r;
+  real16_T v_main;
   real16_T accl;
+  real16_T accl_x;
   real16_T img_w;
   real16_T w_lp;
   real16_T alpha;
@@ -659,6 +691,7 @@ typedef struct {
 } log_data_t2;
 
 typedef struct {
+  int invalid_front_led;
   int invalid_duty_r_cnt;
   int invalid_duty_l_cnt;
   int invalid_v_cnt;

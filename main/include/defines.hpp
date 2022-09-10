@@ -91,7 +91,7 @@ constexpr uint16_t MOTION_CHECK_TH = 1000;
 constexpr uint16_t ENC_OPE_V_R_TH = 175;
 
 constexpr uint16_t LOG_SIZE = 1300;
-constexpr uint16_t LINE_BUF_SIZE = 256;
+constexpr uint16_t LINE_BUF_SIZE = 312;
 constexpr float BATTERY_GAIN = 2.97324;
 
 constexpr uint8_t LEDC_HIGH_SPEED_MODE = 0;
@@ -124,7 +124,8 @@ static const std::string maze_log_file("/spiflash/maze.log");
 static const std::string maze_log_kata_file("/spiflash/maze_kata.log");
 static const std::string maze_log_return_file("/spiflash/maze_return.log");
 
-static const std::string format1("%d,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
+static const std::string
+    format1("%d,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
 static const std::string format2("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
 static const std::string format3(
     "%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,"

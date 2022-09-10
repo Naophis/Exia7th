@@ -167,9 +167,9 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   if (sp.type == TurnType::Normal) {
     // search_front_ctrl(ps_front); // 前壁制御
     if (40 < sensing_result->ego.left90_dist &&
-        sensing_result->ego.left90_dist < 130 &&
+        sensing_result->ego.left90_dist < 110 &&
         40 < sensing_result->ego.right90_dist &&
-        sensing_result->ego.right90_dist < 130) {
+        sensing_result->ego.right90_dist < 110) {
       ps_front.dist +=
           (sensing_result->ego.front_dist - param->front_dist_offset);
     }
@@ -247,30 +247,31 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
     // float default_rad = sp.rad;
     float rad_r = sp.rad;
     float rad_l = sp.rad;
+    const auto orval_gain = 2;
     if (td == TurnDirection::Right) {
       if (sensing_result->ego.right45_dist < th_offset_dist) {
         float rad2 =
-            (sensing_result->ego.right45_dist - param->sla_wall_ref_r) / 2;
+            (sensing_result->ego.right45_dist - param->sla_wall_ref_r) / orval_gain;
         rad_r += rad2;
         find_r = true;
       }
       if (sensing_result->ego.left45_dist < th_offset_dist) {
         float rad2 =
-            (param->sla_wall_ref_l - sensing_result->ego.left45_dist) / 2;
+            (param->sla_wall_ref_l - sensing_result->ego.left45_dist) / orval_gain;
         rad_l += rad2;
         find_l = true;
       }
     } else {
       if (sensing_result->ego.left45_dist < th_offset_dist) {
         float rad2 =
-            (sensing_result->ego.left45_dist - param->sla_wall_ref_l) / 2;
+            (sensing_result->ego.left45_dist - param->sla_wall_ref_l) / orval_gain;
         rad_l += rad2;
         find_l = true;
       }
       if (!find) {
         if (sensing_result->ego.right45_dist < th_offset_dist) {
           float rad2 =
-              (param->sla_wall_ref_r - sensing_result->ego.right45_dist) / 2;
+              (param->sla_wall_ref_r - sensing_result->ego.right45_dist) / orval_gain;
           rad_r += rad2;
           find_r = true;
         }
@@ -515,12 +516,18 @@ void MotionPlanning::reset_ego_data() {
 void MotionPlanning::reset_gyro_ref() {
   const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
   float gyro_raw_data_sum = 0;
+  float accel_x_raw_data_sum = 0;
+  float accel_y_raw_data_sum = 0;
 
   for (int i = 0; i < RESET_GYRO_LOOP_CNT; i++) {
     gyro_raw_data_sum += sensing_result->gyro.raw;
+    accel_x_raw_data_sum += sensing_result->accel_x.raw;
+    accel_y_raw_data_sum += sensing_result->accel_y.raw;
     vTaskDelay(xDelay); //他モジュールの起動待ち
   }
   tgt_val->gyro_zero_p_offset = gyro_raw_data_sum / RESET_GYRO_LOOP_CNT;
+  tgt_val->accel_x_zero_p_offset = accel_x_raw_data_sum / RESET_GYRO_LOOP_CNT;
+  tgt_val->accel_y_zero_p_offset = accel_y_raw_data_sum / RESET_GYRO_LOOP_CNT;
 }
 void MotionPlanning::reset_gyro_ref_with_check() {
   ui->motion_check();
@@ -626,6 +633,7 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
   ps.decel = p_set.str_map[StraightType::FastRun].decel;
   ps.motion_type = MotionType::STRAIGHT;
   ps.sct = SensorCtrlType::Straight;
+  ps.wall_ctrl_mode = WallCtrlMode::NONE;
 
   reset_gyro_ref_with_check();
 
@@ -656,6 +664,7 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
       ps.accl = p_set.str_map[st].accl;
       ps.decel = p_set.str_map[st].decel;
       ps.dia_mode = dia;
+      ps.wall_ctrl_mode = WallCtrlMode::LEFT_ONLY;
 
       ps.dist = !dia ? (dist * cell_size) : (dist * cell_size * ROOT2);
       if (i == 0) {

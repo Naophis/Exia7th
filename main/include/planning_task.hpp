@@ -42,9 +42,10 @@ public:
   unsigned long long global_msec_timer = 0;
 
   bool motor_en = false;
+  bool suction_en = false;
+
 private:
   xTaskHandle handle = 0;
-  bool suction_en = false;
 
   void check_fail_safe();
   void update_ego_motion();
@@ -61,6 +62,8 @@ private:
   float satuate_sen_duty(float duty_sen);
 
   float calc_sensor(float date, float a, float b);
+
+  void calc_filter();
 
   duty_t tgt_duty;
   pid_error_entity_t error_entity;
@@ -113,6 +116,9 @@ private:
   float duty_roll2 = 0;
   sen_log2_t sen_log;
   slip_t slip_param;
+  std::deque<float> enc_v_q;
+  std::deque<float> accl_x_q;
+  float sum_v = 0;
 };
 
 #endif

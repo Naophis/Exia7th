@@ -78,6 +78,7 @@ TurnType MainTask::cast_turn_type(std::string str) {
 }
 void MainTask::dump1() {
 
+  mp->reset_gyro_ref_with_check();
   tgt_val->nmr.motion_type = MotionType::READY;
   tgt_val->nmr.timstamp++;
   while (1) {
@@ -87,6 +88,8 @@ void MainTask::dump1() {
 
     printf("gyro: %d\t(%0.3f)\n", sensing_result->gyro.raw,
            tgt_val->gyro_zero_p_offset);
+    printf("accel_x: %d\n", sensing_result->accel_x.raw);
+    printf("accel_y: %d\n", sensing_result->accel_y.raw);
     printf("battery: %0.3f\n", sensing_result->ego.battery_lp);
     printf("encoder: %d, %d\n", sensing_result->encoder.left,
            sensing_result->encoder.right);
@@ -117,6 +120,11 @@ void MainTask::dump1() {
     printf("ego_w: %0.3f, %0.3f, %0.3f, %0.3f deg\n", sensing_result->ego.w_raw,
            sensing_result->ego.w_lp, tgt_val->ego_in.ang,
            tgt_val->ego_in.ang * 180 / PI);
+    const float tgt_gain =
+        1000.0 /
+        (sensing_result->accel_x.raw - tgt_val->accel_x_zero_p_offset) * 9.8;
+    printf("accel: %0.3f, %0.6f\n", sensing_result->ego.accel_x_raw, tgt_gain);
+
     printf("duty: %0.3f, %0.3f\n", sensing_result->ego.duty.duty_l,
            sensing_result->ego.duty.duty_r);
 
@@ -257,7 +265,7 @@ void MainTask::load_hw_param() {
 
   cJSON *root = cJSON_CreateObject(), *motor_pid, *gyro_pid, *gyro_param,
         *kalman_config, *battery_param, *led_param, *angle_pid, *dist_pid,
-        *sen_pid, *sen_pid_dia;
+        *sen_pid, *sen_pid_dia, *accel_x, *comp_v_param;
   root = cJSON_Parse(str.c_str());
 
   param->dt = cJSON_GetObjectItem(root, "dt")->valuedouble;
@@ -442,6 +450,9 @@ void MainTask::load_hw_param() {
   param->gyro_param.lp_delay =
       cJSON_GetObjectItem(gyro_param, "lp_delay")->valuedouble;
 
+  accel_x = cJSON_GetObjectItem(root, "accel_x_param");
+  param->accel_x_param.gain = cJSON_GetObjectItem(accel_x, "gain")->valuedouble;
+
   battery_param = cJSON_GetObjectItem(root, "battery_param");
   param->battery_param.lp_delay =
       cJSON_GetObjectItem(battery_param, "lp_delay")->valuedouble;
@@ -457,6 +468,12 @@ void MainTask::load_hw_param() {
   param->Kalman_measure =
       cJSON_GetObjectItem(kalman_config, "r_measure")->valuedouble;
 
+  comp_v_param = cJSON_GetObjectItem(root, "comp_v_param");
+  param->comp_param.v_lp_gain = cJSON_GetObjectItem(comp_v_param, "enc_v_lp")->valuedouble;
+  param->comp_param.accl_x_hp_gain = cJSON_GetObjectItem(comp_v_param, "acc_x_hp")->valuedouble;
+  param->comp_param.gain = cJSON_GetObjectItem(comp_v_param, "gain_v")->valuedouble;
+  param->comp_param.enable = cJSON_GetObjectItem(comp_v_param, "enable")->valueint;
+  
   cJSON_free(root);
   cJSON_free(motor_pid);
   cJSON_free(gyro_pid);
@@ -468,6 +485,8 @@ void MainTask::load_hw_param() {
   cJSON_free(dist_pid);
   cJSON_free(angle_pid);
   cJSON_free(kalman_config);
+  cJSON_free(accel_x);
+  cJSON_free(comp_v_param);
 }
 
 void MainTask::load_sensor_param() {
@@ -1069,7 +1088,7 @@ void MainTask::test_run() {
 
   if (sys.test.suction_active) {
     pt->suction_enable(sys.test.suction_duty);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
+    vTaskDelay(xDelay1000);
   }
 
   reset_tgt_data();
@@ -1132,7 +1151,7 @@ void MainTask::test_back() {
 
   if (sys.test.suction_active) {
     pt->suction_enable(sys.test.suction_duty);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
+    vTaskDelay(xDelay1000);
   }
 
   reset_tgt_data();

@@ -27,6 +27,8 @@ public:
   signed short read_2byte_itr2(std::vector<int> &list);
   void setup();
   int read_gyro_z();
+  int read_accel_x();
+  int read_accel_y();
 
 private:
   spi_device_handle_t spi;

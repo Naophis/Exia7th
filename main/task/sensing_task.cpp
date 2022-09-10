@@ -114,6 +114,8 @@ void SensingTask::task() {
     gpio_set_level(LED_R45, 1);
     gpio_set_level(LED_L45, 1);
     lec_cnt = 0;
+    // sensing_result->gyro.raw = gyro_if.read_2byte_itr();
+    // gyro_if.req_read2byte_itr(0x3B);
     for (int i = 0; i < param->led_light_delay_cnt; i++) {
       lec_cnt++;
     }
@@ -150,8 +152,10 @@ void SensingTask::task() {
     pcnt_counter_clear(PCNT_UNIT_1);
 
     if (GY_MODE == 0) {
-      // sensing_result->gyro.raw = gyro_if.read_gyro_z();
-      sensing_result->gyro.raw = gyro_if.read_2byte_itr();
+      sensing_result->gyro.raw = gyro_if.read_gyro_z();
+      // sensing_result->accel_x.raw = gyro_if.read_2byte_itr();
+      // gyro_if.req_read2byte_itr(0x3D);
+      // sensing_result->accel_y.raw = gyro_if.read_2byte_itr();
     } else {
       if (gyro_q.size() == GY_DQ_SIZE) {
         sensing_result->gyro.raw = gyro_q[gyro_q.size() - 1];
