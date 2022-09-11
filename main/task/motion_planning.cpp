@@ -166,10 +166,10 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
 
   if (sp.type == TurnType::Normal) {
     // search_front_ctrl(ps_front); // 前壁制御
-    if (40 < sensing_result->ego.left90_dist &&
-        sensing_result->ego.left90_dist < 110 &&
-        40 < sensing_result->ego.right90_dist &&
-        sensing_result->ego.right90_dist < 110) {
+    if (param->front_dist_offset_pivot_th < sensing_result->ego.left90_dist &&
+        sensing_result->ego.left90_dist < 130 &&
+        param->front_dist_offset_pivot_th < sensing_result->ego.right90_dist &&
+        sensing_result->ego.right90_dist < 130) {
       ps_front.dist +=
           (sensing_result->ego.front_dist - param->front_dist_offset);
     }
@@ -251,27 +251,29 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
     if (td == TurnDirection::Right) {
       if (sensing_result->ego.right45_dist < th_offset_dist) {
         float rad2 =
-            (sensing_result->ego.right45_dist - param->sla_wall_ref_r) / orval_gain;
+            (sensing_result->ego.right45_dist - param->sla_wall_ref_r) /
+            orval_gain;
         rad_r += rad2;
         find_r = true;
       }
       if (sensing_result->ego.left45_dist < th_offset_dist) {
-        float rad2 =
-            (param->sla_wall_ref_l - sensing_result->ego.left45_dist) / orval_gain;
+        float rad2 = (param->sla_wall_ref_l - sensing_result->ego.left45_dist) /
+                     orval_gain;
         rad_l += rad2;
         find_l = true;
       }
     } else {
       if (sensing_result->ego.left45_dist < th_offset_dist) {
-        float rad2 =
-            (sensing_result->ego.left45_dist - param->sla_wall_ref_l) / orval_gain;
+        float rad2 = (sensing_result->ego.left45_dist - param->sla_wall_ref_l) /
+                     orval_gain;
         rad_l += rad2;
         find_l = true;
       }
       if (!find) {
         if (sensing_result->ego.right45_dist < th_offset_dist) {
           float rad2 =
-              (param->sla_wall_ref_r - sensing_result->ego.right45_dist) / orval_gain;
+              (param->sla_wall_ref_r - sensing_result->ego.right45_dist) /
+              orval_gain;
           rad_r += rad2;
           find_r = true;
         }
@@ -296,6 +298,10 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
         return MotionResult::ERROR;
       }
     }
+    if (ps_back.dist < 0) {
+      ps_back.dist = 2;
+    }
+
   } else if (sp.type == TurnType::Dia45 || sp.type == TurnType::Dia135) {
     bool b = true;
     // if (sensing_result->ego.left90_dist < 150 &&

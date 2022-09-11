@@ -451,23 +451,21 @@ SearchResult SearchController::exec(param_set_t &p_set, SearchMode sm) {
       }
     }
     // 足立法で行き先決定
-    float before = mp->tgt_val->global_pos.dist;
-    before = mp->tgt_val->ego_in.dist;
+    const float before = mp->tgt_val->global_pos.dist;
     auto next_motion = adachi->exec(is_stepped);
-    float after = mp->tgt_val->global_pos.dist;
-    after = mp->tgt_val->ego_in.dist;
-    // float diff = after - before;
+    const float after = mp->tgt_val->global_pos.dist;
     adachi->diff = ABS(after - before);
 
     // go_straight_wrapper(p_set);
     if (next_motion == Motion::Straight) {
       mr = go_straight_wrapper(p_set, adachi->diff);
     } else if (next_motion == Motion::TurnRight) {
-      if (10 < sensing_result->ego.left90_dist &&
-          sensing_result->ego.left90_dist < param->front_dist_offset_pivot_th &&
-          10 < sensing_result->ego.right90_dist &&
-          sensing_result->ego.right90_dist <
-              param->front_dist_offset_pivot_th) {
+      if ((10 < sensing_result->ego.left90_dist &&
+           sensing_result->ego.left90_dist <
+               param->front_dist_offset_pivot_th) ||
+          (10 < sensing_result->ego.right90_dist &&
+           sensing_result->ego.right90_dist <
+               param->front_dist_offset_pivot_th)) {
         // (90 - p_set.map[TurnType::Normal].front.right)
         mr = pivot90(p_set, TurnDirection::Right, adachi->diff);
       } else {

@@ -469,11 +469,15 @@ void MainTask::load_hw_param() {
       cJSON_GetObjectItem(kalman_config, "r_measure")->valuedouble;
 
   comp_v_param = cJSON_GetObjectItem(root, "comp_v_param");
-  param->comp_param.v_lp_gain = cJSON_GetObjectItem(comp_v_param, "enc_v_lp")->valuedouble;
-  param->comp_param.accl_x_hp_gain = cJSON_GetObjectItem(comp_v_param, "acc_x_hp")->valuedouble;
-  param->comp_param.gain = cJSON_GetObjectItem(comp_v_param, "gain_v")->valuedouble;
-  param->comp_param.enable = cJSON_GetObjectItem(comp_v_param, "enable")->valueint;
-  
+  param->comp_param.v_lp_gain =
+      cJSON_GetObjectItem(comp_v_param, "enc_v_lp")->valuedouble;
+  param->comp_param.accl_x_hp_gain =
+      cJSON_GetObjectItem(comp_v_param, "acc_x_hp")->valuedouble;
+  param->comp_param.gain =
+      cJSON_GetObjectItem(comp_v_param, "gain_v")->valuedouble;
+  param->comp_param.enable =
+      cJSON_GetObjectItem(comp_v_param, "enable")->valueint;
+
   cJSON_free(root);
   cJSON_free(motor_pid);
   cJSON_free(gyro_pid);
@@ -1977,6 +1981,17 @@ void MainTask::path_run(int idx, int idx2) {
             .str_map[p.first]
             .alpha;
   }
+  const auto rorl = ui->select_direction();
+  const auto backup_l45 = param->sen_ref_p.normal.exist.left45;
+  const auto backup_r45 = param->sen_ref_p.normal.exist.right45;
+  if (rorl == TurnDirection::Right) {
 
+  } else {
+    param->sen_ref_p.normal.exist.left45 =
+        param->sen_ref_p.normal.exist.right45 = 5;
+  }
   mp->exec_path_running(param_set);
+
+  param->sen_ref_p.normal.exist.left45 = backup_l45;
+  param->sen_ref_p.normal.exist.right45 = backup_r45;
 }
