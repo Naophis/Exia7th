@@ -26,7 +26,8 @@ Lm: 0.00000175
 sakiyomi_time: 40
 clear_angle: 5
 clear_dist_order: 80
-front_dist_offset: 91.5
+# front_dist_offset: 91.5
+front_dist_offset: 92.5
 front_dist_offset2: 152.0
 led_light_delay_cnt: 500
 
@@ -91,7 +92,7 @@ dia_wall_off_ref_l: 36.0
 dia_wall_off_ref_r: 37.0
 
 #ログON_OFF
-logging_time: 5.0
+logging_time: 1.0
 search_log_enable: 0
 test_log_enable: 0
 fast_log_enable: 1

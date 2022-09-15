@@ -120,17 +120,19 @@ static const std::initializer_list<std::pair<StraightType, std::string>>
 };
 
 static const std::string slalom_log_file("/spiflash/sla.log");
+static const std::string sysid_log_file("/spiflash/sysid.log");
 static const std::string maze_log_file("/spiflash/maze.log");
 static const std::string maze_log_kata_file("/spiflash/maze_kata.log");
 static const std::string maze_log_return_file("/spiflash/maze_return.log");
 
 static const std::string
-    format1("%d,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
+    format1("%d,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
 static const std::string format2("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
 static const std::string format3(
     "%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,"
     "%0.3f,%d,%0.3f,%0.3f,");
 static const std::string format4("%0.3f,%0.3f,%0.3f,%0.3f,%d\n");
+static const std::string formatsysid("%d,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f\n");
 static char line_buf[LINE_BUF_SIZE];
 // static const std::string format1("%d,%d,%d,%d,%d,%d,");
 // static const std::string format2("%d,%d,%d,%d,%d,%d,%d,");

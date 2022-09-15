@@ -131,6 +131,9 @@ private:
   void save_maze_kata_data(bool write);
   void save_maze_return_data(bool write);
   void read_maze_data();
+
+  void test_system_identification(bool para);
+
   std::vector<param_set_t> paramset_list;
   param_set_t param_set;
   std::shared_ptr<MazeSolverBaseLgc> lgc;

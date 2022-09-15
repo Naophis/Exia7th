@@ -65,6 +65,9 @@ public:
   bool wall_off_dia(TurnDirection td, param_straight_t &ps_front);
   void req_error_reset();
 
+  void system_identification(MotionType mt, float duty_l, float duty_r,
+                             float time);
+
   std::shared_ptr<motion_tgt_val_t> tgt_val;
 
 private:

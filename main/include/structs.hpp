@@ -176,6 +176,8 @@ typedef struct {
   float p = 0;
   float i = 0;
   float d = 0;
+  float b = 0;
+  float c = 0;
   char mode = 0;
 } pid_param_t;
 
@@ -418,6 +420,11 @@ typedef struct {
 } fail_safe_state_t;
 
 typedef struct {
+  float right_v;
+  float left_v;
+} sys_id_t;
+
+typedef struct {
   float v_max;
   float v_end;
   float accl;
@@ -438,6 +445,7 @@ typedef struct {
   MotionDirection motion_dir;
   bool dia_mode = false;
   SensorCtrlType sct;
+  sys_id_t sys_id;
 } new_motion_req_t;
 
 typedef struct {
@@ -458,7 +466,6 @@ typedef struct {
   float right_save;
   float left_save;
 } dia_state_t;
-
 typedef struct {
   t_tgt tgt_in;
   t_ego ego_in;
@@ -531,6 +538,9 @@ typedef struct {
   int turn_times = 0;
   int ignore_opp_sen = 0;
   int dia = 0;
+  int sysid_test_mode = 0;
+  float sysid_duty = 0;
+  float sysid_time = 0;
 } test_mode_t;
 
 typedef struct {
@@ -658,9 +668,7 @@ typedef struct {
   real16_T v_l;
   real16_T v_c;
   real16_T v_r;
-  real16_T v_main;
   real16_T accl;
-  real16_T accl_x;
   real16_T img_w;
   real16_T w_lp;
   real16_T alpha;
@@ -675,7 +683,7 @@ typedef struct {
 
   real16_T left90_lp;
   real16_T left45_lp;
-  real16_T front_lp;
+  // real16_T front_lp;
   real16_T right45_lp;
   real16_T right90_lp;
   real16_T battery_lp;
@@ -689,6 +697,16 @@ typedef struct {
   real16_T sen_log_l45;
   real16_T sen_log_r45;
 } log_data_t2;
+
+
+typedef struct {
+  real16_T v_l;
+  real16_T v_c;
+  real16_T v_r;
+  real16_T w_lp;
+  real16_T volt_l;
+  real16_T volt_r;
+} sysid_log;
 
 typedef struct {
   int invalid_front_led;

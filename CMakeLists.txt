@@ -4,7 +4,7 @@
 # CMakeLists in this exact order for cmake to work correctly
 cmake_minimum_required(VERSION 3.5)
 # set(CMAKE_CXX_FLAGS_DEBUG "-O2 -g -std=c++17")
-set(CMAKE_CXX_FLAGS_RELEASE "-O2 -g -std=c++17")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -g -std=c++20")
 message($ENV{IDF_PATH})
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(main)

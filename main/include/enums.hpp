@@ -44,6 +44,8 @@ enum class MotionType : int {
   PIVOT_OFFSET = 12,
   WALL_OFF_DIA = 13,
   SLA_BACK_STR = 14,
+  SYS_ID_PARA = 15,
+  SYS_ID_ROLL = 16,
 };
 
 enum class FailSafe : int {

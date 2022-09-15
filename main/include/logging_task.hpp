@@ -28,9 +28,15 @@ public:
   void stop_slalom_log();
 
   void dump_log(const std::string file_name);
+  void dump_log_sysid(const std::string file_name);
+  
   void save(const std::string file_name);
+  void save_sysid(const std::string file_name);
+
+  void change_sysid_mode(float duty_l, float duty_r, int time);
 
 private:
+  bool log_mode = true;
   bool logging_active = false;
   xTaskHandle handle = 0;
   float16_bitmap fbm;
@@ -45,7 +51,11 @@ private:
   FILE *f_slalom_log;
   // std::vector<std::shared_ptr<log_data_t>> log_vec;
   std::vector<std::shared_ptr<log_data_t2>> log_vec;
+  std::vector<std::shared_ptr<sysid_log>> sysidlog_vec;
   float calc_sensor(float data, float a, float b, char motion_type);
+  float duty_l = 0;
+  float duty_r = 0;
+  int time = 0;
 };
 
 #endif

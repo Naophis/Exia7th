@@ -298,9 +298,9 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
         return MotionResult::ERROR;
       }
     }
-    if (ps_back.dist < 0) {
-      ps_back.dist = 2;
-    }
+    // if (ps_back.dist < 0) {
+    //   ps_back.dist = 2;
+    // }
 
   } else if (sp.type == TurnType::Dia45 || sp.type == TurnType::Dia135) {
     bool b = true;
@@ -1065,4 +1065,29 @@ void MotionPlanning::calc_dia45_offset(param_straight_t &front,
   }
   front.dist -= offset;
   back.dist += offset * ROOT2;
+}
+void MotionPlanning::system_identification(MotionType mt, float volt_l,
+                                           float volt_r, float time) {
+  req_error_reset();
+  vTaskDelay(2 / portTICK_PERIOD_MS);
+  tgt_val->nmr.v_max = 0;
+  tgt_val->nmr.v_end = 0;
+  tgt_val->nmr.accl = 0;
+  tgt_val->nmr.decel = 0;
+  tgt_val->nmr.dist = 0;
+  tgt_val->nmr.w_max = 0;
+  tgt_val->nmr.w_end = 0;
+  tgt_val->nmr.alpha = 0;
+  tgt_val->nmr.ang = 0;
+  tgt_val->nmr.sla_alpha = 0;
+  tgt_val->nmr.sla_time = 0;
+  tgt_val->nmr.sla_pow_n = 0;
+  tgt_val->nmr.motion_type = mt;
+  tgt_val->nmr.dia_mode = false;
+  tgt_val->ego_in.sla_param.counter = 1;
+  tgt_val->nmr.sys_id.left_v = volt_l;
+  tgt_val->nmr.sys_id.right_v = volt_r;
+  tgt_val->nmr.timstamp++;
+
+  vTaskDelay(time / portTICK_RATE_MS);
 }

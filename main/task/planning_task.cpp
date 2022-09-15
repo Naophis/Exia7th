@@ -1,7 +1,7 @@
 
 #include "include/planning_task.hpp"
 
-constexpr int MOTOR_HZ = 200000;
+constexpr int MOTOR_HZ = 250000;
 constexpr int SUCTION_MOTOR_HZ = 10000;
 PlanningTask::PlanningTask() {}
 
@@ -200,6 +200,14 @@ void PlanningTask::task() {
   set_next_duty(0, 0, 0);
   gpio_set_level(SUCTION_PWM, 0);
   mpc_tgt_calc.initialize();
+  vel_pid.initialize();
+  dist_pid.initialize();
+  sen_pid.initialize();
+  sen_dia_pid.initialize();
+  gyro_pid.initialize();
+  angle_pid.initialize();
+  vel_pid_2dof.initialize();
+  gyro_pid_2dof.initialize();
   enc_v_q.clear();
   accl_x_q.clear();
 
@@ -229,6 +237,16 @@ void PlanningTask::task() {
 
     check_fail_safe();
 
+    // システム同定用
+    if (tgt_val->motion_type == MotionType::SYS_ID_PARA ||
+        tgt_val->motion_type == MotionType::SYS_ID_ROLL) {
+      tgt_duty.duty_l =
+          -tgt_val->nmr.sys_id.left_v / sensing_result->ego.battery_lp * 100;
+      tgt_duty.duty_r =
+          tgt_val->nmr.sys_id.right_v / sensing_result->ego.battery_lp * 100;
+      // printf("%f, %f \n", tgt_duty.duty_l, tgt_duty.duty_r);
+    }
+
     set_next_duty(tgt_duty.duty_l, tgt_duty.duty_r, tgt_duty.duty_suction);
 
     buzzer(buzzer_ch, buzzer_timer);
@@ -242,19 +260,27 @@ float PlanningTask::calc_sensor_pid() {
 
   error_entity.sen.error_i += error_entity.sen.error_p;
   error_entity.sen.error_p = check_sen_error();
-  if (param_ro->sensor_pid.mode == 1) {
-    duty = param_ro->sensor_pid.p * error_entity.sen.error_p +
-           param_ro->sensor_pid.i * error_entity.sen.error_i +
-           param_ro->sensor_pid.d * error_entity.sen.error_d +
-           (error_entity.sen_log.gain_z - error_entity.sen_log.gain_zz) * dt;
-    error_entity.sen_log.gain_zz = error_entity.sen_log.gain_z;
-    error_entity.sen_log.gain_z = duty;
-  } else {
-    duty = param_ro->sensor_pid.p * error_entity.sen.error_p +
-           param_ro->sensor_pid.i * error_entity.sen.error_i +
-           param_ro->sensor_pid.d * error_entity.sen.error_d;
+  if (error_entity.sen.error_p > 10) {
+    error_entity.sen.error_p = 10;
+  } else if (error_entity.sen.error_p < -10) {
+    error_entity.sen.error_p = -10;
   }
-
+  // if (param_ro->sensor_pid.mode == 1) {
+  //   duty = param_ro->sensor_pid.p * error_entity.sen.error_p +
+  //          param_ro->sensor_pid.i * error_entity.sen.error_i +
+  //          param_ro->sensor_pid.d * error_entity.sen.error_d +
+  //          (error_entity.sen_log.gain_z - error_entity.sen_log.gain_zz) * dt;
+  //   error_entity.sen_log.gain_zz = error_entity.sen_log.gain_z;
+  //   error_entity.sen_log.gain_z = duty;
+  // } else {
+  //   duty = param_ro->sensor_pid.p * error_entity.sen.error_p +
+  //          param_ro->sensor_pid.i * error_entity.sen.error_i +
+  //          param_ro->sensor_pid.d * error_entity.sen.error_d;
+  // }
+  const unsigned char enable = 1;
+  sen_pid.step(&error_entity.sen.error_p, &param_ro->sensor_pid.p,
+               &param_ro->sensor_pid.i, &param_ro->sensor_pid.d, &enable, &dt,
+               &duty);
   return duty;
 }
 float PlanningTask::calc_sensor_pid_dia() {
@@ -262,20 +288,25 @@ float PlanningTask::calc_sensor_pid_dia() {
 
   error_entity.sen_dia.error_i += error_entity.sen_dia.error_p;
   error_entity.sen_dia.error_p = check_sen_error_dia();
-  if (param_ro->sensor_pid_dia.mode == 1) {
-    duty =
-        param_ro->sensor_pid_dia.p * error_entity.sen_dia.error_p +
-        param_ro->sensor_pid_dia.i * error_entity.sen_dia.error_i +
-        param_ro->sensor_pid_dia.d * error_entity.sen_dia.error_d +
-        (error_entity.sen_log_dia.gain_z - error_entity.sen_log_dia.gain_zz) *
-            dt;
-    error_entity.sen_log_dia.gain_zz = error_entity.sen_log_dia.gain_z;
-    error_entity.sen_log_dia.gain_z = duty;
-  } else {
-    duty = param_ro->sensor_pid_dia.p * error_entity.sen_dia.error_p +
-           param_ro->sensor_pid_dia.i * error_entity.sen_dia.error_i +
-           param_ro->sensor_pid_dia.d * error_entity.sen_dia.error_d;
-  }
+  // if (param_ro->sensor_pid_dia.mode == 1) {
+  //   duty =
+  //       param_ro->sensor_pid_dia.p * error_entity.sen_dia.error_p +
+  //       param_ro->sensor_pid_dia.i * error_entity.sen_dia.error_i +
+  //       param_ro->sensor_pid_dia.d * error_entity.sen_dia.error_d +
+  //       (error_entity.sen_log_dia.gain_z - error_entity.sen_log_dia.gain_zz)
+  //       *
+  //           dt;
+  //   error_entity.sen_log_dia.gain_zz = error_entity.sen_log_dia.gain_z;
+  //   error_entity.sen_log_dia.gain_z = duty;
+  // } else {
+  //   duty = param_ro->sensor_pid_dia.p * error_entity.sen_dia.error_p +
+  //          param_ro->sensor_pid_dia.i * error_entity.sen_dia.error_i +
+  //          param_ro->sensor_pid_dia.d * error_entity.sen_dia.error_d;
+  // }
+  const unsigned char enable = 1;
+  sen_dia_pid.step(&error_entity.sen_dia.error_p, &param_ro->sensor_pid_dia.p,
+                   &param_ro->sensor_pid_dia.i, &param_ro->sensor_pid_dia.d,
+                   &enable, &dt, &duty);
 
   return duty;
 }
@@ -367,6 +398,7 @@ float PlanningTask::check_sen_error() {
           error_entity.w.error_d = 0;
           error_entity.ang.error_i = 0;
           error_entity.ang.error_d = 0;
+          w_reset = 0;
         }
       } else {
         // error_entity.sen.error_i = 0;
@@ -887,19 +919,40 @@ void PlanningTask::calc_tgt_duty() {
     error_entity.v_log.gain_zz = 0;
     error_entity.v_log.gain_z = 0;
   }
-  if (param_ro->gyro_pid.mode == 1) {
-    duty_roll = param_ro->gyro_pid.p * error_entity.w.error_p +
-                param_ro->gyro_pid.i * error_entity.w.error_i +
-                param_ro->gyro_pid.d * error_entity.w.error_d +
-                (error_entity.w_log.gain_z - error_entity.w_log.gain_zz) * dt;
-    error_entity.w_log.gain_zz = error_entity.w_log.gain_z;
-    error_entity.w_log.gain_z = duty_roll;
+  const unsigned char reset_req = motor_en ? 1 : 0;
+  const float motor_req =
+      tgt_val->motion_type == MotionType::FRONT_CTRL ? 0 : 1;
+  const unsigned char reset = 0;
+  const unsigned char enable = 1;
+
+  if (tgt_val->motion_type == MotionType::FRONT_CTRL || !motor_en) {
+    vel_pid.step(&error_entity.v.error_p, &param_ro->motor_pid.p,
+                 &param_ro->motor_pid.i, &param_ro->motor_pid.d, &reset, &dt,
+                 &duty_c);
+    // vel_pid_2dof.step(tgt_val->ego_in.v, sensing_result->ego.v_c,
+    //                   param_ro->motor_pid.p, param_ro->motor_pid.i,
+    //                   param_ro->motor_pid.d, param_ro->motor_pid.b,
+    //                   param_ro->motor_pid.c, false, dt, &duty_c);
   } else {
-    duty_roll = param_ro->gyro_pid.p * error_entity.w.error_p +
-                param_ro->gyro_pid.i * error_entity.w.error_i +
-                param_ro->gyro_pid.d * error_entity.w.error_d;
-    error_entity.w_log.gain_zz = 0;
-    error_entity.w_log.gain_z = 0;
+    vel_pid.step(&error_entity.v.error_p, &param_ro->motor_pid.p,
+                 &param_ro->motor_pid.i, &param_ro->motor_pid.d, &reset_req,
+                 &dt, &duty_c);
+
+    // vel_pid_2dof.step(tgt_val->ego_in.v, sensing_result->ego.v_c,
+    //                   param_ro->motor_pid.p, param_ro->motor_pid.i,
+    //                   param_ro->motor_pid.d, param_ro->motor_pid.b,
+    //                   param_ro->motor_pid.c, reset_req, dt, &duty_c);
+  }
+
+  if (w_reset == 0 || tgt_val->motion_type == MotionType::FRONT_CTRL ||
+      !motor_en) {
+    gyro_pid.step(&error_entity.w.error_p, &param_ro->gyro_pid.p,
+                  &param_ro->gyro_pid.i, &param_ro->gyro_pid.d, &reset, &dt,
+                  &duty_roll);
+  } else {
+    gyro_pid.step(&error_entity.w.error_p, &param_ro->gyro_pid.p,
+                  &param_ro->gyro_pid.i, &param_ro->gyro_pid.d, &enable, &dt,
+                  &duty_roll);
   }
 
   if (tgt_val->motion_type == MotionType::FRONT_CTRL) {
@@ -1014,6 +1067,7 @@ void PlanningTask::calc_tgt_duty() {
   sensing_result->ego.duty.duty_l = tgt_duty.duty_l;
   sensing_result->ego.ff_duty.front = duty_ff_front;
   sensing_result->ego.ff_duty.roll = duty_ff_roll;
+  w_reset = 1;
 }
 
 void PlanningTask::cp_tgt_val() {
@@ -1113,8 +1167,7 @@ void PlanningTask::check_fail_safe() {
         tgt_val->motion_type == MotionType::BACK_STRAIGHT ||
         tgt_val->motion_type == MotionType::WALL_OFF ||
         tgt_val->motion_type == MotionType::WALL_OFF_DIA ||
-        tgt_val->motion_type == MotionType::SLA_BACK_STR)
-    {
+        tgt_val->motion_type == MotionType::SLA_BACK_STR) {
       if (tgt_val->ego_in.v > 100) {
         if (10 < sensing_result->ego.left90_dist &&
             sensing_result->ego.left90_dist < 45 &&

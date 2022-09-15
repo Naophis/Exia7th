@@ -12,6 +12,9 @@
 #include "esp_system.h"
 #include "esp_vfs.h"
 #include "esp_vfs_fat.h"
+#include "gen_code_pid/pid_controller.h"
+#include "gen_code_pid_2dof/pid_controller_2dof.h"
+#include "gen_code_simple_pid/simple_pid_controller.h"
 #include <cmath>
 
 class PlanningTask {
@@ -119,6 +122,25 @@ private:
   std::deque<float> enc_v_q;
   std::deque<float> accl_x_q;
   float sum_v = 0;
+
+  // PID_Controller vel_pid;
+  PID_Controller dist_pid;
+  PID_Controller sen_pid;
+  PID_Controller sen_dia_pid;
+  // PID_Controller gyro_pid;
+  PID_Controller angle_pid;
+
+  Simple_PID_Controller vel_pid;
+  Simple_PID_Controller gyro_pid;
+  // Simple_PID_Controller dist_pid;
+  // Simple_PID_Controller sen_pid;
+  // Simple_PID_Controller sen_dia_pid;
+  // Simple_PID_Controller gyro_pid;
+  // Simple_PID_Controller angle_pid;
+
+  PID_Controller_2dof vel_pid_2dof;
+  PID_Controller_2dof gyro_pid_2dof;
+  unsigned char w_reset = 0;
 };
 
 #endif

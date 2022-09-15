@@ -409,6 +409,8 @@ void MainTask::load_hw_param() {
   param->motor_pid.p = cJSON_GetObjectItem(motor_pid, "p")->valuedouble;
   param->motor_pid.i = cJSON_GetObjectItem(motor_pid, "i")->valuedouble;
   param->motor_pid.d = cJSON_GetObjectItem(motor_pid, "d")->valuedouble;
+  param->motor_pid.b = cJSON_GetObjectItem(motor_pid, "b")->valuedouble;
+  param->motor_pid.c = cJSON_GetObjectItem(motor_pid, "c")->valuedouble;
   param->motor_pid.mode = cJSON_GetObjectItem(motor_pid, "mode")->valueint;
 
   sen_pid = cJSON_GetObjectItem(root, "sensor_pid");
@@ -434,6 +436,8 @@ void MainTask::load_hw_param() {
   param->gyro_pid.p = cJSON_GetObjectItem(gyro_pid, "p")->valuedouble;
   param->gyro_pid.i = cJSON_GetObjectItem(gyro_pid, "i")->valuedouble;
   param->gyro_pid.d = cJSON_GetObjectItem(gyro_pid, "d")->valuedouble;
+  param->gyro_pid.b = cJSON_GetObjectItem(gyro_pid, "b")->valuedouble;
+  param->gyro_pid.c = cJSON_GetObjectItem(gyro_pid, "c")->valuedouble;
   param->gyro_pid.mode = cJSON_GetObjectItem(gyro_pid, "mode")->valueint;
 
   angle_pid = cJSON_GetObjectItem(root, "angle_pid");
@@ -696,6 +700,12 @@ void MainTask::load_sys_param() {
   sys.test.turn_times = cJSON_GetObjectItem(test, "turn_times")->valueint;
   sys.test.ignore_opp_sen =
       cJSON_GetObjectItem(test, "ignore_opp_sen")->valueint;
+
+  sys.test.sysid_test_mode =
+      cJSON_GetObjectItem(test, "sysid_test_mode")->valueint;
+  sys.test.sysid_duty = cJSON_GetObjectItem(test, "sysid_duty")->valuedouble;
+  sys.test.sysid_time = cJSON_GetObjectItem(test, "sysid_time")->valuedouble;
+
   cJSON_free(root);
   cJSON_free(goals);
   cJSON_free(test);
@@ -984,6 +994,12 @@ void MainTask::task() {
       printf("echo_printf\n");
       dump2();
     } else if (sys.user_mode == 16) {
+      printf("sys id para\n");
+      test_system_identification(false);
+    } else if (sys.user_mode == 17) {
+      printf("sys id roll\n");
+      test_system_identification(true);
+    } else if (sys.user_mode == 18) {
       lt->dump_log(slalom_log_file);
       while (1) {
         if (ui->button_state_hold())
@@ -1087,6 +1103,73 @@ void MainTask::req_error_reset() {
   tgt_val->pl_req.time_stamp++;
 }
 
+void MainTask::test_system_identification(bool para) {
+  if (para) {
+    rorl = ui->select_direction();
+  }
+
+  if (para) {
+    lt->change_sysid_mode(sys.test.sysid_duty, sys.test.sysid_duty,
+                          sys.test.sysid_time);
+  } else {
+    if (rorl == TurnDirection::Right) {
+      lt->change_sysid_mode(sys.test.sysid_duty, -sys.test.sysid_duty,
+                            sys.test.sysid_time);
+    } else {
+      lt->change_sysid_mode(-sys.test.sysid_duty, sys.test.sysid_duty,
+                            sys.test.sysid_time);
+    }
+  }
+  mp->reset_gyro_ref_with_check();
+
+  reset_tgt_data();
+  reset_ego_data();
+  pt->motor_enable();
+
+  req_error_reset();
+
+  if (param->test_log_enable > 0) {
+    lt->start_slalom_log();
+  }
+  if (para) {
+    mp->system_identification(MotionType::SYS_ID_PARA, sys.test.sysid_duty,
+                              sys.test.sysid_duty, sys.test.sysid_time);
+  } else {
+    if (rorl == TurnDirection::Right) {
+      mp->system_identification(MotionType::SYS_ID_ROLL, sys.test.sysid_duty,
+                                -sys.test.sysid_duty, sys.test.sysid_time);
+    } else {
+      mp->system_identification(MotionType::SYS_ID_ROLL, -sys.test.sysid_duty,
+                                sys.test.sysid_duty, sys.test.sysid_time);
+    }
+  }
+  lt->stop_slalom_log();
+  pt->motor_disable();
+  reset_tgt_data();
+  reset_ego_data();
+  req_error_reset();
+  pt->motor_disable();
+  pt->suction_disable();
+  lt->stop_slalom_log();
+
+  lt->save_sysid(sysid_log_file);
+  ui->coin(120);
+
+  param->sen_ref_p.normal.exist.right45 = backup_r;
+  param->sen_ref_p.normal.exist.left45 = backup_l;
+  while (1) {
+    if (ui->button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
+  lt->dump_log_sysid(slalom_log_file);
+  while (1) {
+    if (ui->button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
+}
+
 void MainTask::test_run() {
   mp->reset_gyro_ref_with_check();
 
@@ -1100,8 +1183,9 @@ void MainTask::test_run() {
   pt->motor_enable();
 
   req_error_reset();
-  lt->start_slalom_log();
-
+if (param->test_log_enable > 0) {
+    lt->start_slalom_log();
+  }
   ps.v_max = sys.test.v_max;
   ps.v_end = 20;
   ps.dist = sys.test.dist - 5;
@@ -1163,8 +1247,9 @@ void MainTask::test_back() {
   pt->motor_enable();
 
   req_error_reset();
-  lt->start_slalom_log();
-
+if (param->test_log_enable > 0) {
+    lt->start_slalom_log();
+  }
   ps.v_max = sys.test.v_max;
   ps.v_end = -20;
   ps.dist = sys.test.dist - 5;
@@ -1223,7 +1308,9 @@ void MainTask::test_run_sla() {
   pt->motor_enable();
 
   req_error_reset();
-  lt->start_slalom_log();
+  if (param->test_log_enable > 0) {
+    lt->start_slalom_log();
+  }
   // pt->active_logging(_f);
 
   ps.v_max = sys.test.v_max;
@@ -1278,7 +1365,9 @@ void MainTask::test_turn() {
 
   req_error_reset();
 
-  lt->start_slalom_log();
+  if (param->test_log_enable > 0) {
+    lt->start_slalom_log();
+  }
   // pt->active_logging();
   pr.w_max = sys.test.w_max;
   pr.alpha = sys.test.alpha;
@@ -1354,7 +1443,9 @@ void MainTask::test_sla() {
 
   req_error_reset();
 
-  lt->start_slalom_log();
+  if (param->test_log_enable > 0) {
+    lt->start_slalom_log();
+  }
 
   ps.v_max = sla_p.v;
   ps.v_end = sla_p.v;
@@ -1444,7 +1535,7 @@ void MainTask::test_sla() {
 
 void MainTask::test_search_sla() {
 
-  file_idx = sys.test.file_idx;
+  file_idx = 0;
 
   if (file_idx >= tpp.file_list_size) {
     ui->error();
@@ -1478,7 +1569,9 @@ void MainTask::test_search_sla() {
 
   req_error_reset();
 
-  lt->start_slalom_log();
+  if (param->test_log_enable > 0) {
+    lt->start_slalom_log();
+  }
 
   ps.v_max = sla_p.v;
   ps.v_end = sla_p.v;
@@ -1591,7 +1684,9 @@ void MainTask::test_front_wall_offset() {
   pt->motor_enable();
 
   req_error_reset();
-  lt->start_slalom_log();
+  if (param->test_log_enable > 0) {
+    lt->start_slalom_log();
+  }
   // pt->active_logging(_f);
 
   ps.v_max = sys.test.v_max;
@@ -1669,7 +1764,9 @@ void MainTask::test_dia_walloff() {
   pt->motor_enable();
 
   req_error_reset();
-  lt->start_slalom_log();
+  if (param->test_log_enable > 0) {
+    lt->start_slalom_log();
+  }
   // pt->active_logging(_f);
 
   ps.v_max = sys.test.v_max;
@@ -1761,7 +1858,9 @@ void MainTask::test_sla_walloff() {
   pt->motor_enable();
 
   req_error_reset();
-  lt->start_slalom_log();
+  if (param->test_log_enable > 0) {
+    lt->start_slalom_log();
+  }
   // pt->active_logging(_f);
 
   ps.v_max = sys.test.v_max;
