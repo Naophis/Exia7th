@@ -46,11 +46,14 @@ void Simple_PID_Controller::step(const real32_T *arg_diff,
 }
 
 void Simple_PID_Controller::initialize() {
-  simple_pid_controller_PrevZCX.UD_Reset_ZCE = UNINITIALIZED_ZCSIG;
-  simple_pid_controller_DW.Integrator_DSTATE =
-      simple_pid_controller_P.Constant_Value;
-  simple_pid_controller_DW.Integrator_PrevResetState = 2;
-  simple_pid_controller_DW.icLoad = true;
+  {
+    real32_T Constant;
+    Constant = simple_pid_controller_P.Constant_Value;
+    simple_pid_controller_PrevZCX.UD_Reset_ZCE = UNINITIALIZED_ZCSIG;
+    simple_pid_controller_DW.Integrator_DSTATE = Constant;
+    simple_pid_controller_DW.Integrator_PrevResetState = 2;
+    simple_pid_controller_DW.icLoad = true;
+  }
 }
 
 void Simple_PID_Controller::terminate() {}

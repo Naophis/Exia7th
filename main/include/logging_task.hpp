@@ -29,12 +29,15 @@ public:
 
   void dump_log(const std::string file_name);
   void dump_log_sysid(const std::string file_name);
-  
+
   void save(const std::string file_name);
   void save_sysid(const std::string file_name);
 
   void change_sysid_mode(float duty_l, float duty_r, int time);
 
+  void exec_log();
+
+  bool active_slalom_log = false;
 private:
   bool log_mode = true;
   bool logging_active = false;
@@ -46,7 +49,6 @@ private:
   std::shared_ptr<input_param_t> param;
   std::shared_ptr<motion_tgt_val_t> tgt_val;
 
-  bool active_slalom_log = false;
   int idx_slalom_log = 0;
   FILE *f_slalom_log;
   // std::vector<std::shared_ptr<log_data_t>> log_vec;

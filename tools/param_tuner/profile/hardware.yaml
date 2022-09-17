@@ -1,5 +1,7 @@
 dt: 0.001
-tire: 13.65
+# tire: 13.025
+tire: 13.636
+# tire: 13.135
 offset_start_dist: 23.0
 # offset_start_dist: 45.0
 gear_a: 37
@@ -98,8 +100,8 @@ dia_wall_off_ref_r: 33.0
 #ログON_OFF
 logging_time: 1.0
 search_log_enable: 0
-test_log_enable: 0
-fast_log_enable: 0
+test_log_enable: 1
+fast_log_enable: 1
 sen_log_size: 100
 log_size: 900
 
@@ -127,6 +129,11 @@ motor_pid:
   p: 0.005125
   i: 0.685
   d: 0.0
+
+  # p: 0.00275
+  # i: 0.00275
+  # d: 0.0
+
   b: 0.63778
   c: 0.010752
   mode: 1
@@ -141,9 +148,14 @@ dist_pid:
   # i: 0.0
   # d: 0.0
 gyro_pid:
-  p: 0.25
-  i: 35.0
+  p: 0.275
+  i: 25.0
   d: 0.00
+
+  # p: 0.225
+  # i: 0.025
+  # d: 0.0
+
   # p: 0.175
   # i: 0.03125
   # d: 0.01

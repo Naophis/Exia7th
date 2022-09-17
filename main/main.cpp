@@ -194,6 +194,7 @@ extern "C" void app_main() {
   // lt->set_ego_entity(ego);
   lt->set_tgt_val(tgt_val);
   lt->create_task(1);
+  pt->set_logging_task(lt);
 
   mt.set_sensing_entity(sensing_entity);
   mt.set_input_param_entity(param);

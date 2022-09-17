@@ -26,7 +26,7 @@ test: # テスト走行時に使用するパラメータ群
   suction_active: 1
   suction_duty: 3.25
   # suction_duty: 3.25
-  file_idx: 7
+  file_idx: 8
   sla_dist: 90
   # sla_type: 3
   sla_type: 3

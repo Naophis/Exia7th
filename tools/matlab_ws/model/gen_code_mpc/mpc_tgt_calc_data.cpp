@@ -1,7 +1,6 @@
 #include "mpc_tgt_calc.h"
 
-mpc_tgt_calcModelClass::P_mpc_tgt_calc_T mpc_tgt_calcModelClass::mpc_tgt_calc_P =
-{
+mpc_tgt_calcModelClass::P_mpc_tgt_calc_T mpc_tgt_calcModelClass::mpc_tgt_calc_P{
 
   0.0,
 
@@ -179,45 +178,7 @@ mpc_tgt_calcModelClass::P_mpc_tgt_calc_T mpc_tgt_calcModelClass::mpc_tgt_calc_P 
 
   0.0F,
 
-  1.0F,
-
-  1.0F,
-
-  1.0F,
-
-  0.0F,
-
-  1.0F,
-
-  1.0F,
-
-  1.0F,
-
-  0.0F,
-
   0.001F,
-
-  1000.0F,
-
-  1000.0F,
-
-  0.0F,
-
-  0.001F,
-
-  0.001F,
-
-  0.001F,
-
-  0.001F,
-
-  0.001F,
-
-  0.001F,
-
-  1.0F,
-
-  1.0F,
 
   0.001F,
 

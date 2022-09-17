@@ -7,14 +7,16 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "gen_code_mpc/mpc_tgt_calc.h"
+#include "include/logging_task.hpp"
 #include "include/maze_solver.hpp"
 
 #include "esp_system.h"
 #include "esp_vfs.h"
 #include "esp_vfs_fat.h"
-#include "gen_code_pid/pid_controller.h"
-#include "gen_code_pid_2dof/pid_controller_2dof.h"
+// #include "gen_code_pid/pid_controller.h"
+// #include "gen_code_pid_2dof/pid_controller_2dof.h"
 #include "gen_code_simple_pid/simple_pid_controller.h"
+
 #include <cmath>
 
 class PlanningTask {
@@ -32,6 +34,7 @@ public:
   set_sensing_entity(std::shared_ptr<sensing_result_entity_t> &_sensing_result);
   void set_input_param_entity(std::shared_ptr<input_param_t> &_param_ro);
   void set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val);
+  void set_logging_task(std::shared_ptr<LoggingTask> &_lt);
 
   void buzzer(ledc_channel_config_t &buzzer_ch,
               ledc_timer_config_t &buzzer_timer);
@@ -87,6 +90,7 @@ private:
   std::shared_ptr<sensing_result_entity_t> sensing_result;
   std::shared_ptr<input_param_t> param_ro;
   std::shared_ptr<motion_tgt_val_t> tgt_val;
+  std::shared_ptr<LoggingTask> lt;
 
   t_tgt *mpc_tgt;
   t_ego *mpc_now_ego;
@@ -124,22 +128,23 @@ private:
   float sum_v = 0;
 
   // PID_Controller vel_pid;
-  PID_Controller dist_pid;
-  PID_Controller sen_pid;
-  PID_Controller sen_dia_pid;
+  // PID_Controller dist_pid;
+  // PID_Controller sen_pid;
+  // PID_Controller sen_dia_pid;
   // PID_Controller gyro_pid;
-  PID_Controller angle_pid;
+  // PID_Controller angle_pid;
 
   Simple_PID_Controller vel_pid;
   Simple_PID_Controller gyro_pid;
+
   // Simple_PID_Controller dist_pid;
   // Simple_PID_Controller sen_pid;
   // Simple_PID_Controller sen_dia_pid;
   // Simple_PID_Controller gyro_pid;
   // Simple_PID_Controller angle_pid;
 
-  PID_Controller_2dof vel_pid_2dof;
-  PID_Controller_2dof gyro_pid_2dof;
+  // PID_Controller_2dof vel_pid_2dof;
+  // PID_Controller_2dof gyro_pid_2dof;
   unsigned char w_reset = 0;
 };
 

@@ -53,8 +53,10 @@ extern "C" {
 
   boolean_T rtIsNaN(real_T value)
   {
-    boolean_T result = (boolean_T) 0;
-    size_t bitsPerReal = sizeof(real_T) * (NumBitsPerChar);
+    boolean_T result{ (boolean_T) 0 };
+
+    size_t bitsPerReal{ sizeof(real_T) * (NumBitsPerChar) };
+
     if (bitsPerReal == 32U) {
       result = rtIsNaNF((real32_T)value);
     } else {

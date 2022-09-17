@@ -454,7 +454,7 @@ SearchResult SearchController::exec(param_set_t &p_set, SearchMode sm) {
     const float before = mp->tgt_val->global_pos.dist;
     auto next_motion = adachi->exec(is_stepped);
     const float after = mp->tgt_val->global_pos.dist;
-    adachi->diff = ABS(after - before);
+    adachi->diff = std::abs(after - before);
 
     // go_straight_wrapper(p_set);
     if (next_motion == Motion::Straight) {
@@ -522,7 +522,7 @@ SearchResult SearchController::exec(param_set_t &p_set, SearchMode sm) {
       }
     }
     end_time = pt->global_msec_timer;
-    if (ABS(end_time - start_time) / 1000 > 60 * 3) {
+    if (ABS((end_time - start_time) / 1000) > 60 * 3) {
       break;
     }
   }

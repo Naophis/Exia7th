@@ -17,8 +17,10 @@ extern "C" {
 extern "C" {
   real_T rtGetInf(void)
   {
-    size_t bitsPerReal = sizeof(real_T) * (NumBitsPerChar);
-    real_T inf = 0.0;
+    size_t bitsPerReal{ sizeof(real_T) * (NumBitsPerChar) };
+
+    real_T inf{ 0.0 };
+
     if (bitsPerReal == 32U) {
       inf = rtGetInfF();
     } else {
@@ -44,8 +46,10 @@ extern "C" {
 
   real_T rtGetMinusInf(void)
   {
-    size_t bitsPerReal = sizeof(real_T) * (NumBitsPerChar);
-    real_T minf = 0.0;
+    size_t bitsPerReal{ sizeof(real_T) * (NumBitsPerChar) };
+
+    real_T minf{ 0.0 };
+
     if (bitsPerReal == 32U) {
       minf = rtGetMinusInfF();
     } else {

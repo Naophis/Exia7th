@@ -20,7 +20,7 @@ extern "C" {
 
 #include "bus.h"
 
-class mpc_tgt_calcModelClass
+class mpc_tgt_calcModelClass final
 {
  public:
   struct P_keep_mpc_tgt_calc_T {
@@ -117,27 +117,8 @@ class mpc_tgt_calcModelClass
     real32_T Merge_InitialOutput_m;
     real32_T Gain_Gain_k;
     real32_T Constant_Value_hs;
-    real32_T Constant1_Value_ii;
-    real32_T Constant_Value_hn;
-    real32_T Saturation_UpperSat;
-    real32_T Saturation_LowerSat;
-    real32_T Constant1_Value_op;
-    real32_T Constant_Value_my;
-    real32_T Saturation_UpperSat_i;
-    real32_T Saturation_LowerSat_e;
-    real32_T mms2ms_Gain;
-    real32_T Constant1_Value_hj;
-    real32_T Constant_Value_g;
-    real32_T Constant3_Value_a;
     real32_T Gain1_Gain_e;
     real32_T Gain1_Gain_g;
-    real32_T Gain3_Gain_m;
-    real32_T Gain4_Gain_o;
-    real32_T Gain1_Gain_cq;
-    real32_T Gain2_Gain_c;
-    real32_T Gain5_Gain_e;
-    real32_T Gain6_Gain;
-    real32_T Gain_Gain_kq;
     real32_T DataStoreMemory_InitialValue;
     uint8_T ManualSwitch_CurrentSetting;
     uint8_T ManualSwitch_CurrentSetting_c;
@@ -157,6 +138,10 @@ class mpc_tgt_calcModelClass
     P_keep_mpc_tgt_calc_T* defaultParam;
   };
 
+  mpc_tgt_calcModelClass(mpc_tgt_calcModelClass const&) = delete;
+  mpc_tgt_calcModelClass& operator= (mpc_tgt_calcModelClass const&) & = delete;
+  mpc_tgt_calcModelClass(mpc_tgt_calcModelClass &&) = delete;
+  mpc_tgt_calcModelClass& operator= (mpc_tgt_calcModelClass &&) = delete;
   mpc_tgt_calcModelClass::RT_MODEL_mpc_tgt_calc_T * getRTM();
   void initialize();
   void step(const t_tgt *arg_tgt, const t_ego *arg_ego, int32_T arg_mode,

@@ -10,6 +10,7 @@
 #include "gen_code_conv_single2half/rtwtypes.h"
 
 #include <deque>
+#include <cmath>
 #include <initializer_list>
 #include <iostream>
 #include <memory>
@@ -691,8 +692,8 @@ typedef struct {
   char motion_type;
   int16_t motion_timestamp;
 
-  real16_T duty_ff_front;
-  real16_T duty_ff_roll;
+  // real16_T duty_ff_front;
+  // real16_T duty_ff_roll;
   real16_T duty_sensor_ctrl;
   real16_T sen_log_l45;
   real16_T sen_log_r45;

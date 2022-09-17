@@ -81,8 +81,8 @@ void LoggingTask::task() {
           ld->motion_type = static_cast<int>(tgt_val->motion_type);
 
           ld->duty_sensor_ctrl = floatToHalf(sensing_result->ego.duty.sen);
-          ld->duty_ff_front = floatToHalf(sensing_result->ego.ff_duty.front);
-          ld->duty_ff_roll = floatToHalf(sensing_result->ego.ff_duty.roll);
+          // ld->duty_ff_front = floatToHalf(sensing_result->ego.ff_duty.front);
+          // ld->duty_ff_roll = floatToHalf(sensing_result->ego.ff_duty.roll);
 
           ld->sen_log_l45 = floatToHalf(sensing_result->sen.l45.sensor_dist);
           ld->sen_log_r45 = floatToHalf(sensing_result->sen.r45.sensor_dist);
@@ -97,7 +97,6 @@ void LoggingTask::task() {
         } else {
           vTaskDelay(xDelay4);
         }
-
       } else {
         vTaskDelay(xDelay4);
       }
@@ -117,7 +116,6 @@ void LoggingTask::task() {
           idx_slalom_log++;
         }
       }
-
       vTaskDelay(xDelay1);
     }
   }
@@ -195,9 +193,7 @@ void LoggingTask::save(std::string file_name) {
             halfToFloat(ld->battery_lp),                                      //
             halfToFloat(ld->duty_l),                                          //
             halfToFloat(ld->duty_r),                                          //
-            (ld->motion_type),                                                //
-            halfToFloat(ld->duty_sensor_ctrl),                                //
-            halfToFloat(ld->duty_ff_roll)); // 16
+            (ld->motion_type)); // 16
 
     fprintf(f_slalom_log, f4,                  //
             halfToFloat(ld->duty_sensor_ctrl), //
@@ -255,7 +251,7 @@ void LoggingTask::dump_log(std::string file_name) {
          "dist,"
          "ideal_ang,ang,left90,left45,front,right45,right90,left90_d,left45_d,"
          "front_d,right45_d,right90_d,battery,duty_l,"
-         "duty_r,motion_state,ff_duty_front,ff_duty_roll,duty_sen,dist_mod90,"
+         "duty_r,motion_state,duty_sen,dist_mod90,"
          "sen_dist_l45,sen_dist_r45,timestamp\n");
   while (fgets(line_buf, sizeof(line_buf), f) != NULL)
     printf("%s\n", line_buf);

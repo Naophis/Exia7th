@@ -44,9 +44,9 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p,
   tgt_val->nmr.dia_mode = p.dia_mode;
 
   const auto ego_v = tgt_val->ego_in.v;
-  const auto req_dist = ABS((ego_v * ego_v - p.v_end * p.v_end) / (2 * p.accl));
+  const auto req_dist = std::abs((ego_v * ego_v - p.v_end * p.v_end) / (2 * p.accl));
   if (req_dist > p.dist) {
-    p.accl = ABS((ego_v * ego_v - p.v_end * p.v_end) / (2 * p.dist)) + 1000;
+    p.accl = std::abs((ego_v * ego_v - p.v_end * p.v_end) / (2 * p.dist)) + 1000;
   }
 
   tgt_val->nmr.sct = p.sct;
@@ -62,8 +62,7 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p,
 
   while (1) {
     vTaskDelay(1 / portTICK_RATE_MS);
-    // if (ABS(tgt_val->ego_in.img_dist) >= ABS(p.dist)) {
-    if (ABS(tgt_val->ego_in.dist) >= ABS(p.dist)) {
+    if (std::abs(tgt_val->ego_in.dist) >= std::abs(p.dist)) {
       break;
     }
     if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
@@ -112,8 +111,8 @@ MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
 
   while (1) {
     vTaskDelay(1 / portTICK_RATE_MS);
-    if (ABS(tgt_val->ego_in.ang) >= ABS(p.ang) &&
-        ABS(tgt_val->ego_in.ang * 180 / PI) > 10) {
+    if (std::abs(tgt_val->ego_in.ang) >= std::abs(p.ang) &&
+        std::abs(tgt_val->ego_in.ang * 180 / PI) > 10) {
       break;
     }
     if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
@@ -214,7 +213,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
       }
     }
     if (find_r && find_l) {
-      ps_back.dist = (ABS(ps_back.dist - dist_r) < ABS(ps_back.dist - dist_l))
+      ps_back.dist = (std::abs(ps_back.dist - dist_r) < std::abs(ps_back.dist - dist_l))
                          ? dist_r
                          : dist_l;
     } else if (find_r) {
@@ -280,7 +279,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
       }
     }
     if (find_r && find_l) {
-      sp.rad = (ABS(sp.rad - rad_r) < ABS(sp.rad - rad_l)) ? rad_r : rad_l;
+      sp.rad = (std::abs(sp.rad - rad_r) < std::abs(sp.rad - rad_l)) ? rad_r : rad_l;
     } else if (find_r) {
       sp.rad = rad_r;
     } else if (find_l) {
@@ -404,11 +403,11 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
 
     if (sp.type == TurnType::Orval) {
       if (tgt_val->ego_in.pivot_state == 3 &&
-          ABS(tgt_val->ego_in.ang * 180 / PI) > 10) {
+          std::abs(tgt_val->ego_in.ang * 180 / PI) > 10) {
         tgt_val->ego_in.w = 0;
         break;
       }
-      if (ABS(tgt_val->ego_in.img_ang) + 0.001 >= ABS(sp.ang)) {
+      if (std::abs(tgt_val->ego_in.img_ang) + 0.001 >= std::abs(sp.ang)) {
         tgt_val->ego_in.w = 0;
         break;
       }
@@ -454,7 +453,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   MotionResult res_b = MotionResult::NONE;
   if (ps_back.dist > 0) {
     const auto ego_v = tgt_val->ego_in.v;
-    ps_back.accl = ABS((ego_v * ego_v - ps_back.v_end * ps_back.v_end) /
+    ps_back.accl = std::abs((ego_v * ego_v - ps_back.v_end * ps_back.v_end) /
                        (2 * ps_back.dist)) +
                    1000;
     res_b = go_straight(ps_back);
@@ -573,10 +572,10 @@ MotionResult MotionPlanning::front_ctrl(bool limit) {
     // if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
     //   return MotionResult::ERROR;
     // }
-    if (ABS(sensing_result->ego.front_dist -
+    if (std::abs(sensing_result->ego.front_dist -
             param->sen_ref_p.search_exist.front_ctrl) <
             param->sen_ref_p.search_exist.kireme_l &&
-        ABS((sensing_result->ego.right90_dist -
+        std::abs((sensing_result->ego.right90_dist -
              sensing_result->ego.left90_dist) /
                 2 -
             param->sen_ref_p.search_exist.kireme_r) <
@@ -829,7 +828,7 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
             (param->front_dist_offset2 - sensing_result->ego.front_dist);
         return;
       }
-      if (ABS(tgt_val->ego_in.dist) >= ABS(tgt_val->nmr.dist)) {
+      if (std::abs(tgt_val->ego_in.dist) >= std::abs(tgt_val->nmr.dist)) {
         return;
       }
       vTaskDelay(1 / portTICK_RATE_MS);
@@ -863,7 +862,7 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
             (param->front_dist_offset2 - sensing_result->ego.front_dist);
         return;
       }
-      if (ABS(tgt_val->ego_in.dist) >= ABS(tgt_val->nmr.dist)) {
+      if (std::abs(tgt_val->ego_in.dist) >= std::abs(tgt_val->nmr.dist)) {
         return;
       }
       vTaskDelay(1 / portTICK_RATE_MS);
@@ -995,7 +994,7 @@ void MotionPlanning::calc_dia135_offset(param_straight_t &front,
     }
   }
   if (valid_l && valid_r) {
-    offset = (ABS(offset_l) < ABS(offset_r)) ? offset_l : offset_r;
+    offset = (std::abs(offset_l) < std::abs(offset_r)) ? offset_l : offset_r;
   } else if (valid_l) {
     offset = offset_l;
   } else if (valid_r) {
@@ -1053,7 +1052,7 @@ void MotionPlanning::calc_dia45_offset(param_straight_t &front,
     }
   }
   if (valid_l && valid_r) {
-    if (ABS(offset_l) < ABS(offset_r)) {
+    if (std::abs(offset_l) < std::abs(offset_r)) {
       offset = offset_l;
     } else {
       offset = offset_r;

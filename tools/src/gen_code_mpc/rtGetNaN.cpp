@@ -17,8 +17,10 @@ extern "C" {
 extern "C" {
   real_T rtGetNaN(void)
   {
-    size_t bitsPerReal = sizeof(real_T) * (NumBitsPerChar);
-    real_T nan = 0.0;
+    size_t bitsPerReal{ sizeof(real_T) * (NumBitsPerChar) };
+
+    real_T nan{ 0.0 };
+
     if (bitsPerReal == 32U) {
       nan = rtGetNaNF();
     } else {
@@ -37,7 +39,7 @@ extern "C" {
 
   real32_T rtGetNaNF(void)
   {
-    IEEESingle nanF = { { 0.0F } };
+    IEEESingle nanF{ { 0.0F } };
 
     nanF.wordL.wordLuint = 0xFFC00000U;
     return nanF.wordL.wordLreal;
