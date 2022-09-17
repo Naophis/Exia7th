@@ -65,7 +65,8 @@ real32_T rt_powf_snf(real32_T u0, real32_T u1)
 }
 
 void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
-  int32_T arg_mode, int32_T arg_time_step, t_ego *arg_next_ego)
+  int32_T arg_mode, int32_T arg_time_step, t_ego *arg_next_ego, t_dynamics
+  *arg_ego1)
 {
   t_ego rtb_BusAssignment1_o;
   real_T rtb_Switch_e;
@@ -73,9 +74,9 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
   real32_T Merge_k;
   real32_T rtb_Abs6;
   real32_T rtb_Abs7;
-  real32_T rtb_Gain2;
+  real32_T rtb_Gain2_n;
   real32_T rtb_Gain2_p;
-  real32_T rtb_Product2;
+  real32_T rtb_Product2_h;
   real32_T rtb_Switch_ju;
   if (arg_tgt->v_max >= 0.0F) {
     rtb_Switch_ju = arg_ego->v * arg_ego->v - arg_tgt->end_v * arg_tgt->end_v;
@@ -180,17 +181,17 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
       if (rtb_Switch_ju >= arg_ego->sla_param.limit_time_count) {
         rtb_Switch_e = mpc_tgt_calc_P.Constant1_Value;
       } else {
-        rtb_Product2 = rtb_Switch_ju * mpc_tgt_calc_P.Gain_Gain_e /
+        rtb_Product2_h = rtb_Switch_ju * mpc_tgt_calc_P.Gain_Gain_e /
           arg_ego->sla_param.base_time - mpc_tgt_calc_P.Constant_Value_ne;
-        rtb_Gain2 = rt_powf_snf(rtb_Product2, arg_ego->sla_param.pow_n -
+        rtb_Gain2_n = rt_powf_snf(rtb_Product2_h, arg_ego->sla_param.pow_n -
           mpc_tgt_calc_P.Constant1_Value_mn);
-        rtb_Product2 *= rtb_Gain2;
-        rtb_Gain2_p = mpc_tgt_calc_P.Constant6_Value / (rtb_Product2 -
+        rtb_Product2_h *= rtb_Gain2_n;
+        rtb_Gain2_p = mpc_tgt_calc_P.Constant6_Value / (rtb_Product2_h -
           mpc_tgt_calc_P.Constant5_Value) + mpc_tgt_calc_P.Constant4_Value;
-        rtb_Product2 -= mpc_tgt_calc_P.Constant2_Value_e;
+        rtb_Product2_h -= mpc_tgt_calc_P.Constant2_Value_e;
         rtb_Switch_e = mpc_tgt_calc_P.Gain1_Gain_l * arg_ego->sla_param.pow_n *
-          rtb_Gain2 / (rtb_Product2 * rtb_Product2) * std::exp(rtb_Gain2_p) /
-          arg_ego->sla_param.base_time;
+          rtb_Gain2_n / (rtb_Product2_h * rtb_Product2_h) * std::exp(rtb_Gain2_p)
+          / arg_ego->sla_param.base_time;
       }
 
       rtb_Switch_e *= arg_ego->sla_param.base_alpha;
@@ -213,10 +214,10 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
       int32_T>(static_cast<uint32_T>(rtb_Switch_ju));
   } else if (arg_mode == 2) {
     t_ego rtb_BusAssignment_m;
-    int32_T rtb_Merge1_p;
-    rtb_Product2 = std::abs(arg_ego->ang);
+    int32_T rtb_Merge1;
+    rtb_Product2_h = std::abs(arg_ego->ang);
     rtb_Gain2_p = mpc_tgt_calc_P.Gain2_Gain * arg_tgt->alpha;
-    rtb_Gain2 = std::abs(arg_tgt->tgt_angle);
+    rtb_Gain2_n = std::abs(arg_tgt->tgt_angle);
     if (arg_tgt->alpha > mpc_tgt_calc_P.Switch_Threshold) {
       rtb_Switch_ju = arg_tgt->w_max;
     } else {
@@ -225,7 +226,7 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
 
     if (arg_ego->pivot_state == 2.0F || std::abs(arg_ego->w * arg_ego->w -
          arg_tgt->end_w * arg_tgt->end_w) / (mpc_tgt_calc_P.Gain1_Gain_m * std::
-         abs(rtb_Gain2_p)) + rtb_Product2 >= rtb_Gain2) {
+         abs(rtb_Gain2_p)) + rtb_Product2_h >= rtb_Gain2_n) {
       boolean_T rtb_RelationalOperator_a;
       if (rtb_Gain2_p > mpc_tgt_calc_P.Switch2_Threshold) {
         rtb_RelationalOperator_a = arg_ego->w < arg_tgt->end_w;
@@ -238,13 +239,13 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
           if (rtb_Gain2_p > mpc_tgt_calc_P.Switch1_Threshold) {
             rtb_Gain2_p = static_cast<real32_T>(std::abs((arg_ego->w *
               arg_ego->w - arg_tgt->end_w * arg_tgt->end_w) / (std::fmax
-              (mpc_tgt_calc_P.Constant1_Value_l, static_cast<real_T>(rtb_Gain2 -
-              rtb_Product2)) * mpc_tgt_calc_P.Gain_Gain_j)));
+              (mpc_tgt_calc_P.Constant1_Value_l, static_cast<real_T>(rtb_Gain2_n
+              - rtb_Product2_h)) * mpc_tgt_calc_P.Gain_Gain_j)));
           } else {
             rtb_Gain2_p = static_cast<real32_T>(std::abs((arg_ego->w *
               arg_ego->w - arg_tgt->end_w * arg_tgt->end_w) / (std::fmax
-              (mpc_tgt_calc_P.Constant1_Value_l, static_cast<real_T>(rtb_Gain2 -
-              rtb_Product2)) * mpc_tgt_calc_P.Gain_Gain_j))) *
+              (mpc_tgt_calc_P.Constant1_Value_l, static_cast<real_T>(rtb_Gain2_n
+              - rtb_Product2_h)) * mpc_tgt_calc_P.Gain_Gain_j))) *
               mpc_tgt_calc_P.Gain1_Gain_h;
           }
         }
@@ -252,7 +253,7 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
         rtb_Gain2_p = mpc_tgt_calc_P.Constant_Value_ph;
       }
 
-      rtb_Merge1_p = mpc_tgt_calc_P.Constant2_Value;
+      rtb_Merge1 = mpc_tgt_calc_P.Constant2_Value;
     } else if (arg_ego->pivot_state == 0.0F) {
       if (std::abs(arg_ego->w) < std::abs(rtb_Switch_ju)) {
         if (mpc_tgt_calc_P.ManualSwitch_CurrentSetting_c == 1) {
@@ -263,43 +264,43 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
         }
 
         rtb_Switch_e = rtb_Gain2_p;
-        rtb_Merge1_p = mpc_tgt_calc_P.Constant1_Value_p;
+        rtb_Merge1 = mpc_tgt_calc_P.Constant1_Value_p;
       } else {
         rtb_Switch_e = mpc_tgt_calc_P.Constant_Value;
-        rtb_Merge1_p = mpc_tgt_calc_P.Constant2_Value_f;
+        rtb_Merge1 = mpc_tgt_calc_P.Constant2_Value_f;
       }
 
       rtb_Gain2_p = static_cast<real32_T>(rtb_Switch_e);
     } else {
       rtb_Gain2_p = static_cast<real32_T>(mpc_tgt_calc_P.Constant_Value_n);
-      rtb_Merge1_p = mpc_tgt_calc_P.Constant2_Value_g;
+      rtb_Merge1 = mpc_tgt_calc_P.Constant2_Value_g;
     }
 
     rtb_BusAssignment_m = *arg_ego;
     rtb_BusAssignment_m.w = mpc_tgt_calc_P.Gain_Gain_d * rtb_Gain2_p *
       static_cast<real32_T>(arg_time_step) + arg_ego->w;
     rtb_BusAssignment_m.alpha = rtb_Gain2_p;
-    rtb_BusAssignment_m.pivot_state = rtb_Merge1_p;
+    rtb_BusAssignment_m.pivot_state = rtb_Merge1;
     rtb_BusAssignment1_o = rtb_BusAssignment_m;
     rtb_BusAssignment1_o.w = mpc_tgt_calc_P.Constant_Value_pr;
     rtb_BusAssignment1_o.alpha = mpc_tgt_calc_P.Constant_Value_pr;
     rtb_BusAssignment1_o.pivot_state = mpc_tgt_calc_P.Constant1_Value_c;
-    if (rtb_Product2 < rtb_Gain2) {
+    if (rtb_Product2_h < rtb_Gain2_n) {
       rtb_BusAssignment1_o = rtb_BusAssignment_m;
     }
   } else if (arg_mode == 4) {
     t_ego rtb_BusAssignment_m;
-    int32_T rtb_Merge1_p;
-    rtb_Product2 = std::abs(arg_ego->img_ang);
-    rtb_Gain2 = mpc_tgt_calc_P.Gain2_Gain_i * arg_tgt->alpha;
+    int32_T rtb_Merge1;
+    rtb_Product2_h = std::abs(arg_ego->img_ang);
+    rtb_Gain2_n = mpc_tgt_calc_P.Gain2_Gain_i * arg_tgt->alpha;
     rtb_Gain2_p = std::abs(arg_tgt->tgt_angle);
     rtb_Switch_ju = arg_ego->w * arg_ego->w - arg_tgt->end_w * arg_tgt->end_w;
     if (arg_ego->pivot_state == 2.0F || std::abs(rtb_Switch_ju) /
-        (mpc_tgt_calc_P.Gain1_Gain_hy * std::abs(rtb_Gain2)) + rtb_Product2 >=
-        mpc_tgt_calc_P.Gain_Gain_m * rtb_Gain2_p || rtb_Product2 >=
+        (mpc_tgt_calc_P.Gain1_Gain_hy * std::abs(rtb_Gain2_n)) + rtb_Product2_h >=
+        mpc_tgt_calc_P.Gain_Gain_m * rtb_Gain2_p || rtb_Product2_h >=
         mpc_tgt_calc_P.Gain4_Gain * rtb_Gain2_p) {
       boolean_T rtb_RelationalOperator_a;
-      if (rtb_Gain2 > mpc_tgt_calc_P.Switch2_Threshold_m) {
+      if (rtb_Gain2_n > mpc_tgt_calc_P.Switch2_Threshold_m) {
         rtb_RelationalOperator_a = arg_ego->w < arg_tgt->end_w;
       } else {
         rtb_RelationalOperator_a = arg_ego->w > arg_tgt->end_w;
@@ -307,41 +308,41 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
 
       if (rtb_RelationalOperator_a) {
         if (mpc_tgt_calc_P.ManualSwitch_CurrentSetting_j != 1) {
-          if (rtb_Gain2 > mpc_tgt_calc_P.Switch1_Threshold_i) {
-            rtb_Gain2 = static_cast<real32_T>(std::abs(rtb_Switch_ju / (std::
+          if (rtb_Gain2_n > mpc_tgt_calc_P.Switch1_Threshold_i) {
+            rtb_Gain2_n = static_cast<real32_T>(std::abs(rtb_Switch_ju / (std::
               fmax(mpc_tgt_calc_P.Constant1_Value_m, static_cast<real_T>
-                   (rtb_Gain2_p - rtb_Product2)) * mpc_tgt_calc_P.Gain_Gain_g)));
+                   (rtb_Gain2_p - rtb_Product2_h)) * mpc_tgt_calc_P.Gain_Gain_g)));
           } else {
-            rtb_Gain2 = static_cast<real32_T>(std::abs(rtb_Switch_ju / (std::
+            rtb_Gain2_n = static_cast<real32_T>(std::abs(rtb_Switch_ju / (std::
               fmax(mpc_tgt_calc_P.Constant1_Value_m, static_cast<real_T>
-                   (rtb_Gain2_p - rtb_Product2)) * mpc_tgt_calc_P.Gain_Gain_g)))
+                   (rtb_Gain2_p - rtb_Product2_h)) * mpc_tgt_calc_P.Gain_Gain_g)))
               * mpc_tgt_calc_P.Gain1_Gain_n;
           }
         }
       } else {
-        rtb_Gain2 = mpc_tgt_calc_P.Constant_Value_h;
+        rtb_Gain2_n = mpc_tgt_calc_P.Constant_Value_h;
       }
 
-      rtb_Merge1_p = mpc_tgt_calc_P.Constant2_Value_f2;
-    } else if (arg_ego->pivot_state == 0.0F && rtb_Product2 <
+      rtb_Merge1 = mpc_tgt_calc_P.Constant2_Value_f2;
+    } else if (arg_ego->pivot_state == 0.0F && rtb_Product2_h <
                mpc_tgt_calc_P.Gain5_Gain * rtb_Gain2_p) {
-      rtb_Gain2 = arg_tgt->alpha;
-      rtb_Merge1_p = mpc_tgt_calc_P.Constant1_Value_oj;
+      rtb_Gain2_n = arg_tgt->alpha;
+      rtb_Merge1 = mpc_tgt_calc_P.Constant1_Value_oj;
     } else {
-      rtb_Gain2 = static_cast<real32_T>(mpc_tgt_calc_P.Constant_Value_p);
-      rtb_Merge1_p = mpc_tgt_calc_P.Constant2_Value_j;
+      rtb_Gain2_n = static_cast<real32_T>(mpc_tgt_calc_P.Constant_Value_p);
+      rtb_Merge1 = mpc_tgt_calc_P.Constant2_Value_j;
     }
 
     rtb_BusAssignment_m = *arg_ego;
-    rtb_BusAssignment_m.w = mpc_tgt_calc_P.Gain_Gain_c * rtb_Gain2 *
+    rtb_BusAssignment_m.w = mpc_tgt_calc_P.Gain_Gain_c * rtb_Gain2_n *
       static_cast<real32_T>(arg_time_step) + arg_ego->w;
-    rtb_BusAssignment_m.alpha = rtb_Gain2;
-    rtb_BusAssignment_m.pivot_state = rtb_Merge1_p;
+    rtb_BusAssignment_m.alpha = rtb_Gain2_n;
+    rtb_BusAssignment_m.pivot_state = rtb_Merge1;
     rtb_BusAssignment1_o = rtb_BusAssignment_m;
     rtb_BusAssignment1_o.w = mpc_tgt_calc_P.Constant_Value_m;
     rtb_BusAssignment1_o.alpha = mpc_tgt_calc_P.Constant_Value_m;
     rtb_BusAssignment1_o.pivot_state = mpc_tgt_calc_P.Constant1_Value_e;
-    if (rtb_Product2 < rtb_Gain2_p) {
+    if (rtb_Product2_h < rtb_Gain2_p) {
       rtb_BusAssignment1_o = rtb_BusAssignment_m;
     }
   } else {
@@ -351,26 +352,26 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
       (mpc_tgt_calc_P.Gain_Gain_b * static_cast<real32_T>(arg_time_step));
   }
 
-  rtb_Product2 = rtb_BusAssignment1_o.w * static_cast<real32_T>(arg_time_step) *
-    mpc_tgt_calc_P.Gain1_Gain_g;
+  rtb_Product2_h = rtb_BusAssignment1_o.w * static_cast<real32_T>(arg_time_step)
+    * mpc_tgt_calc_P.Gain1_Gain_g;
   if (arg_mode == 1) {
     rtb_Abs6 = mpc_tgt_calc_P.Gain_Gain_p * static_cast<real32_T>(arg_time_step);
-    Merge_k = (mpc_tgt_calc_P.Constant_Value_o / arg_tgt->mass +
+    Merge_k = (mpc_tgt_calc_P.Constant_Value_o / arg_ego1->mass +
                rtb_BusAssignment1_o.w * arg_ego->slip.vy) * rtb_Abs6 +
       arg_ego->slip.vx;
-    rtb_Gain2 = (mpc_tgt_calc_P.Gain3_Gain_d * arg_tgt->slip_gain_K1 *
-                 arg_ego->slip.beta / arg_tgt->mass - rtb_BusAssignment1_o.w *
-                 arg_ego->slip.vx) * rtb_Abs6 + arg_ego->slip.vy;
-    rtb_Gain2_p = std::sqrt(Merge_k * Merge_k + rtb_Gain2 * rtb_Gain2);
+    rtb_Gain2_n = (mpc_tgt_calc_P.Gain3_Gain_d * arg_tgt->slip_gain_K1 *
+                   arg_ego->slip.beta / arg_ego1->mass - rtb_BusAssignment1_o.w *
+                   arg_ego->slip.vx) * rtb_Abs6 + arg_ego->slip.vy;
+    rtb_Gain2_p = std::sqrt(Merge_k * Merge_k + rtb_Gain2_n * rtb_Gain2_n);
     rtb_BusAssignment1_o.slip.beta = (arg_ego->slip.beta / rtb_Abs6 -
       rtb_BusAssignment1_o.w) / (mpc_tgt_calc_P.Constant1_Value_i / rtb_Abs6 +
       arg_tgt->slip_gain_K2 / rtb_Gain2_p);
     rtb_BusAssignment1_o.slip.v = rtb_Gain2_p;
     rtb_Gain2_p *= mpc_tgt_calc_P.Gain1_Gain_o;
     rtb_BusAssignment1_o.dist = arg_ego->dist + rtb_Abs7;
-    rtb_BusAssignment1_o.ang = arg_ego->ang + rtb_Product2;
+    rtb_BusAssignment1_o.ang = arg_ego->ang + rtb_Product2_h;
     rtb_BusAssignment1_o.img_dist = arg_ego->img_dist + rtb_Abs7;
-    rtb_BusAssignment1_o.img_ang = arg_ego->img_ang + rtb_Product2;
+    rtb_BusAssignment1_o.img_ang = arg_ego->img_ang + rtb_Product2_h;
     rtb_BusAssignment1_o.sla_param.base_alpha = arg_ego->sla_param.base_alpha;
     rtb_BusAssignment1_o.sla_param.base_time = arg_ego->sla_param.base_time;
     rtb_BusAssignment1_o.sla_param.limit_time_count =
@@ -387,7 +388,7 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
     rtb_BusAssignment1_o.cnt_delay_accl_ratio = arg_ego->cnt_delay_accl_ratio;
     rtb_BusAssignment1_o.cnt_delay_decel_ratio = arg_ego->cnt_delay_decel_ratio;
     rtb_BusAssignment1_o.slip.vx = Merge_k;
-    rtb_BusAssignment1_o.slip.vy = rtb_Gain2;
+    rtb_BusAssignment1_o.slip.vy = rtb_Gain2_n;
     rtb_BusAssignment1_o.slip.accl = arg_ego->slip.accl;
     rtb_BusAssignment1_o.v = rtb_Gain2_p;
     rtb_BusAssignment1_o.accl = (rtb_Gain2_p - arg_ego->v) / rtb_Abs6;
@@ -395,9 +396,9 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
     rtb_BusAssignment1_o.v = rtb_Abs6;
     rtb_BusAssignment1_o.accl = Merge_k;
     rtb_BusAssignment1_o.dist = arg_ego->dist + rtb_Abs7;
-    rtb_BusAssignment1_o.ang = arg_ego->ang + rtb_Product2;
+    rtb_BusAssignment1_o.ang = arg_ego->ang + rtb_Product2_h;
     rtb_BusAssignment1_o.img_dist = arg_ego->img_dist + rtb_Abs7;
-    rtb_BusAssignment1_o.img_ang = arg_ego->img_ang + rtb_Product2;
+    rtb_BusAssignment1_o.img_ang = arg_ego->img_ang + rtb_Product2_h;
     rtb_BusAssignment1_o.sla_param.base_alpha = arg_ego->sla_param.base_alpha;
     rtb_BusAssignment1_o.sla_param.base_time = arg_ego->sla_param.base_time;
     rtb_BusAssignment1_o.sla_param.limit_time_count =
@@ -420,6 +421,22 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
     rtb_BusAssignment1_o.slip.accl = arg_ego->slip.accl;
   }
 
+  rtb_Abs7 = arg_ego1->gear_ratio * arg_ego1->km;
+  rtb_Gain2_n = mpc_tgt_calc_P.Gain4_Gain_c * rtb_BusAssignment1_o.accl *
+    arg_ego1->mass * (mpc_tgt_calc_P.Gain1_Gain_b * arg_ego1->tire) *
+    arg_ego1->resist / rtb_Abs7;
+  Merge_k = rtb_BusAssignment1_o.alpha * arg_ego1->lm *
+    (mpc_tgt_calc_P.Gain1_Gain_it * arg_ego1->tire) * arg_ego1->resist /
+    rtb_Abs7 / (mpc_tgt_calc_P.Gain2_Gain_j * arg_ego1->tread);
+  rtb_Product2_h = mpc_tgt_calc_P.Gain4_Gain_m * rtb_BusAssignment1_o.v;
+  rtb_Abs7 = mpc_tgt_calc_P.Gain5_Gain_c * arg_ego1->tread *
+    mpc_tgt_calc_P.Gain_Gain_kc * rtb_BusAssignment1_o.w;
+  rtb_Abs6 = mpc_tgt_calc_P.Gain6_Gain * arg_ego1->tire *
+    mpc_tgt_calc_P.Gain1_Gain_i5;
+  rtb_BusAssignment1_o.ff_duty_l = (rtb_Product2_h - rtb_Abs7) * arg_ego1->ke *
+    mpc_tgt_calc_P.Gain2_Gain_d / rtb_Abs6 + (rtb_Gain2_n - Merge_k);
+  rtb_BusAssignment1_o.ff_duty_r = (rtb_Product2_h + rtb_Abs7) * arg_ego1->ke *
+    mpc_tgt_calc_P.Gain3_Gain_k / rtb_Abs6 + (rtb_Gain2_n + Merge_k);
   *arg_next_ego = rtb_BusAssignment1_o;
 }
 

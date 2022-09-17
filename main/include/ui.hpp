@@ -41,6 +41,7 @@ public:
   void error();
 
   TurnDirection select_direction();
+  TurnDirection select_direction2();
 
 private:
   std::shared_ptr<sensing_result_entity_t> sensing_result;

@@ -228,10 +228,10 @@ void PlanningTask::task() {
 
     // 物理量ベース計算
     mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in, tgt_val->motion_mode,
-                      mpc_step, &mpc_next_ego);
+                      mpc_step, &mpc_next_ego, &dynamics);
 
-    mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in, tgt_val->motion_mode,
-                      param_ro->sakiyomi_time, &mpc_next_ego2);
+    // mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in, tgt_val->motion_mode,
+    //                   param_ro->sakiyomi_time, &mpc_next_ego2, &dynamics);
 
     // 算出結果をコピー
     cp_tgt_val();
@@ -900,14 +900,14 @@ void PlanningTask::calc_tgt_duty() {
   error_entity.w.error_i += error_entity.w.error_p;
   error_entity.ang.error_i += error_entity.ang.error_p;
 
-  float duty_rpm_r = get_rpm_ff_val(TurnDirection::Right);
-  float duty_rpm_l = get_rpm_ff_val(TurnDirection::Left);
+  // float duty_rpm_r = get_rpm_ff_val(TurnDirection::Right);
+  // float duty_rpm_l = get_rpm_ff_val(TurnDirection::Left);
   // float duty_rpm_r = get_feadforward_front(TurnDirection::Right);
   // float duty_rpm_l = get_feadforward_front(TurnDirection::Left);
   float duty_ff_front = 0;
   float duty_ff_roll = 0;
-  duty_ff_front = get_feadforward_front();
-  duty_ff_roll = get_feadforward_roll();
+  // duty_ff_front = get_feadforward_front();
+  // duty_ff_roll = get_feadforward_roll();
 
   duty_c = 0;
   duty_c2 = 0;
@@ -929,8 +929,6 @@ void PlanningTask::calc_tgt_duty() {
     error_entity.v_log.gain_z = 0;
   }
   const unsigned char reset_req = motor_en ? 1 : 0;
-  const float motor_req =
-      tgt_val->motion_type == MotionType::FRONT_CTRL ? 0 : 1;
   const unsigned char reset = 0;
   const unsigned char enable = 1;
 
@@ -1023,13 +1021,22 @@ void PlanningTask::calc_tgt_duty() {
     }
   }
 
-  tgt_duty.duty_r = (duty_c + duty_c2 + duty_roll + duty_roll2 + duty_rpm_r +
-                     duty_ff_front + duty_ff_roll + duty_sen) /
+  // tgt_duty.duty_r = (duty_c + duty_c2 + duty_roll + duty_roll2 + duty_rpm_r +
+  //                    duty_ff_front + duty_ff_roll + duty_sen) /
+  //                   sensing_result->ego.battery_lp * 100;
+
+  // tgt_duty.duty_l = (duty_c + duty_c2 - duty_roll - duty_roll2 + duty_rpm_l +
+  //                    duty_ff_front - duty_ff_roll - duty_sen) /
+  //                   sensing_result->ego.battery_lp * 100;
+
+  tgt_duty.duty_r = (duty_c + duty_c2 + duty_roll + duty_roll2 +
+                     mpc_next_ego.ff_duty_r + duty_sen) /
                     sensing_result->ego.battery_lp * 100;
 
-  tgt_duty.duty_l = (duty_c + duty_c2 - duty_roll - duty_roll2 + duty_rpm_l +
-                     duty_ff_front - duty_ff_roll - duty_sen) /
+  tgt_duty.duty_l = (duty_c + duty_c2 - duty_roll - duty_roll2 +
+                     mpc_next_ego.ff_duty_l - duty_sen) /
                     sensing_result->ego.battery_lp * 100;
+
   const auto max_duty = param_ro->sen_ref_p.search_exist.offset_l;
   if (tgt_val->motion_type == MotionType::FRONT_CTRL) {
     if (tgt_duty.duty_r > max_duty) {
@@ -1062,7 +1069,6 @@ void PlanningTask::calc_tgt_duty() {
     error_entity.sen_dia.error_i = 0;
     tgt_duty.duty_r = tgt_duty.duty_l = 0;
     duty_ff_front = duty_ff_roll = 0;
-    duty_rpm_r = duty_rpm_l = 0;
     error_entity.v_log.gain_zz = 0;
     error_entity.v_log.gain_z = 0;
     error_entity.dist_log.gain_zz = 0;
@@ -1226,7 +1232,7 @@ void PlanningTask::check_fail_safe() {
 }
 
 void PlanningTask::cp_request() {
-  tgt_val->tgt_in.mass = param_ro->Mass;
+  // tgt_val->tgt_in.mass = param_ro->Mass;
   tgt_val->tgt_in.slip_gain_K1 = slip_param.K;
   tgt_val->tgt_in.slip_gain_K2 = slip_param.k;
   if (motion_req_timestamp == tgt_val->nmr.timstamp) {

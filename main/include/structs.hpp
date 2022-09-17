@@ -230,6 +230,7 @@ typedef struct {
   sen_ref_param2_t normal2;
   sen_ref_param2_t dia;
   sen_search_param_t search_exist;
+  sen_search_param_t search_ref;
 } sen_ref_param_t;
 
 typedef struct {

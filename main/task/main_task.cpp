@@ -482,6 +482,15 @@ void MainTask::load_hw_param() {
   param->comp_param.enable =
       cJSON_GetObjectItem(comp_v_param, "enable")->valueint;
 
+  pt->dynamics.mass = param->Mass;
+  pt->dynamics.lm = param->Lm;
+  pt->dynamics.km = param->Km;
+  pt->dynamics.resist = param->Resist;
+  pt->dynamics.tread = param->tread;
+  pt->dynamics.ke = param->Ke;
+  pt->dynamics.tire = param->tire;
+  pt->dynamics.gear_ratio = param->gear_a / param->gear_b;
+
   cJSON_free(root);
   cJSON_free(motor_pid);
   cJSON_free(gyro_pid);
@@ -513,7 +522,7 @@ void MainTask::load_sensor_param() {
 
   cJSON *root = cJSON_CreateObject(), *normal, *normal_ref, *normal_exist, *dia,
         *normal2, *normal2_ref, *normal2_exist, *dia_ref, *dia_exist, *search,
-        *search_exist, *gain;
+        *search_ref, *search_exist, *gain;
   root = cJSON_Parse(str.c_str());
 
   normal = cJSON_GetObjectItem(root, "normal");
@@ -607,6 +616,16 @@ void MainTask::load_sensor_param() {
   param->sen_ref_p.search_exist.front_ctrl =
       cJSON_GetObjectItem(search_exist, "front_ctrl")->valuedouble;
 
+  search_ref = cJSON_GetObjectItem(search, "ref");
+  param->sen_ref_p.search_ref.right45 =
+      cJSON_GetObjectItem(search_ref, "right45")->valuedouble;
+  param->sen_ref_p.search_ref.left45 =
+      cJSON_GetObjectItem(search_ref, "left45")->valuedouble;
+  param->sen_ref_p.search_ref.right90 =
+      cJSON_GetObjectItem(search_ref, "right90")->valuedouble;
+  param->sen_ref_p.search_ref.left90 =
+      cJSON_GetObjectItem(search_ref, "left90")->valuedouble;
+
   gain = cJSON_GetObjectItem(root, "gain");
   param->sensor_gain.l90.a =
       cJSON_GetArrayItem(cJSON_GetObjectItem(gain, "L90"), 0)->valuedouble;
@@ -640,6 +659,7 @@ void MainTask::load_sensor_param() {
   cJSON_free(dia_ref);
   cJSON_free(dia_exist);
   cJSON_free(search);
+  cJSON_free(search_ref);
   cJSON_free(search_exist);
   cJSON_free(gain);
 }
@@ -1025,7 +1045,17 @@ void MainTask::task() {
       printf("%d\n", mode_num);
       if (mode_num == 0) {
         lgc->set_goal_pos(sys.goals);
+        // rorl2 = ui->select_direction2();
+        const auto backup_l45 = param->sen_ref_p.normal.exist.left45;
+        const auto backup_r45 = param->sen_ref_p.normal.exist.right45;
+        // if (rorl2 == TurnDirection::Right) {
+        // } else {
+        // }
+        param->sen_ref_p.normal.exist.left45 =
+            param->sen_ref_p.normal.exist.right45 = 5;
         sr = search_ctrl->exec(paramset_list[0], SearchMode::ALL);
+        param->sen_ref_p.normal.exist.left45 = backup_l45;
+        param->sen_ref_p.normal.exist.right45 = backup_r45;
         if (sr == SearchResult::SUCCESS)
           save_maze_data(true);
         while (1) {
@@ -1037,6 +1067,14 @@ void MainTask::task() {
       } else if (mode_num == 1) {
         lgc->set_goal_pos(sys.goals);
         rorl = ui->select_direction();
+        // rorl2 = ui->select_direction2();
+        const auto backup_l45 = param->sen_ref_p.normal.exist.left45;
+        const auto backup_r45 = param->sen_ref_p.normal.exist.right45;
+        // if (rorl2 == TurnDirection::Right) {
+        // } else {
+        param->sen_ref_p.normal.exist.left45 =
+            param->sen_ref_p.normal.exist.right45 = 5;
+        // }
         sr = SearchResult::SUCCESS;
         if (rorl == TurnDirection::Right)
           sr = search_ctrl->exec(paramset_list[0], SearchMode::Kata);
@@ -1049,6 +1087,8 @@ void MainTask::task() {
             break;
           vTaskDelay(10 / portTICK_RATE_MS);
         }
+        param->sen_ref_p.normal.exist.left45 = backup_l45;
+        param->sen_ref_p.normal.exist.right45 = backup_r45;
         search_ctrl->print_maze();
       } else if (mode_num == 2) {
         path_run(0, 0);
@@ -1183,7 +1223,7 @@ void MainTask::test_run() {
   pt->motor_enable();
 
   req_error_reset();
-if (param->test_log_enable > 0) {
+  if (param->test_log_enable > 0) {
     lt->start_slalom_log();
   }
   ps.v_max = sys.test.v_max;
@@ -1247,7 +1287,7 @@ void MainTask::test_back() {
   pt->motor_enable();
 
   req_error_reset();
-if (param->test_log_enable > 0) {
+  if (param->test_log_enable > 0) {
     lt->start_slalom_log();
   }
   ps.v_max = sys.test.v_max;
@@ -2080,7 +2120,7 @@ void MainTask::path_run(int idx, int idx2) {
             .str_map[p.first]
             .alpha;
   }
-  const auto rorl = ui->select_direction();
+  const auto rorl = ui->select_direction2();
   const auto backup_l45 = param->sen_ref_p.normal.exist.left45;
   const auto backup_r45 = param->sen_ref_p.normal.exist.right45;
   if (rorl == TurnDirection::Right) {

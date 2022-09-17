@@ -42,6 +42,13 @@ dia:
     right90: 100
     left90: 135
 search:
+  ref:
+    right45: 38
+    left45: 38
+    right90: 52
+    left90: 52
+    kireme_r: 0
+    kireme_l: 0
   exist:
     front: 130
     right45: 80
@@ -51,7 +58,8 @@ search:
     left90: 58
 
     # kireme_r: 1.5 #前壁補正：角度
-    kireme_r: 0.45 #前壁補正：角度
+    # kireme_r: 0.45 #前壁補正：角度
+    kireme_r: 0.5 #前壁補正：角度
     kireme_l: 1.0 #切れ目しきい値 L
 
     offset_r: 25 #前壁制御　左右値差　しきい値

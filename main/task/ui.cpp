@@ -233,6 +233,38 @@ TurnDirection UserInterface::select_direction() {
     vTaskDelay(25 / portTICK_PERIOD_MS);
   }
 }
+
+
+
+TurnDirection UserInterface::select_direction2() {
+  TurnDirection td = TurnDirection::None;
+  bool b = true;
+  while (1) {
+    if (sensing_result->ego.v_r > ENC_OPE_V_R_TH) {
+      music_sync(MUSIC::G6_, 75);
+      td = TurnDirection::Right;
+      LED_bit(0, 0, 1, 0, 0);
+    }
+    if (sensing_result->ego.v_l > ENC_OPE_V_R_TH) {
+      music_sync(MUSIC::C6_, 75);
+      td = TurnDirection::Left;
+      LED_bit(1, 0, 0, 0, 0);
+    }
+
+    if (td != TurnDirection::None) {
+      if (button_state_hold()) {
+        coin(80);
+        coin(80);
+        coin(80);
+        return td;
+      }
+    } else {
+      LED_bit(0, 0, 0, (int)b, (int)b);
+      b = b ? false : true;
+    }
+    vTaskDelay(25 / portTICK_PERIOD_MS);
+  }
+}
 void UserInterface::error() {
   int time = 120;
   for (int i = 0; i < 4; i++)

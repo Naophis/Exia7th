@@ -119,6 +119,17 @@ class mpc_tgt_calcModelClass final
     real32_T Constant_Value_hs;
     real32_T Gain1_Gain_e;
     real32_T Gain1_Gain_g;
+    real32_T Gain4_Gain_c;
+    real32_T Gain1_Gain_b;
+    real32_T Gain1_Gain_it;
+    real32_T Gain2_Gain_j;
+    real32_T Gain4_Gain_m;
+    real32_T Gain5_Gain_c;
+    real32_T Gain_Gain_kc;
+    real32_T Gain2_Gain_d;
+    real32_T Gain6_Gain;
+    real32_T Gain1_Gain_i5;
+    real32_T Gain3_Gain_k;
     real32_T DataStoreMemory_InitialValue;
     uint8_T ManualSwitch_CurrentSetting;
     uint8_T ManualSwitch_CurrentSetting_c;
@@ -145,7 +156,7 @@ class mpc_tgt_calcModelClass final
   mpc_tgt_calcModelClass::RT_MODEL_mpc_tgt_calc_T * getRTM();
   void initialize();
   void step(const t_tgt *arg_tgt, const t_ego *arg_ego, int32_T arg_mode,
-            int32_T arg_time_step, t_ego *arg_next_ego);
+            int32_T arg_time_step, t_ego *arg_next_ego, t_dynamics *arg_ego1);
   static void terminate();
   mpc_tgt_calcModelClass();
   ~mpc_tgt_calcModelClass();

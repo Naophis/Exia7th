@@ -2,7 +2,7 @@ clear;
 
 home = pwd;
 
-sim_time = 150;
+sim_time = 50;
 script_file = mfilename('fullpath');
 [filepath, name, ext] = fileparts(script_file);
 cd(filepath);
@@ -11,7 +11,9 @@ Simulink.importExternalCTypes('../include/bus.h');
 
 dt = 0.001;
 
- test_mode = 0; % straight
+ 
+test_mode = 0; % straight
+
 % test_mode = 1; % slalom
 % test_mode = 2; % pivot
 %  test_mode = 3; % back_straight
@@ -42,7 +44,26 @@ slip_gain = 400;
 
 k1 = 0.5;
 k2 = 220;
-mass = 0.015;
+
+mass = single(0.015);
+lm=single(0.0000065);
+ke=single(0.00125);
+km=single(0.0005);
+resist=single(1.7);
+tread=single(38);
+tire=single(13);
+gear_ratio=single(37/8);
+
+
+% mass = single(0.11);
+% lm=single(0.00025);
+% km=single(0.00352);
+% resist=single(2.93);
+% tread=single(74);
+% ke=single(0.000368613538);
+% tire=single(23);
+% gear_ratio=single(67/21);
+
 
 if test_mode == 0
     % tgt
@@ -54,7 +75,7 @@ if test_mode == 0
     w_max = 0;
     end_w = 0;
     param_alpha = 0;
-    tgt_dist = 10;
+    tgt_dist = 180;
     tgt_angle = 0;
 
     % ego

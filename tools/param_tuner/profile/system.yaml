@@ -29,7 +29,7 @@ test: # テスト走行時に使用するパラメータ群
   file_idx: 8
   sla_dist: 90
   # sla_type: 3
-  sla_type: 3
+  sla_type: 5
   sla_type2: 6 #復路ターン種類
   sla_return: 0 # 往復フラグ
   # sla_type: 1 normal

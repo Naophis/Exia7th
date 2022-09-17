@@ -14,7 +14,7 @@ FF_keV: 1
 # FF_roll: 0
 # FF_keV: 0
 
-Ke: 0.00305
+Ke: 0.00125
 Km: 0.0005
 
 # Ke: 0.00105
@@ -27,8 +27,7 @@ slip_param_K: 0.5
 slip_param_k2: 150
 # slip_param_k2: 5
 
-# Lm: 0.0000035
-Lm: 0.00000175
+Lm: 0.0000035
 sakiyomi_time: 40
 clear_angle: 5
 clear_dist_order: 80
@@ -98,12 +97,12 @@ dia_wall_off_ref_l: 38.0
 dia_wall_off_ref_r: 33.0
 
 #ログON_OFF
-logging_time: 1.0
+logging_time: 5.0
 search_log_enable: 0
 test_log_enable: 1
 fast_log_enable: 1
 sen_log_size: 100
-log_size: 900
+log_size: 1000
 
 fail_duty_cnt: 500
 fail_v_cnt: 200

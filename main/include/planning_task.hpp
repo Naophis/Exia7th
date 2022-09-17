@@ -50,6 +50,8 @@ public:
   bool motor_en = false;
   bool suction_en = false;
 
+  t_dynamics dynamics;
+
 private:
   xTaskHandle handle = 0;
 

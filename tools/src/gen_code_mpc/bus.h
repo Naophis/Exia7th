@@ -59,8 +59,18 @@ typedef struct {
   float limit_decel_ratio_cnt;
   float slip_gain_K1;
   float slip_gain_K2;
-  float mass;
 } t_tgt;
+
+typedef struct{
+  float mass;
+  float lm;
+  float km;
+  float resist;
+  float tread;
+  float ke;
+  float tire;
+  float gear_ratio;
+} t_dynamics;
 
 typedef struct {
   float base_alpha;
@@ -109,6 +119,8 @@ typedef struct {
   float cnt_delay_accl_ratio;
   float cnt_delay_decel_ratio;
   t_slip slip;
+  float ff_duty_l;
+  float ff_duty_r;
 } t_ego;
 
 typedef struct {
