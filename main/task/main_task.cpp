@@ -1051,8 +1051,8 @@ void MainTask::task() {
         // if (rorl2 == TurnDirection::Right) {
         // } else {
         // }
-        param->sen_ref_p.normal.exist.left45 =
-            param->sen_ref_p.normal.exist.right45 = 5;
+        // param->sen_ref_p.normal.exist.left45 =
+        //     param->sen_ref_p.normal.exist.right45 = 5;
         sr = search_ctrl->exec(paramset_list[0], SearchMode::ALL);
         param->sen_ref_p.normal.exist.left45 = backup_l45;
         param->sen_ref_p.normal.exist.right45 = backup_r45;
@@ -1072,8 +1072,8 @@ void MainTask::task() {
         const auto backup_r45 = param->sen_ref_p.normal.exist.right45;
         // if (rorl2 == TurnDirection::Right) {
         // } else {
-        param->sen_ref_p.normal.exist.left45 =
-            param->sen_ref_p.normal.exist.right45 = 5;
+        // param->sen_ref_p.normal.exist.left45 =
+        //     param->sen_ref_p.normal.exist.right45 = 5;
         // }
         sr = SearchResult::SUCCESS;
         if (rorl == TurnDirection::Right)

@@ -269,11 +269,11 @@ float PlanningTask::calc_sensor_pid() {
 
   error_entity.sen.error_i += error_entity.sen.error_p;
   error_entity.sen.error_p = check_sen_error();
-  // if (error_entity.sen.error_p > 10) {
-  //   error_entity.sen.error_p = 10;
-  // } else if (error_entity.sen.error_p < -10) {
-  //   error_entity.sen.error_p = -10;
-  // }
+  if (error_entity.sen.error_p > 10) {
+    error_entity.sen.error_p = 10;
+  } else if (error_entity.sen.error_p < -10) {
+    error_entity.sen.error_p = -10;
+  }
   if (param_ro->sensor_pid.mode == 1) {
     duty = param_ro->sensor_pid.p * error_entity.sen.error_p +
            param_ro->sensor_pid.i * error_entity.sen.error_i +
