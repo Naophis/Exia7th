@@ -103,6 +103,12 @@ typedef struct {
   float dist2;
 } dir_pt_t;
 
+struct CompairDirPt {
+  bool operator()(dir_pt_t const &p1, dir_pt_t const &p2) {
+    return p1.dist2 > p2.dist2;
+  }
+};
+
 typedef struct {
   uint8_t x;
   uint8_t y;

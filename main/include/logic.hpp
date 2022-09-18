@@ -8,6 +8,7 @@
 #include "maze_solver.hpp"
 #include <unordered_map>
 
+#include <queue>
 using namespace std;
 
 class MazeSolverBaseLgc {
@@ -198,7 +199,8 @@ public:
   vector<unsigned int> dist;
   vector<unsigned char> updateMap;
   vector<point_t> q_list;
-  vector<dir_pt_t> vq_list;
+  // vector<dir_pt_t> vq_list;
+  priority_queue<dir_pt_t, vector<dir_pt_t>, CompairDirPt> vq_list;
   void set_ego(std::shared_ptr<ego_t> &_ego);
 
 private:
@@ -237,6 +239,7 @@ private:
   float St1 = cell_size;
   float St2 = cell_size * 2 / 7;
   float St3 = cell_size * 1 / 7;
+  dir_pt_t dir_pt;
 };
 
 #endif
