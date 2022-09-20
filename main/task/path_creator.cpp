@@ -127,7 +127,12 @@ bool PathCreator::path_create(bool is_search, int tgt_x, int tgt_y,
   float dist_val = MAX;
   float old_dist_val = MAX;
   stepped.clear();
+  int cnt = 0;
   while (true) {
+    cnt++;
+    if (cnt > 1023) {
+      return false;
+    }
     now_dir = next_dir;
     dirLog[2] = dirLog[1];
     dirLog[1] = dirLog[0];
