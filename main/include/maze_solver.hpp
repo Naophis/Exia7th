@@ -3,6 +3,7 @@
 
 #include "stdio.h"
 #include <cmath>
+#include <set>
 #include <vector>
 
 using namespace std;
@@ -40,6 +41,39 @@ enum class Direction : int {
   South = 8,
   Undefined = 255,
   Null = 0
+};
+
+typedef struct {
+  std::set<Direction> candidate_dir_set;
+  bool selected = false;
+  Direction select_dir = Direction::Null;
+  float from_dist;
+  int x;
+  int y;
+} candidate_route_info_t;
+
+typedef struct {
+  Direction dir;
+  float time;
+  bool use;
+} route_t;
+
+typedef struct {
+  float time;
+  bool state;
+  bool use;
+} path_create_status_t;
+
+struct CompairCandiRoute {
+  bool operator()(candidate_route_info_t const &p1,
+                  candidate_route_info_t const &p2) {
+    return p1.from_dist < p2.from_dist;
+  }
+};
+struct CompairRoute {
+  bool operator()(route_t const &p1, route_t const &p2) {
+    return p1.time > p2.time;
+  }
 };
 
 enum class Motion : int {

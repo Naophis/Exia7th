@@ -2025,15 +2025,6 @@ void MainTask::read_maze_data() {
 }
 
 void MainTask::path_run(int idx, int idx2) {
-  const bool res = pc->path_create(false);
-  if (!res) {
-    ui->error();
-    return;
-  }
-  pc->convert_large_path(true);
-  pc->diagonalPath(true, true);
-  pc->print_path();
-  // lgc->data_economize();
 
   param_set.suction = tpp.profile_list[idx][TurnType::Finish] > 0;
   param_set.suction_duty = sys.test.suction_duty;
@@ -2120,6 +2111,44 @@ void MainTask::path_run(int idx, int idx2) {
             .str_map[p.first]
             .alpha;
   }
+
+  pc->other_route_map.clear();
+  const bool res = pc->path_create(false);
+  if (!res) {
+    ui->error();
+    return;
+  }
+  pc->convert_large_path(true);
+  pc->diagonalPath(true, true);
+
+  pc->path_s2.clear();
+  pc->path_t2.clear();
+  for (int i = 0; i < pc->path_t.size(); i++) {
+    pc->path_s2.push_back(pc->path_s[i]);
+    pc->path_t2.push_back(pc->path_t[i]);
+  }
+  //速度ベース経路導出
+  auto result = pc->timebase_path_create(false, param_set);
+  if (result == 1) { //成功
+    pc->path_s.clear();
+    pc->path_t.clear();
+    for (int i = 0; i < pc->path_t2.size(); i++) {
+      pc->path_s.push_back(pc->path_s2[i]);
+      pc->path_t.push_back(pc->path_t2[i]);
+    }
+  } else { //失敗
+    pc->other_route_map.clear();
+    const bool res = pc->path_create(false);
+    if (!res) {
+      ui->error();
+      return;
+    }
+    pc->convert_large_path(true);
+    pc->diagonalPath(true, true);
+  }
+  pc->print_path();
+  printf("%f\n", pc->route.time);
+
   const auto rorl = ui->select_direction2();
   const auto backup_l45 = param->sen_ref_p.normal.exist.left45;
   const auto backup_r45 = param->sen_ref_p.normal.exist.right45;

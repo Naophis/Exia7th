@@ -102,8 +102,6 @@ public:
   unsigned int searchGoalPosition(const bool isSearch,
                                   vector<point_t> &pt_list);
 
-  void searchGoalPosition2(const bool isSearch, vector<point_t> &pt_list);
-
   bool is_unknown(const int x, const int y, Direction dir);
 
   void setNextRootDirectionPathUnKnown(int x, int y, Direction dir,
@@ -202,13 +200,14 @@ public:
   // vector<dir_pt_t> vq_list;
   priority_queue<dir_pt_t, vector<dir_pt_t>, CompairDirPt> vq_list;
   void set_ego(std::shared_ptr<ego_t> &_ego);
+  unsigned int vector_max_step_val = 180 * 1024;
+  unsigned int VectorMax = vector_max_step_val;
+  const float VectorMaxF = (float)vector_max_step_val;
 
 private:
   std::shared_ptr<ego_t> ego;
   unsigned int maze_list_size;
   unsigned int goal_list_size;
-  unsigned int vector_max_step_val = 180 * 1024;
-  unsigned int VectorMax = vector_max_step_val;
   int Value = 0;
   unsigned int borderLv1 = 0;
   unsigned int borderLv2 = 2;

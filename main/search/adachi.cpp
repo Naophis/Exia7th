@@ -214,6 +214,18 @@ void Adachi::goal_step_check() {
       break;
     }
   }
+  if (lgc->goal_list_origin.size() == 1) {
+    for (auto it = lgc->goal_list_origin.begin();
+         it != lgc->goal_list_origin.end(); it++) {
+      if (lgc->isStep((*it).x, (*it).y, Direction::North) &&
+          lgc->isStep((*it).x, (*it).y, Direction::East) &&
+          lgc->isStep((*it).x, (*it).y, Direction::West) &&
+          lgc->isStep((*it).x, (*it).y, Direction::South)) {
+        it = lgc->goal_list_origin.erase(it);
+        break;
+      }
+    }
+  }
   if (lgc->goal_list_origin.size() == 0) {
     goal_step = true;
   } else {

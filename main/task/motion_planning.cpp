@@ -44,9 +44,11 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p,
   tgt_val->nmr.dia_mode = p.dia_mode;
 
   const auto ego_v = tgt_val->ego_in.v;
-  const auto req_dist = std::abs((ego_v * ego_v - p.v_end * p.v_end) / (2 * p.accl));
+  const auto req_dist =
+      std::abs((ego_v * ego_v - p.v_end * p.v_end) / (2 * p.accl));
   if (req_dist > p.dist) {
-    p.accl = std::abs((ego_v * ego_v - p.v_end * p.v_end) / (2 * p.dist)) + 1000;
+    p.accl =
+        std::abs((ego_v * ego_v - p.v_end * p.v_end) / (2 * p.dist)) + 1000;
   }
 
   tgt_val->nmr.sct = p.sct;
@@ -169,18 +171,34 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
         sensing_result->ego.left90_dist < 130 &&
         param->front_dist_offset_pivot_th < sensing_result->ego.right90_dist &&
         sensing_result->ego.right90_dist < 130) {
-      ps_front.dist +=
-          (sensing_result->ego.front_dist - param->front_dist_offset);
+      auto diff = (sensing_result->ego.front_dist - param->front_dist_offset);
+      if (diff > 5) {
+        // diff = 5;
+      } else if (diff < -5) {
+        diff = -5;
+      }
+      ps_front.dist += diff;
+      // (sensing_result->ego.front_dist - param->front_dist_offset);
     }
     if (td == TurnDirection::Right) {
       if (sensing_result->ego.left45_dist < th_offset_dist) {
-        ps_back.dist +=
-            (param->sla_wall_ref_l - sensing_result->ego.left45_dist);
+        auto diff = (param->sla_wall_ref_l - sensing_result->ego.left45_dist);
+        if (diff > 5) {
+          // diff = 5;
+        } else if (diff < -5) {
+          diff = -5;
+        }
+        ps_back.dist += diff;
       }
     } else {
       if (sensing_result->ego.right45_dist < th_offset_dist) {
-        ps_back.dist +=
-            (param->sla_wall_ref_r - sensing_result->ego.right45_dist);
+        auto diff = (param->sla_wall_ref_r - sensing_result->ego.right45_dist);
+        if (diff > 5) {
+          // diff = 5;
+        } else if (diff < -5) {
+          diff = -5;
+        }
+        ps_back.dist += diff;
       }
     }
     if (ps_front.dist > 0) {
@@ -213,9 +231,10 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
       }
     }
     if (find_r && find_l) {
-      ps_back.dist = (std::abs(ps_back.dist - dist_r) < std::abs(ps_back.dist - dist_l))
-                         ? dist_r
-                         : dist_l;
+      ps_back.dist =
+          (std::abs(ps_back.dist - dist_r) < std::abs(ps_back.dist - dist_l))
+              ? dist_r
+              : dist_l;
     } else if (find_r) {
       ps_back.dist = dist_r;
     } else if (find_l) {
@@ -279,7 +298,8 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
       }
     }
     if (find_r && find_l) {
-      sp.rad = (std::abs(sp.rad - rad_r) < std::abs(sp.rad - rad_l)) ? rad_r : rad_l;
+      sp.rad =
+          (std::abs(sp.rad - rad_r) < std::abs(sp.rad - rad_l)) ? rad_r : rad_l;
     } else if (find_r) {
       sp.rad = rad_r;
     } else if (find_l) {
@@ -454,7 +474,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   if (ps_back.dist > 0) {
     const auto ego_v = tgt_val->ego_in.v;
     ps_back.accl = std::abs((ego_v * ego_v - ps_back.v_end * ps_back.v_end) /
-                       (2 * ps_back.dist)) +
+                            (2 * ps_back.dist)) +
                    1000;
     res_b = go_straight(ps_back);
     if (res_b != MotionResult::NONE) {
@@ -573,12 +593,12 @@ MotionResult MotionPlanning::front_ctrl(bool limit) {
     //   return MotionResult::ERROR;
     // }
     if (std::abs(sensing_result->ego.front_dist -
-            param->sen_ref_p.search_exist.front_ctrl) <
+                 param->sen_ref_p.search_exist.front_ctrl) <
             param->sen_ref_p.search_exist.kireme_l &&
         std::abs((sensing_result->ego.right90_dist -
-             sensing_result->ego.left90_dist) /
-                2 -
-            param->sen_ref_p.search_exist.kireme_r) <
+                  sensing_result->ego.left90_dist) /
+                     2 -
+                 param->sen_ref_p.search_exist.kireme_r) <
             param->sen_ref_p.search_exist.offset_r) {
       cnt++;
     } else {

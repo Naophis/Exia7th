@@ -979,7 +979,7 @@ unsigned int MazeSolverBaseLgc::searchGoalPosition(
     dirLog[2] = dirLog[1];
     dirLog[1] = dirLog[0];
     dirLog[0] = now_dir;
-    Value = VectorMax;
+    Value = vector_max_step_val;
     next_dir = Direction::Undefined;
     pt.x = x;
     pt.y = y;
@@ -989,20 +989,30 @@ unsigned int MazeSolverBaseLgc::searchGoalPosition(
       break;
 
     // const unsigned int position = getDistVector(x, y, now_dir);
+    float position = getDistVector(x, y, now_dir);
 
+    if (now_dir == Direction::North) {
+      position = getDistVector(x, y, Direction::South);
+    } else if (now_dir == Direction::East) {
+      position = getDistVector(x, y, Direction::West);
+    } else if (now_dir == Direction::West) {
+      position = getDistVector(x, y, Direction::East);
+    } else if (now_dir == Direction::South) {
+      position = getDistVector(x, y, Direction::North);
+    }
     setNextRootDirectionPathUnKnown(x, y, Direction::North, now_dir, next_dir,
-                                    Value);
+                                    position);
     setNextRootDirectionPathUnKnown(x, y, Direction::East, now_dir, next_dir,
-                                    Value);
+                                    position);
     setNextRootDirectionPathUnKnown(x, y, Direction::West, now_dir, next_dir,
-                                    Value);
+                                    position);
     setNextRootDirectionPathUnKnown(x, y, Direction::South, now_dir, next_dir,
-                                    Value);
+                                    position);
 
     if (dirLog[0] == dirLog[1] || dirLog[0] != dirLog[2])
-      priorityStraight2(x, y, now_dir, dirLog[0], Value, next_dir);
+      priorityStraight2(x, y, now_dir, dirLog[0], position, next_dir);
     else
-      priorityStraight2(x, y, now_dir, dirLog[1], Value, next_dir);
+      priorityStraight2(x, y, now_dir, dirLog[1], position, next_dir);
 
     if (next_dir == Direction::North) {
       if (is_unknown(x, y, Direction::North))
@@ -1033,73 +1043,6 @@ unsigned int MazeSolverBaseLgc::searchGoalPosition(
   // pt_list.erase(std::unique(pt_list.begin(), pt_list.end()), pt_list.end());
 
   return cnt;
-}
-void MazeSolverBaseLgc::searchGoalPosition2(const bool isSearch,
-                                            vector<point_t> &pt_list) {
-
-  int c = 0;
-  for (int i = 0; i < maze_size; i++)
-    for (int j = 0; j < maze_size; j++)
-      dist[c++] = max_step_val;
-  int head = 0;
-  int tail = 0;
-  for (const auto g : goal_list) {
-    int idx = g.x + g.y * maze_size;
-    dist[idx] = 0;
-    q_list[tail].x = g.x;
-    q_list[tail].y = g.y;
-    tail++;
-  }
-  for (const auto g : goal_list3) {
-    int idx = g.x + g.y * maze_size;
-    dist[idx] = 0;
-    q_list[tail].x = g.x;
-    q_list[tail].y = g.y;
-    tail++;
-  }
-  int pt1;
-  int b;
-  char X = 0, Y = 0;
-  char i, j;
-  point_t pt;
-  while (head != tail) {
-    Y = q_list[head].y;
-    X = q_list[head].x;
-    if (X == 0 && Y == 0)
-      return;
-    head++;
-    pt1 = get_dist_val(X, Y) + 1;
-    for (const auto D : direction_list) {
-      i = 0;
-      j = 0;
-      if (D == Direction::North)
-        j = 1;
-      else if (D == Direction::East)
-        i = 1;
-      else if (D == Direction::West)
-        i = -1;
-      else if (D == Direction::South)
-        j = -1;
-
-      b = !existWall(X, Y, D);
-
-      if (b && get_dist_val(X + i, Y + j) == max_step_val) {
-        if (X + i < 0 || X + i >= maze_size || Y + j < 0 ||
-            Y + j >= maze_size) {
-        } else {
-          set_dist_val(X + i, Y + j, pt1);
-          q_list[tail].x = X + i;
-          q_list[tail].y = Y + j;
-          tail++;
-          if (is_unknown(X + i, Y + j, D)) {
-            pt.x = X + i;
-            pt.y = Y + j;
-            pt_list.emplace_back(pt);
-          }
-        }
-      }
-    }
-  }
 }
 void MazeSolverBaseLgc::priorityStraight2(int x, int y, Direction now_dir,
                                           Direction dir, float &dist_val,
