@@ -673,7 +673,8 @@ void PathCreator::checkOtherRoot(int x, int y, Direction now_dir, float now) {
   for (const auto d : direction_list) {
     const auto dist = lgc->getDistVector(x, y, d);
     const auto d_int = static_cast<int>(d);
-    if (now_d * d_int != 8 && !lgc->existWall(x, y, d) && dist < now) {
+    if (now_d * d_int != 8 && !lgc->existWall(x, y, d) && dist < now &&
+        lgc->isStep(x, y, d)) {
       other_route_map[x + y * lgc->maze_size].candidate_dir_set.insert(d);
     }
   }
