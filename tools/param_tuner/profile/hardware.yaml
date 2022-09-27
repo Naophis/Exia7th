@@ -1,8 +1,9 @@
 dt: 0.001
 # tire: 13.025
-tire: 13.636
+tire: 13.6725
+# tire: 13.095
 # tire: 13.135
-offset_start_dist: 23.0
+offset_start_dist: 21.0
 # offset_start_dist: 45.0
 gear_a: 37
 gear_b: 8
@@ -33,7 +34,7 @@ clear_angle: 5
 clear_dist_order: 80
 # front_dist_offset: 91.5
 front_dist_offset: 93.5
-front_dist_offset2: 152.0
+front_dist_offset2: 137.0
 led_light_delay_cnt: 500
 
 front_dist_offset_pivot_th: 80
@@ -55,8 +56,8 @@ sla_wall_ref_l: 44
 sla_wall_ref_r: 44
 
 # 壁切れ オフセット距離
-wall_off_hold_dist_str_l: -8.0
-wall_off_hold_dist_str_r: -4.0
+wall_off_hold_dist_str_l: -7.0
+wall_off_hold_dist_str_r: -3.0
 # 壁切れ オフセット距離(斜め壁有り)
 wall_off_hold_dist_dia_l: -3.0
 wall_off_hold_dist_dia_r: -6.0
@@ -97,12 +98,12 @@ dia_wall_off_ref_l: 38.0
 dia_wall_off_ref_r: 33.0
 
 #ログON_OFF
-logging_time: 5.0
-search_log_enable: 0
+logging_time: 4.0
+search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1
 sen_log_size: 100
-log_size: 1000
+log_size: 1100
 
 fail_duty_cnt: 500
 fail_v_cnt: 200
@@ -132,6 +133,8 @@ gyro_pid:
   p: 0.275
   i: 25.0
   d: 0.00
+  # p: 0.0
+  # i: 0.0
   mode: 1
   b: 0
   c: 0
@@ -143,9 +146,9 @@ angle_pid:
   b: 0
   c: 0
 sensor_pid:
-  p: 0.15
+  p: 0.125
   i: 0.0
-  d: 0.0
+  d: 0.025
   b: 0
   c: 0
   mode: 1

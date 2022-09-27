@@ -1,6 +1,6 @@
 normal:
   ref:
-    right45: 44.0
+    right45: 45.5
     left45: 44.0
     front: 47
     kireme_r: 0.50
@@ -34,13 +34,13 @@ normal2: #壁なし補正時
     left90: 100
 dia:
   ref:
-    right90: 100
-    left90: 135
+    right90: 130
+    left90: 150
     kireme_r: 160
     kireme_l: 160
   exist:
-    right90: 100
-    left90: 135
+    right90: 130
+    left90: 150
 search:
   ref:
     right45: 38
@@ -59,7 +59,7 @@ search:
 
     # kireme_r: 1.5 #前壁補正：角度
     # kireme_r: 0.45 #前壁補正：角度
-    kireme_r: 0.5 #前壁補正：角度
+    kireme_r: 1.5 #前壁補正：角度
     kireme_l: 1.0 #切れ目しきい値 L
 
     offset_r: 25 #前壁制御　左右値差　しきい値

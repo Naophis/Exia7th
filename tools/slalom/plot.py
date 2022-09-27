@@ -29,7 +29,7 @@ class Plot:
         start_ang = 0
         if type == "normal":
             rad = 26
-            n = 2
+            n = 4
             tgt_ang = 90
             end_pos = {"x": 45, "y": 45}
             start_ang = 0

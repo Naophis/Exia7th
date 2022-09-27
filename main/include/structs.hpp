@@ -9,8 +9,8 @@
 #include "gen_code_conv_single2half/half_type.h"
 #include "gen_code_conv_single2half/rtwtypes.h"
 
-#include <deque>
 #include <cmath>
+#include <deque>
 #include <initializer_list>
 #include <iostream>
 #include <memory>
@@ -577,6 +577,7 @@ typedef struct {
 
 typedef struct {
   float v = 0;
+  float end_v = 0;
   float ang = 0;
   float rad = 0;
   slalom_offset_t front;
@@ -699,7 +700,6 @@ typedef struct {
   real16_T sen_log_l45;
   real16_T sen_log_r45;
 } log_data_t2;
-
 
 typedef struct {
   real16_T v_l;

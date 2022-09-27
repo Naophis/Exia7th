@@ -1045,17 +1045,14 @@ void MainTask::task() {
       printf("%d\n", mode_num);
       if (mode_num == 0) {
         lgc->set_goal_pos(sys.goals);
-        // rorl2 = ui->select_direction2();
-        const auto backup_l45 = param->sen_ref_p.normal.exist.left45;
-        const auto backup_r45 = param->sen_ref_p.normal.exist.right45;
-        // if (rorl2 == TurnDirection::Right) {
-        // } else {
-        // }
-        // param->sen_ref_p.normal.exist.left45 =
-        //     param->sen_ref_p.normal.exist.right45 = 5;
-        sr = search_ctrl->exec(paramset_list[0], SearchMode::ALL);
-        param->sen_ref_p.normal.exist.left45 = backup_l45;
-        param->sen_ref_p.normal.exist.right45 = backup_r45;
+        rorl2 = ui->select_direction2();
+        int idx = 0;
+        if (rorl2 == TurnDirection::Right) {
+          idx = 0;
+        } else {
+          idx = 1;
+        }
+        sr = search_ctrl->exec(paramset_list[idx], SearchMode::ALL);
         if (sr == SearchResult::SUCCESS)
           save_maze_data(true);
         while (1) {
@@ -1067,19 +1064,18 @@ void MainTask::task() {
       } else if (mode_num == 1) {
         lgc->set_goal_pos(sys.goals);
         rorl = ui->select_direction();
-        // rorl2 = ui->select_direction2();
-        const auto backup_l45 = param->sen_ref_p.normal.exist.left45;
-        const auto backup_r45 = param->sen_ref_p.normal.exist.right45;
-        // if (rorl2 == TurnDirection::Right) {
-        // } else {
-        // param->sen_ref_p.normal.exist.left45 =
-        //     param->sen_ref_p.normal.exist.right45 = 5;
-        // }
+        rorl2 = ui->select_direction2();
+        int idx = 0;
+        if (rorl2 == TurnDirection::Right) {
+          idx = 0;
+        } else {
+          idx = 1;
+        }
         sr = SearchResult::SUCCESS;
         if (rorl == TurnDirection::Right)
-          sr = search_ctrl->exec(paramset_list[0], SearchMode::Kata);
+          sr = search_ctrl->exec(paramset_list[idx], SearchMode::Kata);
         else
-          sr = search_ctrl->exec(paramset_list[0], SearchMode::Return);
+          sr = search_ctrl->exec(paramset_list[idx], SearchMode::Return);
         if (sr == SearchResult::SUCCESS)
           save_maze_data(true);
         while (1) {
@@ -1087,8 +1083,6 @@ void MainTask::task() {
             break;
           vTaskDelay(10 / portTICK_RATE_MS);
         }
-        param->sen_ref_p.normal.exist.left45 = backup_l45;
-        param->sen_ref_p.normal.exist.right45 = backup_r45;
         search_ctrl->print_maze();
       } else if (mode_num == 2) {
         path_run(0, 0);
@@ -1582,7 +1576,8 @@ void MainTask::test_search_sla() {
     return;
   }
 
-  sla_p = paramset_list[file_idx].map[TurnType::Normal];
+  sla_p = paramset_list[0].map[TurnType::Normal];
+  str_p = paramset_list[0].str_map[StraightType::Search];
 
   rorl = ui->select_direction();
   backup_r = param->sen_ref_p.normal.exist.right45;
@@ -1613,11 +1608,11 @@ void MainTask::test_search_sla() {
     lt->start_slalom_log();
   }
 
-  ps.v_max = sla_p.v;
-  ps.v_end = sla_p.v;
+  ps.v_max = str_p.v_max;
+  ps.v_end = str_p.v_max;
   ps.dist = 45 + param->offset_start_dist;
-  ps.accl = sys.test.accl;
-  ps.decel = sys.test.decel;
+  ps.accl = str_p.accl;
+  ps.decel = str_p.decel;
   ps.sct = SensorCtrlType::Straight;
 
   mp->go_straight(ps);

@@ -88,6 +88,7 @@ private:
   TurnDirection rorl;
   TurnDirection rorl2;
   next_motion_t nm;
+  param_set_t p_set;
 
   const TickType_t xDelay1000 = 1000 / portTICK_PERIOD_MS;
   const TickType_t xDelay500 = 500 / portTICK_PERIOD_MS;

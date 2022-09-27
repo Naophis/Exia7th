@@ -20,22 +20,22 @@ mode: 0 # モード選択
 test: # テスト走行時に使用するパラメータ群
   v_max: 300
   end_v: 1
-  accl: 12500
-  decel: -12500
+  accl: 2500
+  decel: -2500
   dist: 720 #直進全部　
   # dist: 180 # スラロームテスト
   dia: 0
-  w_max: 8.0
-  alpha: 30
+  w_max: 15.0
+  alpha: 180
   ang: 360
-  suction_active: 1
-  suction_duty: 3.25
+  suction_active: 0
+  suction_duty: 3.35
   # suction_duty: 3.25
   file_idx: 8
   sla_dist: 90
   # sla_type: 3
-  sla_type: 5
-  sla_type2: 6 #復路ターン種類
+  sla_type: 3
+  sla_type2: 8 #復路ターン種類
   sla_return: 0 # 往復フラグ
   # sla_type: 1 normal
   # sla_type: 2 #orval

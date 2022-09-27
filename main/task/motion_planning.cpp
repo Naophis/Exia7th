@@ -68,7 +68,11 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p,
       break;
     }
     if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
-      return MotionResult::ERROR;
+      if (p.motion_type == MotionType::SLA_FRONT_STR ||
+          p.motion_type == MotionType::SLA_BACK_STR) {
+      } else {
+        return MotionResult::ERROR;
+      }
     }
   }
   return MotionResult::NONE;
@@ -167,6 +171,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
 
   if (sp.type == TurnType::Normal) {
     // search_front_ctrl(ps_front); // 前壁制御
+    ps_front.v_max = next_motion.v_max;
     if (param->front_dist_offset_pivot_th < sensing_result->ego.left90_dist &&
         sensing_result->ego.left90_dist < 130 &&
         param->front_dist_offset_pivot_th < sensing_result->ego.right90_dist &&
@@ -176,6 +181,9 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
         // diff = 5;
       } else if (diff < -5) {
         diff = -5;
+      }
+      if (ps_front.dist < 0) {
+        ps_front.dist = 1;
       }
       ps_front.dist += diff;
       // (sensing_result->ego.front_dist - param->front_dist_offset);
@@ -187,6 +195,9 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
           // diff = 5;
         } else if (diff < -5) {
           diff = -5;
+        }
+        if (ps_back.dist < 0) {
+          ps_back.dist = 1;
         }
         ps_back.dist += diff;
       }

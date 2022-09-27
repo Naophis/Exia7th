@@ -1,11 +1,11 @@
 straight:
   search:
-    v_max: 400
-    accl: 1000
-    decel: -1000
-    w_max: 5
+    v_max: 300
+    accl: 5500
+    decel: -5500
+    w_max: 15
     w_end: 0.1
-    alpha: 10
+    alpha: 180
   fast_run:
     v_max: 1500
     accl: 4500
@@ -30,13 +30,15 @@ orval:
   back: { left: 5, right: 5 }
 
 normal:
-  v: 400
+  v: 300
   ang: 90
   rad: 26
   pow_n: 2
-  time: 0.08460937500000223
-  front: { left: 5.125035001744379, right: 5.125035001744379 }
-  back: { left: 5.19514894400956, right: 5.19514894400956 }
+  time: 0.11281250000001165
+  front: { left: 5.78880106421743, right: 5.78880106421743 }
+  # back: { left: 9.466694915341364, right: 9.466694915341364 }
+  back: { left: 12.466694915341364, right: 12.466694915341364 }
+  # back: { left: 15.466694915341364, right: 150.466694915341364 }
 large:
   v: 400
   ang: 90
