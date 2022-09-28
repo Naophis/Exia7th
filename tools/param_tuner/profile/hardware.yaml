@@ -65,12 +65,20 @@ wall_off_hold_dist_dia_r: -6.0
 wall_off_hold_dist_dia_l2: -0.5
 wall_off_hold_dist_dia_r2: 1.0
 
+# # 壁切れ In
+# wall_off_hold_exist_dist_l: 73
+# wall_off_hold_exist_dist_r: 76
+# # 壁切れ Out
+# wall_off_hold_noexist_th_l: 75
+# wall_off_hold_noexist_th_r: 79
+
 # 壁切れ In
 wall_off_hold_exist_dist_l: 73
-wall_off_hold_exist_dist_r: 76
+wall_off_hold_exist_dist_r: 100
 # 壁切れ Out
 wall_off_hold_noexist_th_l: 75
-wall_off_hold_noexist_th_r: 79
+wall_off_hold_noexist_th_r: 105
+
 
 # 壁切れ In
 wall_off_hold_exist_dist_dia_l: 55
@@ -98,12 +106,12 @@ dia_wall_off_ref_l: 38.0
 dia_wall_off_ref_r: 33.0
 
 #ログON_OFF
-logging_time: 4.0
+logging_time: 1.0
 search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1
 sen_log_size: 100
-log_size: 1100
+log_size: 1200
 
 fail_duty_cnt: 500
 fail_v_cnt: 200
@@ -115,6 +123,8 @@ cell2: 90
 motor_pid:
   p: 0.005125
   i: 0.685
+  # p: 0.0005
+  # i: 1.25
   d: 0.0
   b: 0.63778
   c: 0.010752
