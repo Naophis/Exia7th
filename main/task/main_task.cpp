@@ -1102,6 +1102,14 @@ void MainTask::task() {
         path_run(7, 4);
       } else if (mode_num == 10) {
         path_run(8, 4);
+      } else if (mode_num == 11) {
+        path_run(9, 4);
+      } else if (mode_num == 12) {
+        path_run(10, 4);
+      } else if (mode_num == 12) {
+        path_run(11, 4);
+      } else if (mode_num == 12) {
+        path_run(12, 4);
       } else if (mode_num == 14) {
         dump1(); // taskの最終行に配置すること
       } else if (mode_num == 15) {

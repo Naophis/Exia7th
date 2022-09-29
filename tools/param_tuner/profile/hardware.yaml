@@ -56,8 +56,8 @@ sla_wall_ref_l: 44
 sla_wall_ref_r: 44
 
 # 壁切れ オフセット距離
-wall_off_hold_dist_str_l: -7.0
-wall_off_hold_dist_str_r: -3.0
+wall_off_hold_dist_str_l: -10.5
+wall_off_hold_dist_str_r: -8.0
 # 壁切れ オフセット距離(斜め壁有り)
 wall_off_hold_dist_dia_l: -3.0
 wall_off_hold_dist_dia_r: -6.0
@@ -106,12 +106,12 @@ dia_wall_off_ref_l: 38.0
 dia_wall_off_ref_r: 33.0
 
 #ログON_OFF
-logging_time: 1.0
+logging_time: 5.0
 search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1
 sen_log_size: 100
-log_size: 1200
+log_size: 1000
 
 fail_duty_cnt: 500
 fail_v_cnt: 200

@@ -1145,10 +1145,10 @@ void PlanningTask::cp_tgt_val() {
   tgt_val->ego_in.cnt_delay_decel_ratio = mpc_next_ego.cnt_delay_decel_ratio;
 
   const auto theta = tgt_val->ego_in.img_ang + slip_param.beta;
-  const auto x = tgt_val->ego_in.v * std::cos(theta);
-  const auto y = tgt_val->ego_in.v * std::sin(theta);
-  tgt_val->p.x += x;
-  tgt_val->p.y += y;
+  // const auto x = tgt_val->ego_in.v * std::cos(theta);
+  // const auto y = tgt_val->ego_in.v * std::sin(theta);
+  // tgt_val->p.x += x;
+  // tgt_val->p.y += y;
 
   tgt_val->ego_in.slip.beta = mpc_next_ego.slip.beta;
   tgt_val->ego_in.slip.accl = mpc_next_ego.slip.accl;

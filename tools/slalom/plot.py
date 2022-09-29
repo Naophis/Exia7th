@@ -46,13 +46,13 @@ class Plot:
             end_pos = {"x": 0, "y": 180}
             start_ang = 0
         elif type == "dia45":
-            rad = 60
+            rad = 52
             n = 4
             tgt_ang = 45
             end_pos = {"x": 90, "y": 45}
             start_ang = 0
         elif type == "dia135":
-            rad = 48
+            rad = 45
             n = 4
             tgt_ang = 135
             end_pos = {"x": 45, "y": 90}
