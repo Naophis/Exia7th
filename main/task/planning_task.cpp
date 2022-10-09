@@ -230,7 +230,13 @@ void PlanningTask::task() {
     // 物理量ベース計算
     mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in, tgt_val->motion_mode,
                       mpc_step, &mpc_next_ego, &dynamics);
-
+    if (tgt_val->motion_type == MotionType::STRAIGHT ||
+        tgt_val->motion_type == MotionType::SLA_FRONT_STR ||
+        tgt_val->motion_type == MotionType::SLA_BACK_STR) {
+      if (tgt_val->tgt_in.tgt_dist <= tgt_val->ego_in.img_dist) {
+        mpc_next_ego.v = tgt_val->tgt_in.end_v;
+      }
+    }
     // mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in,
     // tgt_val->motion_mode,
     //                   param_ro->sakiyomi_time, &mpc_next_ego2, &dynamics);
@@ -763,23 +769,9 @@ void PlanningTask::pl_req_activate() {
   }
 }
 
-float PlanningTask::get_feadforward_front(TurnDirection td) {
-  // return 0;
-  if (param_ro->FF_front == 0)
-    return 0;
-  const float tread = 38;
-}
-float PlanningTask::get_feadforward_front() {
-  // return 0;
-  if (param_ro->FF_front == 0)
-    return 0;
-}
-float PlanningTask::get_feadforward_roll() {
-  // return 0;
-  const float tread = 38;
-  if (param_ro->FF_roll == 0)
-    return 0;
-}
+float PlanningTask::get_feadforward_front(TurnDirection td) { return 0; }
+float PlanningTask::get_feadforward_front() { return 0; }
+float PlanningTask::get_feadforward_roll() { return 0; }
 float PlanningTask::get_rpm_ff_val(TurnDirection td) {
   // return 0;
   if (param_ro->FF_keV == 0)
