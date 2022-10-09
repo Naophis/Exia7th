@@ -543,6 +543,7 @@ typedef struct {
   int sysid_test_mode = 0;
   float sysid_duty = 0;
   float sysid_time = 0;
+  int start_turn = 0;
 } test_mode_t;
 
 typedef struct {

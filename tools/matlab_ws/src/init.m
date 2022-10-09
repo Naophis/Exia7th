@@ -67,19 +67,19 @@ gear_ratio=single(37/8);
 
 if test_mode == 0
     % tgt
-    v_max = 1000;
-    end_v = 1000;
-    accl = 4000;
-    decel = -4000;
+    v_max = 700;
+    end_v = 200;
+    accl = 12000;
+    decel = -12000;
 
     w_max = 0;
     end_w = 0;
     param_alpha = 0;
-    tgt_dist = 180;
+    tgt_dist = 21;
     tgt_angle = 0;
 
     % ego
-    ego_v = 20;
+    ego_v = 0;
     ego_accl = 0;
     ego_w = 0;
     ego_alpha = 0;

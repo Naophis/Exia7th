@@ -2,9 +2,11 @@
 #define RTW_HEADER_rt_nonfinite_h_
 #include <stddef.h>
 #include "rtwtypes.h"
+#define NOT_USING_NONFINITE_LITERALS   1
 #ifdef __cplusplus
 
-extern "C" {
+extern "C"
+{
 
 #endif
 
@@ -43,6 +45,7 @@ extern "C" {
 #ifdef __cplusplus
 
 }
+
 #endif
 #endif
 

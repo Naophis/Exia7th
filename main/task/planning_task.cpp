@@ -223,6 +223,7 @@ void PlanningTask::task() {
     calc_sensor_dist_all();
 
     mpc_step = 1;
+    tgt_val->tgt_in.time_step2 = param_ro->sakiyomi_time;
 
     cp_request();
 
@@ -230,7 +231,8 @@ void PlanningTask::task() {
     mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in, tgt_val->motion_mode,
                       mpc_step, &mpc_next_ego, &dynamics);
 
-    // mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in, tgt_val->motion_mode,
+    // mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in,
+    // tgt_val->motion_mode,
     //                   param_ro->sakiyomi_time, &mpc_next_ego2, &dynamics);
 
     // 算出結果をコピー
@@ -766,36 +768,17 @@ float PlanningTask::get_feadforward_front(TurnDirection td) {
   if (param_ro->FF_front == 0)
     return 0;
   const float tread = 38;
-  if (td == TurnDirection::Right) {
-
-    return (param_ro->Mass * mpc_next_ego2.accl / 1000 * param_ro->tire / 2000 +
-            param_ro->Ke * (mpc_next_ego2.v + tread / 2 * mpc_next_ego2.w) /
-                (param_ro->tire / 2) * 30.0 / PI) *
-           (param_ro->Resist / param_ro->Km) / 2 /
-           (param_ro->gear_a / param_ro->gear_b);
-  }
-  return (param_ro->Mass * mpc_next_ego2.accl / 1000 * param_ro->tire / 2000 +
-          param_ro->Ke * (mpc_next_ego2.v - tread / 2 * mpc_next_ego2.w) /
-              (param_ro->tire / 2) * 30.0 / PI) *
-         (param_ro->Resist / param_ro->Km) / 2 /
-         (param_ro->gear_a / param_ro->gear_b);
 }
 float PlanningTask::get_feadforward_front() {
   // return 0;
   if (param_ro->FF_front == 0)
     return 0;
-  return param_ro->Mass * mpc_next_ego2.accl / 1000 * param_ro->tire / 1000 *
-         param_ro->Resist /
-         ((param_ro->gear_a / param_ro->gear_b) * param_ro->Km) / 2;
 }
 float PlanningTask::get_feadforward_roll() {
   // return 0;
   const float tread = 38;
   if (param_ro->FF_roll == 0)
     return 0;
-  return param_ro->Lm * mpc_next_ego2.alpha * param_ro->tire * //
-         param_ro->Resist /
-         ((param_ro->gear_a / param_ro->gear_b) * param_ro->Km) / tread;
 }
 float PlanningTask::get_rpm_ff_val(TurnDirection td) {
   // return 0;
@@ -1029,6 +1012,8 @@ void PlanningTask::calc_tgt_duty() {
   //                    duty_ff_front - duty_ff_roll - duty_sen) /
   //                   sensing_result->ego.battery_lp * 100;
 
+  // printf("%0.3f, %0.3f, %0.3f, %0.3f,%0.3f,%0.3f \n", duty_c, duty_c2,
+  //        duty_roll, duty_roll2, mpc_next_ego.ff_duty_r, duty_sen);
   tgt_duty.duty_r = (duty_c + duty_c2 + duty_roll + duty_roll2 +
                      mpc_next_ego.ff_duty_r + duty_sen) /
                     sensing_result->ego.battery_lp * 100;
@@ -1291,6 +1276,7 @@ void PlanningTask::cp_request() {
   }
   if (tgt_val->tgt_in.tgt_dist != 0) {
     tgt_val->ego_in.img_dist -= tgt_val->ego_in.dist;
+    // tgt_val->ego_in.img_dist = 0;
     tgt_val->ego_in.dist = 0;
   }
   tgt_val->ego_in.sla_param.counter = 1;

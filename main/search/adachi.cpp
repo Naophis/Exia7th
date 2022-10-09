@@ -317,11 +317,11 @@ void Adachi::update() {
       lgc->searchGoalPosition(true, subgoal_list);
       cost_mode = 1;
     }
-    // if (subgoal_list.size() == 0) {
-    //   lgc->set_param2();
-    //   lgc->searchGoalPosition(true, subgoal_list);
-    //   cost_mode = 2;
-    // }
+    if (subgoal_list.size() == 0) {
+      lgc->set_param2();
+      lgc->searchGoalPosition(true, subgoal_list);
+      cost_mode = 2;
+    }
   }
   // lgc->reset_dist_map();
   // if (subgoal_list.size() == 0) {

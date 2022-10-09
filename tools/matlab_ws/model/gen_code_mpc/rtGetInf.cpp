@@ -1,20 +1,25 @@
 #include "rtwtypes.h"
 
-extern "C" {
+extern "C"
+{
 
 #include "rtGetInf.h"
 
 }
+
 #include <stddef.h>
 
-extern "C" {
+extern "C"
+{
 
 #include "rt_nonfinite.h"
 
 }
+
 #define NumBitsPerChar                 8U
 
-extern "C" {
+extern "C"
+{
   real_T rtGetInf(void)
   {
     size_t bitsPerReal{ sizeof(real_T) * (NumBitsPerChar) };

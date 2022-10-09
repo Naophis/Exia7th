@@ -1,20 +1,25 @@
 #include "rtwtypes.h"
 
-extern "C" {
+extern "C"
+{
 
 #include "rtGetNaN.h"
 
 }
+
 #include <stddef.h>
 
-extern "C" {
+extern "C"
+{
 
 #include "rt_nonfinite.h"
 
 }
+
 #define NumBitsPerChar                 8U
 
-extern "C" {
+extern "C"
+{
   real_T rtGetNaN(void)
   {
     size_t bitsPerReal{ sizeof(real_T) * (NumBitsPerChar) };

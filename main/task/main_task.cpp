@@ -725,6 +725,7 @@ void MainTask::load_sys_param() {
       cJSON_GetObjectItem(test, "sysid_test_mode")->valueint;
   sys.test.sysid_duty = cJSON_GetObjectItem(test, "sysid_duty")->valuedouble;
   sys.test.sysid_time = cJSON_GetObjectItem(test, "sysid_time")->valuedouble;
+  sys.test.start_turn = cJSON_GetObjectItem(test, "start_turn")->valueint;
 
   cJSON_free(root);
   cJSON_free(goals);
@@ -1038,6 +1039,7 @@ void MainTask::task() {
     search_ctrl->set_lgc(lgc);
     search_ctrl->set_motion_plannning(mp);
     pc->set_logic(lgc);
+    pc->set_userinterface(ui);
     read_maze_data();
     search_ctrl->print_maze();
     while (1) {
@@ -1095,21 +1097,21 @@ void MainTask::task() {
       } else if (mode_num == 6) {
         path_run(4, 4);
       } else if (mode_num == 7) {
-        path_run(5, 4);
+        path_run(5, 5);
       } else if (mode_num == 8) {
-        path_run(6, 4);
+        path_run(6, 6);
       } else if (mode_num == 9) {
-        path_run(7, 4);
+        path_run(7, 7);
       } else if (mode_num == 10) {
-        path_run(8, 4);
+        path_run(8, 8);
       } else if (mode_num == 11) {
-        path_run(9, 4);
+        path_run(9, 8);
       } else if (mode_num == 12) {
-        path_run(10, 4);
+        path_run(10, 8);
       } else if (mode_num == 12) {
-        path_run(11, 4);
+        path_run(11, 8);
       } else if (mode_num == 12) {
-        path_run(12, 4);
+        path_run(12, 8);
       } else if (mode_num == 14) {
         dump1(); // taskの最終行に配置すること
       } else if (mode_num == 15) {
@@ -1492,6 +1494,9 @@ void MainTask::test_sla() {
   ps.v_max = sla_p.v;
   ps.v_end = sla_p.v;
   ps.dist = 90 + param->offset_start_dist;
+  if (sys.test.start_turn > 0) {
+    ps.dist = param->offset_start_dist;
+  }
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
   ps.sct = SensorCtrlType::Straight;

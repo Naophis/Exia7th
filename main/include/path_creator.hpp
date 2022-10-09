@@ -8,6 +8,7 @@
 #include "logic.hpp"
 #include "maze_solver.hpp"
 #include "trajectory_creator.hpp"
+#include "include/ui.hpp"
 
 // constexpr int checkQlength = 256;
 constexpr int R = 1;
@@ -50,7 +51,9 @@ private:
 public:
   std::unordered_map<int, candidate_route_info_t> other_route_map;
   std::shared_ptr<MazeSolverBaseLgc> lgc;
+  std::shared_ptr<UserInterface> ui;
   void set_logic(std::shared_ptr<MazeSolverBaseLgc> &_lgc);
+  void set_userinterface(std::shared_ptr<UserInterface> &_ui);
 
   std::vector<float> path_s;
   std::vector<unsigned char> path_t;

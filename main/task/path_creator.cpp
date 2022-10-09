@@ -8,6 +8,9 @@ int PathCreator::get_dist_val(int x, int y) { return lgc->get_dist_val(x, y); }
 void PathCreator::set_logic(std::shared_ptr<MazeSolverBaseLgc> &_lgc) {
   lgc = _lgc;
 }
+void PathCreator::set_userinterface(std::shared_ptr<UserInterface> &_ui) {
+  ui = _ui;
+}
 void PathCreator::updateVectorMap(const bool isSearch) {
   lgc->updateVectorMap(isSearch);
 }
@@ -130,6 +133,9 @@ bool PathCreator::path_create(bool is_search, int tgt_x, int tgt_y,
   int cnt = 0;
   while (true) {
     cnt++;
+    if (ui->button_state()) {
+      return false;
+    }
     if (cnt > 1023) {
       return false;
     }
@@ -574,16 +580,21 @@ bool PathCreator::path_create_with_change(bool is_search, int tgt_x, int tgt_y,
   //初期化
   pc_result.time = 10000;
   pc_result.use = false;
-
+  printf("2 start\n");
   pc_result.state =
       path_create(is_search, tgt_x, tgt_y, tgt_dir, pc_result.use);
+  printf("2 end\n");
   if (!pc_result.state) {
     return false;
   }
   convert_large_path(true);
   diagonalPath(false, true);
+  printf("3 start\n");
   pc_result.time = calc_goal_time(p_set);
-
+  if (pc_result.time > 100) {
+    return false;
+  }
+  printf("3 end\n");
   return true;
 }
 
@@ -592,7 +603,7 @@ float PathCreator::timebase_path_create(bool is_search, param_set_t &p_set) {
   candidate_route_info_t tmp_cand_route;
   float time = 10000;
 
-  for (int i = 0; i < 100; i++) { //何かでリミットを設ける
+  for (int i = 0; i < 5; i++) { //何かでリミットを設ける
     const auto before = other_route_map.size();
     for (auto itr = other_route_map.begin(); itr != other_route_map.end();
          itr++) {
@@ -616,7 +627,12 @@ float PathCreator::timebase_path_create(bool is_search, param_set_t &p_set) {
       }
       // 該当の位置で分岐してPathを形成。それぞれ評価。
       for (const auto dir : cand.candidate_dir_set) {
+        printf("1 start\n");
         bool goal = path_create_with_change(true, x, y, dir, pc_result, p_set);
+        printf("1 end\n");
+        if (ui->button_state_hold()) {
+          return 0;
+        }
         if (!pc_result.state || !goal) {
           // たどり着かない等、詰んでいたら元のセットから除外。
           other_route_map[x + lgc->maze_size * y].candidate_dir_set.erase(dir);
@@ -732,6 +748,9 @@ float PathCreator::calc_goal_time(param_set_t &p_set) {
 
       time +=
           go_straight_dummy(v_now, ps.v_max, ps.v_end, ps.accl, ps.decel, dist);
+      if (time > 100) {
+        break;
+      }
       v_now = ps.v_end;
       if (turn_type == TurnType::Finish) {
         break;
@@ -767,15 +786,24 @@ char PathCreator::asc(float d, float d2) {
 float PathCreator::go_straight_dummy(float v1, float vmax, float v2, float ac,
                                      float diac, float dist) {
 
-  double dt = 0.001;
-  double acc = ac;
-  double distance = 0;
-  double time = 0;
-  double V_now = v1;
+  float dt = 0.001;
+  float acc = ac;
+  float distance = 0;
+  float time = 0;
+  float V_now = v1;
   int sequence = 1;
-  double d2;
+  float d2;
+
+  float dist2 = std::abs((v1 * v1 - v2 * v2) / (2 * diac));
+  if (dist2 > dist) {
+    acc = std::abs((v1 * v1 - v2 * v2) / (2 * dist)) + 1000;
+  }
+
   while (distance < dist) {
     time += dt;
+    if (ui->button_state()) {
+      return 100;
+    }
     d2 = std::abs((V_now + v2) * (V_now - v2) / (2.0 * diac));
     switch (sequence) {
     case 3:

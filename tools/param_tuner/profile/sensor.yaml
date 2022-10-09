@@ -3,8 +3,8 @@ normal:
     right45: 45.5
     left45: 44.0
     front: 47
-    kireme_r: 0.50
-    kireme_l: 0.50
+    kireme_r: 1.50
+    kireme_l: 1.50
   exist:
     right45: 46
     left45: 46

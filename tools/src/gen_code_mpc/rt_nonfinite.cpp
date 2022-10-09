@@ -1,9 +1,11 @@
-extern "C" {
+extern "C"
+{
 
 #include "rtGetNaN.h"
 
 }
-  extern "C"
+
+extern "C"
 {
 
 #include "rtGetInf.h"
@@ -13,14 +15,17 @@ extern "C" {
 #include <stddef.h>
 #include "rtwtypes.h"
 
-extern "C" {
+extern "C"
+{
 
 #include "rt_nonfinite.h"
 
 }
+
 #define NumBitsPerChar                 8U
 
-extern "C" {
+extern "C"
+{
   real_T rtInf;
   real_T rtMinusInf;
   real_T rtNaN;
@@ -28,7 +33,8 @@ extern "C" {
   real32_T rtMinusInfF;
   real32_T rtNaNF;
 }
-  extern "C"
+
+extern "C"
 {
   void rt_InitInfAndNaN(size_t realSize)
   {

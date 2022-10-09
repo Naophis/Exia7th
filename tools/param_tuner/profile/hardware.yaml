@@ -1,6 +1,7 @@
 dt: 0.001
 # tire: 13.025
-tire: 13.6725
+# tire: 13.6725
+tire: 13.46
 # tire: 13.095
 # tire: 13.135
 offset_start_dist: 21.0
@@ -25,11 +26,12 @@ Resist: 1.7
 Mass: 0.015
 
 slip_param_K: 0.5
-slip_param_k2: 150
+# slip_param_k2: 150
+slip_param_k2: 135
 # slip_param_k2: 5
 
 Lm: 0.0000035
-sakiyomi_time: 40
+sakiyomi_time: 10
 clear_angle: 5
 clear_dist_order: 80
 # front_dist_offset: 91.5
@@ -111,7 +113,7 @@ search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1
 sen_log_size: 100
-log_size: 1000
+log_size: 900
 
 fail_duty_cnt: 500
 fail_v_cnt: 200
@@ -157,8 +159,11 @@ angle_pid:
   c: 0
 sensor_pid:
   p: 0.125
+  # i: 0.0
+  # d: 0.025
+  # p: 0.0
   i: 0.0
-  d: 0.025
+  d: 0.0
   b: 0
   c: 0
   mode: 1

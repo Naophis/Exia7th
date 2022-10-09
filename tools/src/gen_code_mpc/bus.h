@@ -59,6 +59,7 @@ typedef struct {
   float limit_decel_ratio_cnt;
   float slip_gain_K1;
   float slip_gain_K2;
+  float time_step2;
 } t_tgt;
 
 typedef struct{
@@ -103,6 +104,7 @@ typedef struct {
   float accl;
   float w;
   float alpha;
+  float alpha2;
   float dist;
   float ang;
   float img_dist;
