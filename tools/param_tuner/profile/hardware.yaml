@@ -108,7 +108,7 @@ dia_wall_off_ref_l: 38.0
 dia_wall_off_ref_r: 33.0
 
 #ログON_OFF
-logging_time: 5.0
+logging_time: 1.0
 search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1

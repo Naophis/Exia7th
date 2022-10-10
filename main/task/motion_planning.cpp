@@ -410,6 +410,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   tgt_val->nmr.motion_mode = RUN_MODE2::SLAROM_RUN;
   tgt_val->nmr.motion_type = MotionType::SLALOM;
   tgt_val->nmr.sct = SensorCtrlType::NONE;
+  // tgt_val->ego_in.v = sp.v;//強制的に速度を指定
 
   if (sp.type != TurnType::Orval) {
     tgt_val->nmr.ang = 0;
@@ -457,21 +458,8 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
     if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
       return MotionResult::ERROR;
     }
-    // if (type != Dia90) {
-    //   if (!fail) {
-    //     alphaMode = 0;
-    //     alphaTemp = 0;
-    //     slaTerm = 0;
-    //     omegaTemp = 0;
-    //     return 0;
-    //   }
-    // }
   }
-  // ps_back.dist = (td == TurnDirection::Right) ? sp.back.right :
-  // sp.back.left;
 
-  // ps_back.v_max = next_motion.v_max;
-  // ps_back.v_end = next_motion.v_end;
   ps_back.v_max = sp.v;
   ps_back.v_end = sp.v;
   ps_back.accl = next_motion.accl;
@@ -488,10 +476,6 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   //  : SensorCtrlType::Dia;
   MotionResult res_b = MotionResult::NONE;
   if (ps_back.dist > 0) {
-    const auto ego_v = tgt_val->ego_in.v;
-    ps_back.accl = std::abs((ego_v * ego_v - ps_back.v_end * ps_back.v_end) /
-                            (2 * ps_back.dist)) +
-                   1000;
     res_b = go_straight(ps_back);
     if (res_b != MotionResult::NONE) {
       return MotionResult::ERROR;

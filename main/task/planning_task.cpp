@@ -1252,6 +1252,9 @@ void PlanningTask::cp_request() {
     tgt_val->ego_in.ang -= tgt_val->ego_in.img_ang;
     tgt_val->ego_in.img_ang = 0;
   }
+  if (tgt_val->motion_type == MotionType::SLALOM) {
+    tgt_val->ego_in.v = tgt_val->nmr.v_max;
+  }
 
   if (tgt_val->motion_type == MotionType::NONE ||
       tgt_val->motion_type == MotionType::READY) {
