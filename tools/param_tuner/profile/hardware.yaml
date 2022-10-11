@@ -113,7 +113,7 @@ search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1
 sen_log_size: 100
-log_size: 900
+log_size: 1600
 
 fail_duty_cnt: 500
 fail_v_cnt: 200

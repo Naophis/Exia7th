@@ -26,7 +26,9 @@ void LoggingTask::start_slalom_log() {
   active_slalom_log = true; //
   idx_slalom_log = 0;
   log_vec.clear();
+  log_vec.shrink_to_fit();
   sysidlog_vec.clear();
+  sysidlog_vec.shrink_to_fit();
 }
 
 void LoggingTask::stop_slalom_log() {

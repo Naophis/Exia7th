@@ -240,6 +240,7 @@ Motion Adachi::exec(bool is_stepped) {
 
   if (!goaled) {
     pt_list.clear();
+    pt_list.shrink_to_fit();
   }
   if (goaled) {
     subgoal_list.erase(ego->x + ego->y * lgc->maze_size);
@@ -249,10 +250,12 @@ Motion Adachi::exec(bool is_stepped) {
   if (goaled) {
     if (subgoal_list.size() == 0) {
       pt_list.clear();
+      pt_list.shrink_to_fit();
       tmp_p.x = tmp_p.y = 0;
       pt_list.emplace_back(tmp_p);
     } else {
       pt_list.clear();
+      pt_list.shrink_to_fit();
       for (auto itr = subgoal_list.begin(); itr != subgoal_list.end(); ++itr) {
         tmp_p.x = itr->first % lgc->maze_size;
         tmp_p.y = itr->first / lgc->maze_size;

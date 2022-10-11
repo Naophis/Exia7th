@@ -26,6 +26,7 @@ void LoggingTask::start_slalom_log() {
   active_slalom_log = true; //
   idx_slalom_log = 0;
   log_vec.clear();
+  log_vec.shrink_to_fit();
   // log_vec.resize(param->log_size);
   // for (int i = 0; i < param->log_size; i++) {
   //   log_vec[i] = std::make_shared<log_data_t2>();
@@ -42,6 +43,7 @@ void LoggingTask::change_sysid_mode(float d_l, float d_r, int t) {
   duty_r = d_r;
   time = t;
   sysidlog_vec.clear();
+  sysidlog_vec.shrink_to_fit();
   sysidlog_vec.resize(time);
   for (int i = 0; i < time; i++) {
     sysidlog_vec[i] = std::make_shared<sysid_log>();
@@ -273,6 +275,9 @@ void LoggingTask::dump_log(std::string file_name) {
   printf("end___\n"); // csvファイル追記終了トリガー
 
   fclose(f);
+  log_vec.clear();
+  log_vec.shrink_to_fit();
+
 }
 
 void LoggingTask::dump_log_sysid(std::string file_name) {

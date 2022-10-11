@@ -580,21 +580,17 @@ bool PathCreator::path_create_with_change(bool is_search, int tgt_x, int tgt_y,
   //初期化
   pc_result.time = 10000;
   pc_result.use = false;
-  printf("2 start\n");
   pc_result.state =
       path_create(is_search, tgt_x, tgt_y, tgt_dir, pc_result.use);
-  printf("2 end\n");
   if (!pc_result.state) {
     return false;
   }
   convert_large_path(true);
   diagonalPath(false, true);
-  printf("3 start\n");
   pc_result.time = calc_goal_time(p_set);
   if (pc_result.time > 100) {
     return false;
   }
-  printf("3 end\n");
   return true;
 }
 
@@ -627,9 +623,7 @@ float PathCreator::timebase_path_create(bool is_search, param_set_t &p_set) {
       }
       // 該当の位置で分岐してPathを形成。それぞれ評価。
       for (const auto dir : cand.candidate_dir_set) {
-        printf("1 start\n");
         bool goal = path_create_with_change(true, x, y, dir, pc_result, p_set);
-        printf("1 end\n");
         if (ui->button_state_hold()) {
           return 0;
         }

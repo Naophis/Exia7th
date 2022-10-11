@@ -35,6 +35,8 @@ void MazeSolverBaseLgc::set_ego(std::shared_ptr<ego_t> &_ego) { ego = _ego; }
 void MazeSolverBaseLgc::set_goal_pos(const vector<point_t> &list) {
   goal_list.clear();
   goal_list_origin.clear();
+  goal_list.shrink_to_fit();
+  goal_list_origin.shrink_to_fit();
   for (const auto p : list) {
     goal_list.emplace_back(p);
     goal_list_origin.emplace_back(p);
@@ -43,6 +45,7 @@ void MazeSolverBaseLgc::set_goal_pos(const vector<point_t> &list) {
 
 void MazeSolverBaseLgc::set_goal_pos2(const vector<point_t> &pt_list) {
   goal_list2.clear();
+  goal_list2.shrink_to_fit();
   for (const auto p : pt_list)
     goal_list2.emplace_back(p);
 }
@@ -289,7 +292,10 @@ void MazeSolverBaseLgc::back_home() {
   goal_list.emplace_back(p);
 }
 
-void MazeSolverBaseLgc::clear_goal() { goal_list.clear(); }
+void MazeSolverBaseLgc::clear_goal() {
+  goal_list.clear();
+  goal_list.shrink_to_fit();
+}
 
 void MazeSolverBaseLgc::append_goal(const int x, const int y) {
   point_t p;
@@ -969,6 +975,7 @@ unsigned int MazeSolverBaseLgc::searchGoalPosition(
   pt.x = 0;
   pt.y = 0;
   search_log.clear();
+  search_log.shrink_to_fit();
 
   dirLog[2] = dirLog[1] = dirLog[0] = now_dir;
 

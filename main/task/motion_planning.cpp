@@ -209,10 +209,10 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
     } else {
       if (sensing_result->ego.right45_dist < th_offset_dist) {
         auto diff = (param->sla_wall_ref_r - sensing_result->ego.right45_dist);
-        if (diff > 5) {
-          // diff = 5;
-        } else if (diff < -5) {
-          diff = -5;
+        if (diff > 3) {
+          diff = 3;
+        } else if (diff < -3) {
+          diff = -3;
         }
         ps_back.dist += diff;
       }

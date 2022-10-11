@@ -1,5 +1,7 @@
 #include "include/main_task.hpp"
 
+#define getItem cJSON_GetObjectItem
+#define getArray cJSON_GetArrayItem
 MainTask::MainTask() {
   ui = std::make_shared<UserInterface>();
   mp = std::make_shared<MotionPlanning>();
@@ -268,219 +270,195 @@ void MainTask::load_hw_param() {
         *sen_pid, *sen_pid_dia, *accel_x, *comp_v_param;
   root = cJSON_Parse(str.c_str());
 
-  param->dt = cJSON_GetObjectItem(root, "dt")->valuedouble;
-  param->tire = cJSON_GetObjectItem(root, "tire")->valuedouble;
-  param->log_size = cJSON_GetObjectItem(root, "log_size")->valueint;
-  param->cell = cJSON_GetObjectItem(root, "cell")->valuedouble;
-  param->cell2 = cJSON_GetObjectItem(root, "cell2")->valuedouble;
-  param->gear_a = cJSON_GetObjectItem(root, "gear_a")->valuedouble;
-  param->gear_b = cJSON_GetObjectItem(root, "gear_b")->valuedouble;
-  param->max_duty = cJSON_GetObjectItem(root, "max_duty")->valuedouble;
-  param->Ke = cJSON_GetObjectItem(root, "Ke")->valuedouble;
-  param->Km = cJSON_GetObjectItem(root, "Km")->valuedouble;
-  param->Resist = cJSON_GetObjectItem(root, "Resist")->valuedouble;
-  param->Mass = cJSON_GetObjectItem(root, "Mass")->valuedouble;
-  param->Lm = cJSON_GetObjectItem(root, "Lm")->valuedouble;
-  param->slip_param_K = cJSON_GetObjectItem(root, "slip_param_K")->valuedouble;
-  param->slip_param_k2 =
-      cJSON_GetObjectItem(root, "slip_param_k2")->valuedouble;
-  param->sen_log_size = cJSON_GetObjectItem(root, "sen_log_size")->valueint;
-  param->offset_start_dist =
-      cJSON_GetObjectItem(root, "offset_start_dist")->valuedouble;
-  param->sakiyomi_time =
-      cJSON_GetObjectItem(root, "sakiyomi_time")->valuedouble;
-  param->clear_angle = cJSON_GetObjectItem(root, "clear_angle")->valuedouble;
-  param->clear_dist_order =
-      cJSON_GetObjectItem(root, "clear_dist_order")->valuedouble;
-  param->front_dist_offset =
-      cJSON_GetObjectItem(root, "front_dist_offset")->valuedouble;
-  param->front_dist_offset2 =
-      cJSON_GetObjectItem(root, "front_dist_offset2")->valuedouble;
+  param->dt = getItem(root, "dt")->valuedouble;
+  param->tire = getItem(root, "tire")->valuedouble;
+  param->log_size = getItem(root, "log_size")->valueint;
+  param->cell = getItem(root, "cell")->valuedouble;
+  param->cell2 = getItem(root, "cell2")->valuedouble;
+  param->gear_a = getItem(root, "gear_a")->valuedouble;
+  param->gear_b = getItem(root, "gear_b")->valuedouble;
+  param->max_duty = getItem(root, "max_duty")->valuedouble;
+  param->Ke = getItem(root, "Ke")->valuedouble;
+  param->Km = getItem(root, "Km")->valuedouble;
+  param->Resist = getItem(root, "Resist")->valuedouble;
+  param->Mass = getItem(root, "Mass")->valuedouble;
+  param->Lm = getItem(root, "Lm")->valuedouble;
+  param->slip_param_K = getItem(root, "slip_param_K")->valuedouble;
+  param->slip_param_k2 = getItem(root, "slip_param_k2")->valuedouble;
+  param->sen_log_size = getItem(root, "sen_log_size")->valueint;
+  param->offset_start_dist = getItem(root, "offset_start_dist")->valuedouble;
+  param->sakiyomi_time = getItem(root, "sakiyomi_time")->valuedouble;
+  param->clear_angle = getItem(root, "clear_angle")->valuedouble;
+  param->clear_dist_order = getItem(root, "clear_dist_order")->valuedouble;
+  param->front_dist_offset = getItem(root, "front_dist_offset")->valuedouble;
+  param->front_dist_offset2 = getItem(root, "front_dist_offset2")->valuedouble;
   param->clear_dist_ragne_from =
-      cJSON_GetObjectItem(root, "clear_dist_ragne_from")->valuedouble;
+      getItem(root, "clear_dist_ragne_from")->valuedouble;
   param->clear_dist_ragne_to =
-      cJSON_GetObjectItem(root, "clear_dist_ragne_to")->valuedouble;
+      getItem(root, "clear_dist_ragne_to")->valuedouble;
   param->led_light_delay_cnt =
-      cJSON_GetObjectItem(root, "led_light_delay_cnt")->valuedouble;
+      getItem(root, "led_light_delay_cnt")->valuedouble;
 
-  param->fail_check.duty = cJSON_GetObjectItem(root, "fail_duty_cnt")->valueint;
-  param->fail_check.v = cJSON_GetObjectItem(root, "fail_v_cnt")->valueint;
-  param->fail_check.w = cJSON_GetObjectItem(root, "fail_w_cnt")->valueint;
+  param->fail_check.duty = getItem(root, "fail_duty_cnt")->valueint;
+  param->fail_check.v = getItem(root, "fail_v_cnt")->valueint;
+  param->fail_check.w = getItem(root, "fail_w_cnt")->valueint;
 
   param->offset_after_turn_l2 =
-      cJSON_GetObjectItem(root, "offset_after_turn_l2")->valuedouble;
+      getItem(root, "offset_after_turn_l2")->valuedouble;
   param->offset_after_turn_r2 =
-      cJSON_GetObjectItem(root, "offset_after_turn_r2")->valuedouble;
+      getItem(root, "offset_after_turn_r2")->valuedouble;
   param->offset_after_turn_l =
-      cJSON_GetObjectItem(root, "offset_after_turn_l")->valuedouble;
+      getItem(root, "offset_after_turn_l")->valuedouble;
   param->offset_after_turn_r =
-      cJSON_GetObjectItem(root, "offset_after_turn_r")->valuedouble;
+      getItem(root, "offset_after_turn_r")->valuedouble;
 
   param->offset_after_turn_dia_l =
-      cJSON_GetObjectItem(root, "offset_after_turn_dia_l")->valuedouble;
+      getItem(root, "offset_after_turn_dia_l")->valuedouble;
   param->offset_after_turn_dia_r =
-      cJSON_GetObjectItem(root, "offset_after_turn_dia_r")->valuedouble;
+      getItem(root, "offset_after_turn_dia_r")->valuedouble;
 
   param->dia_turn_exist_th_l =
-      cJSON_GetObjectItem(root, "dia_turn_exist_th_l")->valuedouble;
+      getItem(root, "dia_turn_exist_th_l")->valuedouble;
   param->dia_turn_exist_th_r =
-      cJSON_GetObjectItem(root, "dia_turn_exist_th_r")->valuedouble;
-  param->dia_turn_th_l =
-      cJSON_GetObjectItem(root, "dia_turn_th_l")->valuedouble;
-  param->dia_turn_th_r =
-      cJSON_GetObjectItem(root, "dia_turn_th_r")->valuedouble;
+      getItem(root, "dia_turn_exist_th_r")->valuedouble;
+  param->dia_turn_th_l = getItem(root, "dia_turn_th_l")->valuedouble;
+  param->dia_turn_th_r = getItem(root, "dia_turn_th_r")->valuedouble;
 
-  param->logging_time = cJSON_GetObjectItem(root, "logging_time")->valuedouble /
-                        portTICK_PERIOD_MS;
+  param->logging_time =
+      getItem(root, "logging_time")->valuedouble / portTICK_PERIOD_MS;
   param->set_param = true;
 
   param->front_dist_offset_pivot_th =
-      cJSON_GetObjectItem(root, "front_dist_offset_pivot_th")->valuedouble;
+      getItem(root, "front_dist_offset_pivot_th")->valuedouble;
   param->front_dist_offset_pivot =
-      cJSON_GetObjectItem(root, "front_dist_offset_pivot")->valuedouble;
+      getItem(root, "front_dist_offset_pivot")->valuedouble;
 
-  param->search_log_enable =
-      cJSON_GetObjectItem(root, "search_log_enable")->valueint;
-  param->test_log_enable =
-      cJSON_GetObjectItem(root, "test_log_enable")->valueint;
-  param->fast_log_enable =
-      cJSON_GetObjectItem(root, "fast_log_enable")->valueint;
+  param->search_log_enable = getItem(root, "search_log_enable")->valueint;
+  param->test_log_enable = getItem(root, "test_log_enable")->valueint;
+  param->fast_log_enable = getItem(root, "fast_log_enable")->valueint;
 
-  param->wall_off_hold_dist =
-      cJSON_GetObjectItem(root, "wall_off_hold_dist")->valuedouble;
+  param->wall_off_hold_dist = getItem(root, "wall_off_hold_dist")->valuedouble;
   param->wall_off_dist.left_str =
-      cJSON_GetObjectItem(root, "wall_off_hold_dist_str_l")->valuedouble;
+      getItem(root, "wall_off_hold_dist_str_l")->valuedouble;
   param->wall_off_dist.right_str =
-      cJSON_GetObjectItem(root, "wall_off_hold_dist_str_r")->valuedouble;
+      getItem(root, "wall_off_hold_dist_str_r")->valuedouble;
 
   param->wall_off_dist.left_dia =
-      cJSON_GetObjectItem(root, "wall_off_hold_dist_dia_l")->valuedouble;
+      getItem(root, "wall_off_hold_dist_dia_l")->valuedouble;
   param->wall_off_dist.right_dia =
-      cJSON_GetObjectItem(root, "wall_off_hold_dist_dia_r")->valuedouble;
+      getItem(root, "wall_off_hold_dist_dia_r")->valuedouble;
   param->wall_off_dist.left_dia2 =
-      cJSON_GetObjectItem(root, "wall_off_hold_dist_dia_l2")->valuedouble;
+      getItem(root, "wall_off_hold_dist_dia_l2")->valuedouble;
   param->wall_off_dist.right_dia2 =
-      cJSON_GetObjectItem(root, "wall_off_hold_dist_dia_r2")->valuedouble;
+      getItem(root, "wall_off_hold_dist_dia_r2")->valuedouble;
 
   param->wall_off_dist.exist_dist_l =
-      cJSON_GetObjectItem(root, "wall_off_hold_exist_dist_l")->valuedouble;
+      getItem(root, "wall_off_hold_exist_dist_l")->valuedouble;
   param->wall_off_dist.exist_dist_r =
-      cJSON_GetObjectItem(root, "wall_off_hold_exist_dist_r")->valuedouble;
+      getItem(root, "wall_off_hold_exist_dist_r")->valuedouble;
 
   param->wall_off_dist.noexist_th_l =
-      cJSON_GetObjectItem(root, "wall_off_hold_noexist_th_l")->valuedouble;
+      getItem(root, "wall_off_hold_noexist_th_l")->valuedouble;
   param->wall_off_dist.noexist_th_r =
-      cJSON_GetObjectItem(root, "wall_off_hold_noexist_th_r")->valuedouble;
+      getItem(root, "wall_off_hold_noexist_th_r")->valuedouble;
 
   param->wall_off_dist.exist_dia_th_l =
-      cJSON_GetObjectItem(root, "wall_off_hold_exist_dist_dia_l")->valuedouble;
+      getItem(root, "wall_off_hold_exist_dist_dia_l")->valuedouble;
   param->wall_off_dist.exist_dia_th_r =
-      cJSON_GetObjectItem(root, "wall_off_hold_exist_dist_dia_r")->valuedouble;
+      getItem(root, "wall_off_hold_exist_dist_dia_r")->valuedouble;
 
   param->wall_off_dist.noexist_dia_th_l =
-      cJSON_GetObjectItem(root, "wall_off_hold_noexist_dia_th_l")->valuedouble;
+      getItem(root, "wall_off_hold_noexist_dia_th_l")->valuedouble;
   param->wall_off_dist.noexist_dia_th_r =
-      cJSON_GetObjectItem(root, "wall_off_hold_noexist_dia_th_r")->valuedouble;
+      getItem(root, "wall_off_hold_noexist_dia_th_r")->valuedouble;
 
-  param->dia_wall_off_ref_l =
-      cJSON_GetObjectItem(root, "dia_wall_off_ref_l")->valuedouble;
-  param->dia_wall_off_ref_r =
-      cJSON_GetObjectItem(root, "dia_wall_off_ref_r")->valuedouble;
+  param->dia_wall_off_ref_l = getItem(root, "dia_wall_off_ref_l")->valuedouble;
+  param->dia_wall_off_ref_r = getItem(root, "dia_wall_off_ref_r")->valuedouble;
 
-  param->sla_wall_ref_l =
-      cJSON_GetObjectItem(root, "sla_wall_ref_l")->valuedouble;
-  param->sla_wall_ref_r =
-      cJSON_GetObjectItem(root, "sla_wall_ref_r")->valuedouble;
+  param->sla_wall_ref_l = getItem(root, "sla_wall_ref_l")->valuedouble;
+  param->sla_wall_ref_r = getItem(root, "sla_wall_ref_r")->valuedouble;
 
   param->front_dist_offset_dia_front =
-      cJSON_GetObjectItem(root, "front_dist_offset_dia_front")->valuedouble;
+      getItem(root, "front_dist_offset_dia_front")->valuedouble;
   param->front_dist_offset_dia_45_th =
-      cJSON_GetObjectItem(root, "front_dist_offset_dia_45_th")->valuedouble;
+      getItem(root, "front_dist_offset_dia_45_th")->valuedouble;
   param->front_dist_offset_dia_right45 =
-      cJSON_GetObjectItem(root, "front_dist_offset_dia_right45")->valuedouble;
+      getItem(root, "front_dist_offset_dia_right45")->valuedouble;
   param->front_dist_offset_dia_left45 =
-      cJSON_GetObjectItem(root, "front_dist_offset_dia_left45")->valuedouble;
+      getItem(root, "front_dist_offset_dia_left45")->valuedouble;
 
-  param->FF_front = cJSON_GetObjectItem(root, "FF_front")->valueint;
-  param->FF_roll = cJSON_GetObjectItem(root, "FF_roll")->valueint;
-  param->FF_keV = cJSON_GetObjectItem(root, "FF_keV")->valueint;
+  param->FF_front = getItem(root, "FF_front")->valueint;
+  param->FF_roll = getItem(root, "FF_roll")->valueint;
+  param->FF_keV = getItem(root, "FF_keV")->valueint;
 
-  motor_pid = cJSON_GetObjectItem(root, "motor_pid");
-  param->motor_pid.p = cJSON_GetObjectItem(motor_pid, "p")->valuedouble;
-  param->motor_pid.i = cJSON_GetObjectItem(motor_pid, "i")->valuedouble;
-  param->motor_pid.d = cJSON_GetObjectItem(motor_pid, "d")->valuedouble;
-  param->motor_pid.b = cJSON_GetObjectItem(motor_pid, "b")->valuedouble;
-  param->motor_pid.c = cJSON_GetObjectItem(motor_pid, "c")->valuedouble;
-  param->motor_pid.mode = cJSON_GetObjectItem(motor_pid, "mode")->valueint;
+  motor_pid = getItem(root, "motor_pid");
+  param->motor_pid.p = getItem(motor_pid, "p")->valuedouble;
+  param->motor_pid.i = getItem(motor_pid, "i")->valuedouble;
+  param->motor_pid.d = getItem(motor_pid, "d")->valuedouble;
+  param->motor_pid.b = getItem(motor_pid, "b")->valuedouble;
+  param->motor_pid.c = getItem(motor_pid, "c")->valuedouble;
+  param->motor_pid.mode = getItem(motor_pid, "mode")->valueint;
 
-  sen_pid = cJSON_GetObjectItem(root, "sensor_pid");
-  param->sensor_pid.p = cJSON_GetObjectItem(sen_pid, "p")->valuedouble;
-  param->sensor_pid.i = cJSON_GetObjectItem(sen_pid, "i")->valuedouble;
-  param->sensor_pid.d = cJSON_GetObjectItem(sen_pid, "d")->valuedouble;
-  param->sensor_pid.mode = cJSON_GetObjectItem(sen_pid, "mode")->valueint;
+  sen_pid = getItem(root, "sensor_pid");
+  param->sensor_pid.p = getItem(sen_pid, "p")->valuedouble;
+  param->sensor_pid.i = getItem(sen_pid, "i")->valuedouble;
+  param->sensor_pid.d = getItem(sen_pid, "d")->valuedouble;
+  param->sensor_pid.mode = getItem(sen_pid, "mode")->valueint;
 
-  sen_pid_dia = cJSON_GetObjectItem(root, "sensor_pid_dia");
-  param->sensor_pid_dia.p = cJSON_GetObjectItem(sen_pid_dia, "p")->valuedouble;
-  param->sensor_pid_dia.i = cJSON_GetObjectItem(sen_pid_dia, "i")->valuedouble;
-  param->sensor_pid_dia.d = cJSON_GetObjectItem(sen_pid_dia, "d")->valuedouble;
-  param->sensor_pid_dia.mode =
-      cJSON_GetObjectItem(sen_pid_dia, "mode")->valueint;
+  sen_pid_dia = getItem(root, "sensor_pid_dia");
+  param->sensor_pid_dia.p = getItem(sen_pid_dia, "p")->valuedouble;
+  param->sensor_pid_dia.i = getItem(sen_pid_dia, "i")->valuedouble;
+  param->sensor_pid_dia.d = getItem(sen_pid_dia, "d")->valuedouble;
+  param->sensor_pid_dia.mode = getItem(sen_pid_dia, "mode")->valueint;
 
-  dist_pid = cJSON_GetObjectItem(root, "dist_pid");
-  param->dist_pid.p = cJSON_GetObjectItem(dist_pid, "p")->valuedouble;
-  param->dist_pid.i = cJSON_GetObjectItem(dist_pid, "i")->valuedouble;
-  param->dist_pid.d = cJSON_GetObjectItem(dist_pid, "d")->valuedouble;
-  param->dist_pid.mode = cJSON_GetObjectItem(dist_pid, "mode")->valueint;
+  dist_pid = getItem(root, "dist_pid");
+  param->dist_pid.p = getItem(dist_pid, "p")->valuedouble;
+  param->dist_pid.i = getItem(dist_pid, "i")->valuedouble;
+  param->dist_pid.d = getItem(dist_pid, "d")->valuedouble;
+  param->dist_pid.mode = getItem(dist_pid, "mode")->valueint;
 
-  gyro_pid = cJSON_GetObjectItem(root, "gyro_pid");
-  param->gyro_pid.p = cJSON_GetObjectItem(gyro_pid, "p")->valuedouble;
-  param->gyro_pid.i = cJSON_GetObjectItem(gyro_pid, "i")->valuedouble;
-  param->gyro_pid.d = cJSON_GetObjectItem(gyro_pid, "d")->valuedouble;
-  param->gyro_pid.b = cJSON_GetObjectItem(gyro_pid, "b")->valuedouble;
-  param->gyro_pid.c = cJSON_GetObjectItem(gyro_pid, "c")->valuedouble;
-  param->gyro_pid.mode = cJSON_GetObjectItem(gyro_pid, "mode")->valueint;
+  gyro_pid = getItem(root, "gyro_pid");
+  param->gyro_pid.p = getItem(gyro_pid, "p")->valuedouble;
+  param->gyro_pid.i = getItem(gyro_pid, "i")->valuedouble;
+  param->gyro_pid.d = getItem(gyro_pid, "d")->valuedouble;
+  param->gyro_pid.b = getItem(gyro_pid, "b")->valuedouble;
+  param->gyro_pid.c = getItem(gyro_pid, "c")->valuedouble;
+  param->gyro_pid.mode = getItem(gyro_pid, "mode")->valueint;
 
-  angle_pid = cJSON_GetObjectItem(root, "angle_pid");
-  param->angle_pid.p = cJSON_GetObjectItem(angle_pid, "p")->valuedouble;
-  param->angle_pid.i = cJSON_GetObjectItem(angle_pid, "i")->valuedouble;
-  param->angle_pid.d = cJSON_GetObjectItem(angle_pid, "d")->valuedouble;
-  param->angle_pid.mode = cJSON_GetObjectItem(angle_pid, "mode")->valueint;
+  angle_pid = getItem(root, "angle_pid");
+  param->angle_pid.p = getItem(angle_pid, "p")->valuedouble;
+  param->angle_pid.i = getItem(angle_pid, "i")->valuedouble;
+  param->angle_pid.d = getItem(angle_pid, "d")->valuedouble;
+  param->angle_pid.mode = getItem(angle_pid, "mode")->valueint;
 
-  gyro_param = cJSON_GetObjectItem(root, "gyro_param");
+  gyro_param = getItem(root, "gyro_param");
   param->gyro_param.gyro_w_gain_right =
-      cJSON_GetObjectItem(gyro_param, "gyro_w_gain_right")->valuedouble;
+      getItem(gyro_param, "gyro_w_gain_right")->valuedouble;
   param->gyro_param.gyro_w_gain_left =
-      cJSON_GetObjectItem(gyro_param, "gyro_w_gain_left")->valuedouble;
-  param->gyro_param.lp_delay =
-      cJSON_GetObjectItem(gyro_param, "lp_delay")->valuedouble;
+      getItem(gyro_param, "gyro_w_gain_left")->valuedouble;
+  param->gyro_param.lp_delay = getItem(gyro_param, "lp_delay")->valuedouble;
 
-  accel_x = cJSON_GetObjectItem(root, "accel_x_param");
-  param->accel_x_param.gain = cJSON_GetObjectItem(accel_x, "gain")->valuedouble;
+  accel_x = getItem(root, "accel_x_param");
+  param->accel_x_param.gain = getItem(accel_x, "gain")->valuedouble;
 
-  battery_param = cJSON_GetObjectItem(root, "battery_param");
+  battery_param = getItem(root, "battery_param");
   param->battery_param.lp_delay =
-      cJSON_GetObjectItem(battery_param, "lp_delay")->valuedouble;
+      getItem(battery_param, "lp_delay")->valuedouble;
 
-  led_param = cJSON_GetObjectItem(root, "led_param");
-  param->led_param.lp_delay =
-      cJSON_GetObjectItem(led_param, "lp_delay")->valuedouble;
+  led_param = getItem(root, "led_param");
+  param->led_param.lp_delay = getItem(led_param, "lp_delay")->valuedouble;
 
-  kalman_config = cJSON_GetObjectItem(root, "kalman_config");
-  param->Kalman_ang = cJSON_GetObjectItem(kalman_config, "q_ang")->valuedouble;
-  param->Kalman_bias =
-      cJSON_GetObjectItem(kalman_config, "q_bias")->valuedouble;
-  param->Kalman_measure =
-      cJSON_GetObjectItem(kalman_config, "r_measure")->valuedouble;
+  kalman_config = getItem(root, "kalman_config");
+  param->Kalman_ang = getItem(kalman_config, "q_ang")->valuedouble;
+  param->Kalman_bias = getItem(kalman_config, "q_bias")->valuedouble;
+  param->Kalman_measure = getItem(kalman_config, "r_measure")->valuedouble;
 
-  comp_v_param = cJSON_GetObjectItem(root, "comp_v_param");
-  param->comp_param.v_lp_gain =
-      cJSON_GetObjectItem(comp_v_param, "enc_v_lp")->valuedouble;
+  comp_v_param = getItem(root, "comp_v_param");
+  param->comp_param.v_lp_gain = getItem(comp_v_param, "enc_v_lp")->valuedouble;
   param->comp_param.accl_x_hp_gain =
-      cJSON_GetObjectItem(comp_v_param, "acc_x_hp")->valuedouble;
-  param->comp_param.gain =
-      cJSON_GetObjectItem(comp_v_param, "gain_v")->valuedouble;
-  param->comp_param.enable =
-      cJSON_GetObjectItem(comp_v_param, "enable")->valueint;
+      getItem(comp_v_param, "acc_x_hp")->valuedouble;
+  param->comp_param.gain = getItem(comp_v_param, "gain_v")->valuedouble;
+  param->comp_param.enable = getItem(comp_v_param, "enable")->valueint;
 
   pt->dynamics.mass = param->Mass;
   pt->dynamics.lm = param->Lm;
@@ -525,128 +503,123 @@ void MainTask::load_sensor_param() {
         *search_ref, *search_exist, *gain;
   root = cJSON_Parse(str.c_str());
 
-  normal = cJSON_GetObjectItem(root, "normal");
-  normal_ref = cJSON_GetObjectItem(normal, "ref");
-  normal_exist = cJSON_GetObjectItem(normal, "exist");
-  normal2 = cJSON_GetObjectItem(root, "normal2");
-  normal2_ref = cJSON_GetObjectItem(normal2, "ref");
-  normal2_exist = cJSON_GetObjectItem(normal2, "exist");
+  normal = getItem(root, "normal");
+  normal_ref = getItem(normal, "ref");
+  normal_exist = getItem(normal, "exist");
+  normal2 = getItem(root, "normal2");
+  normal2_ref = getItem(normal2, "ref");
+  normal2_exist = getItem(normal2, "exist");
   param->sen_ref_p.normal.ref.right45 =
-      cJSON_GetObjectItem(normal_ref, "right45")->valuedouble;
+      getItem(normal_ref, "right45")->valuedouble;
   param->sen_ref_p.normal.ref.left45 =
-      cJSON_GetObjectItem(normal_ref, "left45")->valuedouble;
+      getItem(normal_ref, "left45")->valuedouble;
   param->sen_ref_p.normal.ref.kireme_r =
-      cJSON_GetObjectItem(normal_ref, "kireme_r")->valuedouble;
+      getItem(normal_ref, "kireme_r")->valuedouble;
   param->sen_ref_p.normal.ref.kireme_l =
-      cJSON_GetObjectItem(normal_ref, "kireme_l")->valuedouble;
+      getItem(normal_ref, "kireme_l")->valuedouble;
 
   param->sen_ref_p.normal.exist.right45 =
-      cJSON_GetObjectItem(normal_exist, "right45")->valuedouble;
+      getItem(normal_exist, "right45")->valuedouble;
   param->sen_ref_p.normal.exist.left45 =
-      cJSON_GetObjectItem(normal_exist, "left45")->valuedouble;
+      getItem(normal_exist, "left45")->valuedouble;
   param->sen_ref_p.normal.exist.front =
-      cJSON_GetObjectItem(normal_exist, "front")->valuedouble;
+      getItem(normal_exist, "front")->valuedouble;
   param->sen_ref_p.normal.exist.right90 =
-      cJSON_GetObjectItem(normal_exist, "right90")->valuedouble;
+      getItem(normal_exist, "right90")->valuedouble;
   param->sen_ref_p.normal.exist.left90 =
-      cJSON_GetObjectItem(normal_exist, "left90")->valuedouble;
+      getItem(normal_exist, "left90")->valuedouble;
 
   param->sen_ref_p.normal2.ref.right45 =
-      cJSON_GetObjectItem(normal2_ref, "right45")->valuedouble;
+      getItem(normal2_ref, "right45")->valuedouble;
   param->sen_ref_p.normal2.ref.left45 =
-      cJSON_GetObjectItem(normal2_ref, "left45")->valuedouble;
+      getItem(normal2_ref, "left45")->valuedouble;
   param->sen_ref_p.normal2.ref.kireme_r =
-      cJSON_GetObjectItem(normal2_ref, "kireme_r")->valuedouble;
+      getItem(normal2_ref, "kireme_r")->valuedouble;
   param->sen_ref_p.normal2.ref.kireme_l =
-      cJSON_GetObjectItem(normal2_ref, "kireme_l")->valuedouble;
+      getItem(normal2_ref, "kireme_l")->valuedouble;
 
   param->sen_ref_p.normal2.exist.right45 =
-      cJSON_GetObjectItem(normal2_exist, "right45")->valuedouble;
+      getItem(normal2_exist, "right45")->valuedouble;
   param->sen_ref_p.normal2.exist.left45 =
-      cJSON_GetObjectItem(normal2_exist, "left45")->valuedouble;
+      getItem(normal2_exist, "left45")->valuedouble;
   param->sen_ref_p.normal2.exist.front =
-      cJSON_GetObjectItem(normal2_exist, "front")->valuedouble;
+      getItem(normal2_exist, "front")->valuedouble;
   param->sen_ref_p.normal2.exist.right90 =
-      cJSON_GetObjectItem(normal2_exist, "right90")->valuedouble;
+      getItem(normal2_exist, "right90")->valuedouble;
   param->sen_ref_p.normal2.exist.left90 =
-      cJSON_GetObjectItem(normal2_exist, "left90")->valuedouble;
+      getItem(normal2_exist, "left90")->valuedouble;
 
   printf("normal2.exist.left90=%f\n", param->sen_ref_p.normal2.exist.left90);
   printf("normal2.exist.right90=%f\n", param->sen_ref_p.normal2.exist.right90);
 
-  dia = cJSON_GetObjectItem(root, "dia");
-  dia_ref = cJSON_GetObjectItem(dia, "ref");
-  dia_exist = cJSON_GetObjectItem(dia, "exist");
-  param->sen_ref_p.dia.ref.right90 =
-      cJSON_GetObjectItem(dia_ref, "right90")->valuedouble;
-  param->sen_ref_p.dia.ref.left90 =
-      cJSON_GetObjectItem(dia_ref, "left90")->valuedouble;
-  param->sen_ref_p.dia.ref.kireme_r =
-      cJSON_GetObjectItem(dia_ref, "kireme_r")->valuedouble;
-  param->sen_ref_p.dia.ref.kireme_l =
-      cJSON_GetObjectItem(dia_ref, "kireme_l")->valuedouble;
+  dia = getItem(root, "dia");
+  dia_ref = getItem(dia, "ref");
+  dia_exist = getItem(dia, "exist");
+  param->sen_ref_p.dia.ref.right90 = getItem(dia_ref, "right90")->valuedouble;
+  param->sen_ref_p.dia.ref.left90 = getItem(dia_ref, "left90")->valuedouble;
+  param->sen_ref_p.dia.ref.kireme_r = getItem(dia_ref, "kireme_r")->valuedouble;
+  param->sen_ref_p.dia.ref.kireme_l = getItem(dia_ref, "kireme_l")->valuedouble;
 
   param->sen_ref_p.dia.exist.right90 =
-      cJSON_GetObjectItem(dia_exist, "right90")->valuedouble;
-  param->sen_ref_p.dia.exist.left90 =
-      cJSON_GetObjectItem(dia_exist, "left90")->valuedouble;
+      getItem(dia_exist, "right90")->valuedouble;
+  param->sen_ref_p.dia.exist.left90 = getItem(dia_exist, "left90")->valuedouble;
 
-  search = cJSON_GetObjectItem(root, "search");
-  search_exist = cJSON_GetObjectItem(search, "exist");
+  search = getItem(root, "search");
+  search_exist = getItem(search, "exist");
   param->sen_ref_p.search_exist.front =
-      cJSON_GetObjectItem(search_exist, "front")->valuedouble;
+      getItem(search_exist, "front")->valuedouble;
   param->sen_ref_p.search_exist.right45 =
-      cJSON_GetObjectItem(search_exist, "right45")->valuedouble;
+      getItem(search_exist, "right45")->valuedouble;
   param->sen_ref_p.search_exist.right90 =
-      cJSON_GetObjectItem(search_exist, "right90")->valuedouble;
+      getItem(search_exist, "right90")->valuedouble;
   param->sen_ref_p.search_exist.left45 =
-      cJSON_GetObjectItem(search_exist, "left45")->valuedouble;
+      getItem(search_exist, "left45")->valuedouble;
   param->sen_ref_p.search_exist.left90 =
-      cJSON_GetObjectItem(search_exist, "left90")->valuedouble;
+      getItem(search_exist, "left90")->valuedouble;
   param->sen_ref_p.search_exist.kireme_r =
-      cJSON_GetObjectItem(search_exist, "kireme_r")->valuedouble;
+      getItem(search_exist, "kireme_r")->valuedouble;
   param->sen_ref_p.search_exist.kireme_l =
-      cJSON_GetObjectItem(search_exist, "kireme_l")->valuedouble;
+      getItem(search_exist, "kireme_l")->valuedouble;
   param->sen_ref_p.search_exist.offset_r =
-      cJSON_GetObjectItem(search_exist, "offset_r")->valuedouble;
+      getItem(search_exist, "offset_r")->valuedouble;
   param->sen_ref_p.search_exist.offset_l =
-      cJSON_GetObjectItem(search_exist, "offset_l")->valuedouble;
+      getItem(search_exist, "offset_l")->valuedouble;
   param->sen_ref_p.search_exist.front_ctrl_th =
-      cJSON_GetObjectItem(search_exist, "front_ctrl_th")->valuedouble;
+      getItem(search_exist, "front_ctrl_th")->valuedouble;
   param->sen_ref_p.search_exist.front_ctrl =
-      cJSON_GetObjectItem(search_exist, "front_ctrl")->valuedouble;
+      getItem(search_exist, "front_ctrl")->valuedouble;
 
-  search_ref = cJSON_GetObjectItem(search, "ref");
+  search_ref = getItem(search, "ref");
   param->sen_ref_p.search_ref.right45 =
-      cJSON_GetObjectItem(search_ref, "right45")->valuedouble;
+      getItem(search_ref, "right45")->valuedouble;
   param->sen_ref_p.search_ref.left45 =
-      cJSON_GetObjectItem(search_ref, "left45")->valuedouble;
+      getItem(search_ref, "left45")->valuedouble;
   param->sen_ref_p.search_ref.right90 =
-      cJSON_GetObjectItem(search_ref, "right90")->valuedouble;
+      getItem(search_ref, "right90")->valuedouble;
   param->sen_ref_p.search_ref.left90 =
-      cJSON_GetObjectItem(search_ref, "left90")->valuedouble;
+      getItem(search_ref, "left90")->valuedouble;
 
-  gain = cJSON_GetObjectItem(root, "gain");
+  gain = getItem(root, "gain");
   param->sensor_gain.l90.a =
-      cJSON_GetArrayItem(cJSON_GetObjectItem(gain, "L90"), 0)->valuedouble;
+      cJSON_GetArrayItem(getItem(gain, "L90"), 0)->valuedouble;
   param->sensor_gain.l90.b =
-      cJSON_GetArrayItem(cJSON_GetObjectItem(gain, "L90"), 1)->valuedouble;
+      cJSON_GetArrayItem(getItem(gain, "L90"), 1)->valuedouble;
   param->sensor_gain.l45.a =
-      cJSON_GetArrayItem(cJSON_GetObjectItem(gain, "L45"), 0)->valuedouble;
+      cJSON_GetArrayItem(getItem(gain, "L45"), 0)->valuedouble;
   param->sensor_gain.l45.b =
-      cJSON_GetArrayItem(cJSON_GetObjectItem(gain, "L45"), 1)->valuedouble;
+      cJSON_GetArrayItem(getItem(gain, "L45"), 1)->valuedouble;
   param->sensor_gain.front.a =
-      cJSON_GetArrayItem(cJSON_GetObjectItem(gain, "F"), 0)->valuedouble;
+      cJSON_GetArrayItem(getItem(gain, "F"), 0)->valuedouble;
   param->sensor_gain.front.b =
-      cJSON_GetArrayItem(cJSON_GetObjectItem(gain, "F"), 1)->valuedouble;
+      cJSON_GetArrayItem(getItem(gain, "F"), 1)->valuedouble;
   param->sensor_gain.r45.a =
-      cJSON_GetArrayItem(cJSON_GetObjectItem(gain, "R45"), 0)->valuedouble;
+      cJSON_GetArrayItem(getItem(gain, "R45"), 0)->valuedouble;
   param->sensor_gain.r45.b =
-      cJSON_GetArrayItem(cJSON_GetObjectItem(gain, "R45"), 1)->valuedouble;
+      cJSON_GetArrayItem(getItem(gain, "R45"), 1)->valuedouble;
   param->sensor_gain.r90.a =
-      cJSON_GetArrayItem(cJSON_GetObjectItem(gain, "R90"), 0)->valuedouble;
+      cJSON_GetArrayItem(getItem(gain, "R90"), 0)->valuedouble;
   param->sensor_gain.r90.b =
-      cJSON_GetArrayItem(cJSON_GetObjectItem(gain, "R90"), 1)->valuedouble;
+      cJSON_GetArrayItem(getItem(gain, "R90"), 1)->valuedouble;
 
   cJSON_free(root);
   cJSON_free(normal);
@@ -683,7 +656,7 @@ void MainTask::load_sys_param() {
   root = cJSON_Parse(str.c_str());
 
   sys.goals.clear();
-  goals = cJSON_GetObjectItem(root, "goals");
+  goals = getItem(root, "goals");
   int goal_size = cJSON_GetArraySize(goals);
   for (int i = 0; i < goal_size; i++) {
     point_t pt;
@@ -692,40 +665,36 @@ void MainTask::load_sys_param() {
     sys.goals.emplace_back(pt);
     printf("%u %u\n", pt.x, pt.y);
   }
-  sys.maze_size = cJSON_GetObjectItem(root, "maze_size")->valueint;
-  sys.user_mode = cJSON_GetObjectItem(root, "mode")->valueint;
-  test = cJSON_GetObjectItem(root, "test");
+  sys.maze_size = getItem(root, "maze_size")->valueint;
+  sys.user_mode = getItem(root, "mode")->valueint;
+  test = getItem(root, "test");
 
-  sys.test.v_max = cJSON_GetObjectItem(test, "v_max")->valuedouble;
-  sys.test.dia = cJSON_GetObjectItem(test, "dia")->valuedouble;
-  sys.test.end_v = cJSON_GetObjectItem(test, "end_v")->valuedouble;
-  sys.test.accl = cJSON_GetObjectItem(test, "accl")->valuedouble;
-  sys.test.decel = cJSON_GetObjectItem(test, "decel")->valuedouble;
-  sys.test.dist = cJSON_GetObjectItem(test, "dist")->valuedouble;
-  sys.test.w_max = cJSON_GetObjectItem(test, "w_max")->valuedouble;
-  // sys.test.w_end = cJSON_GetObjectItem(test, "w_end")->valuedouble;
-  sys.test.alpha = cJSON_GetObjectItem(test, "alpha")->valuedouble;
-  sys.test.ang = cJSON_GetObjectItem(test, "ang")->valuedouble;
-  sys.test.suction_active =
-      cJSON_GetObjectItem(test, "suction_active")->valueint;
-  sys.test.suction_duty =
-      cJSON_GetObjectItem(test, "suction_duty")->valuedouble;
-  sys.test.file_idx = cJSON_GetObjectItem(test, "file_idx")->valueint;
+  sys.test.v_max = getItem(test, "v_max")->valuedouble;
+  sys.test.dia = getItem(test, "dia")->valuedouble;
+  sys.test.end_v = getItem(test, "end_v")->valuedouble;
+  sys.test.accl = getItem(test, "accl")->valuedouble;
+  sys.test.decel = getItem(test, "decel")->valuedouble;
+  sys.test.dist = getItem(test, "dist")->valuedouble;
+  sys.test.w_max = getItem(test, "w_max")->valuedouble;
+  // sys.test.w_end = getItem(test, "w_end")->valuedouble;
+  sys.test.alpha = getItem(test, "alpha")->valuedouble;
+  sys.test.ang = getItem(test, "ang")->valuedouble;
+  sys.test.suction_active = getItem(test, "suction_active")->valueint;
+  sys.test.suction_duty = getItem(test, "suction_duty")->valuedouble;
+  sys.test.file_idx = getItem(test, "file_idx")->valueint;
   printf("sys.test.file_idx = %d\n", sys.test.file_idx);
   file_idx = sys.test.file_idx;
-  sys.test.sla_type = cJSON_GetObjectItem(test, "sla_type")->valueint;
-  sys.test.sla_return = cJSON_GetObjectItem(test, "sla_return")->valueint;
-  sys.test.sla_type2 = cJSON_GetObjectItem(test, "sla_type2")->valueint;
-  sys.test.sla_dist = cJSON_GetObjectItem(test, "sla_dist")->valuedouble;
-  sys.test.turn_times = cJSON_GetObjectItem(test, "turn_times")->valueint;
-  sys.test.ignore_opp_sen =
-      cJSON_GetObjectItem(test, "ignore_opp_sen")->valueint;
+  sys.test.sla_type = getItem(test, "sla_type")->valueint;
+  sys.test.sla_return = getItem(test, "sla_return")->valueint;
+  sys.test.sla_type2 = getItem(test, "sla_type2")->valueint;
+  sys.test.sla_dist = getItem(test, "sla_dist")->valuedouble;
+  sys.test.turn_times = getItem(test, "turn_times")->valueint;
+  sys.test.ignore_opp_sen = getItem(test, "ignore_opp_sen")->valueint;
 
-  sys.test.sysid_test_mode =
-      cJSON_GetObjectItem(test, "sysid_test_mode")->valueint;
-  sys.test.sysid_duty = cJSON_GetObjectItem(test, "sysid_duty")->valuedouble;
-  sys.test.sysid_time = cJSON_GetObjectItem(test, "sysid_time")->valuedouble;
-  sys.test.start_turn = cJSON_GetObjectItem(test, "start_turn")->valueint;
+  sys.test.sysid_test_mode = getItem(test, "sysid_test_mode")->valueint;
+  sys.test.sysid_duty = getItem(test, "sysid_duty")->valuedouble;
+  sys.test.sysid_time = getItem(test, "sysid_time")->valuedouble;
+  sys.test.start_turn = getItem(test, "start_turn")->valueint;
 
   cJSON_free(root);
   cJSON_free(goals);
@@ -749,7 +718,7 @@ void MainTask::load_turn_param_profiles() {
   root = cJSON_Parse(str.c_str());
 
   tpp.file_list.clear();
-  profile_list = cJSON_GetObjectItem(root, "list");
+  profile_list = getItem(root, "list");
   int profile_list_size = cJSON_GetArraySize(profile_list);
   printf("profile_list\n");
   tpp.file_list_size = 0;
@@ -760,166 +729,220 @@ void MainTask::load_turn_param_profiles() {
   }
   printf("tpp.file_list.size() = %d\n", tpp.file_list.size());
 
-  tpp.profile_idx_size =
-      cJSON_GetObjectItem(root, "profile_idx_size")->valueint;
+  tpp.profile_idx_size = getItem(root, "profile_idx_size")->valueint;
   printf("tpp.profile_idx_size= %d\n", tpp.profile_idx_size);
 
   tpp.profile_list.clear();
-  profile_idx = cJSON_GetObjectItem(root, "profile_idx");
+  profile_idx = getItem(root, "profile_idx");
   int profile_idx_size = cJSON_GetArraySize(profile_idx);
 
   for (int i = 0; i < profile_idx_size; i++) {
     p_idx[TurnType::None] =
-        cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "run_param")
-            ->valueint;
+        getItem(getArray(profile_idx, i), "run_param")->valueint;
     p_idx[TurnType::Finish] =
-        cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "suction")
-            ->valueint;
+        getItem(getArray(profile_idx, i), "suction")->valueint;
     p_idx[TurnType::Normal] =
-        cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "normal")
-            ->valueint;
+        getItem(getArray(profile_idx, i), "normal")->valueint;
     p_idx[TurnType::Large] =
-        cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "large")
-            ->valueint;
+        getItem(getArray(profile_idx, i), "large")->valueint;
     p_idx[TurnType::Orval] =
-        cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "orval")
-            ->valueint;
+        getItem(getArray(profile_idx, i), "orval")->valueint;
     p_idx[TurnType::Dia45] =
-        cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "dia45")
-            ->valueint;
+        getItem(getArray(profile_idx, i), "dia45")->valueint;
     p_idx[TurnType::Dia45_2] =
-        cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "dia45_2")
-            ->valueint;
+        getItem(getArray(profile_idx, i), "dia45_2")->valueint;
     p_idx[TurnType::Dia135] =
-        cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "dia135")
-            ->valueint;
+        getItem(getArray(profile_idx, i), "dia135")->valueint;
     p_idx[TurnType::Dia135_2] =
-        cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "dia135_2")
-            ->valueint;
+        getItem(getArray(profile_idx, i), "dia135_2")->valueint;
     p_idx[TurnType::Dia90] =
-        cJSON_GetObjectItem(cJSON_GetArrayItem(profile_idx, i), "dia90")
-            ->valueint;
+        getItem(getArray(profile_idx, i), "dia90")->valueint;
     tpp.profile_list.emplace_back(p_idx);
   }
   cJSON_free(root);
   cJSON_free(profile_list);
   cJSON_free(profile_idx);
 }
-void MainTask::load_slalom_param() {
-  paramset_list.clear();
-  for (const auto file_name : tpp.file_list) {
-    const auto path = std::string("/spiflash/" + file_name);
 
-    FILE *f = fopen(path.c_str(), "rb");
-    if (f == NULL) {
-      return;
-    }
-    // char line_buf[LINE_BUF_SIZE];
-    std::string str = "";
-    while (fgets(line_buf, sizeof(line_buf), f) != NULL) {
-      // printf("%s\n", line_buf);
-      // printf("_______\n");
-      str += std::string(line_buf);
-    }
-    fclose(f);
-
-    cJSON *root = cJSON_CreateObject();
-    root = cJSON_Parse(str.c_str());
-
-    sp.map.clear();
-
-    for (const auto p : turn_name_list) {
-      if (p.first == TurnType::None) {
-        for (const auto p2 : straight_name_list) {
-          str_p.v_max = cJSON_GetObjectItem(
-                            cJSON_GetObjectItem(
-                                cJSON_GetObjectItem(root, p.second.c_str()),
-                                p2.second.c_str()),
-                            "v_max")
-                            ->valuedouble;
-          str_p.accl = cJSON_GetObjectItem(
-                           cJSON_GetObjectItem(
-                               cJSON_GetObjectItem(root, p.second.c_str()),
-                               p2.second.c_str()),
-                           "accl")
-                           ->valuedouble;
-          str_p.decel = cJSON_GetObjectItem(
-                            cJSON_GetObjectItem(
-                                cJSON_GetObjectItem(root, p.second.c_str()),
-                                p2.second.c_str()),
-                            "decel")
-                            ->valuedouble;
-          str_p.w_max = cJSON_GetObjectItem(
-                            cJSON_GetObjectItem(
-                                cJSON_GetObjectItem(root, p.second.c_str()),
-                                p2.second.c_str()),
-                            "w_max")
-                            ->valuedouble;
-          str_p.w_end = cJSON_GetObjectItem(
-                            cJSON_GetObjectItem(
-                                cJSON_GetObjectItem(root, p.second.c_str()),
-                                p2.second.c_str()),
-                            "w_end")
-                            ->valuedouble;
-          str_p.alpha = cJSON_GetObjectItem(
-                            cJSON_GetObjectItem(
-                                cJSON_GetObjectItem(root, p.second.c_str()),
-                                p2.second.c_str()),
-                            "alpha")
-                            ->valuedouble;
-          sp.str_map[p2.first] = str_p;
-        }
-        continue;
-      }
-      sp2.v =
-          cJSON_GetObjectItem(cJSON_GetObjectItem(root, p.second.c_str()), "v")
-              ->valuedouble;
-      sp2.ang = cJSON_GetObjectItem(cJSON_GetObjectItem(root, p.second.c_str()),
-                                    "ang")
-                    ->valuedouble;
-      sp2.ang = PI * sp2.ang / 180;
-
-      sp2.rad = cJSON_GetObjectItem(cJSON_GetObjectItem(root, p.second.c_str()),
-                                    "rad")
-                    ->valuedouble;
-      sp2.pow_n = cJSON_GetObjectItem(
-                      cJSON_GetObjectItem(root, p.second.c_str()), "pow_n")
-                      ->valueint;
-      sp2.time = cJSON_GetObjectItem(
-                     cJSON_GetObjectItem(root, p.second.c_str()), "time")
-                     ->valuedouble;
-      sp2.front.right =
-          cJSON_GetObjectItem(
-              cJSON_GetObjectItem(cJSON_GetObjectItem(root, p.second.c_str()),
-                                  "front"),
-              "right")
-              ->valuedouble;
-      sp2.front.left =
-          cJSON_GetObjectItem(
-              cJSON_GetObjectItem(cJSON_GetObjectItem(root, p.second.c_str()),
-                                  "front"),
-              "left")
-              ->valuedouble;
-      sp2.back.right =
-          cJSON_GetObjectItem(
-              cJSON_GetObjectItem(cJSON_GetObjectItem(root, p.second.c_str()),
-                                  "back"),
-              "right")
-              ->valuedouble;
-      sp2.back.left =
-          cJSON_GetObjectItem(
-              cJSON_GetObjectItem(cJSON_GetObjectItem(root, p.second.c_str()),
-                                  "back"),
-              "left")
-              ->valuedouble;
-      sp2.type = cast_turn_type(p.second);
-      sp.map[p.first] = sp2;
-    }
-
-    paramset_list.emplace_back(sp);
-    cJSON_free(root);
+void MainTask::load_sla(int idx, string turn_name, slalom_param2_t &sla_p) {
+  if ((int)(tpp.file_list.size()) < (idx - 1)) {
+    return;
   }
+  const auto file_name = tpp.file_list[idx];
+  const auto path = std::string("/spiflash/" + file_name);
+
+  FILE *f = fopen(path.c_str(), "rb");
+  if (f == NULL) {
+    return;
+  }
+  std::string str = "";
+  while (fgets(line_buf, sizeof(line_buf), f) != NULL) {
+    str += std::string(line_buf);
+  }
+  fclose(f);
+
+  cJSON *root = cJSON_CreateObject();
+  root = cJSON_Parse(str.c_str());
+  printf("%s\n", file_name.c_str());
+  printf(" - %s\n", turn_name.c_str());
+  sla_p.v = getItem(getItem(root, turn_name.c_str()), "v")->valuedouble;
+  printf(" - v: %f\n", sla_p.v);
+  sla_p.ang = getItem(getItem(root, turn_name.c_str()), "ang")->valuedouble;
+  sla_p.ang = PI * sla_p.ang / 180;
+
+  sla_p.rad = getItem(getItem(root, turn_name.c_str()), "rad")->valuedouble;
+  sla_p.pow_n = getItem(getItem(root, turn_name.c_str()), "pow_n")->valueint;
+  sla_p.time = getItem(getItem(root, turn_name.c_str()), "time")->valuedouble;
+  sla_p.front.right =
+      getItem(getItem(getItem(root, turn_name.c_str()), "front"), "right")
+          ->valuedouble;
+  sla_p.front.left =
+      getItem(getItem(getItem(root, turn_name.c_str()), "front"), "left")
+          ->valuedouble;
+  sla_p.back.right =
+      getItem(getItem(getItem(root, turn_name.c_str()), "back"), "right")
+          ->valuedouble;
+  sla_p.back.left =
+      getItem(getItem(getItem(root, turn_name.c_str()), "back"), "left")
+          ->valuedouble;
+  sla_p.type = cast_turn_type(turn_name);
+
+  cJSON_free(root);
 }
+void MainTask::load_straight(
+    int idx, std::unordered_map<StraightType, straight_param_t> &str_map) {
+  if ((int)(tpp.file_list.size()) < (idx - 1)) {
+    return;
+  }
+  const auto file_name = tpp.file_list[idx];
+  const auto path = std::string("/spiflash/" + file_name);
+
+  FILE *f = fopen(path.c_str(), "rb");
+  if (f == NULL) {
+    return;
+  }
+  std::string str = "";
+  while (fgets(line_buf, sizeof(line_buf), f) != NULL) {
+    str += std::string(line_buf);
+  }
+  fclose(f);
+
+  cJSON *root = cJSON_CreateObject();
+  root = cJSON_Parse(str.c_str());
+  const auto key = "straight";
+  for (const auto p2 : straight_name_list) {
+    str_p.v_max =
+        getItem(getItem(getItem(root, key), p2.second.c_str()), "v_max")
+            ->valuedouble;
+    str_p.accl = getItem(getItem(getItem(root, key), p2.second.c_str()), "accl")
+                     ->valuedouble;
+    str_p.decel =
+        getItem(getItem(getItem(root, key), p2.second.c_str()), "decel")
+            ->valuedouble;
+    str_p.w_max =
+        getItem(getItem(getItem(root, key), p2.second.c_str()), "w_max")
+            ->valuedouble;
+    str_p.w_end =
+        getItem(getItem(getItem(root, key), p2.second.c_str()), "w_end")
+            ->valuedouble;
+    str_p.alpha =
+        getItem(getItem(getItem(root, key), p2.second.c_str()), "alpha")
+            ->valuedouble;
+    str_map[p2.first] = str_p;
+  }
+  cJSON_free(root);
+}
+
+void MainTask::load_slas(
+    int idx, vector<pair<TurnType, string>> &turn_list,
+    std::unordered_map<TurnType, slalom_param2_t> &turn_map) {
+  if ((int)(tpp.file_list.size()) < (idx - 1)) {
+    return;
+  }
+  const auto file_name = tpp.file_list[idx];
+  const auto path = std::string("/spiflash/" + file_name);
+
+  FILE *f = fopen(path.c_str(), "rb");
+  if (f == NULL) {
+    return;
+  }
+  std::string str = "";
+  while (fgets(line_buf, sizeof(line_buf), f) != NULL) {
+    str += std::string(line_buf);
+  }
+  fclose(f);
+  // param_set.map
+  // TurnType, slalom_param2_t
+  cJSON *root = cJSON_CreateObject();
+  root = cJSON_Parse(str.c_str());
+
+  printf("%s\n", file_name.c_str());
+  for (const auto p : turn_list) {
+    printf(" - %s\n", p.second.c_str());
+    turn_map[p.first].v =
+        getItem(getItem(root, p.second.c_str()), "v")->valuedouble;
+    printf(" - v: %f\n", turn_map[p.first].v);
+    turn_map[p.first].ang =
+        getItem(getItem(root, p.second.c_str()), "ang")->valuedouble;
+    turn_map[p.first].ang = PI * turn_map[p.first].ang / 180;
+
+    turn_map[p.first].rad =
+        getItem(getItem(root, p.second.c_str()), "rad")->valuedouble;
+    turn_map[p.first].pow_n =
+        getItem(getItem(root, p.second.c_str()), "pow_n")->valueint;
+    turn_map[p.first].time =
+        getItem(getItem(root, p.second.c_str()), "time")->valuedouble;
+    turn_map[p.first].front.right =
+        getItem(getItem(getItem(root, p.second.c_str()), "front"), "right")
+            ->valuedouble;
+    turn_map[p.first].front.left =
+        getItem(getItem(getItem(root, p.second.c_str()), "front"), "left")
+            ->valuedouble;
+    turn_map[p.first].back.right =
+        getItem(getItem(getItem(root, p.second.c_str()), "back"), "right")
+            ->valuedouble;
+    turn_map[p.first].back.left =
+        getItem(getItem(getItem(root, p.second.c_str()), "back"), "left")
+            ->valuedouble;
+    turn_map[p.first].type = cast_turn_type(p.second);
+  }
+
+  cJSON_free(root);
+}
+void MainTask::load_slalom_param(int idx, int idx2) {
+  param_set.suction = tpp.profile_list[idx][TurnType::Finish] > 0;
+  param_set.suction_duty = sys.test.suction_duty;
+  param_set.map.clear();
+  param_set.map_slow.clear();
+  param_set.str_map.clear();
+
+  turn_map.clear();
+  for (const auto p : turn_name_list) {
+    if (p.first == TurnType::None) {
+      continue;
+    }
+    const unsigned char sla_idx = tpp.profile_list[idx][p.first];
+    turn_map[sla_idx].emplace_back(p);
+    // load_sla(sla_idx, p.second, param_set.map[p.first]);
+  }
+  for (auto itr = turn_map.begin(); itr != turn_map.end(); ++itr) {
+    load_slas(itr->first, itr->second, param_set.map);
+  }
+  turn_map.clear();
+  for (const auto p : turn_name_list) {
+    if (p.first == TurnType::None) {
+      continue;
+    }
+    const unsigned char sla_idx = tpp.profile_list[idx2][p.first];
+    turn_map[sla_idx].emplace_back(p);
+    // load_sla(sla_idx, p.second, param_set.map_slow[p.first]);
+  }
+  for (auto itr = turn_map.begin(); itr != turn_map.end(); ++itr) {
+    load_slas(itr->first, itr->second, param_set.map_slow);
+  }
+  load_straight(idx, param_set.str_map);
+}
+void MainTask::load_slalom_param() {}
 
 void MainTask::load_param() {
   if (!ui->button_state_hold()) {
@@ -927,7 +950,7 @@ void MainTask::load_param() {
     load_sensor_param();
     load_sys_param();
     load_turn_param_profiles();
-    load_slalom_param();
+    // load_slalom_param();
   }
 }
 void MainTask::rx_uart_json() {
@@ -1054,7 +1077,8 @@ void MainTask::task() {
         } else {
           idx = 1;
         }
-        sr = search_ctrl->exec(paramset_list[idx], SearchMode::ALL);
+        load_slalom_param(idx, idx);
+        sr = search_ctrl->exec(param_set, SearchMode::ALL);
         if (sr == SearchResult::SUCCESS)
           save_maze_data(true);
         while (1) {
@@ -1074,10 +1098,11 @@ void MainTask::task() {
           idx = 1;
         }
         sr = SearchResult::SUCCESS;
+        load_slalom_param(idx, idx);
         if (rorl == TurnDirection::Right)
-          sr = search_ctrl->exec(paramset_list[idx], SearchMode::Kata);
+          sr = search_ctrl->exec(param_set, SearchMode::Kata);
         else
-          sr = search_ctrl->exec(paramset_list[idx], SearchMode::Return);
+          sr = search_ctrl->exec(param_set, SearchMode::Return);
         if (sr == SearchResult::SUCCESS)
           save_maze_data(true);
         while (1) {
@@ -1452,7 +1477,8 @@ void MainTask::test_sla() {
     return;
   }
 
-  sla_p = paramset_list[file_idx].map[static_cast<TurnType>(sys.test.sla_type)];
+  load_slalom_param(file_idx, file_idx);
+  sla_p = param_set.map[static_cast<TurnType>(sys.test.sla_type)];
 
   printf("slalom params\n");
   printf("v = %f\n", sla_p.v);
@@ -2033,92 +2059,7 @@ void MainTask::read_maze_data() {
 }
 
 void MainTask::path_run(int idx, int idx2) {
-
-  param_set.suction = tpp.profile_list[idx][TurnType::Finish] > 0;
-  param_set.suction_duty = sys.test.suction_duty;
-  for (const auto p : turn_name_list) {
-    if (p.first != TurnType::None) {
-      param_set.map[p.first].v =
-          paramset_list[tpp.profile_list[idx][p.first]].map[p.first].v;
-      param_set.map[p.first].ang =
-          paramset_list[tpp.profile_list[idx][p.first]].map[p.first].ang;
-      param_set.map[p.first].rad =
-          paramset_list[tpp.profile_list[idx][p.first]].map[p.first].rad;
-      param_set.map[p.first].pow_n =
-          paramset_list[tpp.profile_list[idx][p.first]].map[p.first].pow_n;
-      param_set.map[p.first].time =
-          paramset_list[tpp.profile_list[idx][p.first]].map[p.first].time;
-      param_set.map[p.first].front.left =
-          paramset_list[tpp.profile_list[idx][p.first]].map[p.first].front.left;
-      param_set.map[p.first].front.right =
-          paramset_list[tpp.profile_list[idx][p.first]]
-              .map[p.first]
-              .front.right;
-      param_set.map[p.first].back.left =
-          paramset_list[tpp.profile_list[idx][p.first]].map[p.first].back.left;
-      param_set.map[p.first].back.right =
-          paramset_list[tpp.profile_list[idx][p.first]].map[p.first].back.right;
-      param_set.map[p.first].type =
-          paramset_list[tpp.profile_list[idx][p.first]].map[p.first].type;
-    }
-  }
-  for (const auto p : turn_name_list) {
-    if (p.first != TurnType::None) {
-      param_set.map_slow[p.first].v =
-          paramset_list[tpp.profile_list[idx2][p.first]].map[p.first].v;
-      param_set.map_slow[p.first].ang =
-          paramset_list[tpp.profile_list[idx2][p.first]].map[p.first].ang;
-      param_set.map_slow[p.first].rad =
-          paramset_list[tpp.profile_list[idx2][p.first]].map[p.first].rad;
-      param_set.map_slow[p.first].pow_n =
-          paramset_list[tpp.profile_list[idx2][p.first]].map[p.first].pow_n;
-      param_set.map_slow[p.first].time =
-          paramset_list[tpp.profile_list[idx2][p.first]].map[p.first].time;
-      param_set.map_slow[p.first].front.left =
-          paramset_list[tpp.profile_list[idx2][p.first]]
-              .map[p.first]
-              .front.left;
-      param_set.map_slow[p.first].front.right =
-          paramset_list[tpp.profile_list[idx2][p.first]]
-              .map[p.first]
-              .front.right;
-      param_set.map_slow[p.first].back.left =
-          paramset_list[tpp.profile_list[idx2][p.first]].map[p.first].back.left;
-      param_set.map_slow[p.first].back.right =
-          paramset_list[tpp.profile_list[idx2][p.first]]
-              .map[p.first]
-              .back.right;
-      param_set.map_slow[p.first].type =
-          paramset_list[tpp.profile_list[idx2][p.first]].map[p.first].type;
-    }
-  }
-
-  for (const auto p : straight_name_list) {
-    param_set.str_map[p.first].v_max =
-        paramset_list[tpp.profile_list[idx][TurnType::None]]
-            .str_map[p.first]
-            .v_max;
-    param_set.str_map[p.first].accl =
-        paramset_list[tpp.profile_list[idx][TurnType::None]]
-            .str_map[p.first]
-            .accl;
-    param_set.str_map[p.first].decel =
-        paramset_list[tpp.profile_list[idx][TurnType::None]]
-            .str_map[p.first]
-            .decel;
-    param_set.str_map[p.first].w_max =
-        paramset_list[tpp.profile_list[idx][TurnType::None]]
-            .str_map[p.first]
-            .w_max;
-    param_set.str_map[p.first].w_end =
-        paramset_list[tpp.profile_list[idx][TurnType::None]]
-            .str_map[p.first]
-            .w_end;
-    param_set.str_map[p.first].alpha =
-        paramset_list[tpp.profile_list[idx][TurnType::None]]
-            .str_map[p.first]
-            .alpha;
-  }
+  load_slalom_param(idx, idx2);
 
   pc->other_route_map.clear();
   const bool res = pc->path_create(false);
@@ -2170,4 +2111,6 @@ void MainTask::path_run(int idx, int idx2) {
 
   param->sen_ref_p.normal.exist.left45 = backup_l45;
   param->sen_ref_p.normal.exist.right45 = backup_r45;
+
+  param->fast_log_enable = 0; //１回きり
 }
