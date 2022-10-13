@@ -250,20 +250,20 @@ void MainTask::save_json_data(std::string &str) {
 }
 
 void MainTask::load_hw_param() {
-  FILE *f = fopen("/spiflash/hardware.txt", "rb");
-  if (f == NULL) {
+  string fileName = "/spiflash/hardware.txt";
+
+  std::ifstream ifs(fileName);
+  if (!ifs) {
     return;
   }
-  // char line_buf[LINE_BUF_SIZE];
-  std::string str = "";
-  while (fgets(line_buf, sizeof(line_buf), f) != NULL) {
-    printf("%s\n", line_buf);
-    printf("_______\n");
-    str += std::string(line_buf);
+  std::string str;
+  std::string buf;
+  while (!ifs.eof()) {
+    std::getline(ifs, buf);
+    str += buf;
   }
-  fclose(f);
 
-  printf("%s\n", str.c_str());
+  // printf("%s\n", str.c_str());
 
   cJSON *root = cJSON_CreateObject(), *motor_pid, *gyro_pid, *gyro_param,
         *kalman_config, *battery_param, *led_param, *angle_pid, *dist_pid,
@@ -469,35 +469,33 @@ void MainTask::load_hw_param() {
   pt->dynamics.tire = param->tire;
   pt->dynamics.gear_ratio = param->gear_a / param->gear_b;
 
-  cJSON_free(root);
-  cJSON_free(motor_pid);
-  cJSON_free(gyro_pid);
-  cJSON_free(sen_pid);
-  cJSON_free(sen_pid_dia);
-  cJSON_free(gyro_param);
-  cJSON_free(battery_param);
-  cJSON_free(led_param);
-  cJSON_free(dist_pid);
-  cJSON_free(angle_pid);
-  cJSON_free(kalman_config);
-  cJSON_free(accel_x);
-  cJSON_free(comp_v_param);
+  // cJSON_free(motor_pid);
+  // cJSON_free(gyro_pid);
+  // cJSON_free(sen_pid);
+  // cJSON_free(sen_pid_dia);
+  // cJSON_free(gyro_param);
+  // cJSON_free(battery_param);
+  // cJSON_free(led_param);
+  // cJSON_free(dist_pid);
+  // cJSON_free(angle_pid);
+  // cJSON_free(kalman_config);
+  // cJSON_free(accel_x);
+  // cJSON_free(comp_v_param);
+  cJSON_Delete(root);
 }
 
 void MainTask::load_sensor_param() {
-  FILE *f = fopen("/spiflash/sensor.txt", "rb");
-  if (f == NULL) {
+  string fileName = "/spiflash/sensor.txt";
+  std::ifstream ifs(fileName);
+  if (!ifs) {
     return;
   }
-  // char line_buf[LINE_BUF_SIZE];
-  std::string str = "";
-  while (fgets(line_buf, sizeof(line_buf), f) != NULL) {
-    printf("%s\n", line_buf);
-    printf("_______\n");
-    str += std::string(line_buf);
+  std::string str;
+  std::string buf;
+  while (!ifs.eof()) {
+    std::getline(ifs, buf);
+    str += buf;
   }
-  fclose(f);
-
   cJSON *root = cJSON_CreateObject(), *normal, *normal_ref, *normal_exist, *dia,
         *normal2, *normal2_ref, *normal2_exist, *dia_ref, *dia_exist, *search,
         *search_ref, *search_exist, *gain;
@@ -621,36 +619,34 @@ void MainTask::load_sensor_param() {
   param->sensor_gain.r90.b =
       cJSON_GetArrayItem(getItem(gain, "R90"), 1)->valuedouble;
 
-  cJSON_free(root);
-  cJSON_free(normal);
-  cJSON_free(normal_ref);
-  cJSON_free(normal_exist);
-  cJSON_free(normal2);
-  cJSON_free(normal2_ref);
-  cJSON_free(normal2_exist);
-  cJSON_free(dia);
-  cJSON_free(dia_ref);
-  cJSON_free(dia_exist);
-  cJSON_free(search);
-  cJSON_free(search_ref);
-  cJSON_free(search_exist);
-  cJSON_free(gain);
+  // cJSON_free(normal);
+  // cJSON_free(normal_ref);
+  // cJSON_free(normal_exist);
+  // cJSON_free(normal2);
+  // cJSON_free(normal2_ref);
+  // cJSON_free(normal2_exist);
+  // cJSON_free(dia);
+  // cJSON_free(dia_ref);
+  // cJSON_free(dia_exist);
+  // cJSON_free(search);
+  // cJSON_free(search_ref);
+  // cJSON_free(search_exist);
+  // cJSON_free(gain);
+  cJSON_Delete(root);
 }
 
 void MainTask::load_sys_param() {
-  FILE *f = fopen("/spiflash/system.txt", "rb");
-  if (f == NULL) {
+  string fileName = "/spiflash/system.txt";
+  std::ifstream ifs(fileName);
+  if (!ifs) {
     return;
   }
-  // char line_buf[LINE_BUF_SIZE];
-  std::string str = "";
-  while (fgets(line_buf, sizeof(line_buf), f) != NULL) {
-    printf("%s\n", line_buf);
-    printf("_______\n");
-    str += std::string(line_buf);
+  std::string str;
+  std::string buf;
+  while (!ifs.eof()) {
+    std::getline(ifs, buf);
+    str += buf;
   }
-  fclose(f);
-  printf("%s\n", line_buf);
 
   cJSON *root = cJSON_CreateObject(), *test, *goals;
   root = cJSON_Parse(str.c_str());
@@ -696,23 +692,23 @@ void MainTask::load_sys_param() {
   sys.test.sysid_time = getItem(test, "sysid_time")->valuedouble;
   sys.test.start_turn = getItem(test, "start_turn")->valueint;
 
-  cJSON_free(root);
-  cJSON_free(goals);
-  cJSON_free(test);
+  // cJSON_free(goals);
+  // cJSON_free(test);
+  cJSON_Delete(root);
 }
 
 void MainTask::load_turn_param_profiles() {
-  FILE *f = fopen("/spiflash/profiles.txt", "rb");
-  if (f == NULL)
+  string fileName = "/spiflash/profiles.txt";
+  std::ifstream ifs(fileName);
+  if (!ifs) {
     return;
-  // char line_buf[LINE_BUF_SIZE];
-  std::string str = "";
-  while (fgets(line_buf, sizeof(line_buf), f) != NULL) {
-    // printf("%s\n", line_buf);
-    // printf("_______\n");
-    str += std::string(line_buf);
   }
-  fclose(f);
+  std::string str;
+  std::string buf;
+  while (!ifs.eof()) {
+    std::getline(ifs, buf);
+    str += buf;
+  }
 
   cJSON *root = cJSON_CreateObject(), *profile_list, *profile_idx;
   root = cJSON_Parse(str.c_str());
@@ -759,56 +755,12 @@ void MainTask::load_turn_param_profiles() {
         getItem(getArray(profile_idx, i), "dia90")->valueint;
     tpp.profile_list.emplace_back(p_idx);
   }
-  cJSON_free(root);
-  cJSON_free(profile_list);
-  cJSON_free(profile_idx);
+  // cJSON_free(profile_list);
+  // cJSON_free(profile_idx);
+  cJSON_Delete(root);
 }
 
-void MainTask::load_sla(int idx, string turn_name, slalom_param2_t &sla_p) {
-  if ((int)(tpp.file_list.size()) < (idx - 1)) {
-    return;
-  }
-  const auto file_name = tpp.file_list[idx];
-  const auto path = std::string("/spiflash/" + file_name);
-
-  FILE *f = fopen(path.c_str(), "rb");
-  if (f == NULL) {
-    return;
-  }
-  std::string str = "";
-  while (fgets(line_buf, sizeof(line_buf), f) != NULL) {
-    str += std::string(line_buf);
-  }
-  fclose(f);
-
-  cJSON *root = cJSON_CreateObject();
-  root = cJSON_Parse(str.c_str());
-  printf("%s\n", file_name.c_str());
-  printf(" - %s\n", turn_name.c_str());
-  sla_p.v = getItem(getItem(root, turn_name.c_str()), "v")->valuedouble;
-  printf(" - v: %f\n", sla_p.v);
-  sla_p.ang = getItem(getItem(root, turn_name.c_str()), "ang")->valuedouble;
-  sla_p.ang = PI * sla_p.ang / 180;
-
-  sla_p.rad = getItem(getItem(root, turn_name.c_str()), "rad")->valuedouble;
-  sla_p.pow_n = getItem(getItem(root, turn_name.c_str()), "pow_n")->valueint;
-  sla_p.time = getItem(getItem(root, turn_name.c_str()), "time")->valuedouble;
-  sla_p.front.right =
-      getItem(getItem(getItem(root, turn_name.c_str()), "front"), "right")
-          ->valuedouble;
-  sla_p.front.left =
-      getItem(getItem(getItem(root, turn_name.c_str()), "front"), "left")
-          ->valuedouble;
-  sla_p.back.right =
-      getItem(getItem(getItem(root, turn_name.c_str()), "back"), "right")
-          ->valuedouble;
-  sla_p.back.left =
-      getItem(getItem(getItem(root, turn_name.c_str()), "back"), "left")
-          ->valuedouble;
-  sla_p.type = cast_turn_type(turn_name);
-
-  cJSON_free(root);
-}
+void MainTask::load_sla(int idx, string turn_name, slalom_param2_t &sla_p) {}
 void MainTask::load_straight(
     int idx, std::unordered_map<StraightType, straight_param_t> &str_map) {
   if ((int)(tpp.file_list.size()) < (idx - 1)) {
@@ -817,18 +769,17 @@ void MainTask::load_straight(
   const auto file_name = tpp.file_list[idx];
   const auto path = std::string("/spiflash/" + file_name);
 
-  FILE *f = fopen(path.c_str(), "rb");
-  if (f == NULL) {
-    return;
-  }
+  std::ifstream ifs(path);
   std::string str = "";
-  while (fgets(line_buf, sizeof(line_buf), f) != NULL) {
-    str += std::string(line_buf);
+  std::string buf;
+  while (!ifs.eof()) {
+    std::getline(ifs, buf);
+    str += buf;
   }
-  fclose(f);
-
+  ifs.close();
   cJSON *root = cJSON_CreateObject();
   root = cJSON_Parse(str.c_str());
+  str.shrink_to_fit();
   const auto key = "straight";
   for (const auto p2 : straight_name_list) {
     str_p.v_max =
@@ -850,7 +801,7 @@ void MainTask::load_straight(
             ->valuedouble;
     str_map[p2.first] = str_p;
   }
-  cJSON_free(root);
+  cJSON_Delete(root);
 }
 
 void MainTask::load_slas(
@@ -862,26 +813,23 @@ void MainTask::load_slas(
   const auto file_name = tpp.file_list[idx];
   const auto path = std::string("/spiflash/" + file_name);
 
-  FILE *f = fopen(path.c_str(), "rb");
-  if (f == NULL) {
-    return;
-  }
+  std::ifstream ifs(path);
   std::string str = "";
-  while (fgets(line_buf, sizeof(line_buf), f) != NULL) {
-    str += std::string(line_buf);
+  std::string buf;
+  while (!ifs.eof()) {
+    std::getline(ifs, buf);
+    str += buf;
   }
-  fclose(f);
-  // param_set.map
-  // TurnType, slalom_param2_t
+  ifs.close();
   cJSON *root = cJSON_CreateObject();
   root = cJSON_Parse(str.c_str());
-
-  printf("%s\n", file_name.c_str());
+  str.shrink_to_fit();
+  // printf("%s\n", file_name.c_str());
   for (const auto p : turn_list) {
-    printf(" - %s\n", p.second.c_str());
+    // printf(" - %s\n", p.second.c_str());
     turn_map[p.first].v =
         getItem(getItem(root, p.second.c_str()), "v")->valuedouble;
-    printf(" - v: %f\n", turn_map[p.first].v);
+    // printf(" - v: %f\n", turn_map[p.first].v);
     turn_map[p.first].ang =
         getItem(getItem(root, p.second.c_str()), "ang")->valuedouble;
     turn_map[p.first].ang = PI * turn_map[p.first].ang / 180;
@@ -906,8 +854,7 @@ void MainTask::load_slas(
             ->valuedouble;
     turn_map[p.first].type = cast_turn_type(p.second);
   }
-
-  cJSON_free(root);
+  cJSON_Delete(root);
 }
 void MainTask::load_slalom_param(int idx, int idx2) {
   param_set.suction = tpp.profile_list[idx][TurnType::Finish] > 0;
@@ -1146,6 +1093,7 @@ void MainTask::task() {
         lgc->init(sys.maze_size, sys.maze_size * sys.maze_size - 1);
         lgc->set_goal_pos(sys.goals);
       }
+      // param->fast_log_enable = 0; //１回きり
       vTaskDelay(10 / portTICK_RATE_MS);
     }
   }
@@ -2059,8 +2007,14 @@ void MainTask::read_maze_data() {
 }
 
 void MainTask::path_run(int idx, int idx2) {
+  // printf("read_param\n");
+  // printf("before: %d bytes\n", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
   load_slalom_param(idx, idx2);
 
+  // printf("after: %d bytes\n", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
+
+  // printf("path_create\n");
+  // printf("before: %d bytes\n", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
   pc->other_route_map.clear();
   const bool res = pc->path_create(false);
   if (!res) {
@@ -2097,6 +2051,7 @@ void MainTask::path_run(int idx, int idx2) {
   }
   pc->print_path();
   printf("%f\n", pc->route.time);
+  // printf("after: %d bytes\n", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
 
   const auto rorl = ui->select_direction2();
   const auto backup_l45 = param->sen_ref_p.normal.exist.left45;
@@ -2112,5 +2067,5 @@ void MainTask::path_run(int idx, int idx2) {
   param->sen_ref_p.normal.exist.left45 = backup_l45;
   param->sen_ref_p.normal.exist.right45 = backup_r45;
 
-  param->fast_log_enable = 0; //１回きり
+  // param->fast_log_enable = 0; //１回きり
 }

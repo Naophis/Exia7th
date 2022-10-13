@@ -113,7 +113,7 @@ search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1
 sen_log_size: 100
-log_size: 1600
+log_size: 3000
 
 fail_duty_cnt: 500
 fail_v_cnt: 200
@@ -124,7 +124,7 @@ cell2: 90
 
 motor_pid:
   p: 0.005125
-  i: 0.685
+  i: 0.975
   # p: 0.0005
   # i: 1.25
   d: 0.0

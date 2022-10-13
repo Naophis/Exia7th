@@ -640,7 +640,7 @@ float PathCreator::timebase_path_create(bool is_search, param_set_t &p_set) {
               path_s2.push_back(path_s[i]);
               path_t2.push_back(path_t[i]);
             }
-            print_path();
+            // print_path();
           }
           route.dir = dir;
           route.use = pc_result.use;

@@ -25,6 +25,7 @@ void LoggingTask::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
 void LoggingTask::start_slalom_log() {
   active_slalom_log = true; //
   idx_slalom_log = 0;
+  std::vector<std::unique_ptr<log_data_t2>>().swap(log_vec);
   log_vec.clear();
   log_vec.shrink_to_fit();
   // log_vec.resize(param->log_size);
@@ -61,7 +62,7 @@ void LoggingTask::task() {
     if (log_mode) {
       if (logging_active) {
         if (active_slalom_log && idx_slalom_log <= param->log_size) {
-          auto ld = std::make_shared<log_data_t2>();
+          auto ld = make_unique<log_data_t2>();
 
           ld->img_v = floatToHalf(tgt_val->ego_in.v);
           ld->v_l = floatToHalf(sensing_result->ego.v_l);
@@ -100,8 +101,10 @@ void LoggingTask::task() {
 
           ld->motion_timestamp = tgt_val->nmr.timstamp;
 
-          log_vec.emplace_back(ld);
-          idx_slalom_log++;
+          if (heap_caps_get_free_size(MALLOC_CAP_INTERNAL) > 10000) {
+            log_vec.emplace_back(std::move(ld));
+            idx_slalom_log++;
+          }
         }
         if (param->set_param) {
           vTaskDelay(param->logging_time);
@@ -157,7 +160,7 @@ void LoggingTask::save(std::string file_name) {
 
   int i = 0;
 
-  for (const auto ld : log_vec) {
+  for (const auto &ld : log_vec) {
 
     fprintf(f_slalom_log, f1,       //
             i++,                    //
@@ -275,11 +278,13 @@ void LoggingTask::dump_log(std::string file_name) {
   printf("end___\n"); // csvファイル追記終了トリガー
 
   fclose(f);
+  printf("memory: %d bytes\n", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
   log_vec.clear();
-  log_vec.shrink_to_fit();
-
+  // std::vector<std::shared_ptr<log_data_t2>>().swap(log_vec);
 }
-
+// 135276
+// 135152
+// 116076
 void LoggingTask::dump_log_sysid(std::string file_name) {
 
   const TickType_t xDelay2 = 100 / portTICK_PERIOD_MS;

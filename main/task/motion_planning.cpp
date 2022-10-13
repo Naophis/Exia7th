@@ -66,11 +66,17 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p,
   if (adachi != nullptr) {
     adachi->update();
   }
-
+  unsigned int cnt = 0;
   while (1) {
     vTaskDelay(1 / portTICK_RATE_MS);
+    cnt++;
     if (std::abs(tgt_val->ego_in.dist) >= std::abs(p.dist)) {
       break;
+    }
+    if (std::abs(p.v_end) < 10) {
+      if (cnt > 1000) {
+        break;
+      }
     }
     if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
       if (p.motion_type == MotionType::SLA_FRONT_STR ||
@@ -182,10 +188,10 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
         param->front_dist_offset_pivot_th < sensing_result->ego.right90_dist &&
         sensing_result->ego.right90_dist < 130) {
       auto diff = (sensing_result->ego.front_dist - param->front_dist_offset);
-      if (diff > 3) {
-        diff = 3;
-      } else if (diff < -3) {
-        diff = -3;
+      if (diff > 5) {
+        diff = 5;
+      } else if (diff < -5) {
+        diff = -5;
       }
       if (ps_front.dist < 0) {
         ps_front.dist = 1;
@@ -196,10 +202,10 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
     if (td == TurnDirection::Right) {
       if (sensing_result->ego.left45_dist < th_offset_dist) {
         auto diff = (param->sla_wall_ref_l - sensing_result->ego.left45_dist);
-        if (diff > 3) {
-          diff = 3;
-        } else if (diff < -3) {
-          diff = -3;
+        if (diff > 5) {
+          diff = 5;
+        } else if (diff < -5) {
+          diff = -5;
         }
         if (ps_back.dist < 0) {
           ps_back.dist = 1;

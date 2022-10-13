@@ -33,6 +33,8 @@
 #include <vector>
 
 #include "cJSON.h"
+#include <esp_heap_caps.h>
+#include <fstream>
 
 class MainTask {
 public:

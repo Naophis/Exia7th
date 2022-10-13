@@ -9,6 +9,9 @@
 #include "freertos/task.h"
 #include "gen_code_conv_single2half/half_type.h"
 
+#include <esp_heap_caps.h>
+#include <fstream>
+
 class LoggingTask {
 public:
   LoggingTask(){};
@@ -38,6 +41,7 @@ public:
   void exec_log();
 
   bool active_slalom_log = false;
+
 private:
   bool log_mode = true;
   bool logging_active = false;
@@ -52,12 +56,17 @@ private:
   int idx_slalom_log = 0;
   FILE *f_slalom_log;
   // std::vector<std::shared_ptr<log_data_t>> log_vec;
-  std::vector<std::shared_ptr<log_data_t2>> log_vec;
+  std::vector<std::unique_ptr<log_data_t2>> log_vec;
   std::vector<std::shared_ptr<sysid_log>> sysidlog_vec;
   float calc_sensor(float data, float a, float b, char motion_type);
   float duty_l = 0;
   float duty_r = 0;
   int time = 0;
+
+  template <typename T, typename... Args>
+  std::unique_ptr<T> make_unique(Args &&... args) {
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+  }
 };
 
 #endif
