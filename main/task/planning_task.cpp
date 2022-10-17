@@ -276,7 +276,11 @@ float PlanningTask::calc_sensor_pid() {
   float duty = 0;
 
   error_entity.sen.error_i += error_entity.sen.error_p;
+  error_entity.sen.error_d = error_entity.sen.error_p;
   error_entity.sen.error_p = check_sen_error();
+  error_entity.sen.error_d =
+      error_entity.sen.error_p - error_entity.sen.error_d;
+
   if (error_entity.sen.error_p > 10) {
     error_entity.sen.error_p = 10;
   } else if (error_entity.sen.error_p < -10) {
@@ -304,7 +308,10 @@ float PlanningTask::calc_sensor_pid_dia() {
   float duty = 0;
 
   error_entity.sen_dia.error_i += error_entity.sen_dia.error_p;
+  error_entity.sen_dia.error_d = error_entity.sen_dia.error_p;
   error_entity.sen_dia.error_p = check_sen_error_dia();
+  error_entity.sen_dia.error_d =
+      error_entity.sen_dia.error_p - error_entity.sen_dia.error_d;
   if (param_ro->sensor_pid_dia.mode == 1) {
     duty =
         param_ro->sensor_pid_dia.p * error_entity.sen_dia.error_p +

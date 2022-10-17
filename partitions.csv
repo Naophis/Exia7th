@@ -6,3 +6,4 @@ factory,    app,  factory,  0x10000, 1M,
 ot_storage, data, 0x3a,            , 0x2000,
 storage0,  data, fat,     ,       1M
 storage1,  data, fat,     ,        1M,
+coredump, data, coredump,,        64K

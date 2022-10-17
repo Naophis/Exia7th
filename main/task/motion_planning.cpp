@@ -73,7 +73,7 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p,
     if (std::abs(tgt_val->ego_in.dist) >= std::abs(p.dist)) {
       break;
     }
-    if (std::abs(p.v_end) < 10) {
+    if (p.v_end <= 10) {
       if (cnt > 1000) {
         break;
       }
@@ -188,10 +188,10 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
         param->front_dist_offset_pivot_th < sensing_result->ego.right90_dist &&
         sensing_result->ego.right90_dist < 130) {
       auto diff = (sensing_result->ego.front_dist - param->front_dist_offset);
-      if (diff > 5) {
-        diff = 5;
-      } else if (diff < -5) {
-        diff = -5;
+      if (diff > param->normal_sla_offset) {
+        diff = param->normal_sla_offset;
+      } else if (diff < -param->normal_sla_offset) {
+        diff = -param->normal_sla_offset;
       }
       if (ps_front.dist < 0) {
         ps_front.dist = 1;
@@ -202,10 +202,10 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
     if (td == TurnDirection::Right) {
       if (sensing_result->ego.left45_dist < th_offset_dist) {
         auto diff = (param->sla_wall_ref_l - sensing_result->ego.left45_dist);
-        if (diff > 5) {
-          diff = 5;
-        } else if (diff < -5) {
-          diff = -5;
+        if (diff > param->normal_sla_offset) {
+          diff = param->normal_sla_offset;
+        } else if (diff < -param->normal_sla_offset) {
+          diff = -param->normal_sla_offset;
         }
         if (ps_back.dist < 0) {
           ps_back.dist = 1;

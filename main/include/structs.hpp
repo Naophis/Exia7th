@@ -363,7 +363,7 @@ typedef struct {
   float slip_param_k2 = 0;
 
   fail_check_cnt_t fail_check;
-
+  float normal_sla_offset = 4;
 } input_param_t;
 
 typedef struct {

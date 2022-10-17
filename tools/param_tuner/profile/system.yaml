@@ -21,11 +21,11 @@ debug: 0
 mode: 0 # モード選択
 
 test: # テスト走行時に使用するパラメータ群
-  v_max: 500
+  v_max: 475
   end_v: 1
   accl: 1800
   decel: -1800
-  dist: 720 #直進全部　
+  dist: 360 #直進全部　
   # dist: 180 # スラロームテスト
   dia: 0
   w_max: 15.0

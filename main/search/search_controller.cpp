@@ -92,7 +92,20 @@ MotionResult SearchController::go_straight_wrapper(param_set_t &p_set,
              (far_right && !left_exist)) {
     return straight_offset(p_set, TurnDirection::Right, diff);
   }
-  return mp->go_straight(p, adachi);
+  const auto left = param->sen_ref_p.normal.exist.left45;
+  const auto right = param->sen_ref_p.normal.exist.right45;
+  if (left_exist) {
+    param->sen_ref_p.normal.exist.left45 = 60;
+  }
+  if (right_exist) {
+    param->sen_ref_p.normal.exist.right45 = 60;
+  }
+  p.dist = param->cell / 2 - diff;
+  auto res1 = mp->go_straight(p, adachi);
+  param->sen_ref_p.normal.exist.left45 = left;
+  param->sen_ref_p.normal.exist.right45 = right;
+  p.dist = param->cell / 2;
+  return mp->go_straight(p, fake_adachi);
 
   return MotionResult::NONE;
 }
