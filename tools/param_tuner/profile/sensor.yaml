@@ -65,7 +65,7 @@ search:
     offset_r: 25 #前壁制御　左右値差　しきい値
     offset_l: 30 #前壁制御　duty max値
 
-    front_ctrl_th: 200
+    front_ctrl_th: 50
     front_ctrl: 48
 gain:
   F: [896.44499125, 61.32583049]

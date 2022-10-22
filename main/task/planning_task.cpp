@@ -837,6 +837,11 @@ void PlanningTask::calc_tgt_duty() {
 
   error_entity.dist.error_p =
       tgt_val->global_pos.img_dist - tgt_val->global_pos.dist;
+  if (error_entity.dist.error_p > param_ro->front_ctrl_error_th) {
+    error_entity.dist.error_p = param_ro->front_ctrl_error_th;
+  } else if (error_entity.dist.error_p < -param_ro->front_ctrl_error_th) {
+    error_entity.dist.error_p = -param_ro->front_ctrl_error_th;
+  }
   error_entity.ang.error_p =
       tgt_val->global_pos.img_ang - tgt_val->global_pos.ang;
 

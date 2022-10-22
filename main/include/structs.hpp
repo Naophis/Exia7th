@@ -329,6 +329,7 @@ typedef struct {
 
   float sla_wall_ref_l = 45;
   float sla_wall_ref_r = 45;
+  float front_ctrl_error_th = 4;
 
   float clear_dist_ragne_from = 0;
   float clear_dist_ragne_to = 0;
@@ -501,6 +502,8 @@ typedef struct {
   float wall_off_dist_l = 0;
   bool dia_mode = false;
   bool skil_wall_off = false;
+  bool search_str_wide_ctrl_r = false;
+  bool search_str_wide_ctrl_l = false;
 } param_straight_t;
 
 typedef struct {

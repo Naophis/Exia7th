@@ -303,6 +303,9 @@ void MainTask::load_hw_param() {
   param->fail_check.v = getItem(root, "fail_v_cnt")->valueint;
   param->fail_check.w = getItem(root, "fail_w_cnt")->valueint;
 
+  param->front_ctrl_error_th =
+      getItem(root, "front_ctrl_error_th")->valuedouble;
+
   param->offset_after_turn_l2 =
       getItem(root, "offset_after_turn_l2")->valuedouble;
   param->offset_after_turn_r2 =
@@ -1223,8 +1226,9 @@ void MainTask::test_run() {
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
   mp->go_straight(ps);
+  lt->stop_slalom_log();
   // bool front_ctrl = (sensing_result->ego.front_dist < 60);
-  vTaskDelay(100 / portTICK_RATE_MS);
+  vTaskDelay(50 / portTICK_RATE_MS);
   pt->motor_disable();
   reset_tgt_data();
   reset_ego_data();
@@ -1234,7 +1238,6 @@ void MainTask::test_run() {
   reset_tgt_data();
   reset_ego_data();
   req_error_reset();
-  lt->stop_slalom_log();
   mp->coin();
   lt->save(slalom_log_file);
   ui->coin(120);
@@ -2059,8 +2062,14 @@ void MainTask::path_run(int idx, int idx2) {
   if (rorl == TurnDirection::Right) {
 
   } else {
-    param->sen_ref_p.normal.exist.left45 =
-        param->sen_ref_p.normal.exist.right45 = 5;
+    pc->other_route_map.clear();
+    const bool res = pc->path_create(false);
+    if (!res) {
+      ui->error();
+      return;
+    }
+    pc->convert_large_path(true);
+    pc->diagonalPath(true, true);
   }
   mp->exec_path_running(param_set);
 

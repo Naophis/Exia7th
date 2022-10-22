@@ -50,11 +50,16 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p,
     p.accl =
         std::abs((ego_v * ego_v - p.v_end * p.v_end) / (2 * p.dist)) + 1000;
     p.decel = -p.accl;
-    // std::abs((ego_v * ego_v - p.v_end * p.v_end) / (2 * p.dist)) + 1000;
   }
 
-  // printf("%f, %f, ", p.v_max, p.v_end);
-  // printf("%f, %f, %f\n", p.dist, p.accl, p.decel);
+  const auto left = param->sen_ref_p.normal.exist.left45;
+  const auto right = param->sen_ref_p.normal.exist.right45;
+  if (p.search_str_wide_ctrl_l) {
+    param->sen_ref_p.normal.exist.left45 = 60;
+  }
+  if (p.search_str_wide_ctrl_r) {
+    param->sen_ref_p.normal.exist.right45 = 60;
+  }
 
   tgt_val->nmr.sct = p.sct;
   if (p.motion_type != MotionType::NONE) {
@@ -73,6 +78,10 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p,
     if (std::abs(tgt_val->ego_in.dist) >= std::abs(p.dist)) {
       break;
     }
+    if (std::abs(tgt_val->ego_in.dist) >= param->clear_dist_ragne_to) {
+      param->sen_ref_p.normal.exist.left45 = left;
+      param->sen_ref_p.normal.exist.right45 = right;
+    }
     if (p.v_end <= 10) {
       if (cnt > 1000) {
         break;
@@ -82,10 +91,14 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p,
       if (p.motion_type == MotionType::SLA_FRONT_STR ||
           p.motion_type == MotionType::SLA_BACK_STR) {
       } else {
+        param->sen_ref_p.normal.exist.left45 = left;
+        param->sen_ref_p.normal.exist.right45 = right;
         return MotionResult::ERROR;
       }
     }
   }
+  param->sen_ref_p.normal.exist.left45 = left;
+  param->sen_ref_p.normal.exist.right45 = right;
   return MotionResult::NONE;
 }
 
@@ -160,10 +173,15 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   bool find = false;
   bool find_r = false;
   bool find_l = false;
+
+  ps_front.search_str_wide_ctrl_l = ps_front.search_str_wide_ctrl_r =
+      ps_back.search_str_wide_ctrl_l = ps_back.search_str_wide_ctrl_r = false;
+
   ps_front.v_max = sp.v;
   ps_front.v_end = sp.v;
   ps_front.accl = next_motion.accl;
   ps_front.decel = next_motion.decel;
+
   ps_front.dist = (td == TurnDirection::Right) ? sp.front.right : sp.front.left;
   if (adachi != nullptr) {
     ps_front.dist -= adachi->diff;
@@ -193,10 +211,10 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
       } else if (diff < -param->normal_sla_offset) {
         diff = -param->normal_sla_offset;
       }
+      ps_front.dist += diff;
       if (ps_front.dist < 0) {
         ps_front.dist = 1;
       }
-      ps_front.dist += diff;
       // (sensing_result->ego.front_dist - param->front_dist_offset);
     }
     if (td == TurnDirection::Right) {
@@ -207,10 +225,10 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
         } else if (diff < -param->normal_sla_offset) {
           diff = -param->normal_sla_offset;
         }
+        ps_back.dist += diff;
         if (ps_back.dist < 0) {
           ps_back.dist = 1;
         }
-        ps_back.dist += diff;
       }
     } else {
       if (sensing_result->ego.right45_dist < th_offset_dist) {
@@ -616,7 +634,7 @@ MotionResult MotionPlanning::front_ctrl(bool limit) {
     if (!limit) {
       if (cnt > param->sen_ref_p.search_exist.front_ctrl_th)
         break;
-      if (max_cnt > 500)
+      if (max_cnt > 250)
         break;
     }
   }
@@ -665,6 +683,7 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
   ps.motion_type = MotionType::STRAIGHT;
   ps.sct = SensorCtrlType::Straight;
   ps.wall_ctrl_mode = WallCtrlMode::NONE;
+  ps.search_str_wide_ctrl_l = ps.search_str_wide_ctrl_r = false;
 
   reset_gyro_ref_with_check();
 
@@ -695,6 +714,7 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
       ps.accl = p_set.str_map[st].accl;
       ps.decel = p_set.str_map[st].decel;
       ps.dia_mode = dia;
+      ps.search_str_wide_ctrl_l = ps.search_str_wide_ctrl_r = false;
       ps.wall_ctrl_mode = WallCtrlMode::LEFT_ONLY;
 
       ps.dist = !dia ? (dist * cell_size) : (dist * cell_size * ROOT2);
@@ -744,11 +764,14 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
         dist4 = 0.5 * pc->path_s[i + 1] - 1;
       }
       // スラロームの後距離の目標速度を指定
+      // nm.v_max =
+      //     fast_mode ? p_set.map[turn_type].v : p_set.map_slow[turn_type].v;
+      // nm.v_end =
+      //     fast_mode ? p_set.map[turn_type].v : p_set.map_slow[turn_type].v;
 
-      nm.v_max =
-          fast_mode ? p_set.map[turn_type].v : p_set.map_slow[turn_type].v;
-      nm.v_end =
-          fast_mode ? p_set.map[turn_type].v : p_set.map_slow[turn_type].v;
+      nm.v_max = p_set.map[turn_type].v;
+      nm.v_end = p_set.map[turn_type].v;
+
       nm.accl = p_set.str_map[st].accl;
       nm.decel = p_set.str_map[st].decel;
       nm.is_turn = false;
@@ -757,15 +780,18 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
       if (exist_next_idx && !(dist3 > 0 && dist4 > 0)) {
         //連続スラロームのとき、次のスラロームの速度になるように加速
         auto next_turn_type = tc.get_turn_type(pc->path_t[i + 1]);
-        nm.v_max = fast_mode ? p_set.map[next_turn_type].v
-                             : p_set.map_slow[next_turn_type].v;
-        nm.v_end = fast_mode ? p_set.map[next_turn_type].v
-                             : p_set.map_slow[next_turn_type].v;
+        // nm.v_max = fast_mode ? p_set.map[next_turn_type].v
+        //                      : p_set.map_slow[next_turn_type].v;
+        // nm.v_end = fast_mode ? p_set.map[next_turn_type].v
+        //                      : p_set.map_slow[next_turn_type].v;
         nm.is_turn = true;
+        nm.v_max = p_set.map[next_turn_type].v;
+        nm.v_end = p_set.map[next_turn_type].v;
       }
       auto res =
           slalom(fast_mode ? p_set.map[turn_type] : p_set.map_slow[turn_type],
                  turn_dir, nm, dia);
+      fast_mode = true;
       if (res == MotionResult::ERROR) {
         break;
       }
