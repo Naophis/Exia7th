@@ -17,14 +17,16 @@ FF_keV: 1
 # FF_roll: 0
 # FF_keV: 0
 
-Ke: 0.00125
+# Ke: 0.00125
+# Km: 0.0005
+Ke: 0.00185
 Km: 0.0005
 
 # Ke: 0.00105
 # Km: 0.0025
 # Resist: 2.93
 Resist: 1.7
-Mass: 0.015
+Mass: 0.0185
 
 slip_param_K: 0.5
 # slip_param_k2: 150
@@ -41,7 +43,7 @@ front_dist_offset2: 137.0
 led_light_delay_cnt: 500
 
 front_dist_offset_pivot_th: 80
-front_dist_offset_pivot: 88
+front_dist_offset_pivot: 90
 
 front_dist_offset_dia_front: 139
 front_dist_offset_dia_45_th: 77
@@ -109,7 +111,7 @@ dia_wall_off_ref_l: 38.0
 dia_wall_off_ref_r: 33.0
 
 #ログON_OFF
-logging_time: 2.0
+logging_time: 1.0
 search_log_enable: 0
 test_log_enable: 1
 fast_log_enable: 1
@@ -119,6 +121,10 @@ log_size: 2000
 normal_sla_offset: 7
 
 front_ctrl_error_th: 1
+front_diff_th: 8
+
+ff_v_th: 200
+ff_front_dury: 0.95
 
 fail_duty_cnt: 500
 fail_v_cnt: 200
@@ -129,15 +135,14 @@ cell2: 90
 
 motor_pid:
   p: 0.005125
-  # i: 0.675
-  # p: 0.00075
   i: 1.25
+  # p: 0.00025
   # i: 0.65
-  # p: 0.0005
-  # i: 1.25
+  # p: 0.0
+  # i: 0.0
   d: 0.0
-  b: 0.63778
-  c: 0.010752
+  b: 0
+  c: 0
   mode: 1
 dist_pid:
   p: 0.85
@@ -192,7 +197,7 @@ accel_x_param:
 
 comp_v_param:
   enc_v_lp: 0.1
-  acc_x_hp: 2
+  acc_x_hp: 5
   gain_v: 0.75
   enable: 0
 

@@ -533,6 +533,8 @@ float PlanningTask::check_sen_error_dia() {
 void PlanningTask::update_ego_motion() {
   const float dt = param_ro->dt;
   const float tire = param_ro->tire;
+  tgt_val->ego_in.ff_duty_low_th = param_ro->ff_front_dury;
+  tgt_val->ego_in.ff_duty_low_v_th = param_ro->ff_v_th;
   if (!motor_en) {
     tgt_val->ego_in.v = 0;
     tgt_val->ego_in.w = 0;
@@ -546,7 +548,7 @@ void PlanningTask::update_ego_motion() {
   sensing_result->ego.v_c =
       (sensing_result->ego.v_l + sensing_result->ego.v_r) / 2;
 
-  // calc_filter();
+  calc_filter();
 
   sensing_result->ego.rpm.right =
       30.0 * sensing_result->ego.v_r / (PI * tire / 2);

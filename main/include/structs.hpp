@@ -365,6 +365,9 @@ typedef struct {
 
   fail_check_cnt_t fail_check;
   float normal_sla_offset = 4;
+  float front_diff_th = 3;
+  float ff_v_th = 3;
+  float ff_front_dury = 3;
 } input_param_t;
 
 typedef struct {

@@ -298,11 +298,16 @@ void MainTask::load_hw_param() {
       getItem(root, "clear_dist_ragne_to")->valuedouble;
   param->led_light_delay_cnt =
       getItem(root, "led_light_delay_cnt")->valuedouble;
+  param->front_diff_th = getItem(root, "front_diff_th")->valuedouble;
+
+  param->ff_v_th = getItem(root, "ff_v_th")->valuedouble;
+  param->ff_front_dury = getItem(root, "ff_front_dury")->valuedouble;
 
   param->fail_check.duty = getItem(root, "fail_duty_cnt")->valueint;
   param->fail_check.v = getItem(root, "fail_v_cnt")->valueint;
   param->fail_check.w = getItem(root, "fail_w_cnt")->valueint;
-
+  tgt_val->ego_in.ff_duty_low_th = param->ff_front_dury;
+  tgt_val->ego_in.ff_duty_low_v_th = param->ff_v_th;
   param->front_ctrl_error_th =
       getItem(root, "front_ctrl_error_th")->valuedouble;
 
@@ -1566,8 +1571,9 @@ void MainTask::test_search_sla() {
     return;
   }
 
-  sla_p = paramset_list[0].map[TurnType::Normal];
-  str_p = paramset_list[0].str_map[StraightType::Search];
+  load_slalom_param(0, 0);
+  sla_p = param_set.map[TurnType::Normal];
+  str_p = param_set.str_map[StraightType::Search];
 
   rorl = ui->select_direction();
   backup_r = param->sen_ref_p.normal.exist.right45;

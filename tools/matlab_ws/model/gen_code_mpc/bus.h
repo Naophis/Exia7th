@@ -123,6 +123,8 @@ typedef struct {
   t_slip slip;
   float ff_duty_l;
   float ff_duty_r;
+  float ff_duty_low_th;
+  float ff_duty_low_v_th;
 } t_ego;
 
 typedef struct {

@@ -54,6 +54,7 @@ private:
   void front_wall_ctrl();
 
   void judge_wall();
+  bool judge2();
   bool wall_n = false;
   bool wall_e = false;
   bool wall_w = false;

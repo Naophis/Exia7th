@@ -117,9 +117,9 @@ MotionResult SearchController::slalom(param_set_t &p_set,
   return mp->slalom(sp, td, nm);
 }
 void SearchController::front_wall_ctrl() {
-  mp->reset_tgt_data();
-  mp->reset_ego_data();
-  vTaskDelay(25 / portTICK_RATE_MS);
+  // mp->reset_tgt_data();
+  // mp->reset_ego_data();
+  // vTaskDelay(25 / portTICK_RATE_MS);
   pt->motor_enable();
   mp->front_ctrl(false);
   vTaskDelay(25 / portTICK_RATE_MS);
@@ -199,14 +199,14 @@ MotionResult SearchController::pivot(param_set_t &p_set, float diff) {
   pt->motor_disable();
   mp->reset_tgt_data();
   mp->reset_ego_data();
-  vTaskDelay(25 / portTICK_RATE_MS);
 
   if (adachi->goal_step && !saved) {
-    vTaskDelay(25 / portTICK_RATE_MS);
+    vTaskDelay(1 / portTICK_RATE_MS);
     save_maze_data();
-    vTaskDelay(25 / portTICK_RATE_MS);
+    vTaskDelay(1 / portTICK_RATE_MS);
     saved = true;
   }
+  vTaskDelay(25 / portTICK_RATE_MS);
 
   mp->reset_tgt_data();
   mp->reset_ego_data();
@@ -215,7 +215,7 @@ MotionResult SearchController::pivot(param_set_t &p_set, float diff) {
     front_wall_ctrl();
   }
 
-  vTaskDelay(25 / portTICK_RATE_MS);
+  // vTaskDelay(25 / portTICK_RATE_MS);
   mp->reset_tgt_data();
   mp->reset_ego_data();
   // mp->req_error_reset();
@@ -227,15 +227,15 @@ MotionResult SearchController::pivot(param_set_t &p_set, float diff) {
     pr.ang = PI / 2;
 
     res = mp->pivot_turn(pr);
-    vTaskDelay(25 / portTICK_RATE_MS);
+    vTaskDelay(1 / portTICK_RATE_MS);
     front_ctrl = (sensing_result->ego.front_dist < 60);
     pt->motor_disable();
-    vTaskDelay(25 / portTICK_RATE_MS);
+    vTaskDelay(1 / portTICK_RATE_MS);
 
     if (front_ctrl2) {
       front_wall_ctrl();
     }
-    vTaskDelay(25 / portTICK_RATE_MS);
+    vTaskDelay(1 / portTICK_RATE_MS);
 
     // mp->reset_tgt_data();
     pt->motor_enable();
@@ -258,14 +258,14 @@ MotionResult SearchController::pivot(param_set_t &p_set, float diff) {
     pt->motor_disable();
     mp->reset_tgt_data();
     mp->reset_ego_data();
-    vTaskDelay(25 / portTICK_RATE_MS);
+    vTaskDelay(1 / portTICK_RATE_MS);
   } else {
     pr.ang = PI;
     res = mp->pivot_turn(pr);
     pt->motor_disable();
     mp->reset_tgt_data();
     mp->reset_ego_data();
-    vTaskDelay(25 / portTICK_RATE_MS);
+    vTaskDelay(1 / portTICK_RATE_MS);
   }
 
   // if (res == MotionResult::ERROR)
@@ -362,7 +362,7 @@ MotionResult SearchController::pivot90(param_set_t &p_set,
   bool front_ctrl = (sensing_result->ego.front_dist < 60);
   if (front_ctrl) {
     front_wall_ctrl();
-    vTaskDelay(25 / portTICK_RATE_MS);
+    // vTaskDelay(25 / portTICK_RATE_MS);
   }
 
   float tmp_dist = 0;
@@ -372,10 +372,10 @@ MotionResult SearchController::pivot90(param_set_t &p_set,
   pr.ang = PI / 2;
   pr.RorL = td;
 
-  pt->motor_disable();
-  mp->reset_tgt_data();
-  mp->reset_ego_data();
-  vTaskDelay(25 / portTICK_RATE_MS);
+  // pt->motor_disable();
+  // mp->reset_tgt_data();
+  // mp->reset_ego_data();
+  // vTaskDelay(25 / portTICK_RATE_MS);
 
   adachi->update();
 
@@ -386,10 +386,10 @@ MotionResult SearchController::pivot90(param_set_t &p_set,
   pt->motor_disable();
   mp->reset_tgt_data();
   mp->reset_ego_data();
-  vTaskDelay(25 / portTICK_RATE_MS);
+  // vTaskDelay(25 / portTICK_RATE_MS);
 
-  mp->reset_tgt_data();
-  mp->reset_ego_data();
+  // mp->reset_tgt_data();
+  // mp->reset_ego_data();
 
   p.v_max = p_set.str_map[StraightType::Search].v_max;
   p.v_end = p_set.str_map[StraightType::Search].v_max;
@@ -493,24 +493,13 @@ SearchResult SearchController::exec(param_set_t &p_set, SearchMode sm) {
     if (next_motion == Motion::Straight) {
       mr = go_straight_wrapper(p_set, adachi->diff);
     } else if (next_motion == Motion::TurnRight) {
-      if ((10 < sensing_result->ego.left90_dist &&
-           sensing_result->ego.left90_dist <
-               param->front_dist_offset_pivot_th) ||
-          (10 < sensing_result->ego.right90_dist &&
-           sensing_result->ego.right90_dist <
-               param->front_dist_offset_pivot_th)) {
-        // (90 - p_set.map[TurnType::Normal].front.right)
+      if (judge2()) {
         mr = pivot90(p_set, TurnDirection::Right, adachi->diff);
       } else {
         mr = slalom(p_set, TurnDirection::Right, adachi->diff);
       }
     } else if (next_motion == Motion::TurnLeft) {
-      if (10 < sensing_result->ego.left90_dist &&
-          sensing_result->ego.left90_dist < param->front_dist_offset_pivot_th &&
-          10 < sensing_result->ego.right90_dist &&
-          sensing_result->ego.right90_dist <
-              param->front_dist_offset_pivot_th) {
-        // (90 - p_set.map[TurnType::Normal].front.left)
+      if (judge2()) {
         mr = pivot90(p_set, TurnDirection::Left, adachi->diff);
       } else {
         mr = slalom(p_set, TurnDirection::Left, adachi->diff);
@@ -633,6 +622,24 @@ MotionResult SearchController::straight_offset(param_set_t &p_set,
   pt->motor_enable();
   return mp->go_straight(p);
 }
+bool SearchController::judge2() {
+  const auto near =
+      (10 < sensing_result->ego.left90_dist &&
+       sensing_result->ego.left90_dist < param->front_dist_offset_pivot_th &&
+       10 < sensing_result->ego.right90_dist &&
+       sensing_result->ego.right90_dist < param->front_dist_offset_pivot_th);
+
+  const auto diff =
+      (10 < sensing_result->ego.left90_dist) &&
+      (10 < sensing_result->ego.right90_dist) &&
+      (sensing_result->ego.left90_dist < 150) &&
+      (sensing_result->ego.right90_dist < 150) &&
+      (std::abs(sensing_result->ego.left90_dist -
+                sensing_result->ego.right90_dist) > param->front_diff_th);
+
+  return near | diff;
+}
+
 void SearchController::judge_wall() {
   wall_n = false;
   wall_e = false;
