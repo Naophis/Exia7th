@@ -2,7 +2,8 @@ dt: 0.001
 # tire: 13.025
 # tire: 13.6725
 # tire: 13.46
-tire: 13.3675
+# tire: 13.367
+tire: 13.1775
 # tire: 13.095
 # tire: 13.135
 offset_start_dist: 21.0
@@ -114,7 +115,7 @@ dia_wall_off_ref_r: 33.0
 logging_time: 1.0
 search_log_enable: 0
 test_log_enable: 1
-fast_log_enable: 1
+fast_log_enable: 0
 sen_log_size: 100
 log_size: 2000
 
