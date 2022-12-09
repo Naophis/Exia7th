@@ -1,5 +1,5 @@
-#ifndef ICM20689_HPP
-#define ICM20689_HPP
+#ifndef LSM6DSR_HPP
+#define LSM6DSR_HPP
 
 #include "defines.hpp"
 #include "driver/spi_common.h"
@@ -9,15 +9,16 @@
 #include <cstring>
 #include <string.h>
 
-class ICM20689 {
+class LSM6DSR {
 public:
-  ICM20689();
-  virtual ~ICM20689();
+  LSM6DSR();
+  virtual ~LSM6DSR();
 
   void init();
   uint8_t write1byte(const uint8_t address, const uint8_t data);
   uint8_t read1byte(const uint8_t address);
   int16_t read2byte(const uint8_t address);
+  int16_t read2byte_2(const uint8_t address);
 
   void req_read1byte_itr(const uint8_t address);
   uint8_t read_1byte_itr();
@@ -29,6 +30,8 @@ public:
   int read_gyro_z();
   int read_accel_x();
   int read_accel_y();
+  void begin();
+  void enable_g();
 
 private:
   spi_device_handle_t spi;

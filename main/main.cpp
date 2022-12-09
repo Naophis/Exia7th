@@ -71,8 +71,15 @@ void init_gpio() {
   io_conf.pin_bit_mask |= 1ULL << LED_R45;
   io_conf.pin_bit_mask |= 1ULL << LED_L45;
   io_conf.pin_bit_mask |= 1ULL << LED_L90;
-  io_conf.pin_bit_mask |= 1ULL << A_CW_CCW;
-  io_conf.pin_bit_mask |= 1ULL << B_CW_CCW;
+
+  io_conf.pin_bit_mask |= 1ULL << A_CW_CCW1;
+  io_conf.pin_bit_mask |= 1ULL << B_CW_CCW1;
+  io_conf.pin_bit_mask |= 1ULL << A_CW_CCW2;
+  io_conf.pin_bit_mask |= 1ULL << B_CW_CCW2;
+  io_conf.pin_bit_mask |= 1ULL << SUCTION_PWM;
+
+  io_conf.pin_bit_mask |= 1ULL << A_PWM;
+  io_conf.pin_bit_mask |= 1ULL << B_PWM;
 
   io_conf.pin_bit_mask |= 1ULL << LED1;
   io_conf.pin_bit_mask |= 1ULL << LED2;
@@ -95,6 +102,7 @@ void init_gpio() {
 }
 int gyro_mode = 0;
 ICM20689 gyro_if;
+LSM6DSR gyro_if2;
 void timer_isr(void *parameters) {
   timer_group_clr_intr_status_in_isr(TIMER_GROUP_0, TIMER_0);
   timer_group_enable_alarm_in_isr(TIMER_GROUP_0, TIMER_0);
@@ -141,12 +149,40 @@ extern "C" void app_main() {
 
   init_gpio();
   init_uart();
-  if (GY_MODE) {
-    gyro_if.init();
-    gyro_if.setup();
-    gyro_mode = 0;
-    hwtimer_init();
-  }
+  // if (true) {
+  //   gyro_if2.init();
+  //   gyro_if2.setup();
+  //   while (1) {
+  //     uint8_t whoami = gyro_if2.read1byte(0x0F);
+  //     auto gyro_z2 = gyro_if2.read2byte(0x26);
+  //     auto accl = gyro_if2.read2byte(0x28);
+  //     printf("%2x\t%d\t%d\n", (int)whoami, gyro_z2,accl);
+  //     vTaskDelay(100 / portTICK_RATE_MS);
+  //   }
+  // }
+  // if (true) {
+  //   if (true) {
+  //     gpio_set_level(A_CW_CCW1, 1);
+  //     gpio_set_level(A_CW_CCW2, 0);
+  //     gpio_set_level(B_CW_CCW1, 0);
+  //     gpio_set_level(B_CW_CCW2, 1);
+  //   } else {
+  //     gpio_set_level(A_CW_CCW1, 0);
+  //     gpio_set_level(A_CW_CCW2, 1);
+  //     gpio_set_level(B_CW_CCW1, 1);
+  //     gpio_set_level(B_CW_CCW2, 0);
+  //   }
+  //   while (true) {
+  //     if (!gpio_get_level(SW1)) {
+  //       // gpio_set_level(A_PWM, 1);
+  //       // gpio_set_level(B_PWM, 1);
+  //       gpio_set_level(SUCTION_PWM, 1);
+  //     } else {
+  //       gpio_set_level(A_PWM, 0);
+  //       gpio_set_level(B_PWM, 0);
+  //     }
+  //   }
+  // }
 
   esp_vfs_fat_mount_config_t mount_config;
   mount_config.max_files = 8;

@@ -152,12 +152,11 @@ void PlanningTask::buzzer(ledc_channel_config_t &buzzer_ch,
   ledc_update_duty(buzzer_ch.speed_mode, buzzer_ch.channel);
 }
 void PlanningTask::calc_filter() {
-  enc_v_q.push_back(sensing_result->ego.v_c);
-  sum_v += sensing_result->ego.v_c;
-  if (enc_v_q.size() > param_ro->comp_param.accl_x_hp_gain) {
-    sum_v -= enc_v_q.front();
-    enc_v_q.pop_front();
-  }
+  const auto alpha = param_ro->comp_param.accl_x_hp_gain;
+  sensing_result->ego.filter_v = //
+      alpha * (sensing_result->ego.filter_v +
+               sensing_result->ego.accel_x_raw * dt) + //
+      (1 - alpha) * sensing_result->ego.v_c;
 }
 void PlanningTask::task() {
   const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
@@ -541,10 +540,10 @@ void PlanningTask::update_ego_motion() {
   }
 
   // エンコーダ、ジャイロから速度、角速度、距離、角度更新
-  sensing_result->ego.v_r =
-      (float)(PI * tire * sensing_result->encoder.right / 4096.0 / dt / 1);
-  sensing_result->ego.v_l =
-      (float)(PI * tire * sensing_result->encoder.left / 4096.0 / dt / 1);
+  sensing_result->ego.v_r = (float)(PI * tire * sensing_result->encoder.right /
+                                    4096.0 / dt / dynamics.gear_ratio);
+  sensing_result->ego.v_l = (float)(PI * tire * sensing_result->encoder.left /
+                                    4096.0 / dt / dynamics.gear_ratio);
   sensing_result->ego.v_c =
       (sensing_result->ego.v_l + sensing_result->ego.v_r) / 2;
 
@@ -663,28 +662,28 @@ void PlanningTask::update_ego_motion() {
 void PlanningTask::set_next_duty(float duty_l, float duty_r,
                                  float duty_suction) {
   if (motor_en) {
-    mcpwm_start(MCPWM_UNIT_0, MCPWM_TIMER_0);
-    mcpwm_start(MCPWM_UNIT_0, MCPWM_TIMER_1);
-    if (duty_r < 0) {
-      gpio_set_level(A_CW_CCW, 0);
-    } else {
-      gpio_set_level(A_CW_CCW, 1);
-    }
-
     if (duty_l < 0) {
-      gpio_set_level(B_CW_CCW, 1);
+      GPIO.out1_w1ts.val = BIT(A_CW_CCW2_BIT);
+      GPIO.out1_w1tc.val = BIT(A_CW_CCW1_BIT);
     } else {
-      gpio_set_level(B_CW_CCW, 0);
+      GPIO.out1_w1ts.val = BIT(A_CW_CCW1_BIT);
+      GPIO.out1_w1tc.val = BIT(A_CW_CCW2_BIT);
     }
-
+    if (duty_r < 0) {
+      GPIO.out1_w1ts.val = BIT(B_CW_CCW1_BIT);
+      GPIO.out1_w1tc.val = BIT(B_CW_CCW2_BIT);
+    } else {
+      GPIO.out1_w1ts.val = BIT(B_CW_CCW2_BIT);
+      GPIO.out1_w1tc.val = BIT(B_CW_CCW1_BIT);
+    }
     float tmp_duty_r = duty_r > 0 ? duty_r : -duty_r;
     float tmp_duty_l = duty_l > 0 ? duty_l : -duty_l;
     // mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A);
-    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, tmp_duty_r);
+    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, tmp_duty_l);
     mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A,
                         MCPWM_DUTY_MODE_0);
     // mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A);
-    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A, tmp_duty_l);
+    mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A, tmp_duty_r);
     mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A,
                         MCPWM_DUTY_MODE_0);
   } else {
@@ -728,8 +727,11 @@ void PlanningTask::init_gpio() {
   io_conf.pin_bit_mask |= 1ULL << LED_R45;
   io_conf.pin_bit_mask |= 1ULL << LED_L45;
   io_conf.pin_bit_mask |= 1ULL << LED_L90;
-  io_conf.pin_bit_mask |= 1ULL << A_CW_CCW;
-  io_conf.pin_bit_mask |= 1ULL << B_CW_CCW;
+
+  io_conf.pin_bit_mask |= 1ULL << A_CW_CCW1;
+  io_conf.pin_bit_mask |= 1ULL << B_CW_CCW1;
+  io_conf.pin_bit_mask |= 1ULL << A_CW_CCW2;
+  io_conf.pin_bit_mask |= 1ULL << B_CW_CCW2;
 
   io_conf.pin_bit_mask |= 1ULL << LED1;
   io_conf.pin_bit_mask |= 1ULL << LED2;
@@ -826,7 +828,8 @@ void PlanningTask::calc_tgt_duty() {
   if (param_ro->comp_param.enable == 0) {
     error_entity.v.error_p = tgt_val->ego_in.v - sensing_result->ego.v_c;
   } else {
-    error_entity.v.error_p = tgt_val->ego_in.v - sensing_result->ego.main_v;
+    // error_entity.v.error_p = tgt_val->ego_in.v - sensing_result->ego.main_v;
+    error_entity.v.error_p = tgt_val->ego_in.v - sensing_result->ego.filter_v;
   }
   error_entity.w.error_p = tgt_val->ego_in.w - sensing_result->ego.w_lp;
 

@@ -3,7 +3,7 @@ dt: 0.001
 # tire: 13.6725
 # tire: 13.46
 # tire: 13.367
-tire: 13.1775
+tire: 15.10
 # tire: 13.095
 # tire: 13.135
 offset_start_dist: 21.0
@@ -26,8 +26,8 @@ Km: 0.0005
 # Ke: 0.00105
 # Km: 0.0025
 # Resist: 2.93
-Resist: 1.7
-Mass: 0.0185
+Resist: 4.6
+Mass: 0.0205
 
 slip_param_K: 0.5
 # slip_param_k2: 150
@@ -117,7 +117,7 @@ search_log_enable: 0
 test_log_enable: 1
 fast_log_enable: 0
 sen_log_size: 100
-log_size: 2000
+log_size: 1200
 
 normal_sla_offset: 7
 
@@ -135,10 +135,14 @@ cell: 90
 cell2: 90
 
 motor_pid:
-  p: 0.005125
-  i: 1.25
-  # p: 0.00025
-  # i: 0.65
+  # p: 0.00475
+  # i: 4.125
+
+  # p: 0.0275
+  # i: 3.75
+
+  p: 0.020
+  i: 1.875
   # p: 0.0
   # i: 0.0
   d: 0.0
@@ -157,7 +161,7 @@ dist_pid:
   # d: 0.0
 gyro_pid:
   p: 0.275
-  i: 25.0
+  i: 12.5
   d: 0.00
   # p: 0.0
   # i: 0.0
@@ -189,18 +193,20 @@ sensor_pid_dia:
   c: 0
   mode: 1
 gyro_param:
-  gyro_w_gain_right: 0.001061
-  gyro_w_gain_left: 0.0010612
+  gyro_w_gain_right: 0.0024635
+  gyro_w_gain_left: 0.00246375
   lp_delay: 1
 accel_x_param:
-  gain: 4.92 # 16g
+  # gain: 4.92 # 16g
+  gain: 0.1565
+  # gain: 0.161595
   # gain: 1.212 # 4g
 
 comp_v_param:
-  enc_v_lp: 0.1
-  acc_x_hp: 5
+  enc_v_lp: 0
+  acc_x_hp: 0.65
   gain_v: 0.75
-  enable: 0
+  enable: 1
 
 battery_param:
   lp_delay: 0.25

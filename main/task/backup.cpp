@@ -157,8 +157,8 @@ void SensingTask::task() {
     pcnt_counter_clear(PCNT_UNIT_1);
 
     if (GY_MODE == 0) {
-      sensing_result->gyro.raw = gyro_if.read_2byte_itr();
-      sensing_result->accel_x.raw = gyro_if.read2byte(0x28);
+      sensing_result->gyro.raw = gyro_if.read_gyro_z();
+      // sensing_result->accel_x.raw = gyro_if.read_2byte_itr();
       // gyro_if.req_read2byte_itr(0x3D);
       // sensing_result->accel_y.raw = gyro_if.read_2byte_itr();
     } else {

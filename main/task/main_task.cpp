@@ -92,7 +92,8 @@ void MainTask::dump1() {
            tgt_val->gyro_zero_p_offset);
     printf("accel_x: %d\n", sensing_result->accel_x.raw);
     printf("accel_y: %d\n", sensing_result->accel_y.raw);
-    printf("battery: %0.3f\n", sensing_result->ego.battery_lp);
+    printf("battery: %0.3f (%d)\n", sensing_result->ego.battery_lp,
+           sensing_result->battery.raw);
     printf("encoder: %d, %d\n", sensing_result->encoder.left,
            sensing_result->encoder.right);
     printf("sensor: %d, %d, %d, %d, %d\n", sensing_result->led_sen.left90.raw,
@@ -114,9 +115,11 @@ void MainTask::dump1() {
            param->sen_ref_p.search_exist.right45,
            param->sen_ref_p.search_exist.right90);
 
-    printf("ego_v: %0.3f, %0.3f, %0.3f, %0.3f\n", sensing_result->ego.v_l,
-           sensing_result->ego.v_c, sensing_result->ego.v_r,
-           tgt_val->ego_in.dist);
+    printf("ego_v: %0.3f, %0.3f, %0.3f, %0.3f, (%d, %d)\n",
+           sensing_result->ego.v_l, sensing_result->ego.v_c,
+           sensing_result->ego.v_r, tgt_val->ego_in.dist,
+           sensing_result->encoder.left, sensing_result->encoder.right);
+
     printf("calc_v: %0.3f, %0.3f\n", tgt_val->ego_in.v, tgt_val->ego_in.w);
 
     printf("ego_w: %0.3f, %0.3f, %0.3f, %0.3f deg\n", sensing_result->ego.w_raw,

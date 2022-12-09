@@ -71,6 +71,7 @@ typedef struct {
   float v_r = 0;
   float v_l = 0;
   float v_c = 0;
+  float filter_v = 0;
 
   float main_v = 0;
 
@@ -677,8 +678,10 @@ typedef struct {
   real16_T img_v;
   real16_T v_l;
   real16_T v_c;
+  real16_T v_c2;
   real16_T v_r;
   real16_T accl;
+  real16_T accl_x;
   real16_T img_w;
   real16_T w_lp;
   real16_T alpha;

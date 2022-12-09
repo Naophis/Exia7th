@@ -80,8 +80,8 @@ int16_t ICM20689::read2byte(const uint8_t address) {
 }
 
 void ICM20689::setup() {
-  // uint8_t whoami = read1byte(0x75);
-  // printf("%d\n", whoami);
+  uint8_t whoami = read1byte(0x0F);
+  printf("%d\n", whoami);
   write1byte(0x6B, 0x80); //スリープ解除?
   vTaskDelay(10 / portTICK_PERIOD_MS);
   write1byte(0x68, 0x04); //ジャイロリセット

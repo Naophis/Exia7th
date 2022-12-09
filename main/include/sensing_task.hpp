@@ -7,6 +7,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "icm20689.hpp"
+#include "lsm6dsr.hpp"
 #include <deque>
 #include <driver/adc.h>
 #include <stdio.h>
@@ -37,7 +38,8 @@ public:
   virtual void task4();
   void set_input_param_entity(std::shared_ptr<input_param_t> &_param);
 
-  ICM20689 gyro_if;
+  // ICM20689 gyro_if;
+  LSM6DSR gyro_if;
   bool is_ready() { return ready; }
   std::deque<int> gyro_q;
   void set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val);

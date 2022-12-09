@@ -18,6 +18,7 @@ set(COMPONENT_SRCS
     "task/ui.cpp"
     "task/main_task.cpp"
     "task/icm20689.cpp"
+    "task/lsm6dsr.cpp"
     "task/sensing_task.cpp"
     "search/adachi.cpp"
     "search/logic.cpp"
