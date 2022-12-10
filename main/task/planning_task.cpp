@@ -1,7 +1,8 @@
 
 #include "include/planning_task.hpp"
 
-constexpr int MOTOR_HZ = 250000;
+// constexpr int MOTOR_HZ = 250000;
+constexpr int MOTOR_HZ = 125000;
 constexpr int SUCTION_MOTOR_HZ = 10000;
 PlanningTask::PlanningTask() {}
 
@@ -1153,6 +1154,13 @@ void PlanningTask::cp_tgt_val() {
 
 void PlanningTask::check_fail_safe() {
   bool no_problem = true;
+  if (!motor_en) {
+    fail_safe.invalid_duty_r_cnt = 0;
+    fail_safe.invalid_duty_l_cnt = 0;
+    fail_safe.invalid_v_cnt = 0;
+    fail_safe.invalid_w_cnt = 0;
+    tgt_val->fss.error = 0;
+  }
   if (motor_en) {
     // if (std::abs(sensing_result->ego.duty.duty_r) > 100) {
     //   fail_safe.invalid_duty_r_cnt++;

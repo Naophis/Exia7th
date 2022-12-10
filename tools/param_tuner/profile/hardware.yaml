@@ -3,7 +3,7 @@ dt: 0.001
 # tire: 13.6725
 # tire: 13.46
 # tire: 13.367
-tire: 15.10
+tire: 15.15
 # tire: 13.095
 # tire: 13.135
 offset_start_dist: 21.0
@@ -39,8 +39,9 @@ sakiyomi_time: 10
 clear_angle: 5
 clear_dist_order: 80
 # front_dist_offset: 91.5
-front_dist_offset: 93.5
-front_dist_offset2: 137.0
+front_dist_offset: 90.0 # 探索時の前壁補正
+# front_dist_offset2: 137.0
+front_dist_offset2: 144.0
 led_light_delay_cnt: 500
 
 front_dist_offset_pivot_th: 80
@@ -80,10 +81,10 @@ wall_off_hold_dist_dia_r2: 1.0
 
 # 壁切れ In
 wall_off_hold_exist_dist_l: 73
-wall_off_hold_exist_dist_r: 100
+wall_off_hold_exist_dist_r: 73
 # 壁切れ Out
 wall_off_hold_noexist_th_l: 75
-wall_off_hold_noexist_th_r: 105
+wall_off_hold_noexist_th_r: 75
 
 
 # 壁切れ In
@@ -113,9 +114,9 @@ dia_wall_off_ref_r: 33.0
 
 #ログON_OFF
 logging_time: 1.0
-search_log_enable: 0
+search_log_enable: 1
 test_log_enable: 1
-fast_log_enable: 0
+fast_log_enable: 1
 sen_log_size: 100
 log_size: 1200
 
@@ -141,8 +142,8 @@ motor_pid:
   # p: 0.0275
   # i: 3.75
 
-  p: 0.020
-  i: 1.875
+  p: 0.0125
+  i: 0.9
   # p: 0.0
   # i: 0.0
   d: 0.0
@@ -198,7 +199,7 @@ gyro_param:
   lp_delay: 1
 accel_x_param:
   # gain: 4.92 # 16g
-  gain: 0.1565
+  gain: 155.75
   # gain: 0.161595
   # gain: 1.212 # 4g
 

@@ -20,13 +20,14 @@ maze_size: 32
 give_up_time: 30
 debug: 0
 mode: 0 # モード選択
+# mode: 13 # モード選択
 
 test: # テスト走行時に使用するパラメータ群
-  v_max: 500
+  v_max: 300
   end_v: 1
   accl: 2500
   decel: -2400
-  dist: 270 #直進全部　
+  dist: 540 #直進全部　
   # dist: 180 # スラロームテスト
   dia: 0
   w_max: 10.5
@@ -53,7 +54,7 @@ test: # テスト走行時に使用するパラメータ群
   turn_times: 0
   ignore_opp_sen: 0 #斜めターン後の直進テスト
   sysid_test_mode: 0 #システム同定のテスト:0 直進、1回転
-  sysid_duty: 1.5 #duty 
+  sysid_duty: 4.25 #duty 
   sysid_time: 2000 #duty 
   start_turn: 0 #開幕ターンテスト
   

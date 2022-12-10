@@ -253,6 +253,7 @@ extern "C" void app_main() {
     if (mt.ui->button_state()) {
       printf("time_stamp: %d\n", tgt_val->nmr.timstamp);
       printf("motion_type: %d\n", static_cast<int>(tgt_val->motion_type));
+      printf("fss.error: %d\n", tgt_val->fss.error);
       printf("motor_en: %d\n", (pt->motor_en) ? 1 : 0);
       printf("suction_en: %d\n", (pt->suction_en) ? 1 : 0);
     }

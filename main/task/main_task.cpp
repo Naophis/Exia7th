@@ -90,7 +90,8 @@ void MainTask::dump1() {
 
     printf("gyro: %d\t(%0.3f)\n", sensing_result->gyro.raw,
            tgt_val->gyro_zero_p_offset);
-    printf("accel_x: %d\n", sensing_result->accel_x.raw);
+    printf("accel_x: %f\t(%f)\n", sensing_result->ego.accel_x_raw,
+           sensing_result->ego.accel_x_raw / 9806.65 * param->accel_x_param.gain);
     printf("accel_y: %d\n", sensing_result->accel_y.raw);
     printf("battery: %0.3f (%d)\n", sensing_result->ego.battery_lp,
            sensing_result->battery.raw);
