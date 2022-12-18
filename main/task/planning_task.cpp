@@ -161,6 +161,7 @@ void PlanningTask::calc_filter() {
 }
 void PlanningTask::task() {
   const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
+  BaseType_t queue_recieved;
   init_gpio();
 
   memset(&buzzer_ch, 0, sizeof(buzzer_ch));
@@ -218,6 +219,7 @@ void PlanningTask::task() {
   accl_x_q.clear();
 
   while (1) {
+    queue_recieved = xQueueReceive(*qh, &receive_req, 0);
     // 自己位置更新
     update_ego_motion();
     calc_sensor_dist_all();
@@ -225,7 +227,9 @@ void PlanningTask::task() {
     mpc_step = 1;
     tgt_val->tgt_in.time_step2 = param_ro->sakiyomi_time;
 
-    cp_request();
+    if (queue_recieved == pdTRUE) {
+      cp_request();
+    }
 
     // 物理量ベース計算
     mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in, tgt_val->motion_mode,
@@ -237,14 +241,9 @@ void PlanningTask::task() {
         mpc_next_ego.v = tgt_val->tgt_in.end_v;
       }
     }
-    // mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in,
-    // tgt_val->motion_mode,
-    //                   param_ro->sakiyomi_time, &mpc_next_ego2, &dynamics);
 
     // 算出結果をコピー
     cp_tgt_val();
-
-    pl_req_activate();
 
     // Duty計算
     calc_tgt_duty();
@@ -764,20 +763,20 @@ void PlanningTask::init_gpio() {
 }
 
 void PlanningTask::pl_req_activate() {
-  if (tgt_val->pl_req.time_stamp != pid_req_timestamp) {
-    if (tgt_val->pl_req.error_gyro_reset == 1) {
+  if (receive_req->pl_req.time_stamp != pid_req_timestamp) {
+    if (receive_req->pl_req.error_gyro_reset == 1) {
       error_entity.v.error_i = 0;
     }
-    if (tgt_val->pl_req.error_vel_reset == 1) {
+    if (receive_req->pl_req.error_vel_reset == 1) {
       error_entity.dist.error_i = 0;
     }
-    if (tgt_val->pl_req.error_dist_reset == 1) {
+    if (receive_req->pl_req.error_dist_reset == 1) {
       error_entity.w.error_i = 0;
     }
-    if (tgt_val->pl_req.error_ang_reset == 1) {
+    if (receive_req->pl_req.error_ang_reset == 1) {
       error_entity.ang.error_i = 0;
     }
-    if (tgt_val->pl_req.error_led_reset == 1) {
+    if (receive_req->pl_req.error_led_reset == 1) {
       // error_entity.led.error_i = 0;
     }
     // if (tgt_val->pl_req.log_start == 1) {
@@ -786,7 +785,7 @@ void PlanningTask::pl_req_activate() {
     // if (tgt_val->pl_req.log_end == 1) {
     //   log_active = false;
     // }
-    pid_req_timestamp = tgt_val->pl_req.time_stamp;
+    pid_req_timestamp = receive_req->pl_req.time_stamp;
   }
 }
 
@@ -1189,7 +1188,7 @@ void PlanningTask::check_fail_safe() {
     //   no_problem = false;
     // }
 
-    if (std::abs((tgt_val->ego_in.img_ang - tgt_val->ego_in.ang) * 180 / PI) >
+    if (std::abs((tgt_val->ego_in.img_ang - tgt_val->ego_in.ang) * 180.0 / PI) >
         20) {
       fail_safe.invalid_w_cnt++;
       no_problem = false;
@@ -1244,38 +1243,39 @@ void PlanningTask::check_fail_safe() {
 
 void PlanningTask::cp_request() {
   // tgt_val->tgt_in.mass = param_ro->Mass;
-  tgt_val->tgt_in.slip_gain_K1 = slip_param.K;
-  tgt_val->tgt_in.slip_gain_K2 = slip_param.k;
-  if (motion_req_timestamp == tgt_val->nmr.timstamp) {
+
+  pl_req_activate();
+  if (motion_req_timestamp == receive_req->nmr.timstamp) {
     return;
   }
   const float dt = param_ro->dt;
-  motion_req_timestamp = tgt_val->nmr.timstamp;
+  motion_req_timestamp = receive_req->nmr.timstamp;
 
-  tgt_val->tgt_in.v_max = tgt_val->nmr.v_max;
-  tgt_val->tgt_in.end_v = tgt_val->nmr.v_end;
-  tgt_val->tgt_in.accl = tgt_val->nmr.accl;
-  tgt_val->tgt_in.decel = tgt_val->nmr.decel;
-  tgt_val->tgt_in.w_max = tgt_val->nmr.w_max;
-  tgt_val->tgt_in.end_w = tgt_val->nmr.w_end;
-  tgt_val->tgt_in.alpha = tgt_val->nmr.alpha;
+  tgt_val->tgt_in.v_max = receive_req->nmr.v_max;
+  tgt_val->tgt_in.end_v = receive_req->nmr.v_end;
+  tgt_val->tgt_in.accl = receive_req->nmr.accl;
+  tgt_val->tgt_in.decel = receive_req->nmr.decel;
+  tgt_val->tgt_in.w_max = receive_req->nmr.w_max;
+  tgt_val->tgt_in.end_w = receive_req->nmr.w_end;
+  tgt_val->tgt_in.alpha = receive_req->nmr.alpha;
 
-  tgt_val->tgt_in.tgt_dist = tgt_val->nmr.dist;
-  tgt_val->tgt_in.tgt_angle = tgt_val->nmr.ang;
+  tgt_val->tgt_in.tgt_dist = receive_req->nmr.dist;
+  tgt_val->tgt_in.tgt_angle = receive_req->nmr.ang;
 
-  tgt_val->motion_mode = (int)(tgt_val->nmr.motion_mode);
-  tgt_val->motion_type = tgt_val->nmr.motion_type;
+  tgt_val->motion_mode = (int)(receive_req->nmr.motion_mode);
+  tgt_val->motion_type = receive_req->nmr.motion_type;
 
-  tgt_val->ego_in.sla_param.base_alpha = tgt_val->nmr.sla_alpha;
-  tgt_val->ego_in.sla_param.base_time = tgt_val->nmr.sla_time;
-  tgt_val->ego_in.sla_param.limit_time_count = tgt_val->nmr.sla_time * 2 / dt;
-  tgt_val->ego_in.sla_param.pow_n = tgt_val->nmr.sla_pow_n;
+  tgt_val->ego_in.sla_param.base_alpha = receive_req->nmr.sla_alpha;
+  tgt_val->ego_in.sla_param.base_time = receive_req->nmr.sla_time;
+  tgt_val->ego_in.sla_param.limit_time_count =
+      receive_req->nmr.sla_time * 2 / dt;
+  tgt_val->ego_in.sla_param.pow_n = receive_req->nmr.sla_pow_n;
 
   tgt_val->ego_in.state = 0;
   tgt_val->ego_in.pivot_state = 0;
 
-  tgt_val->dia_state.left_save = tgt_val->dia_state.right_save = false;
-  tgt_val->dia_state.left_old = tgt_val->dia_state.right_old = 0;
+  tgt_val->dia_state.left_save = receive_req->dia_state.right_save = false;
+  tgt_val->dia_state.left_old = receive_req->dia_state.right_old = 0;
 
   if (!(tgt_val->motion_type == MotionType::NONE ||
         tgt_val->motion_type == MotionType::STRAIGHT ||
@@ -1285,9 +1285,6 @@ void PlanningTask::cp_request() {
         tgt_val->motion_type == MotionType::WALL_OFF)) {
     tgt_val->ego_in.ang -= tgt_val->ego_in.img_ang;
     tgt_val->ego_in.img_ang = 0;
-  }
-  if (tgt_val->motion_type == MotionType::SLALOM) {
-    tgt_val->ego_in.v = tgt_val->nmr.v_max;
   }
 
   if (tgt_val->motion_type == MotionType::NONE ||
@@ -1305,14 +1302,13 @@ void PlanningTask::cp_request() {
   }
   if (tgt_val->tgt_in.tgt_dist != 0) {
     tgt_val->ego_in.img_dist -= tgt_val->ego_in.dist;
-    // tgt_val->ego_in.img_dist = 0;
     tgt_val->ego_in.dist = 0;
   }
   tgt_val->ego_in.sla_param.counter = 1;
   tgt_val->ego_in.sla_param.state = 0;
 
-  tgt_val->motion_dir = tgt_val->nmr.motion_dir;
-  tgt_val->dia_mode = tgt_val->nmr.dia_mode;
+  tgt_val->motion_dir = receive_req->nmr.motion_dir;
+  tgt_val->dia_mode = receive_req->nmr.dia_mode;
 }
 float PlanningTask::calc_sensor(float data, float a, float b) {
   auto res = a / std::log(data) - b;

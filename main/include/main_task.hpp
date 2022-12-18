@@ -58,6 +58,13 @@ public:
 
   TurnType cast_turn_type(std::string str);
   std::shared_ptr<UserInterface> ui;
+  QueueHandle_t *qh;
+
+  void set_queue_handler(QueueHandle_t &_qh) {
+    qh = &_qh;
+    mp->set_queue_handler(_qh);
+    ui->set_queue_handler(_qh);
+  }
 
 private:
   SearchResult sr;

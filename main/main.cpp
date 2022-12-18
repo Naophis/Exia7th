@@ -41,6 +41,10 @@
 
 #include "esp_debug_helpers.h"
 #include "rom/uart.h"
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
+#include "freertos/task.h"
 SensingTask st;
 
 void init_uart() {
@@ -184,6 +188,8 @@ extern "C" void app_main() {
   //   }
   // }
 
+  QueueHandle_t xQueue;
+  xQueue = xQueueCreate(4, sizeof(motion_tgt_val_t *));
   esp_vfs_fat_mount_config_t mount_config;
   mount_config.max_files = 8;
   mount_config.format_if_mount_failed = true;
@@ -223,6 +229,7 @@ extern "C" void app_main() {
   pt->set_input_param_entity(param);
   // pt->set_ego_entity(ego);
   pt->set_tgt_val(tgt_val);
+  pt->set_queue_handler(xQueue);
   pt->create_task(0);
 
   lt->set_sensing_entity(sensing_entity);
@@ -238,6 +245,7 @@ extern "C" void app_main() {
   mt.set_tgt_val(tgt_val);
   mt.set_planning_task(pt);
   mt.set_logging_task(lt);
+  mt.set_queue_handler(xQueue);
   mt.create_task(1);
 
   // /* Set the GPIO as a push/pull output */

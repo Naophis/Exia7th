@@ -453,6 +453,8 @@ typedef struct {
   bool dia_mode = false;
   SensorCtrlType sct;
   sys_id_t sys_id;
+  bool tgt_reset_req = false;
+  bool ego_reset_req = false;
 } new_motion_req_t;
 
 typedef struct {

@@ -5,6 +5,7 @@
 #include "driver/ledc.h"
 #include "driver/mcpwm.h"
 #include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
 #include "freertos/task.h"
 #include "gen_code_mpc/mpc_tgt_calc.h"
 #include "include/logging_task.hpp"
@@ -50,6 +51,10 @@ public:
   bool suction_en = false;
 
   t_dynamics dynamics;
+  QueueHandle_t *qh;
+  motion_tgt_val_t *receive_req;
+
+  void set_queue_handler(QueueHandle_t &_qh) { qh = &_qh; }
 
 private:
   xTaskHandle handle = 0;
