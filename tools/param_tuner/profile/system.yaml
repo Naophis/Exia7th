@@ -21,13 +21,14 @@ give_up_time: 30
 debug: 0
 mode: 0 # モード選択
 # mode: 13 # モード選択
+# mode: 14 # senging
 
 test: # テスト走行時に使用するパラメータ群
   v_max: 300
   end_v: 1
   accl: 2500
   decel: -2400
-  dist: 540 #直進全部　
+  dist: 54000 #直進全部　
   # dist: 180 # スラロームテスト
   dia: 0
   w_max: 10.5

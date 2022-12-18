@@ -1,8 +1,8 @@
 
 #include "include/planning_task.hpp"
 
-// constexpr int MOTOR_HZ = 250000;
-constexpr int MOTOR_HZ = 125000;
+constexpr int MOTOR_HZ = 250000;
+// constexpr int MOTOR_HZ = 125000;
 constexpr int SUCTION_MOTOR_HZ = 10000;
 PlanningTask::PlanningTask() {}
 
@@ -593,15 +593,15 @@ void PlanningTask::update_ego_motion() {
         (1 - param_ro->comp_param.v_lp_gain) * sensing_result->ego.v_c +
         param_ro->comp_param.v_lp_gain * sensing_result->ego.v_lp;
   } else if (param_ro->comp_param.enable == 2) {
-    sensing_result->ego.v_lp =
-        (1 - param_ro->comp_param.v_lp_gain) * sum_v / enc_v_q.size() +
-        param_ro->comp_param.v_lp_gain * sensing_result->ego.v_lp;
+    // sensing_result->ego.v_lp =
+    //     (1 - param_ro->comp_param.v_lp_gain) * sum_v / enc_v_q.size() +
+    //     param_ro->comp_param.v_lp_gain * sensing_result->ego.v_lp;
     // printf("%f, %f %f %d\n", sensing_result->ego.v_lp,
     // sensing_result->ego.v_c,
     //        sum_v, enc_v_q.size());
   }
 
-  sensing_result->ego.main_v = sum_v / enc_v_q.size();
+  // sensing_result->ego.main_v = sum_v / enc_v_q.size();
   // param_ro->comp_param.gain *
   //     (sensing_result->ego.main_v + sensing_result->ego.accel_x_raw * dt) +
   // (1 - param_ro->comp_param.gain) * sensing_result->ego.v_lp;
@@ -663,19 +663,28 @@ void PlanningTask::update_ego_motion() {
 void PlanningTask::set_next_duty(float duty_l, float duty_r,
                                  float duty_suction) {
   if (motor_en) {
-    if (duty_l < 0) {
+    // duty_l=duty_r=45;
+    if (duty_l > 0) {
       GPIO.out1_w1ts.val = BIT(A_CW_CCW2_BIT);
       GPIO.out1_w1tc.val = BIT(A_CW_CCW1_BIT);
+      // gpio_set_level(A_CW_CCW2, 1);
+      // gpio_set_level(A_CW_CCW1, 0);
     } else {
-      GPIO.out1_w1ts.val = BIT(A_CW_CCW1_BIT);
-      GPIO.out1_w1tc.val = BIT(A_CW_CCW2_BIT);
+      gpio_set_level(A_CW_CCW1, 1);
+      gpio_set_level(A_CW_CCW2, 0);
+      // GPIO.out1_w1ts.val = BIT(A_CW_CCW1_BIT);
+      // GPIO.out1_w1tc.val = BIT(A_CW_CCW2_BIT);
     }
-    if (duty_r < 0) {
+    if (duty_r > 0) {
       GPIO.out1_w1ts.val = BIT(B_CW_CCW1_BIT);
       GPIO.out1_w1tc.val = BIT(B_CW_CCW2_BIT);
+      // gpio_set_level(B_CW_CCW1, 1);
+      // gpio_set_level(B_CW_CCW2, 0);
     } else {
       GPIO.out1_w1ts.val = BIT(B_CW_CCW2_BIT);
       GPIO.out1_w1tc.val = BIT(B_CW_CCW1_BIT);
+      // gpio_set_level(B_CW_CCW2, 1);
+      // gpio_set_level(B_CW_CCW1, 0);
     }
     float tmp_duty_r = duty_r > 0 ? duty_r : -duty_r;
     float tmp_duty_l = duty_l > 0 ? duty_l : -duty_l;
@@ -1181,7 +1190,7 @@ void PlanningTask::check_fail_safe() {
     // }
 
     if (std::abs((tgt_val->ego_in.img_ang - tgt_val->ego_in.ang) * 180 / PI) >
-        10) {
+        20) {
       fail_safe.invalid_w_cnt++;
       no_problem = false;
     }

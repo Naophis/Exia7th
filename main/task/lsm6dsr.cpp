@@ -208,7 +208,9 @@ void LSM6DSR::setup() {
   vTaskDelay(10 / portTICK_PERIOD_MS);
 
   // 加速度計の設定
-  write1byte(LSM6DSRX_CTRL1_XL, 0xAE);
+  write1byte(LSM6DSRX_CTRL1_XL, 0xAA); // 4g
+  // write1byte(LSM6DSRX_CTRL1_XL, 0xAE); //8g
+  // write1byte(LSM6DSRX_CTRL1_XL, 0xA6); // 16g
   // 加速度計のスケールを±8gに設定
   // 加速度計の出力データレートを416Hzに設定
   vTaskDelay(10 / portTICK_PERIOD_MS);
@@ -238,10 +240,10 @@ void LSM6DSR::req_read1byte_itr(const uint8_t address) {
   uint16_t tx_data = (address | READ_FLAG) << 8;
   tx_data = SPI_SWAP_DATA_TX(tx_data, 16);
   itr_t.tx_buffer = &tx_data;
-  spi_device_queue_trans(spi, &itr_t, 1 / portTICK_RATE_MS); // Transmit!
+  spi_device_queue_trans(spi, &itr_t, 1.0 / portTICK_RATE_MS); // Transmit!
 }
 uint8_t LSM6DSR::read_1byte_itr() {
-  spi_device_get_trans_result(spi, &r_trans, 1 / portTICK_RATE_MS);
+  spi_device_get_trans_result(spi, &r_trans, 1.0 / portTICK_RATE_MS);
   return (uint8_t)(((unsigned short)(r_trans->rx_data[1] & 0xff)));
 }
 
@@ -252,10 +254,10 @@ void LSM6DSR::req_read2byte_itr(const uint8_t address) {
   itr_t.tx_data[0] = (address | READ_FLAG);
   itr_t.tx_data[1] = 0;
   itr_t.tx_data[2] = 0;
-  spi_device_queue_trans(spi, &itr_t, 1 / portTICK_RATE_MS); // Transmit!
+  spi_device_queue_trans(spi, &itr_t, 1.0 / portTICK_RATE_MS); // Transmit!
 }
 int16_t LSM6DSR::read_2byte_itr() {
-  spi_device_get_trans_result(spi, &r_trans, 1 / portTICK_RATE_MS);
+  spi_device_get_trans_result(spi, &r_trans, 1.0 / portTICK_RATE_MS);
   return (signed short)((((unsigned short)(r_trans->rx_data[2] & 0xff)) << 8) |
                         ((unsigned short)(r_trans->rx_data[1] & 0xff)));
 }

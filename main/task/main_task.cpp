@@ -91,7 +91,8 @@ void MainTask::dump1() {
     printf("gyro: %d\t(%0.3f)\n", sensing_result->gyro.raw,
            tgt_val->gyro_zero_p_offset);
     printf("accel_x: %f\t(%f)\n", sensing_result->ego.accel_x_raw,
-           sensing_result->ego.accel_x_raw / 9806.65 * param->accel_x_param.gain);
+           sensing_result->ego.accel_x_raw / 9806.65 *
+               param->accel_x_param.gain);
     printf("accel_y: %d\n", sensing_result->accel_y.raw);
     printf("battery: %0.3f (%d)\n", sensing_result->ego.battery_lp,
            sensing_result->battery.raw);
@@ -1096,8 +1097,16 @@ void MainTask::task() {
         path_run(11, 8);
       } else if (mode_num == 12) {
         path_run(12, 8);
+      } else if (mode_num == 13) {
+        printf("keep_pivot\n");
+        keep_pivot();
       } else if (mode_num == 14) {
-        dump1(); // taskの最終行に配置すること
+        // dump1(); // taskの最終行に配置すること
+        printf("suction\n");
+        mp->reset_gyro_ref_with_check();
+        pt->suction_enable(sys.test.suction_duty);
+        vTaskDelay(1000 * 10 / portTICK_PERIOD_MS);
+        pt->suction_disable();
       } else if (mode_num == 15) {
         save_maze_data(false);
         save_maze_kata_data(false);

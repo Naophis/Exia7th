@@ -3,13 +3,14 @@ dt: 0.001
 # tire: 13.6725
 # tire: 13.46
 # tire: 13.367
-tire: 15.15
+# tire: 15.15
+tire: 13.5
 # tire: 13.095
 # tire: 13.135
 offset_start_dist: 21.0
 # offset_start_dist: 45.0
 gear_a: 37
-gear_b: 8
+gear_b: 9
 max_duty: 99.9
 FF_front: 1
 FF_roll: 1
@@ -113,9 +114,9 @@ dia_wall_off_ref_l: 38.0
 dia_wall_off_ref_r: 33.0
 
 #ログON_OFF
-logging_time: 1.0
+logging_time: 4.0
 search_log_enable: 1
-test_log_enable: 1
+test_log_enable: 0
 fast_log_enable: 1
 sen_log_size: 100
 log_size: 1200
@@ -143,7 +144,7 @@ motor_pid:
   # i: 3.75
 
   p: 0.0125
-  i: 0.9
+  i: 1.275
   # p: 0.0
   # i: 0.0
   d: 0.0
@@ -198,8 +199,9 @@ gyro_param:
   gyro_w_gain_left: 0.00246375
   lp_delay: 1
 accel_x_param:
-  # gain: 4.92 # 16g
-  gain: 155.75
+  # gain: 315.56 # 16g
+  # gain: 155.75 # 8g
+  gain: 77.5 # 4g
   # gain: 0.161595
   # gain: 1.212 # 4g
 

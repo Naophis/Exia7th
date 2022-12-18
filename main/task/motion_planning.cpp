@@ -139,11 +139,50 @@ MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
   tgt_val->nmr.timstamp++;
   vTaskDelay(10 / portTICK_RATE_MS);
 
+  int c = 0;
   while (1) {
     vTaskDelay(1 / portTICK_RATE_MS);
+    c++;
     if (std::abs(tgt_val->ego_in.ang) >= std::abs(p.ang) &&
         std::abs(tgt_val->ego_in.ang * 180 / PI) > 10) {
       break;
+    }
+    if (c == 250) { //動き出さないとき
+      if (std::abs(tgt_val->ego_in.ang * 180 / PI) < 10) {
+        pt->motor_disable();
+        vTaskDelay(10 / portTICK_RATE_MS);
+        pt->motor_enable();
+        reset_tgt_data();
+        reset_ego_data();
+        tgt_val->motion_type = MotionType::NONE;
+        tgt_val->nmr.timstamp++;
+        vTaskDelay(1 / portTICK_RATE_MS);
+
+        tgt_val->nmr.v_max = 0;
+        tgt_val->nmr.v_end = 0;
+        tgt_val->nmr.accl = 0;
+        tgt_val->nmr.decel = 0;
+        tgt_val->nmr.dist = 0;
+        if (p.RorL == TurnDirection::Left) {
+          tgt_val->nmr.w_max = p.w_max;
+          tgt_val->nmr.w_end = p.w_end;
+          tgt_val->nmr.alpha = p.alpha;
+          tgt_val->nmr.ang = p.ang;
+          tgt_val->nmr.motion_dir = MotionDirection::LEFT;
+        } else {
+          tgt_val->nmr.w_max = -p.w_max;
+          tgt_val->nmr.w_end = -p.w_end;
+          tgt_val->nmr.alpha = -p.alpha;
+          tgt_val->nmr.ang = p.ang;
+          tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
+        }
+        tgt_val->nmr.motion_mode = RUN_MODE2::PIVOT_TURN;
+        tgt_val->nmr.motion_type = MotionType::PIVOT;
+        tgt_val->nmr.sct = SensorCtrlType::NONE;
+        tgt_val->nmr.timstamp++;
+        c = 0;
+        vTaskDelay(10 / portTICK_RATE_MS);
+      }
     }
     if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
       // return MotionResult::ERROR;
