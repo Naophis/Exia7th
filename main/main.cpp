@@ -107,6 +107,7 @@ void init_gpio() {
 int gyro_mode = 0;
 ICM20689 gyro_if;
 LSM6DSR gyro_if2;
+AS5147P enc_if;
 void timer_isr(void *parameters) {
   timer_group_clr_intr_status_in_isr(TIMER_GROUP_0, TIMER_0);
   timer_group_enable_alarm_in_isr(TIMER_GROUP_0, TIMER_0);
@@ -154,37 +155,14 @@ extern "C" void app_main() {
   init_gpio();
   init_uart();
   // if (true) {
-  //   gyro_if2.init();
-  //   gyro_if2.setup();
+  //   enc_if.init();
+  //   enc_if.setup();
   //   while (1) {
-  //     uint8_t whoami = gyro_if2.read1byte(0x0F);
-  //     auto gyro_z2 = gyro_if2.read2byte(0x26);
-  //     auto accl = gyro_if2.read2byte(0x28);
-  //     printf("%2x\t%d\t%d\n", (int)whoami, gyro_z2,accl);
+  //     auto enc_l3 = enc_if.read2byte(0x3F, 0xFF, false) & 0x3FFF;
+  //     auto enc_r3 = enc_if.read2byte(0x3F, 0xFF, true) & 0x3FFF;
+  //     cout << "3_" << 360 * enc_l3 / 16384.0 << "\t" << 360 * enc_r3 / 16384.0
+  //          << endl;
   //     vTaskDelay(100 / portTICK_RATE_MS);
-  //   }
-  // }
-  // if (true) {
-  //   if (true) {
-  //     gpio_set_level(A_CW_CCW1, 1);
-  //     gpio_set_level(A_CW_CCW2, 0);
-  //     gpio_set_level(B_CW_CCW1, 0);
-  //     gpio_set_level(B_CW_CCW2, 1);
-  //   } else {
-  //     gpio_set_level(A_CW_CCW1, 0);
-  //     gpio_set_level(A_CW_CCW2, 1);
-  //     gpio_set_level(B_CW_CCW1, 1);
-  //     gpio_set_level(B_CW_CCW2, 0);
-  //   }
-  //   while (true) {
-  //     if (!gpio_get_level(SW1)) {
-  //       // gpio_set_level(A_PWM, 1);
-  //       // gpio_set_level(B_PWM, 1);
-  //       gpio_set_level(SUCTION_PWM, 1);
-  //     } else {
-  //       gpio_set_level(A_PWM, 0);
-  //       gpio_set_level(B_PWM, 0);
-  //     }
   //   }
   // }
 

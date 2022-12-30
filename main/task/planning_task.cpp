@@ -1,8 +1,9 @@
 
 #include "include/planning_task.hpp"
 
-constexpr int MOTOR_HZ = 250000;
+// constexpr int MOTOR_HZ = 250000;
 // constexpr int MOTOR_HZ = 125000;
+constexpr int MOTOR_HZ = 100000;
 constexpr int SUCTION_MOTOR_HZ = 10000;
 PlanningTask::PlanningTask() {}
 
@@ -529,6 +530,47 @@ float PlanningTask::check_sen_error_dia() {
   return 0;
 }
 
+void PlanningTask::calc_vel() {
+  const float dt = param_ro->dt;
+  const float tire = param_ro->tire;
+  const auto enc_delta_l =
+      sensing_result->encoder.left - sensing_result->encoder.left_old;
+  float enc_ang_l = 0.f;
+  if (ABS(enc_delta_l) < MIN(ABS(enc_delta_l - ENC_RESOLUTION),
+                             ABS(enc_delta_l + ENC_RESOLUTION))) {
+    enc_ang_l = 2 * PI * (float)enc_delta_l / (float)ENC_RESOLUTION;
+  } else {
+    if (ABS(enc_delta_l - ENC_RESOLUTION) < ABS(enc_delta_l + ENC_RESOLUTION)) {
+      enc_ang_l = 2 * PI * (float)(enc_delta_l - ENC_RESOLUTION) /
+                  (float)ENC_RESOLUTION;
+    } else {
+      enc_ang_l = 2 * PI * (float)(enc_delta_l + ENC_RESOLUTION) /
+                  (float)ENC_RESOLUTION;
+    }
+  }
+
+  const auto enc_delta_r =
+      sensing_result->encoder.right - sensing_result->encoder.right_old;
+  float enc_ang_r = 0.f;
+  if (ABS(enc_delta_r) < MIN(ABS(enc_delta_r - ENC_RESOLUTION),
+                             ABS(enc_delta_r + ENC_RESOLUTION))) {
+    enc_ang_r = 2 * PI * (float)enc_delta_r / (float)ENC_RESOLUTION;
+  } else {
+    if (ABS(enc_delta_r - ENC_RESOLUTION) < ABS(enc_delta_r + ENC_RESOLUTION)) {
+      enc_ang_r = 2 * PI * (float)(enc_delta_r - ENC_RESOLUTION) /
+                  (float)ENC_RESOLUTION;
+    } else {
+      enc_ang_r = 2 * PI * (float)(enc_delta_r + ENC_RESOLUTION) /
+                  (float)ENC_RESOLUTION;
+    }
+  }
+
+  sensing_result->ego.v_l = -tire * enc_ang_l / dt / dynamics.gear_ratio / 2;
+  sensing_result->ego.v_r = tire * enc_ang_r / dt / dynamics.gear_ratio / 2;
+  sensing_result->ego.v_c =
+      (sensing_result->ego.v_l + sensing_result->ego.v_r) / 2;
+}
+
 void PlanningTask::update_ego_motion() {
   const float dt = param_ro->dt;
   const float tire = param_ro->tire;
@@ -540,12 +582,13 @@ void PlanningTask::update_ego_motion() {
   }
 
   // エンコーダ、ジャイロから速度、角速度、距離、角度更新
-  sensing_result->ego.v_r = (float)(PI * tire * sensing_result->encoder.right /
-                                    4096.0 / dt / dynamics.gear_ratio);
-  sensing_result->ego.v_l = (float)(PI * tire * sensing_result->encoder.left /
-                                    4096.0 / dt / dynamics.gear_ratio);
-  sensing_result->ego.v_c =
-      (sensing_result->ego.v_l + sensing_result->ego.v_r) / 2;
+  // sensing_result->ego.v_r = (float)(PI * tire * sensing_result->encoder.right
+  // /
+  //                                   4096.0 / dt / dynamics.gear_ratio);
+  // sensing_result->ego.v_l = (float)(PI * tire * sensing_result->encoder.left
+  // /
+  //                                   4096.0 / dt / dynamics.gear_ratio);
+  calc_vel();
 
   calc_filter();
 
@@ -663,35 +706,31 @@ void PlanningTask::set_next_duty(float duty_l, float duty_r,
                                  float duty_suction) {
   if (motor_en) {
     // duty_l=duty_r=45;
-    if (duty_l > 0) {
+
+    if (duty_l < 0) {
       GPIO.out1_w1ts.val = BIT(A_CW_CCW2_BIT);
       GPIO.out1_w1tc.val = BIT(A_CW_CCW1_BIT);
-      // gpio_set_level(A_CW_CCW2, 1);
-      // gpio_set_level(A_CW_CCW1, 0);
     } else {
-      gpio_set_level(A_CW_CCW1, 1);
-      gpio_set_level(A_CW_CCW2, 0);
-      // GPIO.out1_w1ts.val = BIT(A_CW_CCW1_BIT);
-      // GPIO.out1_w1tc.val = BIT(A_CW_CCW2_BIT);
+      GPIO.out1_w1ts.val = BIT(A_CW_CCW1_BIT);
+      GPIO.out1_w1tc.val = BIT(A_CW_CCW2_BIT);
     }
-    if (duty_r > 0) {
+    if (duty_r < 0) {
       GPIO.out1_w1ts.val = BIT(B_CW_CCW1_BIT);
       GPIO.out1_w1tc.val = BIT(B_CW_CCW2_BIT);
-      // gpio_set_level(B_CW_CCW1, 1);
-      // gpio_set_level(B_CW_CCW2, 0);
     } else {
       GPIO.out1_w1ts.val = BIT(B_CW_CCW2_BIT);
       GPIO.out1_w1tc.val = BIT(B_CW_CCW1_BIT);
-      // gpio_set_level(B_CW_CCW2, 1);
-      // gpio_set_level(B_CW_CCW1, 0);
     }
     float tmp_duty_r = duty_r > 0 ? duty_r : -duty_r;
     float tmp_duty_l = duty_l > 0 ? duty_l : -duty_l;
-    // mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A);
+
+    mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_B);
+    mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_B);
+
     mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, tmp_duty_l);
     mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A,
                         MCPWM_DUTY_MODE_0);
-    // mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A);
+
     mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A, tmp_duty_r);
     mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A,
                         MCPWM_DUTY_MODE_0);
@@ -1040,8 +1079,20 @@ void PlanningTask::calc_tgt_duty() {
                      mpc_next_ego.ff_duty_l - duty_sen) /
                     sensing_result->ego.battery_lp * 100;
 
-  const auto max_duty = param_ro->sen_ref_p.search_exist.offset_l;
   if (tgt_val->motion_type == MotionType::FRONT_CTRL) {
+    const auto max_duty = param_ro->sen_ref_p.search_exist.offset_l;
+    if (tgt_duty.duty_r > max_duty) {
+      tgt_duty.duty_r = max_duty;
+    } else if (tgt_duty.duty_r < -max_duty) {
+      tgt_duty.duty_r = -max_duty;
+    }
+    if (tgt_duty.duty_l > max_duty) {
+      tgt_duty.duty_l = max_duty;
+    } else if (tgt_duty.duty_l < -max_duty) {
+      tgt_duty.duty_l = -max_duty;
+    }
+  } else {
+    const auto max_duty = param_ro->max_duty;
     if (tgt_duty.duty_r > max_duty) {
       tgt_duty.duty_r = max_duty;
     } else if (tgt_duty.duty_r < -max_duty) {

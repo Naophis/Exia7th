@@ -75,6 +75,8 @@ private:
 
   float calc_sensor(float date, float a, float b);
 
+  void calc_vel();
+
   void calc_filter();
 
   duty_t tgt_duty;

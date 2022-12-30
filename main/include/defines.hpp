@@ -11,6 +11,7 @@
 
 #include "include/enums.hpp"
 #include "include/structs.hpp"
+#include <bitset>
 #include <initializer_list>
 #include <iostream>
 #include <memory>
@@ -71,10 +72,17 @@ constexpr gpio_num_t EN_MOSI = GPIO_NUM_2;
 constexpr gpio_num_t EN_CLK = GPIO_NUM_3;
 constexpr gpio_num_t EN_GN_SSL = GPIO_NUM_4;
 
-constexpr gpio_num_t ENC_R_A = GPIO_NUM_6;
-constexpr gpio_num_t ENC_R_B = GPIO_NUM_7;
-constexpr gpio_num_t ENC_L_A = GPIO_NUM_35;
-constexpr gpio_num_t ENC_L_B = GPIO_NUM_36;
+// constexpr gpio_num_t ENC_R_A = GPIO_NUM_6;
+// constexpr gpio_num_t ENC_R_B = GPIO_NUM_7;
+// constexpr gpio_num_t ENC_L_A = GPIO_NUM_35;
+// constexpr gpio_num_t ENC_L_B = GPIO_NUM_36;
+
+constexpr gpio_num_t ENC_R_CS = GPIO_NUM_6;
+constexpr gpio_num_t ENC_L_CS = GPIO_NUM_33;
+constexpr gpio_num_t ENC_CLK = GPIO_NUM_34;
+
+constexpr gpio_num_t ENC_MISO = GPIO_NUM_36; // B
+constexpr gpio_num_t ENC_MOSI = GPIO_NUM_35; // A
 
 constexpr gpio_num_t SUCTION_PWM = GPIO_NUM_5;
 
@@ -84,6 +92,10 @@ constexpr gpio_num_t SUCTION_PWM = GPIO_NUM_5;
 #define SEN_L45 ADC2_CHANNEL_6
 #define SEN_L90 ADC2_CHANNEL_8
 #define BATTERY ADC2_CHANNEL_9
+
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+
 // constexpr adc2_channel_t SEN_R90 = ADC2_CHANNEL_0;
 // constexpr adc2_channel_t SEN_R45 = ADC2_CHANNEL_1;
 // constexpr adc2_channel_t SEN_F = ADC2_CHANNEL_4;
@@ -93,7 +105,11 @@ constexpr gpio_num_t SUCTION_PWM = GPIO_NUM_5;
 
 constexpr int16_t ENCODER_H_LIM_VAL = 32767;
 constexpr int16_t ENCODER_L_LIM_VAL = -32767;
+
+const int16_t ENC_RESOLUTION = 16384 - 1;
 constexpr uint8_t READ_FLAG = 0x80;
+constexpr uint16_t READ_FLAG2 = 0b01000000;
+constexpr uint16_t PARITY_FLAG = 0b10000000;
 constexpr uint8_t ESC = 0x1B;
 constexpr uint16_t BUF_SIZE = 4096;
 
@@ -136,7 +152,8 @@ static const std::string maze_log_file("/spiflash/maze.log");
 static const std::string maze_log_kata_file("/spiflash/maze_kata.log");
 static const std::string maze_log_return_file("/spiflash/maze_return.log");
 
-static const std::string format1("%d,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
+static const std::string
+    format1("%d,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
 static const std::string format2("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
 static const std::string format3(
     "%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,"

@@ -35,6 +35,8 @@ union LED_bit {
 typedef struct {
   int16_t right = 0;
   int16_t left = 0;
+  int16_t right_old = 0;
+  int16_t left_old = 0;
 } encoder_data_t;
 
 typedef struct {

@@ -3,8 +3,8 @@ straight:
     # v_max: 500
     v_max: 475
     # v_max: 550
-    accl: 5500
-    decel: -5500
+    accl: 3500
+    decel: -3500
     w_max: 22.5
     w_end: 0.1
     alpha: 240

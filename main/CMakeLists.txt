@@ -20,6 +20,7 @@ set(COMPONENT_SRCS
     "task/icm20689.cpp"
     "task/lsm6dsr.cpp"
     "task/sensing_task.cpp"
+    "task/as5147p.cpp"
     "search/adachi.cpp"
     "search/logic.cpp"
     "search/search_controller.cpp"
