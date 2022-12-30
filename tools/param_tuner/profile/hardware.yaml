@@ -3,14 +3,16 @@ dt: 0.001
 # tire: 13.6725
 # tire: 13.46
 # tire: 13.367
-tire: 13.1775
+# tire: 15.15
+tire: 13.5
 # tire: 13.095
 # tire: 13.135
 offset_start_dist: 21.0
 # offset_start_dist: 45.0
 gear_a: 37
-gear_b: 8
-max_duty: 99.9
+gear_b: 9
+# max_duty: 99.9
+max_duty: 40.0
 FF_front: 1
 FF_roll: 1
 FF_keV: 1
@@ -26,8 +28,8 @@ Km: 0.0005
 # Ke: 0.00105
 # Km: 0.0025
 # Resist: 2.93
-Resist: 1.7
-Mass: 0.0185
+Resist: 4.6
+Mass: 0.0205
 
 slip_param_K: 0.5
 # slip_param_k2: 150
@@ -39,8 +41,9 @@ sakiyomi_time: 10
 clear_angle: 5
 clear_dist_order: 80
 # front_dist_offset: 91.5
-front_dist_offset: 93.5
-front_dist_offset2: 137.0
+front_dist_offset: 90.0 # 探索時の前壁補正
+# front_dist_offset2: 137.0
+front_dist_offset2: 144.0
 led_light_delay_cnt: 500
 
 front_dist_offset_pivot_th: 80
@@ -80,10 +83,10 @@ wall_off_hold_dist_dia_r2: 1.0
 
 # 壁切れ In
 wall_off_hold_exist_dist_l: 73
-wall_off_hold_exist_dist_r: 100
+wall_off_hold_exist_dist_r: 73
 # 壁切れ Out
 wall_off_hold_noexist_th_l: 75
-wall_off_hold_noexist_th_r: 105
+wall_off_hold_noexist_th_r: 75
 
 
 # 壁切れ In
@@ -112,12 +115,12 @@ dia_wall_off_ref_l: 38.0
 dia_wall_off_ref_r: 33.0
 
 #ログON_OFF
-logging_time: 1.0
-search_log_enable: 0
+logging_time: 4.0
+search_log_enable: 1
 test_log_enable: 1
-fast_log_enable: 0
+fast_log_enable: 1
 sen_log_size: 100
-log_size: 2000
+log_size: 1200
 
 normal_sla_offset: 7
 
@@ -135,10 +138,16 @@ cell: 90
 cell2: 90
 
 motor_pid:
-  p: 0.005125
-  i: 1.25
-  # p: 0.00025
-  # i: 0.65
+  # p: 0.00475
+  # i: 4.125
+
+  # p: 0.0275
+  # i: 3.75
+
+  # p: 0.0025
+  # i: 1.375
+  p: 0.0025
+  i: 0.75
   # p: 0.0
   # i: 0.0
   d: 0.0
@@ -157,7 +166,7 @@ dist_pid:
   # d: 0.0
 gyro_pid:
   p: 0.275
-  i: 25.0
+  i: 12.5
   d: 0.00
   # p: 0.0
   # i: 0.0
@@ -172,7 +181,7 @@ angle_pid:
   b: 0
   c: 0
 sensor_pid:
-  p: 0.145
+  p: 0.125
   # i: 0.0
   # d: 0.025
   # p: 0.0
@@ -189,18 +198,21 @@ sensor_pid_dia:
   c: 0
   mode: 1
 gyro_param:
-  gyro_w_gain_right: 0.001061
-  gyro_w_gain_left: 0.0010612
+  gyro_w_gain_right: 0.0024635
+  gyro_w_gain_left: 0.00246375
   lp_delay: 1
 accel_x_param:
-  gain: 4.92 # 16g
+  # gain: 315.56 # 16g
+  # gain: 155.75 # 8g
+  gain: 77.5 # 4g
+  # gain: 0.161595
   # gain: 1.212 # 4g
 
 comp_v_param:
-  enc_v_lp: 0.1
-  acc_x_hp: 5
+  enc_v_lp: 0
+  acc_x_hp: 0.85
   gain_v: 0.75
-  enable: 0
+  enable: 1
 
 battery_param:
   lp_delay: 0.25

@@ -5,6 +5,7 @@
 #include "driver/ledc.h"
 #include "driver/mcpwm.h"
 #include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
 #include "freertos/task.h"
 #include "gen_code_mpc/mpc_tgt_calc.h"
 #include "include/logging_task.hpp"
@@ -16,7 +17,6 @@
 // #include "gen_code_pid/pid_controller.h"
 // #include "gen_code_pid_2dof/pid_controller_2dof.h"
 #include "gen_code_simple_pid/simple_pid_controller.h"
-
 #include <cmath>
 
 class PlanningTask {
@@ -51,6 +51,10 @@ public:
   bool suction_en = false;
 
   t_dynamics dynamics;
+  QueueHandle_t *qh;
+  motion_tgt_val_t *receive_req;
+
+  void set_queue_handler(QueueHandle_t &_qh) { qh = &_qh; }
 
 private:
   xTaskHandle handle = 0;
@@ -70,6 +74,8 @@ private:
   float satuate_sen_duty(float duty_sen);
 
   float calc_sensor(float date, float a, float b);
+
+  void calc_vel();
 
   void calc_filter();
 

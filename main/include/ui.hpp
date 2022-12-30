@@ -2,6 +2,7 @@
 #define UI_HPP
 
 #include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
 #include "freertos/task.h"
 #include "include/Music.hpp"
 #include "include/defines.hpp"
@@ -42,6 +43,9 @@ public:
 
   TurnDirection select_direction();
   TurnDirection select_direction2();
+  QueueHandle_t *qh;
+
+  void set_queue_handler(QueueHandle_t &_qh) { qh = &_qh; }
 
 private:
   std::shared_ptr<sensing_result_entity_t> sensing_result;

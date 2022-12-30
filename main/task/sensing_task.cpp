@@ -75,6 +75,7 @@ void SensingTask::task() {
   if (!GY_MODE) {
     gyro_if.init();
     gyro_if.setup();
+    enc_if.init();
   }
   ready = true;
 
@@ -84,11 +85,9 @@ void SensingTask::task() {
   adc2_config_channel_atten(SEN_L45, atten);
   adc2_config_channel_atten(SEN_L90, atten);
   adc2_config_channel_atten(BATTERY, atten);
-  encoder_init(PCNT_UNIT_0, ENC_R_A, ENC_R_B);
-  encoder_init(PCNT_UNIT_1, ENC_L_A, ENC_L_B);
 
   while (1) {
-    gyro_if.req_read2byte_itr(0x47);
+    // gyro_if.req_read2byte_itr(0x26);
     adc2_get_raw(BATTERY, width, &sensing_result->battery.raw);
     // LED_OFF ADC
     adc2_get_raw(SEN_R90, width, &sensing_result->led_sen_before.right90.raw);
@@ -100,6 +99,7 @@ void SensingTask::task() {
     if (!(tgt_val->motion_type == MotionType::NONE ||
           tgt_val->motion_type == MotionType::PIVOT)) {
     }
+
     gpio_set_level(LED_R90, 1);
     gpio_set_level(LED_L90, 1);
     lec_cnt = 0;
@@ -121,6 +121,9 @@ void SensingTask::task() {
     }
     adc2_get_raw(SEN_R45, width, &sensing_result->led_sen_after.right45.raw);
     adc2_get_raw(SEN_L45, width, &sensing_result->led_sen_after.left45.raw);
+
+    GPIO.out_w1tc = BIT(LED_R45_BIT);
+    GPIO.out_w1tc = BIT(LED_L45_BIT);
 
     sensing_result->led_sen.right90.raw =
         std::max(sensing_result->led_sen_after.right90.raw -
@@ -146,16 +149,20 @@ void SensingTask::task() {
     gpio_set_level(LED_L45, 0);
     gpio_set_level(LED_L90, 0);
 
-    pcnt_get_counter_value(PCNT_UNIT_0, &sensing_result->encoder_raw.right);
-    pcnt_counter_clear(PCNT_UNIT_0);
-    pcnt_get_counter_value(PCNT_UNIT_1, &sensing_result->encoder_raw.left);
-    pcnt_counter_clear(PCNT_UNIT_1);
+    // pcnt_get_counter_value(PCNT_UNIT_0, &sensing_result->encoder_raw.right);
+    // pcnt_counter_clear(PCNT_UNIT_0);
+    // pcnt_get_counter_value(PCNT_UNIT_1, &sensing_result->encoder_raw.left);
+    // pcnt_counter_clear(PCNT_UNIT_1);
 
     if (GY_MODE == 0) {
-      sensing_result->gyro.raw = gyro_if.read_gyro_z();
+      sensing_result->gyro.raw = gyro_if.read2byte(0x26);
+      sensing_result->accel_x.raw = gyro_if.read2byte(0x28);
+      // sensing_result->gyro.raw = gyro_if.read_2byte_itr();
+      // gyro_if.req_read2byte_itr(0x28);
       // sensing_result->accel_x.raw = gyro_if.read_2byte_itr();
       // gyro_if.req_read2byte_itr(0x3D);
       // sensing_result->accel_y.raw = gyro_if.read_2byte_itr();
+
     } else {
       if (gyro_q.size() == GY_DQ_SIZE) {
         sensing_result->gyro.raw = gyro_q[gyro_q.size() - 1];
@@ -167,10 +174,17 @@ void SensingTask::task() {
       }
     }
 
+    auto enc_l = enc_if.read2byte(0x3F, 0xFF, false) & 0x3FFF;
+    auto enc_r = enc_if.read2byte(0x3F, 0xFF, true) & 0x3FFF;
+
     sensing_result->battery.data =
-        BATTERY_GAIN * 2 * sensing_result->battery.raw / 4096;
-    sensing_result->encoder.right = -sensing_result->encoder_raw.right;
-    sensing_result->encoder.left = -sensing_result->encoder_raw.left; //反転必須
+        BATTERY_GAIN * 3 * sensing_result->battery.raw / 4096;
+
+    sensing_result->encoder.right_old = sensing_result->encoder.right;
+    sensing_result->encoder.left_old = sensing_result->encoder.left;
+    sensing_result->encoder.right = enc_r;
+    sensing_result->encoder.left = enc_l;
+
     vTaskDelay(xDelay);
   }
 }

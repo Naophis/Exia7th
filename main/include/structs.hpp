@@ -35,6 +35,8 @@ union LED_bit {
 typedef struct {
   int16_t right = 0;
   int16_t left = 0;
+  int16_t right_old = 0;
+  int16_t left_old = 0;
 } encoder_data_t;
 
 typedef struct {
@@ -71,6 +73,7 @@ typedef struct {
   float v_r = 0;
   float v_l = 0;
   float v_c = 0;
+  float filter_v = 0;
 
   float main_v = 0;
 
@@ -452,6 +455,8 @@ typedef struct {
   bool dia_mode = false;
   SensorCtrlType sct;
   sys_id_t sys_id;
+  bool tgt_reset_req = false;
+  bool ego_reset_req = false;
 } new_motion_req_t;
 
 typedef struct {
@@ -677,8 +682,10 @@ typedef struct {
   real16_T img_v;
   real16_T v_l;
   real16_T v_c;
+  real16_T v_c2;
   real16_T v_r;
   real16_T accl;
+  real16_T accl_x;
   real16_T img_w;
   real16_T w_lp;
   real16_T alpha;

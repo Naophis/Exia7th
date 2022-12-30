@@ -160,7 +160,8 @@ SerialPort.list().then(
       if (
         p.path.match(/usbserial/) ||
         p.path.match(/COM/) ||
-        p.path.match(/ttyUSB/)
+        p.path.match(/ttyUSB/)||
+        p.path.match(/ttyACM/)
       ) {
         if (p.serialNumber) {
           comport = p.path;

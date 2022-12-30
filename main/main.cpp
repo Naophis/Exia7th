@@ -41,6 +41,10 @@
 
 #include "esp_debug_helpers.h"
 #include "rom/uart.h"
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
+#include "freertos/task.h"
 SensingTask st;
 
 void init_uart() {
@@ -71,8 +75,15 @@ void init_gpio() {
   io_conf.pin_bit_mask |= 1ULL << LED_R45;
   io_conf.pin_bit_mask |= 1ULL << LED_L45;
   io_conf.pin_bit_mask |= 1ULL << LED_L90;
-  io_conf.pin_bit_mask |= 1ULL << A_CW_CCW;
-  io_conf.pin_bit_mask |= 1ULL << B_CW_CCW;
+
+  io_conf.pin_bit_mask |= 1ULL << A_CW_CCW1;
+  io_conf.pin_bit_mask |= 1ULL << B_CW_CCW1;
+  io_conf.pin_bit_mask |= 1ULL << A_CW_CCW2;
+  io_conf.pin_bit_mask |= 1ULL << B_CW_CCW2;
+  io_conf.pin_bit_mask |= 1ULL << SUCTION_PWM;
+
+  io_conf.pin_bit_mask |= 1ULL << A_PWM;
+  io_conf.pin_bit_mask |= 1ULL << B_PWM;
 
   io_conf.pin_bit_mask |= 1ULL << LED1;
   io_conf.pin_bit_mask |= 1ULL << LED2;
@@ -95,6 +106,8 @@ void init_gpio() {
 }
 int gyro_mode = 0;
 ICM20689 gyro_if;
+LSM6DSR gyro_if2;
+AS5147P enc_if;
 void timer_isr(void *parameters) {
   timer_group_clr_intr_status_in_isr(TIMER_GROUP_0, TIMER_0);
   timer_group_enable_alarm_in_isr(TIMER_GROUP_0, TIMER_0);
@@ -141,13 +154,20 @@ extern "C" void app_main() {
 
   init_gpio();
   init_uart();
-  if (GY_MODE) {
-    gyro_if.init();
-    gyro_if.setup();
-    gyro_mode = 0;
-    hwtimer_init();
-  }
+  // if (true) {
+  //   enc_if.init();
+  //   enc_if.setup();
+  //   while (1) {
+  //     auto enc_l3 = enc_if.read2byte(0x3F, 0xFF, false) & 0x3FFF;
+  //     auto enc_r3 = enc_if.read2byte(0x3F, 0xFF, true) & 0x3FFF;
+  //     cout << "3_" << 360 * enc_l3 / 16384.0 << "\t" << 360 * enc_r3 / 16384.0
+  //          << endl;
+  //     vTaskDelay(100 / portTICK_RATE_MS);
+  //   }
+  // }
 
+  QueueHandle_t xQueue;
+  xQueue = xQueueCreate(4, sizeof(motion_tgt_val_t *));
   esp_vfs_fat_mount_config_t mount_config;
   mount_config.max_files = 8;
   mount_config.format_if_mount_failed = true;
@@ -187,6 +207,7 @@ extern "C" void app_main() {
   pt->set_input_param_entity(param);
   // pt->set_ego_entity(ego);
   pt->set_tgt_val(tgt_val);
+  pt->set_queue_handler(xQueue);
   pt->create_task(0);
 
   lt->set_sensing_entity(sensing_entity);
@@ -202,6 +223,7 @@ extern "C" void app_main() {
   mt.set_tgt_val(tgt_val);
   mt.set_planning_task(pt);
   mt.set_logging_task(lt);
+  mt.set_queue_handler(xQueue);
   mt.create_task(1);
 
   // /* Set the GPIO as a push/pull output */
@@ -217,6 +239,7 @@ extern "C" void app_main() {
     if (mt.ui->button_state()) {
       printf("time_stamp: %d\n", tgt_val->nmr.timstamp);
       printf("motion_type: %d\n", static_cast<int>(tgt_val->motion_type));
+      printf("fss.error: %d\n", tgt_val->fss.error);
       printf("motor_en: %d\n", (pt->motor_en) ? 1 : 0);
       printf("suction_en: %d\n", (pt->suction_en) ? 1 : 0);
     }

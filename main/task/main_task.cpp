@@ -83,6 +83,7 @@ void MainTask::dump1() {
   mp->reset_gyro_ref_with_check();
   tgt_val->nmr.motion_type = MotionType::READY;
   tgt_val->nmr.timstamp++;
+  xQueueSendToBack(*qh, &tgt_val, 1);
   while (1) {
     printf("%c[2J", ESC);   /* 画面消去 */
     printf("%c[0;0H", ESC); /* 戦闘戻す*/
@@ -90,9 +91,12 @@ void MainTask::dump1() {
 
     printf("gyro: %d\t(%0.3f)\n", sensing_result->gyro.raw,
            tgt_val->gyro_zero_p_offset);
-    printf("accel_x: %d\n", sensing_result->accel_x.raw);
+    printf("accel_x: %f\t(%f)\n", sensing_result->ego.accel_x_raw,
+           sensing_result->ego.accel_x_raw / 9806.65 *
+               param->accel_x_param.gain);
     printf("accel_y: %d\n", sensing_result->accel_y.raw);
-    printf("battery: %0.3f\n", sensing_result->ego.battery_lp);
+    printf("battery: %0.3f (%d)\n", sensing_result->ego.battery_lp,
+           sensing_result->battery.raw);
     printf("encoder: %d, %d\n", sensing_result->encoder.left,
            sensing_result->encoder.right);
     printf("sensor: %d, %d, %d, %d, %d\n", sensing_result->led_sen.left90.raw,
@@ -114,9 +118,11 @@ void MainTask::dump1() {
            param->sen_ref_p.search_exist.right45,
            param->sen_ref_p.search_exist.right90);
 
-    printf("ego_v: %0.3f, %0.3f, %0.3f, %0.3f\n", sensing_result->ego.v_l,
-           sensing_result->ego.v_c, sensing_result->ego.v_r,
-           tgt_val->ego_in.dist);
+    printf("ego_v: %0.3f, %0.3f, %0.3f, %0.3f, (%d, %d)\n",
+           sensing_result->ego.v_l, sensing_result->ego.v_c,
+           sensing_result->ego.v_r, tgt_val->ego_in.dist,
+           sensing_result->encoder.left, sensing_result->encoder.right);
+
     printf("calc_v: %0.3f, %0.3f\n", tgt_val->ego_in.v, tgt_val->ego_in.w);
 
     printf("ego_w: %0.3f, %0.3f, %0.3f, %0.3f deg\n", sensing_result->ego.w_raw,
@@ -142,6 +148,7 @@ void MainTask::dump2() {
 
   tgt_val->nmr.motion_type = MotionType::READY;
   tgt_val->nmr.timstamp++;
+  xQueueSendToBack(*qh, &tgt_val, 1);
   while (1) {
     printf("%d, %d, %d, %d, %d\n", sensing_result->led_sen.left90.raw,
            sensing_result->led_sen.left45.raw,
@@ -1092,8 +1099,16 @@ void MainTask::task() {
         path_run(11, 8);
       } else if (mode_num == 12) {
         path_run(12, 8);
+      } else if (mode_num == 13) {
+        printf("keep_pivot\n");
+        keep_pivot();
       } else if (mode_num == 14) {
-        dump1(); // taskの最終行に配置すること
+        // dump1(); // taskの最終行に配置すること
+        printf("suction\n");
+        mp->reset_gyro_ref_with_check();
+        pt->suction_enable(sys.test.suction_duty);
+        vTaskDelay(1000 * 10 / portTICK_PERIOD_MS);
+        pt->suction_disable();
       } else if (mode_num == 15) {
         save_maze_data(false);
         save_maze_kata_data(false);
@@ -1126,6 +1141,7 @@ void MainTask::req_error_reset() {
   tgt_val->pl_req.error_ang_reset = 1;
   tgt_val->pl_req.error_dist_reset = 1;
   tgt_val->pl_req.time_stamp++;
+  xQueueSendToBack(*qh, &tgt_val, 1);
 }
 
 void MainTask::test_system_identification(bool para) {

@@ -70,6 +70,9 @@ public:
 
   std::shared_ptr<motion_tgt_val_t> tgt_val;
 
+  QueueHandle_t *qh;
+  void set_queue_handler(QueueHandle_t &_qh) { qh = &_qh; }
+
 private:
   void calc_dia135_offset(param_straight_t &front, param_straight_t &back,
                           TurnDirection dir, bool exec_wall_off);

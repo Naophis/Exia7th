@@ -47,6 +47,7 @@ void UserInterface::motion_check() {
   int c = 0;
   tgt_val->nmr.motion_type = MotionType::READY;
   tgt_val->nmr.timstamp++;
+  xQueueSendToBack(*qh, &tgt_val, 1);
   vTaskDelay(1 / portTICK_PERIOD_MS);
   while (1) {
     c++;
@@ -105,7 +106,21 @@ void UserInterface::hello_exia() {
 }
 
 void UserInterface::LED_on_off(gpio_num_t gpio_num, int state) {
-  gpio_set_level(gpio_num, state);
+  // gpio_set_level(gpio_num, state);
+  const int num = (int)gpio_num;
+  if (num < 32) {
+    if (state) {
+      GPIO.out_w1ts = BIT(num);
+    } else {
+      GPIO.out_w1tc = BIT(num);
+    }
+  } else {
+    if (state) {
+      GPIO.out1_w1ts.val = BIT(num - 32);
+    } else {
+      GPIO.out1_w1tc.val = BIT(num - 32);
+    }
+  }
 }
 
 void UserInterface::LED_bit(int b0, int b1, int b2, int b3, int b4) {
@@ -233,8 +248,6 @@ TurnDirection UserInterface::select_direction() {
     vTaskDelay(25 / portTICK_PERIOD_MS);
   }
 }
-
-
 
 TurnDirection UserInterface::select_direction2() {
   TurnDirection td = TurnDirection::None;
