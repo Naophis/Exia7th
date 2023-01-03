@@ -122,7 +122,7 @@ constexpr uint16_t LINE_BUF_SIZE = 312;
 constexpr float BATTERY_GAIN = 3.096; // 2.97324;
 
 constexpr uint8_t LEDC_HIGH_SPEED_MODE = 0;
-constexpr float LOW_BATTERY_TH = 7.95;
+constexpr float LOW_BATTERY_TH = 7.65;
 
 constexpr uint16_t RESET_GYRO_LOOP_CNT = 512;
 

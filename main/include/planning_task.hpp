@@ -52,11 +52,20 @@ public:
 
   t_dynamics dynamics;
   QueueHandle_t *qh;
+  QueueHandle_t motor_qh_enable;
+
+  motor_req_t motor_enable_send_msg;
+  motor_req_t motor_enable_recv_msg; //受け手のメッセージ
+  motor_req_t motor_enable_status;
+
   motion_tgt_val_t *receive_req;
 
   void set_queue_handler(QueueHandle_t &_qh) { qh = &_qh; }
 
 private:
+  void motor_enable_main();
+  void motor_disable_main();
+
   xTaskHandle handle = 0;
 
   void check_fail_safe();
@@ -85,6 +94,7 @@ private:
   int buzzer_timestamp = 0;
   int motion_req_timestamp = 0;
   int pid_req_timestamp = 0;
+  int motor_req_timestamp = 0;
   void pl_req_activate();
   void cp_tgt_val();
   mpc_tgt_calcModelClass mpc_tgt_calc;

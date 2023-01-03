@@ -1,10 +1,10 @@
 straight:
   search:
     # v_max: 500
-    v_max: 300
+    v_max: 385
     # v_max: 550
-    accl: 1500
-    decel: -1500
+    accl: 2500
+    decel: -2500
     w_max: 22.5
     w_end: 0.1
     alpha: 240

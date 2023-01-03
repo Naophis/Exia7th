@@ -23,7 +23,7 @@ FF_keV: 1
 # Ke: 0.00125
 # Km: 0.0005
 Ke: 0.00185
-Km: 0.0005
+Km: 0.00105
 
 # Ke: 0.00105
 # Km: 0.0025
@@ -115,7 +115,7 @@ dia_wall_off_ref_l: 38.0
 dia_wall_off_ref_r: 33.0
 
 #ログON_OFF
-logging_time: 4.0
+logging_time: 8.0
 search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1
@@ -146,17 +146,20 @@ motor_pid:
 
   # p: 0.0025
   # i: 1.375
-  p: 0.00275
-  i: 0.275
+  # p: 0.0175
+  # i: 0.000215
+  p: 0.0065
+  i: 0.0005125
+  d: 0.012
   # p: 0.0
   # i: 0.0
-  d: 0.0
+  # d: 0.0
   b: 0
   c: 0
-  mode: 1
+  mode: 0
 dist_pid:
-  p: 0.35
-  i: 0.00025
+  p: 0.5
+  i: 0.00035
   d: 0.175
   b: 0
   c: 0
@@ -166,15 +169,15 @@ dist_pid:
   # d: 0.0
 gyro_pid:
   p: 0.275
-  i: 12.5
-  d: 0.00
+  i: 0.0285
+  d: 0.275
   # p: 0.0
   # i: 0.0
-  mode: 1
+  mode: 0
   b: 0
   c: 0
 angle_pid:
-  p: 0.1
+  p: 0.12
   i: 0.0
   d: 0.0
   mode: 1

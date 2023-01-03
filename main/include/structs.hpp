@@ -583,6 +583,11 @@ typedef struct {
 } turn_param_profile_t;
 
 typedef struct {
+  bool enable = 0;
+  int timestamp = 0;
+} motor_req_t;
+
+typedef struct {
   float right = 0;
   float left = 0;
 } slalom_offset_t;

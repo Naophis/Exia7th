@@ -11,66 +11,20 @@ PlanningTask::~PlanningTask() {}
 void PlanningTask::create_task(const BaseType_t xCoreID) {
   xTaskCreatePinnedToCore(task_entry_point, "planning_task", 8192 * 2, this, 1,
                           &handle, xCoreID);
+  motor_qh_enable = xQueueCreate(4, sizeof(motor_req_t *));
 }
 
 void PlanningTask::set_logging_task(std::shared_ptr<LoggingTask> &_lt) {
   lt = _lt; //
 }
-
-void PlanningTask::motor_enable() {
+void PlanningTask::motor_enable_main() {
   motor_en = true;
   mcpwm_start(MCPWM_UNIT_0, MCPWM_TIMER_0);
   mcpwm_start(MCPWM_UNIT_0, MCPWM_TIMER_1);
-  tgt_val->nmr.v_max = 0;
-  tgt_val->nmr.v_end = 0;
-  tgt_val->nmr.accl = 0;
-  tgt_val->nmr.decel = 0;
-  tgt_val->nmr.dist = 0;
-  tgt_val->nmr.motion_mode = RUN_MODE2::NONE_MODE;
-  tgt_val->nmr.motion_type = MotionType::NONE;
-  tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
-  tgt_val->nmr.sct = SensorCtrlType::NONE;
-  tgt_val->motion_type = MotionType::NONE;
-  tgt_val->ego_in.dist = 0;
-  tgt_val->ego_in.img_dist = 0;
-  tgt_val->nmr.w_max = 0;
-  tgt_val->nmr.w_end = 0;
-  tgt_val->nmr.alpha = 0;
-  tgt_val->nmr.ang = 0;
 
-  tgt_val->tgt_in.v_max = 0;
-  tgt_val->tgt_in.end_v = 0;
-  tgt_val->tgt_in.accl = 0;
-  tgt_val->tgt_in.decel = 0;
-  tgt_val->tgt_in.w_max = 0;
-  tgt_val->tgt_in.end_w = 0;
-  tgt_val->tgt_in.alpha = 0;
-  tgt_val->tgt_in.tgt_dist = 0;
-  tgt_val->tgt_in.tgt_angle = 0;
-
-  tgt_val->motion_mode = 0;
-
-  tgt_val->tgt_in.accl_param.limit = 2500;
-  tgt_val->tgt_in.accl_param.n = 4;
-  tgt_val->global_pos.ang = 0;
-  tgt_val->global_pos.img_ang = 0;
-  tgt_val->global_pos.dist = 0;
-  tgt_val->global_pos.img_dist = 0;
-
-  tgt_val->nmr.timstamp++;
 }
-void PlanningTask::suction_enable(float duty) {
-  suction_en = true;
-  tgt_duty.duty_suction = duty;
-  mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A);
-  mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A,
-                 std::abs(tgt_duty.duty_suction));
-  mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A,
-                      MCPWM_DUTY_MODE_0);
-  mcpwm_start(MCPWM_UNIT_1, MCPWM_TIMER_2);
-}
-void PlanningTask::motor_disable(bool reset_req) {
-  // if (reset_req) {
+
+void PlanningTask::motor_disable_main() {
   motor_en = false;
 
   mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_B, 0);
@@ -93,8 +47,27 @@ void PlanningTask::motor_disable(bool reset_req) {
   mcpwm_stop(MCPWM_UNIT_0, MCPWM_TIMER_1);
   gpio_set_level(A_PWM, 0);
   gpio_set_level(B_PWM, 0);
+}
 
-  // }
+void PlanningTask::suction_enable(float duty) {
+  suction_en = true;
+  tgt_duty.duty_suction = duty;
+  mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A);
+  mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A,
+                 std::abs(tgt_duty.duty_suction));
+  mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A,
+                      MCPWM_DUTY_MODE_0);
+  mcpwm_start(MCPWM_UNIT_1, MCPWM_TIMER_2);
+}
+void PlanningTask::motor_enable() {
+  motor_enable_send_msg.enable = true;
+  motor_enable_send_msg.timestamp++;
+  xQueueSendToBack(motor_qh_enable, &motor_enable_send_msg, 1);
+}
+void PlanningTask::motor_disable(bool reset_req) {
+  motor_enable_send_msg.enable = false;
+  motor_enable_send_msg.timestamp++;
+  xQueueSendToBack(motor_qh_enable, &motor_enable_send_msg, 1);
 }
 void PlanningTask::motor_disable() {
   motor_disable(true); //
@@ -220,6 +193,17 @@ void PlanningTask::task() {
   accl_x_q.clear();
 
   while (1) {
+    if (xQueueReceive(motor_qh_enable, &motor_enable_send_msg, 0) == pdTRUE) {
+      if (motor_req_timestamp != motor_enable_send_msg.timestamp) {
+        if (motor_enable_send_msg.enable) {
+          motor_enable_main();
+        } else {
+          motor_disable_main();
+        }
+        motor_req_timestamp = motor_enable_send_msg.timestamp;
+      }
+    }
+
     queue_recieved = xQueueReceive(*qh, &receive_req, 0);
     // 自己位置更新
     update_ego_motion();
@@ -735,7 +719,7 @@ void PlanningTask::set_next_duty(float duty_l, float duty_r,
     mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A,
                         MCPWM_DUTY_MODE_0);
   } else {
-    motor_disable(false);
+    // motor_disable(false);
     // mcpwm_start(MCPWM_UNIT_0, MCPWM_TIMER_0);
     // mcpwm_start(MCPWM_UNIT_0, MCPWM_TIMER_1);
     // mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, 0);
@@ -954,6 +938,11 @@ void PlanningTask::calc_tgt_duty() {
   duty_roll = 0;
   duty_roll2 = 0;
 
+  if (tgt_val->motion_type == MotionType::FRONT_CTRL || !motor_en) {
+    error_entity.v.error_i = error_entity.v.error_d = 0;
+    error_entity.v_log.gain_z = error_entity.v_log.gain_zz = 0;
+  }
+
   if (param_ro->motor_pid.mode == 1) {
     duty_c = param_ro->motor_pid.p * error_entity.v.error_p +
              param_ro->motor_pid.i * error_entity.v.error_i +
@@ -972,16 +961,21 @@ void PlanningTask::calc_tgt_duty() {
   const unsigned char reset = 0;
   const unsigned char enable = 1;
 
-  if (tgt_val->motion_type == MotionType::FRONT_CTRL || !motor_en) {
-    vel_pid.step(&error_entity.v.error_p, &param_ro->motor_pid.p,
-                 &param_ro->motor_pid.i, &param_ro->motor_pid.d, &reset, &dt,
-                 &duty_c);
-  } else {
-    vel_pid.step(&error_entity.v.error_p, &param_ro->motor_pid.p,
-                 &param_ro->motor_pid.i, &param_ro->motor_pid.d, &reset_req,
-                 &dt, &duty_c);
-  }
+  // if (tgt_val->motion_type == MotionType::FRONT_CTRL || !motor_en) {
+  //   vel_pid.step(&error_entity.v.error_p, &param_ro->motor_pid.p,
+  //                &param_ro->motor_pid.i, &param_ro->motor_pid.d, &reset, &dt,
+  //                &duty_c);
+  // } else {
+  //   vel_pid.step(&error_entity.v.error_p, &param_ro->motor_pid.p,
+  //                &param_ro->motor_pid.i, &param_ro->motor_pid.d, &reset_req,
+  //                &dt, &duty_c);
+  // }
 
+  if (w_reset == 0 || tgt_val->motion_type == MotionType::FRONT_CTRL ||
+      !motor_en) {
+    error_entity.w.error_i = error_entity.w.error_d = 0;
+    error_entity.w_log.gain_z = error_entity.w_log.gain_zz = 0;
+  }
   if (param_ro->gyro_pid.mode == 1) {
     duty_roll = param_ro->gyro_pid.p * error_entity.w.error_p +
                 param_ro->gyro_pid.i * error_entity.w.error_i +
@@ -997,16 +991,16 @@ void PlanningTask::calc_tgt_duty() {
     error_entity.w_log.gain_z = 0;
   }
 
-  if (w_reset == 0 || tgt_val->motion_type == MotionType::FRONT_CTRL ||
-      !motor_en) {
-    gyro_pid.step(&error_entity.w.error_p, &param_ro->gyro_pid.p,
-                  &param_ro->gyro_pid.i, &param_ro->gyro_pid.d, &reset, &dt,
-                  &duty_roll);
-  } else {
-    gyro_pid.step(&error_entity.w.error_p, &param_ro->gyro_pid.p,
-                  &param_ro->gyro_pid.i, &param_ro->gyro_pid.d, &enable, &dt,
-                  &duty_roll);
-  }
+  // if (w_reset == 0 || tgt_val->motion_type == MotionType::FRONT_CTRL ||
+  //     !motor_en) {
+  //   gyro_pid.step(&error_entity.w.error_p, &param_ro->gyro_pid.p,
+  //                 &param_ro->gyro_pid.i, &param_ro->gyro_pid.d, &reset, &dt,
+  //                 &duty_roll);
+  // } else {
+  //   gyro_pid.step(&error_entity.w.error_p, &param_ro->gyro_pid.p,
+  //                 &param_ro->gyro_pid.i, &param_ro->gyro_pid.d, &enable, &dt,
+  //                 &duty_roll);
+  // }
   if (tgt_val->motion_type == MotionType::SLALOM) {
     const float max_duty_roll = 8.5;
     if (duty_roll > max_duty_roll) {
