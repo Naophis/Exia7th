@@ -51,7 +51,8 @@ void MainTask::check_battery() {
   vTaskDelay(1500 / portTICK_PERIOD_MS); //他モジュールの起動待ち
 
   printf("battery= %f\n", sensing_result->ego.battery_raw);
-  if (sensing_result->ego.battery_raw > LOW_BATTERY_TH)
+  if (sensing_result->ego.battery_raw > LOW_BATTERY_TH ||
+      sensing_result->ego.battery_raw < 6.5)
     return;
   while (1) {
     ui->music_sync(MUSIC::G5_, 250);
@@ -99,12 +100,12 @@ void MainTask::dump1() {
            sensing_result->battery.raw);
     printf("encoder: %d, %d\n", sensing_result->encoder.left,
            sensing_result->encoder.right);
-    printf("sensor: %d, %d, %d, %d, %d\n", sensing_result->led_sen.left90.raw,
-           sensing_result->led_sen.left45.raw,
-           sensing_result->led_sen.front.raw,
-           sensing_result->led_sen.right45.raw,
-           sensing_result->led_sen.right90.raw);
-    printf("sensor_dist: %0.2f, %0.2f, %0.2f, %0.2f, %0.2f\n",
+    printf(
+        "sensor: %4d, %4d, %4d, %4d, %4d\n", sensing_result->led_sen.left90.raw,
+        sensing_result->led_sen.left45.raw, sensing_result->led_sen.front.raw,
+        sensing_result->led_sen.right45.raw,
+        sensing_result->led_sen.right90.raw);
+    printf("sensor_dist: %3.2f, %3.2f, %3.2f, %3.2f, %3.2f\n",
            sensing_result->ego.left90_dist,  //
            sensing_result->ego.left45_dist,  //
            sensing_result->ego.front_dist,   //
@@ -118,22 +119,22 @@ void MainTask::dump1() {
            param->sen_ref_p.search_exist.right45,
            param->sen_ref_p.search_exist.right90);
 
-    printf("ego_v: %0.3f, %0.3f, %0.3f, %0.3f, (%d, %d)\n",
+    printf("ego_v: %4.3f, %4.3f, %4.3f, %4.3f, (%4d, %4d)\n",
            sensing_result->ego.v_l, sensing_result->ego.v_c,
            sensing_result->ego.v_r, tgt_val->ego_in.dist,
            sensing_result->encoder.left, sensing_result->encoder.right);
 
-    printf("calc_v: %0.3f, %0.3f\n", tgt_val->ego_in.v, tgt_val->ego_in.w);
+    printf("calc_v: %4.3f, %3.3f\n", tgt_val->ego_in.v, tgt_val->ego_in.w);
 
-    printf("ego_w: %0.3f, %0.3f, %0.3f, %0.3f deg\n", sensing_result->ego.w_raw,
+    printf("ego_w: %2.3f, %2.3f, %2.3f, %3.3f deg\n", sensing_result->ego.w_raw,
            sensing_result->ego.w_lp, tgt_val->ego_in.ang,
            tgt_val->ego_in.ang * 180 / PI);
     const float tgt_gain =
         1000.0 /
         (sensing_result->accel_x.raw - tgt_val->accel_x_zero_p_offset) * 9.8;
-    printf("accel: %0.3f, %0.6f\n", sensing_result->ego.accel_x_raw, tgt_gain);
+    printf("accel: %3.3f, %6.6f\n", sensing_result->ego.accel_x_raw, tgt_gain);
 
-    printf("duty: %0.3f, %0.3f\n", sensing_result->ego.duty.duty_l,
+    printf("duty: %3.3f, %3.3f\n", sensing_result->ego.duty.duty_l,
            sensing_result->ego.duty.duty_r);
 
     if (ui->button_state()) {
@@ -1012,9 +1013,15 @@ void MainTask::task() {
           break;
         vTaskDelay(10 / portTICK_RATE_MS);
       }
-    } else if (sys.user_mode == 17) {
+    } else if (sys.user_mode == 19) {
       printf("test_dia_walloff\n");
       test_dia_walloff();
+    } else if (sys.user_mode == 20) {
+      printf("test_pivot_n\n");
+      test_pivot_n();
+    } else if (sys.user_mode == 21) {
+      printf("test_pivot_n2\n");
+      test_pivot_n2();
     }
   } else {
     // ui->hello_exia();
@@ -1441,6 +1448,106 @@ void MainTask::test_turn() {
   }
 }
 
+void MainTask::test_pivot_n() {
+  rorl = ui->select_direction();
+
+  mp->reset_gyro_ref_with_check();
+  reset_tgt_data();
+  reset_ego_data();
+  pt->motor_enable();
+
+  req_error_reset();
+
+  if (param->test_log_enable > 0) {
+    lt->start_slalom_log();
+  }
+  // pt->active_logging();
+  pr.w_max = sys.test.w_max;
+  pr.alpha = sys.test.alpha;
+  pr.w_end = 0;
+  pr.ang = sys.test.ang * PI / 180;
+  pr.RorL = rorl;
+
+  for (int i = 0; i < sys.test.turn_times; i++) {
+    mp->pivot_turn(pr);
+    vTaskDelay(50 / portTICK_RATE_MS);
+  }
+  pt->motor_disable();
+  pt->suction_disable();
+
+  lt->stop_slalom_log();
+  reset_tgt_data();
+  reset_ego_data();
+  req_error_reset();
+  lt->save(slalom_log_file);
+  ui->coin(120);
+
+  while (1) {
+    if (ui->button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
+  lt->dump_log(slalom_log_file);
+  while (1) {
+    if (ui->button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
+}
+
+void MainTask::test_pivot_n2() {
+  rorl = ui->select_direction();
+  search_ctrl->set_lgc(lgc);
+  search_ctrl->set_motion_plannning(mp);
+  pc->set_logic(lgc);
+  pc->set_userinterface(ui);
+  load_slalom_param(0, 0);
+  // sr = search_ctrl->exec(param_set, SearchMode::ALL);
+
+  mp->reset_gyro_ref_with_check();
+  reset_tgt_data();
+  reset_ego_data();
+  pt->motor_enable();
+
+  req_error_reset();
+
+  if (param->test_log_enable > 0) {
+    lt->start_slalom_log();
+  }
+  // pt->active_logging();
+  pr.w_max = sys.test.w_max;
+  pr.alpha = sys.test.alpha;
+  pr.w_end = 0;
+  pr.ang = sys.test.ang * PI / 180;
+  pr.RorL = rorl;
+
+  for (int i = 0; i < sys.test.turn_times; i++) {
+    search_ctrl->pivot(param_set, 0);
+    vTaskDelay(50 / portTICK_RATE_MS);
+  }
+  pt->motor_disable();
+  pt->suction_disable();
+
+  lt->stop_slalom_log();
+  reset_tgt_data();
+  reset_ego_data();
+  req_error_reset();
+  lt->save(slalom_log_file);
+  ui->coin(120);
+
+  while (1) {
+    if (ui->button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
+  lt->dump_log(slalom_log_file);
+  while (1) {
+    if (ui->button_state_hold())
+      break;
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
+}
+
 void MainTask::test_sla() {
 
   if (file_idx >= tpp.file_list_size) {
@@ -1629,7 +1736,7 @@ void MainTask::test_search_sla() {
 
   mp->go_straight(ps);
 
-  nm.v_max = sla_p.v;
+  nm.v_max = str_p.v_max;
   nm.v_end = sla_p.v;
   nm.accl = sys.test.accl;
   nm.decel = sys.test.decel;

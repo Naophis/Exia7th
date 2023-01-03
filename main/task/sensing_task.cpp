@@ -19,8 +19,8 @@ void SensingTask::create_task(const BaseType_t xCoreID) {
   //                         &handle, xCoreID);
 }
 void SensingTask::set_input_param_entity(
-    std::shared_ptr<input_param_t> &_param_ro) {
-  param = _param_ro;
+    std::shared_ptr<input_param_t> &_param) {
+  param = _param;
 }
 
 void SensingTask::task_entry_point(void *task_instance) {
@@ -185,8 +185,37 @@ void SensingTask::task() {
     sensing_result->encoder.right = enc_r;
     sensing_result->encoder.left = enc_l;
 
+    sensing_result->ego.left90_dist_old = sensing_result->ego.left90_dist;
+    sensing_result->ego.left45_dist_old = sensing_result->ego.left45_dist;
+    sensing_result->ego.front_dist_old = sensing_result->ego.front_dist;
+    sensing_result->ego.right45_dist_old = sensing_result->ego.right45_dist;
+    sensing_result->ego.right90_dist_old = sensing_result->ego.right90_dist;
+
+    sensing_result->ego.left90_dist =
+        calc_sensor(sensing_result->ego.left90_lp, param->sensor_gain.l90.a,
+                    param->sensor_gain.l90.b);
+    sensing_result->ego.left45_dist =
+        calc_sensor(sensing_result->ego.left45_lp, param->sensor_gain.l45.a,
+                    param->sensor_gain.l45.b);
+    sensing_result->ego.right45_dist =
+        calc_sensor(sensing_result->ego.right45_lp, param->sensor_gain.r45.a,
+                    param->sensor_gain.r45.b);
+    sensing_result->ego.right90_dist =
+        calc_sensor(sensing_result->ego.right90_lp, param->sensor_gain.r90.a,
+                    param->sensor_gain.r90.b);
+    sensing_result->ego.front_dist =
+        (sensing_result->ego.left90_dist + sensing_result->ego.right90_dist) /
+        2;
+
     vTaskDelay(xDelay);
   }
+}
+
+float SensingTask::calc_sensor(float data, float a, float b) {
+  auto res = a / std::log(data) - b;
+  if (res < 5 || res > 180)
+    return 180;
+  return res;
 }
 void SensingTask::task0() {}
 void SensingTask::task1() {}

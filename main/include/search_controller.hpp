@@ -27,6 +27,8 @@ public:
   void print_maze();
   void set_input_param_entity(std::shared_ptr<input_param_t> &_param);
   void save_maze_data();
+  MotionResult pivot(param_set_t &p_set, float diff);
+  MotionResult pivot90(param_set_t &p_set, const TurnDirection td, float diff);
 
 private:
   bool saved = false;
@@ -45,8 +47,6 @@ private:
 
   MotionResult go_straight_wrapper(param_set_t &p_set, float diff);
   MotionResult slalom(param_set_t &p_set, const TurnDirection td, float diff);
-  MotionResult pivot(param_set_t &p_set, float diff);
-  MotionResult pivot90(param_set_t &p_set, const TurnDirection td, float diff);
   MotionResult straight_offset(param_set_t &p_set, const TurnDirection td,
                                float diff);
   MotionResult finish(param_set_t &p_set);

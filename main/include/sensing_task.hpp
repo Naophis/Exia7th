@@ -1,13 +1,13 @@
 #ifndef SENSING_TASK_HPP
 #define SENSING_TASK_HPP
 
+#include "as5147p.hpp"
 #include "defines.hpp"
 #include "driver/pcnt.h"
 #include "driver/timer.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "icm20689.hpp"
-#include "as5147p.hpp"
 #include "lsm6dsr.hpp"
 #include <deque>
 #include <driver/adc.h>
@@ -47,6 +47,7 @@ public:
   void set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val);
 
 private:
+  float calc_sensor(float data, float a, float b);
   volatile int lec_cnt = 0;
   std::shared_ptr<input_param_t> param;
   int led_light_delay_cnt = 10000;

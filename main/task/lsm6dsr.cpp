@@ -17,7 +17,7 @@ void LSM6DSR::init() {
   };
   spi_device_interface_config_t devcfg = {
       .mode = 3,
-      .clock_speed_hz = 7 * 1000 * 1000, // aaaaaaaaaaa
+      .clock_speed_hz = 10 * 1000 * 1000, // aaaaaaaaaaa
       .spics_io_num = EN_GN_SSL,
       .queue_size = 12,
   };

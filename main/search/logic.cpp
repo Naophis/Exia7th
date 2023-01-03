@@ -968,7 +968,6 @@ unsigned int MazeSolverBaseLgc::searchGoalPosition(
   int y = 1;
   // int position = 0;
   // int idx;
-  float Value;
 
   Direction dirLog[3];
   point_t pt;

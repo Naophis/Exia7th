@@ -54,11 +54,14 @@ void LoggingTask::change_sysid_mode(float d_l, float d_r, int t) {
 void LoggingTask::exec_log() {}
 
 void LoggingTask::task() {
-  const TickType_t xDelay4 = 4.0 / portTICK_PERIOD_MS;
+  const TickType_t xDelay4 = 40.0 / portTICK_PERIOD_MS;
   const TickType_t xDelay1 = 1.0 / portTICK_PERIOD_MS;
 
   while (1) {
     logging_active = active_slalom_log;
+    if (idx_slalom_log > param->log_size) {
+      logging_active = false;
+    }
     if (log_mode) {
       if (logging_active) {
         if (active_slalom_log && idx_slalom_log <= param->log_size) {

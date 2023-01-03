@@ -216,10 +216,10 @@ MotionResult SearchController::pivot(param_set_t &p_set, float diff) {
   }
 
   // vTaskDelay(25 / portTICK_RATE_MS);
-  mp->reset_tgt_data();
-  mp->reset_ego_data();
+  // mp->reset_tgt_data();
+  // mp->reset_ego_data();
   // mp->req_error_reset();
-  pt->motor_enable();
+  // pt->motor_enable();
 
   if (flag) {
     p.motion_type = MotionType::PIVOT_OFFSET;
@@ -294,7 +294,10 @@ MotionResult SearchController::pivot(param_set_t &p_set, float diff) {
   // mp->reset_gyro_ref();
   // ui->coin(100);
 
-  adachi->update();
+  if (adachi != nullptr) {
+    adachi->update();
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
 
   vTaskDelay(25 / portTICK_RATE_MS);
   mp->reset_tgt_data();
@@ -365,7 +368,6 @@ MotionResult SearchController::pivot90(param_set_t &p_set,
     // vTaskDelay(25 / portTICK_RATE_MS);
   }
 
-  float tmp_dist = 0;
   pr.w_max = p_set.str_map[StraightType::Search].w_max;
   pr.alpha = p_set.str_map[StraightType::Search].alpha;
   pr.w_end = p_set.str_map[StraightType::Search].w_end;
@@ -377,11 +379,14 @@ MotionResult SearchController::pivot90(param_set_t &p_set,
   // mp->reset_ego_data();
   // vTaskDelay(25 / portTICK_RATE_MS);
 
-  adachi->update();
+  if (adachi != nullptr) {
+    adachi->update();
+    vTaskDelay(10 / portTICK_RATE_MS);
+  }
 
-  mp->reset_tgt_data();
-  mp->reset_ego_data();
-  pt->motor_enable();
+  // mp->reset_tgt_data();
+  // mp->reset_ego_data();
+  // pt->motor_enable();
   res = mp->pivot_turn(pr);
   pt->motor_disable();
   mp->reset_tgt_data();
@@ -493,12 +498,14 @@ SearchResult SearchController::exec(param_set_t &p_set, SearchMode sm) {
     if (next_motion == Motion::Straight) {
       mr = go_straight_wrapper(p_set, adachi->diff);
     } else if (next_motion == Motion::TurnRight) {
+      // mr = slalom(p_set, TurnDirection::Right, adachi->diff);
       if (judge2()) {
         mr = pivot90(p_set, TurnDirection::Right, adachi->diff);
       } else {
         mr = slalom(p_set, TurnDirection::Right, adachi->diff);
       }
     } else if (next_motion == Motion::TurnLeft) {
+      // mr = slalom(p_set, TurnDirection::Left, adachi->diff);
       if (judge2()) {
         mr = pivot90(p_set, TurnDirection::Left, adachi->diff);
       } else {

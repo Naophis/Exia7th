@@ -3,7 +3,7 @@
 
 // constexpr int MOTOR_HZ = 250000;
 // constexpr int MOTOR_HZ = 125000;
-constexpr int MOTOR_HZ = 100000;
+constexpr int MOTOR_HZ = 80000;
 constexpr int SUCTION_MOTOR_HZ = 10000;
 PlanningTask::PlanningTask() {}
 
@@ -1007,7 +1007,21 @@ void PlanningTask::calc_tgt_duty() {
                   &param_ro->gyro_pid.i, &param_ro->gyro_pid.d, &enable, &dt,
                   &duty_roll);
   }
-
+  if (tgt_val->motion_type == MotionType::SLALOM) {
+    const float max_duty_roll = 8.5;
+    if (duty_roll > max_duty_roll) {
+      duty_roll = max_duty_roll;
+    } else if (duty_roll < -max_duty_roll) {
+      duty_roll = -max_duty_roll;
+    }
+  } else {
+    const float max_duty_roll = 2.5;
+    if (duty_roll > max_duty_roll) {
+      duty_roll = max_duty_roll;
+    } else if (duty_roll < -max_duty_roll) {
+      duty_roll = -max_duty_roll;
+    }
+  }
   if (tgt_val->motion_type == MotionType::FRONT_CTRL) {
     // duty_roll = 0;
     // duty_c = 0;
@@ -1198,7 +1212,7 @@ void PlanningTask::cp_tgt_val() {
   tgt_val->ego_in.cnt_delay_accl_ratio = mpc_next_ego.cnt_delay_accl_ratio;
   tgt_val->ego_in.cnt_delay_decel_ratio = mpc_next_ego.cnt_delay_decel_ratio;
 
-  const auto theta = tgt_val->ego_in.img_ang + slip_param.beta;
+  // const auto theta = tgt_val->ego_in.img_ang + slip_param.beta;
   // const auto x = tgt_val->ego_in.v * std::cos(theta);
   // const auto y = tgt_val->ego_in.v * std::sin(theta);
   // tgt_val->p.x += x;
@@ -1371,28 +1385,6 @@ float PlanningTask::calc_sensor(float data, float a, float b) {
 void PlanningTask::calc_sensor_dist_all() {
   if (!(tgt_val->motion_type == MotionType::NONE ||
         tgt_val->motion_type == MotionType::PIVOT)) {
-
-    sensing_result->ego.left90_dist_old = sensing_result->ego.left90_dist;
-    sensing_result->ego.left45_dist_old = sensing_result->ego.left45_dist;
-    sensing_result->ego.front_dist_old = sensing_result->ego.front_dist;
-    sensing_result->ego.right45_dist_old = sensing_result->ego.right45_dist;
-    sensing_result->ego.right90_dist_old = sensing_result->ego.right90_dist;
-
-    sensing_result->ego.left90_dist =
-        calc_sensor(sensing_result->ego.left90_lp, param_ro->sensor_gain.l90.a,
-                    param_ro->sensor_gain.l90.b);
-    sensing_result->ego.left45_dist =
-        calc_sensor(sensing_result->ego.left45_lp, param_ro->sensor_gain.l45.a,
-                    param_ro->sensor_gain.l45.b);
-    sensing_result->ego.right45_dist =
-        calc_sensor(sensing_result->ego.right45_lp, param_ro->sensor_gain.r45.a,
-                    param_ro->sensor_gain.r45.b);
-    sensing_result->ego.right90_dist =
-        calc_sensor(sensing_result->ego.right90_lp, param_ro->sensor_gain.r90.a,
-                    param_ro->sensor_gain.r90.b);
-    sensing_result->ego.front_dist =
-        (sensing_result->ego.left90_dist + sensing_result->ego.right90_dist) /
-        2;
   } else {
     sensing_result->ego.left90_dist        //
         = sensing_result->ego.left45_dist  //
