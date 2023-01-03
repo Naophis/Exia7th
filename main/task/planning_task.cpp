@@ -12,6 +12,7 @@ void PlanningTask::create_task(const BaseType_t xCoreID) {
   xTaskCreatePinnedToCore(task_entry_point, "planning_task", 8192 * 2, this, 1,
                           &handle, xCoreID);
   motor_qh_enable = xQueueCreate(4, sizeof(motor_req_t *));
+  suction_qh_enable = xQueueCreate(4, sizeof(motor_req_t *));
 }
 
 void PlanningTask::set_logging_task(std::shared_ptr<LoggingTask> &_lt) {
@@ -21,7 +22,6 @@ void PlanningTask::motor_enable_main() {
   motor_en = true;
   mcpwm_start(MCPWM_UNIT_0, MCPWM_TIMER_0);
   mcpwm_start(MCPWM_UNIT_0, MCPWM_TIMER_1);
-
 }
 
 void PlanningTask::motor_disable_main() {
@@ -49,16 +49,6 @@ void PlanningTask::motor_disable_main() {
   gpio_set_level(B_PWM, 0);
 }
 
-void PlanningTask::suction_enable(float duty) {
-  suction_en = true;
-  tgt_duty.duty_suction = duty;
-  mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A);
-  mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A,
-                 std::abs(tgt_duty.duty_suction));
-  mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A,
-                      MCPWM_DUTY_MODE_0);
-  mcpwm_start(MCPWM_UNIT_1, MCPWM_TIMER_2);
-}
 void PlanningTask::motor_enable() {
   motor_enable_send_msg.enable = true;
   motor_enable_send_msg.timestamp++;
@@ -73,8 +63,17 @@ void PlanningTask::motor_disable() {
   motor_disable(true); //
   vTaskDelay(1 / portTICK_PERIOD_MS);
 }
-void PlanningTask::suction_disable() {
-  // gpio_set_level(SUCTION_PWM, 0);
+
+void PlanningTask::suction_motor_enable_main() {
+  suction_en = true;
+  mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A);
+  mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A,
+                 std::abs(tgt_duty.duty_suction));
+  mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A,
+                      MCPWM_DUTY_MODE_0);
+  mcpwm_start(MCPWM_UNIT_1, MCPWM_TIMER_2);
+}
+void PlanningTask::suction_motor_disable_main() {
   suction_en = false;
   tgt_duty.duty_suction = 0;
   mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A);
@@ -83,7 +82,18 @@ void PlanningTask::suction_disable() {
   mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_B, 0);
   mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_B,
                       MCPWM_DUTY_MODE_0);
-  // gpio_set_level(SUCTION_PWM, 0);
+}
+
+void PlanningTask::suction_enable(float duty) {
+  tgt_duty.duty_suction = duty;
+  suction_enable_send_msg.enable = true;
+  suction_enable_send_msg.timestamp++;
+  xQueueSendToBack(suction_qh_enable, &suction_enable_send_msg, 1);
+}
+void PlanningTask::suction_disable() {
+  suction_enable_send_msg.enable = false;
+  suction_enable_send_msg.timestamp++;
+  xQueueSendToBack(suction_qh_enable, &suction_enable_send_msg, 1);
 }
 void PlanningTask::task_entry_point(void *task_instance) {
   static_cast<PlanningTask *>(task_instance)->task();
@@ -203,7 +213,17 @@ void PlanningTask::task() {
         motor_req_timestamp = motor_enable_send_msg.timestamp;
       }
     }
-
+    if (xQueueReceive(suction_qh_enable, &suction_enable_send_msg, 0) ==
+        pdTRUE) {
+      if (suction_req_timestamp != suction_enable_send_msg.timestamp) {
+        if (suction_enable_send_msg.enable) {
+          suction_motor_enable_main();
+        } else {
+          suction_motor_disable_main();
+        }
+        suction_req_timestamp = suction_enable_send_msg.timestamp;
+      }
+    }
     queue_recieved = xQueueReceive(*qh, &receive_req, 0);
     // 自己位置更新
     update_ego_motion();
@@ -743,7 +763,7 @@ void PlanningTask::set_next_duty(float duty_l, float duty_r,
     // mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A, 0);
     // mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A,
     //                     MCPWM_DUTY_MODE_0);
-    suction_disable();
+    // suction_disable();
   }
 }
 

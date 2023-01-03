@@ -19,11 +19,12 @@ goals: [[1, 0], [1, 1], [2, 0], [2, 1]]
 maze_size: 32
 give_up_time: 30
 debug: 0 #
-# mode: 0 # メイン
+mode: 0 # メイン
 # mode: 3 # 超信地
 # mode: 7 # front ctrl
+# mode: 11 # suction
 # mode: 13 # keep_pos
-mode: 14 # sensing
+# mode: 14 # sensing
 # mode: 15 # sensor calib
 # mode: 20 # pivot turn n
 # mode: 21 # pivot turn n2

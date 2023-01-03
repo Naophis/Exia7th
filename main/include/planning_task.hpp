@@ -53,10 +53,13 @@ public:
   t_dynamics dynamics;
   QueueHandle_t *qh;
   QueueHandle_t motor_qh_enable;
+  QueueHandle_t suction_qh_enable;
 
   motor_req_t motor_enable_send_msg;
-  motor_req_t motor_enable_recv_msg; //受け手のメッセージ
   motor_req_t motor_enable_status;
+
+  motor_req_t suction_enable_send_msg;
+  motor_req_t suction_enable_status;
 
   motion_tgt_val_t *receive_req;
 
@@ -65,6 +68,9 @@ public:
 private:
   void motor_enable_main();
   void motor_disable_main();
+
+  void suction_motor_enable_main();
+  void suction_motor_disable_main();
 
   xTaskHandle handle = 0;
 
@@ -95,6 +101,7 @@ private:
   int motion_req_timestamp = 0;
   int pid_req_timestamp = 0;
   int motor_req_timestamp = 0;
+  int suction_req_timestamp = 0;
   void pl_req_activate();
   void cp_tgt_val();
   mpc_tgt_calcModelClass mpc_tgt_calc;
