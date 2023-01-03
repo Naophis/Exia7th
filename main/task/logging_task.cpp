@@ -1,6 +1,7 @@
 #include "include/logging_task.hpp"
 
 void LoggingTask::create_task(const BaseType_t xCoreID) {
+  qh = xQueueCreate(4, sizeof(motion_tgt_val_t *));
   xTaskCreatePinnedToCore(task_entry_point, "logging_task", 8192, this, 1,
                           &handle, xCoreID);
 }
@@ -23,7 +24,7 @@ void LoggingTask::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
 }
 
 void LoggingTask::start_slalom_log() {
-  active_slalom_log = true; //
+  req_logging_active = true;
   idx_slalom_log = 0;
   std::vector<std::unique_ptr<log_data_t2>>().swap(log_vec);
   log_vec.clear();
@@ -32,6 +33,7 @@ void LoggingTask::start_slalom_log() {
   // for (int i = 0; i < param->log_size; i++) {
   //   log_vec[i] = std::make_shared<log_data_t2>();
   // }
+  xQueueSendToBack(qh, &req_logging_active, 1);
 }
 
 void LoggingTask::stop_slalom_log() {
@@ -56,15 +58,21 @@ void LoggingTask::exec_log() {}
 void LoggingTask::task() {
   const TickType_t xDelay4 = 40.0 / portTICK_PERIOD_MS;
   const TickType_t xDelay1 = 1.0 / portTICK_PERIOD_MS;
-
+  BaseType_t queue_recieved;
+  bool logging_active = false;
   while (1) {
-    logging_active = active_slalom_log;
+
+    if (!logging_active) {
+      queue_recieved =
+          xQueueReceive(qh, &receive_logging_active_req, portMAX_DELAY);
+      logging_active = receive_logging_active_req;
+    }
     if (idx_slalom_log > param->log_size) {
       logging_active = false;
     }
     if (log_mode) {
       if (logging_active) {
-        if (active_slalom_log && idx_slalom_log <= param->log_size) {
+        if (idx_slalom_log <= param->log_size) {
           auto ld = make_unique<log_data_t2>();
 
           ld->img_v = floatToHalf(tgt_val->ego_in.v);

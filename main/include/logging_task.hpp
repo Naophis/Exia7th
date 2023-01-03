@@ -44,11 +44,13 @@ public:
 
 private:
   bool log_mode = true;
-  bool logging_active = false;
+  bool req_logging_active = false;
   xTaskHandle handle = 0;
   float16_bitmap fbm;
   uint16_bitmap uibm;
 
+  bool *receive_logging_active_req;
+  QueueHandle_t qh;
   std::shared_ptr<sensing_result_entity_t> sensing_result;
   std::shared_ptr<input_param_t> param;
   std::shared_ptr<motion_tgt_val_t> tgt_val;
