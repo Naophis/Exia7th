@@ -66,7 +66,8 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p,
     tgt_val->nmr.motion_type = p.motion_type;
   }
   tgt_val->nmr.timstamp++;
-  xQueueSendToBack(*qh, &tgt_val, 1);
+  xQueueReset(*qh);
+  xQueueSendToFront(*qh, &tgt_val, 1);
   vTaskDelay(1 / portTICK_RATE_MS);
   if (adachi != nullptr) {
     adachi->update();
@@ -113,7 +114,8 @@ MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
   reset_ego_data();
   tgt_val->motion_type = MotionType::NONE;
   tgt_val->nmr.timstamp++;
-  xQueueSendToBack(*qh, &tgt_val, 1);
+  xQueueReset(*qh);
+  xQueueSendToFront(*qh, &tgt_val, 1);
   vTaskDelay(1 / portTICK_RATE_MS);
 
   tgt_val->nmr.v_max = 0;
@@ -138,7 +140,8 @@ MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
   tgt_val->nmr.motion_type = MotionType::PIVOT;
   tgt_val->nmr.sct = SensorCtrlType::NONE;
   tgt_val->nmr.timstamp++;
-  xQueueSendToBack(*qh, &tgt_val, 1);
+  xQueueReset(*qh);
+  xQueueSendToFront(*qh, &tgt_val, 1);
   vTaskDelay(10 / portTICK_RATE_MS);
 
   int c = 0;
@@ -158,7 +161,8 @@ MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
         reset_ego_data();
         tgt_val->motion_type = MotionType::NONE;
         tgt_val->nmr.timstamp++;
-        xQueueSendToBack(*qh, &tgt_val, 1);
+        xQueueReset(*qh);
+        xQueueSendToFront(*qh, &tgt_val, 1);
         vTaskDelay(1 / portTICK_RATE_MS);
 
         tgt_val->nmr.v_max = 0;
@@ -184,7 +188,8 @@ MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
         tgt_val->nmr.sct = SensorCtrlType::NONE;
         tgt_val->nmr.timstamp++;
         c = 0;
-        xQueueSendToBack(*qh, &tgt_val, 1);
+        xQueueReset(*qh);
+        xQueueSendToFront(*qh, &tgt_val, 1);
         vTaskDelay(10 / portTICK_RATE_MS);
       }
     }
@@ -200,7 +205,8 @@ void MotionPlanning::req_error_reset() {
   tgt_val->pl_req.error_ang_reset = 1;
   tgt_val->pl_req.error_dist_reset = 1;
   tgt_val->pl_req.time_stamp++;
-  xQueueSendToBack(*qh, &tgt_val, 1);
+  xQueueReset(*qh);
+  xQueueSendToFront(*qh, &tgt_val, 1);
 }
 MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
                                     next_motion_t &next_motion) {
@@ -500,7 +506,8 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   tgt_val->ego_in.sla_param.counter = 1;
   tgt_val->ego_in.sla_param.limit_time_count = (int)(sp.time * 2 / dt);
   tgt_val->nmr.timstamp++;
-  xQueueSendToBack(*qh, &tgt_val, 1);
+  xQueueReset(*qh);
+  xQueueSendToFront(*qh, &tgt_val, 1);
   if (adachi != nullptr) {
     adachi->update();
   }
@@ -576,7 +583,8 @@ void MotionPlanning::reset_tgt_data() {
   tgt_val->global_pos.img_dist = 0;
   tgt_val->nmr.tgt_reset_req = true;
   // TODO
-  xQueueSendToBack(*qh, &tgt_val, 1);
+  xQueueReset(*qh);
+  xQueueSendToFront(*qh, &tgt_val, 1);
   vTaskDelay(1 / portTICK_RATE_MS);
   tgt_val->nmr.tgt_reset_req = false;
 }
@@ -610,7 +618,8 @@ void MotionPlanning::reset_ego_data() {
   tgt_val->motion_type = MotionType::NONE;
   tgt_val->nmr.timstamp++;
 
-  xQueueSendToBack(*qh, &tgt_val, 1);
+  xQueueReset(*qh);
+  xQueueSendToFront(*qh, &tgt_val, 1);
   vTaskDelay(1 / portTICK_RATE_MS);
   tgt_val->nmr.ego_reset_req = false;
 
@@ -661,7 +670,8 @@ MotionResult MotionPlanning::front_ctrl(bool limit) {
   tgt_val->nmr.dia_mode = false;
   tgt_val->ego_in.sla_param.counter = 1;
   tgt_val->nmr.timstamp++;
-  xQueueSendToBack(*qh, &tgt_val, 1);
+  xQueueReset(*qh);
+  xQueueSendToFront(*qh, &tgt_val, 1);
 
   unsigned int cnt = 0;
   unsigned int max_cnt = 0;
@@ -717,7 +727,8 @@ void MotionPlanning::keep() {
   tgt_val->nmr.dia_mode = false;
   tgt_val->nmr.sct = SensorCtrlType::NONE;
   tgt_val->nmr.timstamp++;
-  xQueueSendToBack(*qh, &tgt_val, 1);
+  xQueueReset(*qh);
+  xQueueSendToFront(*qh, &tgt_val, 1);
 
   while (1) {
     vTaskDelay(1 / portTICK_RATE_MS);
@@ -923,7 +934,8 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
   tgt_val->nmr.dia_mode = ps_front.dia_mode;
   tgt_val->nmr.sct = SensorCtrlType::Straight;
   tgt_val->nmr.timstamp++;
-  xQueueSendToBack(*qh, &tgt_val, 1);
+  xQueueReset(*qh);
+  xQueueSendToFront(*qh, &tgt_val, 1);
   vTaskDelay(1 / portTICK_RATE_MS);
   if (td == TurnDirection::Right) {
     while (true) {

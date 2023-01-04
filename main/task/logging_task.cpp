@@ -33,7 +33,7 @@ void LoggingTask::start_slalom_log() {
   // for (int i = 0; i < param->log_size; i++) {
   //   log_vec[i] = std::make_shared<log_data_t2>();
   // }
-  xQueueSendToBack(qh, &req_logging_active, 1);
+  xQueueSendToFront(qh, &req_logging_active, 1);
 }
 
 void LoggingTask::stop_slalom_log() {

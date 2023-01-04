@@ -167,7 +167,7 @@ extern "C" void app_main() {
   // }
 
   QueueHandle_t xQueue;
-  xQueue = xQueueCreate(4, sizeof(motion_tgt_val_t *));
+  xQueue = xQueueCreate(1, sizeof(motion_tgt_val_t *));
   esp_vfs_fat_mount_config_t mount_config;
   mount_config.max_files = 8;
   mount_config.format_if_mount_failed = true;

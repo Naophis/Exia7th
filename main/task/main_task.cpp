@@ -84,7 +84,8 @@ void MainTask::dump1() {
   mp->reset_gyro_ref_with_check();
   tgt_val->nmr.motion_type = MotionType::READY;
   tgt_val->nmr.timstamp++;
-  xQueueSendToBack(*qh, &tgt_val, 1);
+  xQueueReset(*qh);
+  xQueueSendToFront(*qh, &tgt_val, 1);
   while (1) {
     printf("%c[2J", ESC);   /* 画面消去 */
     printf("%c[0;0H", ESC); /* 戦闘戻す*/
@@ -149,7 +150,8 @@ void MainTask::dump2() {
 
   tgt_val->nmr.motion_type = MotionType::READY;
   tgt_val->nmr.timstamp++;
-  xQueueSendToBack(*qh, &tgt_val, 1);
+  xQueueReset(*qh);
+  xQueueSendToFront(*qh, &tgt_val, 1);
   while (1) {
     printf("%d, %d, %d, %d, %d\n", sensing_result->led_sen.left90.raw,
            sensing_result->led_sen.left45.raw,
@@ -1148,7 +1150,8 @@ void MainTask::req_error_reset() {
   tgt_val->pl_req.error_ang_reset = 1;
   tgt_val->pl_req.error_dist_reset = 1;
   tgt_val->pl_req.time_stamp++;
-  xQueueSendToBack(*qh, &tgt_val, 1);
+  xQueueReset(*qh);
+  xQueueSendToFront(*qh, &tgt_val, 1);
 }
 
 void MainTask::test_system_identification(bool para) {

@@ -45,8 +45,8 @@ search:
   ref:
     right45: 38
     left45: 38
-    right90: 52
-    left90: 52
+    right90: 55
+    left90: 55
     kireme_r: 0
     kireme_l: 0
   exist:

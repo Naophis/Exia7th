@@ -47,7 +47,7 @@ front_dist_offset: 99.0 # 探索時の前壁補正
 front_dist_offset2: 130
 led_light_delay_cnt: 500
 
-front_dist_offset_pivot_th: 80
+front_dist_offset_pivot_th: 83
 front_dist_offset_pivot: 90
 
 front_dist_offset_dia_front: 139
@@ -116,7 +116,7 @@ dia_wall_off_ref_l: 38.0
 dia_wall_off_ref_r: 33.0
 
 #ログON_OFF
-logging_time: 1.0
+logging_time: 8.0
 search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1
@@ -172,17 +172,18 @@ dist_pid:
   # i: 0.0
   # d: 0.0
 gyro_pid:
-
-  p: 0.275
-  i: 12.5
-  d: 0.00
+  # 速度型 mode=1
   # p: 0.275
-  # i: 0.0285
-  # d: 0.275
+  # i: 12.5
+  # d: 0.00
+  # 通常 mode=0
+  p: 0.275
+  i: 0.0285
+  d: 0.275
   # p: 0.0
   # i: 0.0
   # d: 0
-  mode: 1
+  mode: 0
   b: 0
   c: 0
 angle_pid:
