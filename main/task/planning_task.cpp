@@ -3,7 +3,7 @@
 
 // constexpr int MOTOR_HZ = 250000;
 // constexpr int MOTOR_HZ = 125000;
-constexpr int MOTOR_HZ = 80000;
+constexpr int MOTOR_HZ = 75000 / 1;
 constexpr int SUCTION_MOTOR_HZ = 10000;
 PlanningTask::PlanningTask() {}
 
@@ -709,7 +709,8 @@ void PlanningTask::update_ego_motion() {
 void PlanningTask::set_next_duty(float duty_l, float duty_r,
                                  float duty_suction) {
   if (motor_en) {
-    // duty_l=duty_r=45;
+    // duty_l = 25;
+    // duty_r = -25;
 
     if (duty_l < 0) {
       GPIO.out1_w1ts.val = BIT(A_CW_CCW2_BIT);
@@ -725,6 +726,10 @@ void PlanningTask::set_next_duty(float duty_l, float duty_r,
       GPIO.out1_w1ts.val = BIT(B_CW_CCW2_BIT);
       GPIO.out1_w1tc.val = BIT(B_CW_CCW1_BIT);
     }
+    // GPIO.out1_w1ts.val = BIT(A_CW_CCW2_BIT);
+    // GPIO.out1_w1ts.val = BIT(A_CW_CCW1_BIT);
+    // GPIO.out1_w1ts.val = BIT(B_CW_CCW1_BIT);
+    // GPIO.out1_w1ts.val = BIT(B_CW_CCW2_BIT);
     float tmp_duty_r = duty_r > 0 ? duty_r : -duty_r;
     float tmp_duty_l = duty_l > 0 ? duty_l : -duty_l;
 
@@ -963,33 +968,33 @@ void PlanningTask::calc_tgt_duty() {
     error_entity.v_log.gain_z = error_entity.v_log.gain_zz = 0;
   }
 
-  if (param_ro->motor_pid.mode == 1) {
-    duty_c = param_ro->motor_pid.p * error_entity.v.error_p +
-             param_ro->motor_pid.i * error_entity.v.error_i +
-             param_ro->motor_pid.d * error_entity.v.error_d +
-             (error_entity.v_log.gain_z - error_entity.v_log.gain_zz) * dt;
-    error_entity.v_log.gain_zz = error_entity.v_log.gain_z;
-    error_entity.v_log.gain_z = duty_c;
-  } else {
-    duty_c = param_ro->motor_pid.p * error_entity.v.error_p +
-             param_ro->motor_pid.i * error_entity.v.error_i +
-             param_ro->motor_pid.d * error_entity.v.error_d;
-    error_entity.v_log.gain_zz = 0;
-    error_entity.v_log.gain_z = 0;
-  }
+  // if (param_ro->motor_pid.mode == 1) {
+  //   duty_c = param_ro->motor_pid.p * error_entity.v.error_p +
+  //            param_ro->motor_pid.i * error_entity.v.error_i +
+  //            param_ro->motor_pid.d * error_entity.v.error_d +
+  //            (error_entity.v_log.gain_z - error_entity.v_log.gain_zz) * dt;
+  //   error_entity.v_log.gain_zz = error_entity.v_log.gain_z;
+  //   error_entity.v_log.gain_z = duty_c;
+  // } else {
+  //   duty_c = param_ro->motor_pid.p * error_entity.v.error_p +
+  //            param_ro->motor_pid.i * error_entity.v.error_i +
+  //            param_ro->motor_pid.d * error_entity.v.error_d;
+  //   error_entity.v_log.gain_zz = 0;
+  //   error_entity.v_log.gain_z = 0;
+  // }
   const unsigned char reset_req = motor_en ? 1 : 0;
   const unsigned char reset = 0;
   const unsigned char enable = 1;
 
-  // if (tgt_val->motion_type == MotionType::FRONT_CTRL || !motor_en) {
-  //   vel_pid.step(&error_entity.v.error_p, &param_ro->motor_pid.p,
-  //                &param_ro->motor_pid.i, &param_ro->motor_pid.d, &reset, &dt,
-  //                &duty_c);
-  // } else {
-  //   vel_pid.step(&error_entity.v.error_p, &param_ro->motor_pid.p,
-  //                &param_ro->motor_pid.i, &param_ro->motor_pid.d, &reset_req,
-  //                &dt, &duty_c);
-  // }
+  if (tgt_val->motion_type == MotionType::FRONT_CTRL || !motor_en) {
+    vel_pid.step(&error_entity.v.error_p, &param_ro->motor_pid.p,
+                 &param_ro->motor_pid.i, &param_ro->motor_pid.d, &reset, &dt,
+                 &duty_c);
+  } else {
+    vel_pid.step(&error_entity.v.error_p, &param_ro->motor_pid.p,
+                 &param_ro->motor_pid.i, &param_ro->motor_pid.d, &reset_req,
+                 &dt, &duty_c);
+  }
 
   if (w_reset == 0 || tgt_val->motion_type == MotionType::FRONT_CTRL ||
       !motor_en) {

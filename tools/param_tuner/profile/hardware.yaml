@@ -4,7 +4,7 @@ dt: 0.001
 # tire: 13.46
 # tire: 13.367
 # tire: 15.15
-tire: 13.5
+tire: 13.175
 # tire: 13.095
 # tire: 13.135
 offset_start_dist: 21.0
@@ -23,7 +23,7 @@ FF_keV: 1
 # Ke: 0.00125
 # Km: 0.0005
 Ke: 0.00185
-Km: 0.00105
+Km: 0.0025
 
 # Ke: 0.00105
 # Km: 0.0025
@@ -41,9 +41,10 @@ sakiyomi_time: 10
 clear_angle: 5
 clear_dist_order: 80
 # front_dist_offset: 91.5
-front_dist_offset: 90.0 # 探索時の前壁補正
+# front_dist_offset: 97.5 # 探索時の前壁補正
+front_dist_offset: 102.0 # 探索時の前壁補正
 # front_dist_offset2: 137.0
-front_dist_offset2: 144.0
+front_dist_offset2: 130.0
 led_light_delay_cnt: 500
 
 front_dist_offset_pivot_th: 80
@@ -61,12 +62,12 @@ clear_dist_ragne_to: 45
 wall_off_hold_dist: 30
 
 # スラロームオフセット距離壁補正リファレンス値
-sla_wall_ref_l: 44
-sla_wall_ref_r: 44
+sla_wall_ref_l: 42
+sla_wall_ref_r: 42
 
 # 壁切れ オフセット距離
-wall_off_hold_dist_str_l: -10.5
-wall_off_hold_dist_str_r: -8.0
+wall_off_hold_dist_str_l: -10.0
+wall_off_hold_dist_str_r: -5.0
 # 壁切れ オフセット距離(斜め壁有り)
 wall_off_hold_dist_dia_l: -3.0
 wall_off_hold_dist_dia_r: -6.0
@@ -83,10 +84,10 @@ wall_off_hold_dist_dia_r2: 1.0
 
 # 壁切れ In
 wall_off_hold_exist_dist_l: 73
-wall_off_hold_exist_dist_r: 73
+wall_off_hold_exist_dist_r: 63
 # 壁切れ Out
 wall_off_hold_noexist_th_l: 75
-wall_off_hold_noexist_th_r: 75
+wall_off_hold_noexist_th_r: 65
 
 
 # 壁切れ In
@@ -115,7 +116,7 @@ dia_wall_off_ref_l: 38.0
 dia_wall_off_ref_r: 33.0
 
 #ログON_OFF
-logging_time: 8.0
+logging_time: 12.0
 search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1
@@ -125,7 +126,7 @@ log_size: 1200
 normal_sla_offset: 7
 
 front_ctrl_error_th: 1
-front_diff_th: 8
+front_diff_th: 12
 
 ff_v_th: 200
 ff_front_dury: 0.95
@@ -148,15 +149,18 @@ motor_pid:
   # i: 1.375
   # p: 0.0175
   # i: 0.000215
-  p: 0.0065
-  i: 0.0005125
-  d: 0.012
-  # p: 0.0
-  # i: 0.0
-  # d: 0.0
+  # p: 0.0065
+  # i: 0.0005125
+  # d: 0.012
+
+  # p: 0.00525
+  # i: 1.25
+  p: 0.00525
+  i: 1.95
+  d: 0.0
   b: 0
   c: 0
-  mode: 0
+  mode: 1
 dist_pid:
   p: 0.5
   i: 0.00035
@@ -173,6 +177,7 @@ gyro_pid:
   d: 0.275
   # p: 0.0
   # i: 0.0
+  # d: 0
   mode: 0
   b: 0
   c: 0
@@ -201,8 +206,10 @@ sensor_pid_dia:
   c: 0
   mode: 1
 gyro_param:
-  gyro_w_gain_right: 0.0024635
-  gyro_w_gain_left: 0.00246375
+  # gyro_w_gain_right: 0.0024635
+  # gyro_w_gain_left: 0.00246375
+  gyro_w_gain_right: 0.002470
+  gyro_w_gain_left: 0.002470
   lp_delay: 1
 accel_x_param:
   # gain: 315.56 # 16g
@@ -215,7 +222,7 @@ comp_v_param:
   enc_v_lp: 0
   acc_x_hp: 0.85
   gain_v: 0.75
-  enable: 1
+  enable: 0
 
 battery_param:
   lp_delay: 0.25

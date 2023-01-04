@@ -87,7 +87,7 @@ void SensingTask::task() {
   adc2_config_channel_atten(BATTERY, atten);
 
   while (1) {
-    // gyro_if.req_read2byte_itr(0x26);
+    gyro_if.req_read2byte_itr(0x26);
     adc2_get_raw(BATTERY, width, &sensing_result->battery.raw);
     // LED_OFF ADC
     adc2_get_raw(SEN_R90, width, &sensing_result->led_sen_before.right90.raw);
@@ -155,9 +155,9 @@ void SensingTask::task() {
     // pcnt_counter_clear(PCNT_UNIT_1);
 
     if (GY_MODE == 0) {
-      sensing_result->gyro.raw = gyro_if.read2byte(0x26);
-      sensing_result->accel_x.raw = gyro_if.read2byte(0x28);
-      // sensing_result->gyro.raw = gyro_if.read_2byte_itr();
+      // sensing_result->gyro.raw = gyro_if.read2byte(0x26);
+      // sensing_result->accel_x.raw = gyro_if.read2byte(0x28);
+      sensing_result->gyro.raw = gyro_if.read_2byte_itr();
       // gyro_if.req_read2byte_itr(0x28);
       // sensing_result->accel_x.raw = gyro_if.read_2byte_itr();
       // gyro_if.req_read2byte_itr(0x3D);

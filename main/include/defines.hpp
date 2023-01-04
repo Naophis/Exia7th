@@ -59,9 +59,9 @@ constexpr gpio_num_t B_PWM = GPIO_NUM_40;
 
 constexpr gpio_num_t BUZZER = GPIO_NUM_37;
 
-constexpr gpio_num_t LED1 = GPIO_NUM_15;
+constexpr gpio_num_t LED1 = GPIO_NUM_13;
 constexpr gpio_num_t LED2 = GPIO_NUM_14;
-constexpr gpio_num_t LED3 = GPIO_NUM_13;
+constexpr gpio_num_t LED3 = GPIO_NUM_15;
 constexpr gpio_num_t LED4 = GPIO_NUM_10;
 constexpr gpio_num_t LED5 = GPIO_NUM_16;
 

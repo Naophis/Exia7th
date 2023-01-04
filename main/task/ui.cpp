@@ -125,85 +125,16 @@ void UserInterface::LED_on_off(gpio_num_t gpio_num, int state) {
 
 void UserInterface::LED_bit(int b0, int b1, int b2, int b3, int b4) {
   LED_on_off(LED1, (b0 == 1));
-  LED_on_off(LED2, (b1 == 1));
-  LED_on_off(LED3, (b2 == 1));
-  LED_on_off(LED4, (b3 == 1));
+  LED_on_off(LED4, (b1 == 1));
+  LED_on_off(LED2, (b2 == 1));
+  LED_on_off(LED3, (b3 == 1));
   LED_on_off(LED5, (b4 == 1));
 }
-void UserInterface::LED_otherwise(int byte, int state) {
-  LED_on_off(LED2, ((byte & 0x03) == 0x01));
-  LED_on_off(LED3, ((byte & 0x02) == 0x02));
-  LED_on_off(LED4, ((byte & 0x03) == 0x03));
-  LED_on_off(LED5, ((byte & 0x04) == 0x04));
-}
-void UserInterface::LED(int byte, int state) {
-  int led2 = byte & 0x01;
-  int led3 = byte & 0x02;
-  int led4 = byte & 0x03;
-  int led5 = byte & 0x04;
-  if (led2) {
-    LED_on_off(LED2, state);
-  }
-  if (led2) {
-    LED_on_off(LED2, state);
-  }
-  if (led3) {
-    LED_on_off(LED3, state);
-  }
-  if (led4) {
-    LED_on_off(LED4, state);
-  }
-  if (led5) {
-    LED_on_off(LED5, state);
-  }
-}
-void UserInterface::LED_on(int byte) {
-  int led1 = byte & 0x01;
-  int led2 = byte & 0x02;
-  int led3 = byte & 0x03;
-  int led4 = byte & 0x04;
-  int led5 = byte & 0x05;
-  const int state = 1;
-  if (led1) {
-    LED_on_off(LED1, state);
-  }
-  if (led2) {
-    LED_on_off(LED2, state);
-  }
-  if (led3) {
-    LED_on_off(LED3, state);
-  }
-  if (led4) {
-    LED_on_off(LED4, state);
-  }
-  if (led5) {
-    LED_on_off(LED5, state);
-  }
-}
+void UserInterface::LED_otherwise(int byte, int state) {}
+void UserInterface::LED(int byte, int state) {}
+void UserInterface::LED_on(int byte) {}
 
-void UserInterface::LED_off(int byte) {
-  int led1 = byte & 0x01;
-  int led2 = byte & 0x02;
-  int led3 = byte & 0x03;
-  int led4 = byte & 0x04;
-  int led5 = byte & 0x05;
-  const int state = 0;
-  if (led1) {
-    LED_on_off(LED1, state);
-  }
-  if (led2) {
-    LED_on_off(LED2, state);
-  }
-  if (led3) {
-    LED_on_off(LED3, state);
-  }
-  if (led4) {
-    LED_on_off(LED4, state);
-  }
-  if (led5) {
-    LED_on_off(LED5, state);
-  }
-}
+void UserInterface::LED_off(int byte) {}
 void UserInterface::LED_off_all() {
   const int state = 0;
   LED_on_off(LED1, state);
@@ -228,7 +159,7 @@ TurnDirection UserInterface::select_direction() {
     if (sensing_result->ego.v_r > ENC_OPE_V_R_TH) {
       music_sync(MUSIC::G6_, 75);
       td = TurnDirection::Right;
-      LED_bit(0, 0, 0, 1, 0);
+      LED_bit(1, 0, 0, 0, 0);
     }
     if (sensing_result->ego.v_l > ENC_OPE_V_R_TH) {
       music_sync(MUSIC::C6_, 75);
@@ -242,7 +173,7 @@ TurnDirection UserInterface::select_direction() {
         return td;
       }
     } else {
-      LED_bit(0, 0, 0, (int)b, (int)b);
+      LED_bit((int)b, 0, 0, 0, (int)b);
       b = b ? false : true;
     }
     vTaskDelay(25 / portTICK_PERIOD_MS);
@@ -250,33 +181,7 @@ TurnDirection UserInterface::select_direction() {
 }
 
 TurnDirection UserInterface::select_direction2() {
-  TurnDirection td = TurnDirection::None;
-  bool b = true;
-  while (1) {
-    if (sensing_result->ego.v_r > ENC_OPE_V_R_TH) {
-      music_sync(MUSIC::G6_, 75);
-      td = TurnDirection::Right;
-      LED_bit(0, 0, 1, 0, 0);
-    }
-    if (sensing_result->ego.v_l > ENC_OPE_V_R_TH) {
-      music_sync(MUSIC::C6_, 75);
-      td = TurnDirection::Left;
-      LED_bit(1, 0, 0, 0, 0);
-    }
-
-    if (td != TurnDirection::None) {
-      if (button_state_hold()) {
-        coin(80);
-        coin(80);
-        coin(80);
-        return td;
-      }
-    } else {
-      LED_bit(0, 0, 0, (int)b, (int)b);
-      b = b ? false : true;
-    }
-    vTaskDelay(25 / portTICK_PERIOD_MS);
-  }
+  return select_direction(); //
 }
 void UserInterface::error() {
   int time = 120;
