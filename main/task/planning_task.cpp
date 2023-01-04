@@ -52,12 +52,12 @@ void PlanningTask::motor_disable_main() {
 void PlanningTask::motor_enable() {
   motor_enable_send_msg.enable = true;
   motor_enable_send_msg.timestamp++;
-  xQueueSendToBack(motor_qh_enable, &motor_enable_send_msg, 1);
+  xQueueOverwrite(motor_qh_enable, &motor_enable_send_msg);
 }
 void PlanningTask::motor_disable(bool reset_req) {
   motor_enable_send_msg.enable = false;
   motor_enable_send_msg.timestamp++;
-  xQueueSendToBack(motor_qh_enable, &motor_enable_send_msg, 1);
+  xQueueOverwrite(motor_qh_enable, &motor_enable_send_msg);
 }
 void PlanningTask::motor_disable() {
   motor_disable(true); //
@@ -88,12 +88,12 @@ void PlanningTask::suction_enable(float duty) {
   tgt_duty.duty_suction = duty;
   suction_enable_send_msg.enable = true;
   suction_enable_send_msg.timestamp++;
-  xQueueSendToBack(suction_qh_enable, &suction_enable_send_msg, 1);
+  xQueueOverwrite(suction_qh_enable, &suction_enable_send_msg, 1);
 }
 void PlanningTask::suction_disable() {
   suction_enable_send_msg.enable = false;
   suction_enable_send_msg.timestamp++;
-  xQueueSendToBack(suction_qh_enable, &suction_enable_send_msg, 1);
+  xQueueOverwrite(suction_qh_enable, &suction_enable_send_msg, 1);
 }
 void PlanningTask::task_entry_point(void *task_instance) {
   static_cast<PlanningTask *>(task_instance)->task();
@@ -1001,31 +1001,32 @@ void PlanningTask::calc_tgt_duty() {
     error_entity.w.error_i = error_entity.w.error_d = 0;
     error_entity.w_log.gain_z = error_entity.w_log.gain_zz = 0;
   }
-  if (param_ro->gyro_pid.mode == 1) {
-    duty_roll = param_ro->gyro_pid.p * error_entity.w.error_p +
-                param_ro->gyro_pid.i * error_entity.w.error_i +
-                param_ro->gyro_pid.d * error_entity.w.error_d +
-                (error_entity.w_log.gain_z - error_entity.w_log.gain_zz) * dt;
-    error_entity.w_log.gain_zz = error_entity.w_log.gain_z;
-    error_entity.w_log.gain_z = duty_roll;
-  } else {
-    duty_roll = param_ro->gyro_pid.p * error_entity.w.error_p +
-                param_ro->gyro_pid.i * error_entity.w.error_i +
-                param_ro->gyro_pid.d * error_entity.w.error_d;
-    error_entity.w_log.gain_zz = 0;
-    error_entity.w_log.gain_z = 0;
-  }
-
-  // if (w_reset == 0 || tgt_val->motion_type == MotionType::FRONT_CTRL ||
-  //     !motor_en) {
-  //   gyro_pid.step(&error_entity.w.error_p, &param_ro->gyro_pid.p,
-  //                 &param_ro->gyro_pid.i, &param_ro->gyro_pid.d, &reset, &dt,
-  //                 &duty_roll);
+  // if (param_ro->gyro_pid.mode == 1) {
+  //   duty_roll = param_ro->gyro_pid.p * error_entity.w.error_p +
+  //               param_ro->gyro_pid.i * error_entity.w.error_i +
+  //               param_ro->gyro_pid.d * error_entity.w.error_d +
+  //               (error_entity.w_log.gain_z - error_entity.w_log.gain_zz) *
+  //               dt;
+  //   error_entity.w_log.gain_zz = error_entity.w_log.gain_z;
+  //   error_entity.w_log.gain_z = duty_roll;
   // } else {
-  //   gyro_pid.step(&error_entity.w.error_p, &param_ro->gyro_pid.p,
-  //                 &param_ro->gyro_pid.i, &param_ro->gyro_pid.d, &enable, &dt,
-  //                 &duty_roll);
+  //   duty_roll = param_ro->gyro_pid.p * error_entity.w.error_p +
+  //               param_ro->gyro_pid.i * error_entity.w.error_i +
+  //               param_ro->gyro_pid.d * error_entity.w.error_d;
+  //   error_entity.w_log.gain_zz = 0;
+  //   error_entity.w_log.gain_z = 0;
   // }
+
+  if (w_reset == 0 || tgt_val->motion_type == MotionType::FRONT_CTRL ||
+      !motor_en) {
+    gyro_pid.step(&error_entity.w.error_p, &param_ro->gyro_pid.p,
+                  &param_ro->gyro_pid.i, &param_ro->gyro_pid.d, &reset, &dt,
+                  &duty_roll);
+  } else {
+    gyro_pid.step(&error_entity.w.error_p, &param_ro->gyro_pid.p,
+                  &param_ro->gyro_pid.i, &param_ro->gyro_pid.d, &enable, &dt,
+                  &duty_roll);
+  }
   if (tgt_val->motion_type == MotionType::SLALOM) {
     const float max_duty_roll = 8.5;
     if (duty_roll > max_duty_roll) {

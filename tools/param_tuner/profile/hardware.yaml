@@ -4,7 +4,7 @@ dt: 0.001
 # tire: 13.46
 # tire: 13.367
 # tire: 15.15
-tire: 13.175
+tire: 13.095
 # tire: 13.095
 # tire: 13.135
 offset_start_dist: 21.0
@@ -42,9 +42,9 @@ clear_angle: 5
 clear_dist_order: 80
 # front_dist_offset: 91.5
 # front_dist_offset: 97.5 # 探索時の前壁補正
-front_dist_offset: 102.0 # 探索時の前壁補正
+front_dist_offset: 99.0 # 探索時の前壁補正
 # front_dist_offset2: 137.0
-front_dist_offset2: 130.0
+front_dist_offset2: 130
 led_light_delay_cnt: 500
 
 front_dist_offset_pivot_th: 80
@@ -62,12 +62,12 @@ clear_dist_ragne_to: 45
 wall_off_hold_dist: 30
 
 # スラロームオフセット距離壁補正リファレンス値
-sla_wall_ref_l: 42
-sla_wall_ref_r: 42
+sla_wall_ref_l: 45
+sla_wall_ref_r: 45
 
 # 壁切れ オフセット距離
-wall_off_hold_dist_str_l: -10.0
-wall_off_hold_dist_str_r: -5.0
+wall_off_hold_dist_str_l: -8.5
+wall_off_hold_dist_str_r: -8.5
 # 壁切れ オフセット距離(斜め壁有り)
 wall_off_hold_dist_dia_l: -3.0
 wall_off_hold_dist_dia_r: -6.0
@@ -116,7 +116,7 @@ dia_wall_off_ref_l: 38.0
 dia_wall_off_ref_r: 33.0
 
 #ログON_OFF
-logging_time: 12.0
+logging_time: 1.0
 search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1
@@ -172,13 +172,17 @@ dist_pid:
   # i: 0.0
   # d: 0.0
 gyro_pid:
+
   p: 0.275
-  i: 0.0285
-  d: 0.275
+  i: 12.5
+  d: 0.00
+  # p: 0.275
+  # i: 0.0285
+  # d: 0.275
   # p: 0.0
   # i: 0.0
   # d: 0
-  mode: 0
+  mode: 1
   b: 0
   c: 0
 angle_pid:
