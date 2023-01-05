@@ -14,7 +14,7 @@ dt = 0.001;
  
 test_mode = 0; % straight
 
- %test_mode = 1; % slalom
+test_mode = 1; % slalom
 % test_mode = 2; % pivot
 %  test_mode = 3; % back_straight
 %test_mode = 4; % slalom2
@@ -52,7 +52,7 @@ km=single(0.0005);
 resist=single(1.7);
 tread=single(38);
 tire=single(13);
-gear_ratio=single(37/8);
+gear_ratio=single(37/9);
 
 
 % mass = single(0.11);
@@ -100,7 +100,7 @@ if test_mode == 0
 
 elseif test_mode == 1
     % tgt
-    v_max = 1000;
+    v_max = 300;
     end_v = v_max;
     accl = 28000;
     decel = -20000;

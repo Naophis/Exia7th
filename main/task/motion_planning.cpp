@@ -957,14 +957,14 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
       vTaskDelay(1 / portTICK_RATE_MS);
     }
     while (true) {
-      if (40 < sensing_result->ego.left90_dist &&
-          sensing_result->ego.left90_dist < 150 &&
-          40 < sensing_result->ego.right90_dist &&
-          sensing_result->ego.right90_dist < 150) {
-        ps_front.dist -=
-            (param->front_dist_offset2 - sensing_result->ego.front_dist);
-        return;
-      }
+      // if (40 < sensing_result->ego.left90_dist &&
+      //     sensing_result->ego.left90_dist < 150 &&
+      //     40 < sensing_result->ego.right90_dist &&
+      //     sensing_result->ego.right90_dist < 150) {
+      //   ps_front.dist -=
+      //       (param->front_dist_offset2 - sensing_result->ego.front_dist);
+      //   return;
+      // }
       if (sensing_result->ego.right45_dist >
           param->wall_off_dist.noexist_th_r) {
         ps_front.dist += param->wall_off_dist.right_str;
@@ -995,14 +995,14 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
         ps_front.dist += param->wall_off_dist.left_str;
         return;
       }
-      if (40 < sensing_result->ego.left90_dist &&
-          sensing_result->ego.left90_dist < 150 &&
-          40 < sensing_result->ego.right90_dist &&
-          sensing_result->ego.right90_dist < 150) {
-        ps_front.dist -=
-            (param->front_dist_offset2 - sensing_result->ego.front_dist);
-        return;
-      }
+      // if (40 < sensing_result->ego.left90_dist &&
+      //     sensing_result->ego.left90_dist < 150 &&
+      //     40 < sensing_result->ego.right90_dist &&
+      //     sensing_result->ego.right90_dist < 150) {
+      //   ps_front.dist -=
+      //       (param->front_dist_offset2 - sensing_result->ego.front_dist);
+      //   return;
+      // }
       vTaskDelay(1 / portTICK_RATE_MS);
     }
   }

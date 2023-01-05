@@ -1209,9 +1209,6 @@ void PlanningTask::cp_tgt_val() {
   tgt_val->ego_in.sla_param = mpc_next_ego.sla_param;
   tgt_val->ego_in.state = mpc_next_ego.state;
 
-  slip_param.K = param_ro->slip_param_K;
-  slip_param.k = param_ro->slip_param_k2;
-
   // const auto Fx = 0;
   // const auto Fy = -slip_param.K * slip_param.beta;
 
@@ -1237,7 +1234,6 @@ void PlanningTask::cp_tgt_val() {
   //   slip_param.beta = 0;
   //   slip_param.v = mpc_next_ego.v / 1000;
   // }
-
   tgt_val->ego_in.v = mpc_next_ego.v;
   tgt_val->ego_in.w = mpc_next_ego.w;
   tgt_val->ego_in.sla_param.state = mpc_next_ego.sla_param.state;
@@ -1357,6 +1353,8 @@ void PlanningTask::cp_request() {
     return;
   }
   const float dt = param_ro->dt;
+  slip_param.K = param_ro->slip_param_K;
+  slip_param.k = param_ro->slip_param_k2;
   motion_req_timestamp = receive_req->nmr.timstamp;
 
   tgt_val->tgt_in.v_max = receive_req->nmr.v_max;
