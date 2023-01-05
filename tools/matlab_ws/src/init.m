@@ -120,7 +120,7 @@ elseif test_mode == 1
 
     % radius = 90.5;
     radius = 54;
-    alphaTemp = (ego_v / radius);
+    alphaTemp = -(ego_v / radius);
     sla.base_alpha = alphaTemp;
     % sla.base_time = 0.18627166748046875;
     sla.base_time = 0.1286468505859375;

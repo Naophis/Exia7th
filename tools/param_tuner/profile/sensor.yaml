@@ -1,12 +1,12 @@
 normal:
   ref:
-    right45: 46.0
-    left45: 47.0
+    right45: 45.5
+    left45: 46.0
     front: 47
     kireme_r: 1.50
     kireme_l: 1.50
   exist:
-    right45: 47
+    right45: 48
     left45: 48
     # right45: 48
     # left45: 48

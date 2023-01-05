@@ -289,6 +289,7 @@ MotionResult SearchController::pivot(param_set_t &p_set, float diff) {
     mp->reset_ego_data();
     vTaskDelay(25 / portTICK_RATE_MS);
     pt->motor_disable();
+    vTaskDelay(100 / portTICK_RATE_MS);
   }
 
   // mp->reset_gyro_ref();

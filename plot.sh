@@ -10,6 +10,7 @@ if [ $# -ne 0 ];then
             echo $file $i ${offset_idx}
             if [ $i -eq 0 ]; then
                 echo ./tools/param_tuner/logs/$file
+                read -p "Press [Enter] key to resume."
                 `rosrun plotjuggler plotjuggler -d ./tools/param_tuner/logs/$file -l ./tools/param_tuner/profile.xml`
                 break
             fi

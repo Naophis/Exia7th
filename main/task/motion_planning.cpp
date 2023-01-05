@@ -1028,10 +1028,12 @@ bool MotionPlanning::wall_off_dia(TurnDirection td,
   tgt_val->nmr.timstamp++;
   if (td == TurnDirection::Right) {
     while (true) {
+      // 壁切れ開始
       if (sensing_result->ego.right45_dist <
           param->wall_off_dist.exist_dia_th_r) {
         break;
       }
+      // 反対側の壁あり
       if (sensing_result->ego.left45_dist < param->dia_turn_th_l) {
         ps_front.dist += param->wall_off_dist.right_dia;
         return false;
@@ -1039,6 +1041,7 @@ bool MotionPlanning::wall_off_dia(TurnDirection td,
       vTaskDelay(1 / portTICK_RATE_MS);
     }
     while (true) {
+      // 壁切れ終了
       if (sensing_result->ego.right45_dist >
           param->wall_off_dist.noexist_dia_th_r) {
         ps_front.dist += param->wall_off_dist.right_dia2;
@@ -1048,10 +1051,12 @@ bool MotionPlanning::wall_off_dia(TurnDirection td,
     }
   } else {
     while (true) {
+      // 壁切れ開始
       if (sensing_result->ego.left45_dist <
           param->wall_off_dist.exist_dia_th_l) {
         break;
       }
+      // 反対側壁あり
       if (sensing_result->ego.right45_dist < param->dia_turn_th_r) {
         ps_front.dist += param->wall_off_dist.left_dia;
         return false;
@@ -1059,6 +1064,7 @@ bool MotionPlanning::wall_off_dia(TurnDirection td,
       vTaskDelay(1 / portTICK_RATE_MS);
     }
     while (true) {
+      // 壁切れ終了
       if (sensing_result->ego.left45_dist >
           param->wall_off_dist.noexist_dia_th_l) {
         ps_front.dist += param->wall_off_dist.left_dia2;

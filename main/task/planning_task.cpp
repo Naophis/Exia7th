@@ -289,11 +289,11 @@ float PlanningTask::calc_sensor_pid() {
   error_entity.sen.error_d =
       error_entity.sen.error_p - error_entity.sen.error_d;
 
-  if (error_entity.sen.error_p > 10) {
-    error_entity.sen.error_p = 10;
-  } else if (error_entity.sen.error_p < -10) {
-    error_entity.sen.error_p = -10;
-  }
+  // if (error_entity.sen.error_p > 10) {
+  //   error_entity.sen.error_p = 10;
+  // } else if (error_entity.sen.error_p < -10) {
+  //   error_entity.sen.error_p = -10;
+  // }
   if (param_ro->sensor_pid.mode == 1) {
     duty = param_ro->sensor_pid.p * error_entity.sen.error_p +
            param_ro->sensor_pid.i * error_entity.sen.error_i +
@@ -1274,14 +1274,14 @@ void PlanningTask::check_fail_safe() {
     tgt_val->fss.error = 0;
   }
   if (motor_en) {
-    // if (std::abs(sensing_result->ego.duty.duty_r) > 100) {
-    //   fail_safe.invalid_duty_r_cnt++;
-    //   no_problem = false;
-    // }
-    // if (std::abs(sensing_result->ego.duty.duty_l) > 100) {
-    //   fail_safe.invalid_duty_l_cnt++;
-    //   no_problem = false;
-    // }
+    if (std::abs(sensing_result->ego.duty.duty_r) > param_ro->max_duty) {
+      fail_safe.invalid_duty_r_cnt++;
+      no_problem = false;
+    }
+    if (std::abs(sensing_result->ego.duty.duty_l) > param_ro->max_duty) {
+      fail_safe.invalid_duty_l_cnt++;
+      no_problem = false;
+    }
 
     if (std::abs(tgt_val->ego_in.v - sensing_result->ego.v_c) > 200) {
       fail_safe.invalid_v_cnt++;
@@ -1415,6 +1415,8 @@ void PlanningTask::cp_request() {
 
   tgt_val->motion_dir = receive_req->nmr.motion_dir;
   tgt_val->dia_mode = receive_req->nmr.dia_mode;
+  tgt_val->tgt_in.slip_gain_K1 = param_ro->slip_param_K;
+  tgt_val->tgt_in.slip_gain_K2 = param_ro->slip_param_k2;
   if (tgt_val->nmr.motion_type == MotionType::SLALOM) {
     tgt_val->ego_in.v = receive_req->nmr.v_max;
   }
@@ -1429,6 +1431,27 @@ float PlanningTask::calc_sensor(float data, float a, float b) {
 void PlanningTask::calc_sensor_dist_all() {
   if (!(tgt_val->motion_type == MotionType::NONE ||
         tgt_val->motion_type == MotionType::PIVOT)) {
+    sensing_result->ego.left90_dist_old = sensing_result->ego.left90_dist;
+    sensing_result->ego.left45_dist_old = sensing_result->ego.left45_dist;
+    sensing_result->ego.front_dist_old = sensing_result->ego.front_dist;
+    sensing_result->ego.right45_dist_old = sensing_result->ego.right45_dist;
+    sensing_result->ego.right90_dist_old = sensing_result->ego.right90_dist;
+
+    sensing_result->ego.left90_dist =
+        calc_sensor(sensing_result->ego.left90_lp, param_ro->sensor_gain.l90.a,
+                    param_ro->sensor_gain.l90.b);
+    sensing_result->ego.left45_dist =
+        calc_sensor(sensing_result->ego.left45_lp, param_ro->sensor_gain.l45.a,
+                    param_ro->sensor_gain.l45.b);
+    sensing_result->ego.right45_dist =
+        calc_sensor(sensing_result->ego.right45_lp, param_ro->sensor_gain.r45.a,
+                    param_ro->sensor_gain.r45.b);
+    sensing_result->ego.right90_dist =
+        calc_sensor(sensing_result->ego.right90_lp, param_ro->sensor_gain.r90.a,
+                    param_ro->sensor_gain.r90.b);
+    sensing_result->ego.front_dist =
+        (sensing_result->ego.left90_dist + sensing_result->ego.right90_dist) /
+        2;
   } else {
     sensing_result->ego.left90_dist        //
         = sensing_result->ego.left45_dist  //

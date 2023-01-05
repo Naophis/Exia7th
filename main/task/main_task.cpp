@@ -335,10 +335,6 @@ void MainTask::load_hw_param() {
   param->offset_after_turn_dia_r =
       getItem(root, "offset_after_turn_dia_r")->valuedouble;
 
-  param->dia_turn_exist_th_l =
-      getItem(root, "dia_turn_exist_th_l")->valuedouble;
-  param->dia_turn_exist_th_r =
-      getItem(root, "dia_turn_exist_th_r")->valuedouble;
   param->dia_turn_th_l = getItem(root, "dia_turn_th_l")->valuedouble;
   param->dia_turn_th_r = getItem(root, "dia_turn_th_r")->valuedouble;
 
@@ -1561,7 +1557,7 @@ void MainTask::test_sla() {
 
   load_slalom_param(file_idx, file_idx);
   sla_p = param_set.map[static_cast<TurnType>(sys.test.sla_type)];
-
+  auto sla_p2 = param_set.map[static_cast<TurnType>(sys.test.sla_type2)];
   printf("slalom params\n");
   printf("v = %f\n", sla_p.v);
   printf("ang = %f\n", sla_p.ang * 180 / PI);
@@ -1621,14 +1617,11 @@ void MainTask::test_sla() {
   mp->slalom(sla_p, rorl, nm, false);
 
   if (sys.test.sla_return > 0) {
-    bool dia =
-        static_cast<TurnType>(sys.test.sla_type2) == TurnType::Dia45_2 ||
-        static_cast<TurnType>(sys.test.sla_type2) == TurnType::Dia135_2 ||
-        static_cast<TurnType>(sys.test.sla_type2) == TurnType::Dia90;
+    const auto type2 = static_cast<TurnType>(sys.test.sla_type2);
+    bool dia = type2 == TurnType::Dia45_2 || type2 == TurnType::Dia135_2 ||
+               type2 == TurnType::Dia90;
 
-    mp->slalom(
-        paramset_list[file_idx].map[static_cast<TurnType>(sys.test.sla_type2)],
-        rorl2, nm, dia);
+    mp->slalom(sla_p2, rorl2, nm, dia);
   }
 
   ps.v_max = sla_p.v;

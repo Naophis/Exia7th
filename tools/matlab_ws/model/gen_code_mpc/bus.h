@@ -62,7 +62,7 @@ typedef struct {
   float time_step2;
 } t_tgt;
 
-typedef struct {
+typedef struct{
   float mass;
   float lm;
   float km;
@@ -70,7 +70,7 @@ typedef struct {
   float tread;
   float ke;
   float tire;
-  float gear_ratio = 1;
+  float gear_ratio;
 } t_dynamics;
 
 typedef struct {
