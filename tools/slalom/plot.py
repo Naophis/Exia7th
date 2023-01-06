@@ -64,7 +64,7 @@ class Plot:
             end_pos = {"x": 90, "y": 45}
             start_ang = 45
         elif type == "dia135_2":
-            rad = 40
+            rad = 45
             n = 4
             tgt_ang = 135
             end_pos = {"x": -45, "y": 90}

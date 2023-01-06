@@ -953,6 +953,9 @@ void PlanningTask::calc_tgt_duty() {
   error_entity.w.error_i += error_entity.w.error_p;
   error_entity.ang.error_i += error_entity.ang.error_p;
 
+  tgt_val->v_error = error_entity.v.error_i;
+  tgt_val->w_error = error_entity.w.error_i;
+  
   // float duty_rpm_r = get_rpm_ff_val(TurnDirection::Right);
   // float duty_rpm_l = get_rpm_ff_val(TurnDirection::Left);
   // float duty_rpm_r = get_feadforward_front(TurnDirection::Right);
@@ -1267,81 +1270,14 @@ void PlanningTask::cp_tgt_val() {
 void PlanningTask::check_fail_safe() {
   bool no_problem = true;
   if (!motor_en) {
-    fail_safe.invalid_duty_r_cnt = 0;
-    fail_safe.invalid_duty_l_cnt = 0;
-    fail_safe.invalid_v_cnt = 0;
-    fail_safe.invalid_w_cnt = 0;
     tgt_val->fss.error = 0;
+    return;
   }
-  if (motor_en) {
-    if (std::abs(sensing_result->ego.duty.duty_r) > param_ro->max_duty) {
-      fail_safe.invalid_duty_r_cnt++;
-      no_problem = false;
-    }
-    if (std::abs(sensing_result->ego.duty.duty_l) > param_ro->max_duty) {
-      fail_safe.invalid_duty_l_cnt++;
-      no_problem = false;
-    }
-
-    if (std::abs(tgt_val->ego_in.v - sensing_result->ego.v_c) > 200) {
-      fail_safe.invalid_v_cnt++;
-      no_problem = false;
-    }
-    // if (std::abs(tgt_val->ego_in.w - sensing_result->ego.w_lp) > 10) {
-    //   fail_safe.invalid_w_cnt++;
-    //   no_problem = false;
-    // }
-
-    if (std::abs((tgt_val->ego_in.img_ang - tgt_val->ego_in.ang) * 180.0 / PI) >
-        20) {
-      fail_safe.invalid_w_cnt++;
-      no_problem = false;
-    }
-
-    if (tgt_val->motion_type == MotionType::STRAIGHT ||
-        tgt_val->motion_type == MotionType::SLA_FRONT_STR ||
-        tgt_val->motion_type == MotionType::BACK_STRAIGHT ||
-        tgt_val->motion_type == MotionType::WALL_OFF ||
-        tgt_val->motion_type == MotionType::WALL_OFF_DIA ||
-        tgt_val->motion_type == MotionType::SLA_BACK_STR) {
-      if (tgt_val->ego_in.v > 100) {
-        if (10 < sensing_result->ego.left90_dist &&
-            sensing_result->ego.left90_dist < 45 &&
-            10 < sensing_result->ego.right90_dist &&
-            sensing_result->ego.right90_dist < 45) {
-          fail_safe.invalid_front_led++;
-          no_problem = false;
-        }
-      }
-    }
+  if (ABS(error_entity.v.error_i) > param_ro->fail_check.v) {
+    tgt_val->fss.error = 1;
   }
-  if (no_problem) {
-    fail_safe.invalid_duty_r_cnt = 0;
-    fail_safe.invalid_duty_l_cnt = 0;
-    fail_safe.invalid_v_cnt = 0;
-    fail_safe.invalid_w_cnt = 0;
-    tgt_val->fss.error = 0;
-  } else {
-    bool error = false;
-
-    // if (std::abs(fail_safe.invalid_front_led) > param_ro->fail_check.duty) {
-    //   error = true;
-    // }
-    // if (std::abs(fail_safe.invalid_duty_r_cnt) > param_ro->fail_check.duty) {
-    //   error = true;
-    // }
-    // if (std::abs(fail_safe.invalid_duty_l_cnt) > param_ro->fail_check.duty) {
-    //   error = true;
-    // }
-    if (std::abs(fail_safe.invalid_v_cnt) > param_ro->fail_check.v) {
-      error = true;
-    }
-    if (std::abs(fail_safe.invalid_w_cnt) > param_ro->fail_check.w) {
-      error = true;
-    }
-    if (error) {
-      tgt_val->fss.error = 1;
-    }
+  if (ABS(error_entity.w.error_i) > param_ro->fail_check.w) {
+    tgt_val->fss.error = 1;
   }
 }
 

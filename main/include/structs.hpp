@@ -494,6 +494,8 @@ typedef struct {
   new_motion_req_t nmr;
   pos_t p;
   dia_state_t dia_state;
+  float v_error;
+  float w_error;
 } motion_tgt_val_t;
 
 typedef struct {

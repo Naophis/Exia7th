@@ -2,7 +2,7 @@ clear;
 
 home = pwd;
 
-sim_time = 50;
+sim_time = 15;
 script_file = mfilename('fullpath');
 [filepath, name, ext] = fileparts(script_file);
 cd(filepath);
@@ -43,7 +43,7 @@ accl_param_n = single(16);
 slip_gain = 400;
 
 k1 = 0.5;
-k2 = 220;
+k2 = 135;
 
 mass = single(0.015);
 lm=single(0.0000065);
@@ -100,7 +100,7 @@ if test_mode == 0
 
 elseif test_mode == 1
     % tgt
-    v_max = 300;
+    v_max = 950;
     end_v = v_max;
     accl = 28000;
     decel = -20000;
@@ -119,11 +119,11 @@ elseif test_mode == 1
     ego_state = int8(0);
 
     % radius = 90.5;
-    radius = 54;
-    alphaTemp = -(ego_v / radius);
+    radius = 45;
+    alphaTemp = (ego_v / radius);
     sla.base_alpha = alphaTemp;
     % sla.base_time = 0.18627166748046875;
-    sla.base_time = 0.1286468505859375;
+    sla.base_time = 0.0731249999999984;
 
     sla.limit_time_count = sla.base_time * 2 / dt;
     sla.pow_n = 4;

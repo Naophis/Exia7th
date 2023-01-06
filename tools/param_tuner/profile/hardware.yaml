@@ -93,8 +93,8 @@ wall_off_hold_noexist_dia_th_r: 55
 wall_off_hold_dist_dia_l2: -0.5
 wall_off_hold_dist_dia_r2: -4.5
 #斜めターン壁有り補正
-dia_turn_th_l: 60
-dia_turn_th_r: 60
+dia_turn_th_l: 40
+dia_turn_th_r: 40
 # 壁切れ オフセット距離(斜め壁有り)
 wall_off_hold_dist_dia_l: 6
 wall_off_hold_dist_dia_r: -1.0
@@ -112,7 +112,7 @@ dia_wall_off_ref_l: 38.0
 dia_wall_off_ref_r: 33.0
 
 #ログON_OFF
-logging_time: 6.0
+logging_time: 1.0
 search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1
@@ -128,8 +128,8 @@ ff_v_th: 200
 ff_front_dury: 0.95
 
 fail_duty_cnt: 150
-fail_v_cnt: 50
-fail_w_cnt: 50
+fail_v_cnt: 8000
+fail_w_cnt: 250
 
 cell: 90
 cell2: 90
@@ -169,16 +169,15 @@ dist_pid:
   # d: 0.0
 gyro_pid:
   # 速度型 mode=1
-  p: 0.165
-  i: 27.25
-  # i: 0
-  d: 0.0
-  mode: 1
+  # p: 0.165
+  # i: 15.25
+  # d: 0.0
+  # mode: 1
   # 通常 mode=0
-  # p: 0.275
-  # i: 0.0285
-  # d: 0.275
-  # mode: 0
+  p: 0.275
+  i: 0.0285
+  d: 0.275
+  mode: 0
   # p: 0.0
   # i: 0.0
   # d: 0
@@ -202,7 +201,7 @@ sensor_pid:
   c: 0
   mode: 1
 sensor_pid_dia:
-  p: 0.025
+  p: 0.0
   i: 0.0
   d: 0.0
   b: 0
