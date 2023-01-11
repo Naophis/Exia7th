@@ -63,7 +63,7 @@ void PlanningTask::motor_disable(bool reset_req) {
 }
 void PlanningTask::motor_disable() {
   motor_disable(true); //
-  vTaskDelay(1 / portTICK_PERIOD_MS);
+  vTaskDelay(1.0 / portTICK_PERIOD_MS);
 }
 
 void PlanningTask::suction_motor_enable_main() {

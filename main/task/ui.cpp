@@ -49,7 +49,7 @@ void UserInterface::motion_check() {
   tgt_val->nmr.timstamp++;
   xQueueReset(*qh);
   xQueueSendToFront(*qh, &tgt_val, 1);
-  vTaskDelay(1 / portTICK_PERIOD_MS);
+  vTaskDelay(1.0 / portTICK_PERIOD_MS);
   while (1) {
     c++;
     if (c % 2 == 0) {
@@ -69,7 +69,7 @@ void UserInterface::motion_check() {
       }
       break;
     }
-    vTaskDelay(50 / portTICK_PERIOD_MS);
+    vTaskDelay(50.0 / portTICK_PERIOD_MS);
   }
 }
 
@@ -81,29 +81,29 @@ void UserInterface::coin(int time) {
 void UserInterface::hello_exia() {
   int time = 120;
   music_sync(MUSIC::A6_, time);
-  vTaskDelay(10 / portTICK_PERIOD_MS);
+  vTaskDelay(10.0/ portTICK_PERIOD_MS);
   music_sync(MUSIC::A6_, time);
-  vTaskDelay(10 / portTICK_PERIOD_MS);
+  vTaskDelay(10.0/ portTICK_PERIOD_MS);
   music_sync(MUSIC::A6_, time);
-  vTaskDelay(10 / portTICK_PERIOD_MS);
+  vTaskDelay(10.0/ portTICK_PERIOD_MS);
   music_sync(MUSIC::A6_, 3 * time);
   vTaskDelay(time / portTICK_PERIOD_MS);
   music_sync(MUSIC::A6_, time);
-  vTaskDelay(10 / portTICK_PERIOD_MS);
+  vTaskDelay(10.0/ portTICK_PERIOD_MS);
   music_sync(MUSIC::A6_, time);
-  vTaskDelay(10 / portTICK_PERIOD_MS);
+  vTaskDelay(10.0/ portTICK_PERIOD_MS);
   music_sync(MUSIC::A6_, time);
-  vTaskDelay(10 / portTICK_PERIOD_MS);
+  vTaskDelay(10.0/ portTICK_PERIOD_MS);
   music_sync(MUSIC::A6_, time);
-  vTaskDelay(10 / portTICK_PERIOD_MS);
+  vTaskDelay(10.0/ portTICK_PERIOD_MS);
   music_sync(MUSIC::C7_, 1.5 * time);
   vTaskDelay(time / 3 / portTICK_PERIOD_MS);
   music_sync(MUSIC::G6_, 2 * time);
-  vTaskDelay(10 / portTICK_PERIOD_MS);
+  vTaskDelay(10.0/ portTICK_PERIOD_MS);
   music_sync(MUSIC::F6_, 2 * time);
-  vTaskDelay(10 / portTICK_PERIOD_MS);
+  vTaskDelay(10.0/ portTICK_PERIOD_MS);
   music_sync(MUSIC::G6_, 2 * time);
-  vTaskDelay(10 / portTICK_PERIOD_MS);
+  vTaskDelay(10.0/ portTICK_PERIOD_MS);
 }
 
 void UserInterface::LED_on_off(gpio_num_t gpio_num, int state) {
@@ -177,7 +177,7 @@ TurnDirection UserInterface::select_direction() {
       LED_bit((int)b, 0, 0, 0, (int)b);
       b = b ? false : true;
     }
-    vTaskDelay(25 / portTICK_PERIOD_MS);
+    vTaskDelay(25.0 / portTICK_PERIOD_MS);
   }
 }
 

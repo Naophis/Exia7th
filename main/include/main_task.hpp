@@ -100,12 +100,12 @@ private:
   next_motion_t nm;
   param_set_t p_set;
 
-  const TickType_t xDelay1000 = 1000 / portTICK_PERIOD_MS;
-  const TickType_t xDelay500 = 500 / portTICK_PERIOD_MS;
-  const TickType_t xDelay100 = 100 / portTICK_PERIOD_MS;
-  const TickType_t xDelay50 = 50 / portTICK_PERIOD_MS;
-  const TickType_t xDelay10 = 10 / portTICK_PERIOD_MS;
-  const TickType_t xDelay1 = 1 / portTICK_PERIOD_MS;
+  const TickType_t xDelay1000 = 1000.0 / portTICK_PERIOD_MS;
+  const TickType_t xDelay500 = 500.0 / portTICK_PERIOD_MS;
+  const TickType_t xDelay100 = 100.0 / portTICK_PERIOD_MS;
+  const TickType_t xDelay50 = 50.0 / portTICK_PERIOD_MS;
+  const TickType_t xDelay10 = 10.0 / portTICK_PERIOD_MS;
+  const TickType_t xDelay1 = 1.0 / portTICK_PERIOD_MS;
   void dump1();
   void dump2();
   int select_mode();

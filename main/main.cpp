@@ -164,7 +164,7 @@ extern "C" void app_main() {
   //     cout << "3_" << 360 * enc_l3 / 16384.0 << "\t" << 360 * enc_r3 /
   //     16384.0
   //          << endl;
-  //     vTaskDelay(100 / portTICK_RATE_MS);
+  //     vTaskDelay(100.0 / portTICK_RATE_MS);
   //   }
   // }
 
@@ -239,7 +239,7 @@ extern "C" void app_main() {
   esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(0));
   esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(1));
   while (1) {
-    vTaskDelay(5000 / portTICK_RATE_MS);
+    vTaskDelay(5000.0 / portTICK_RATE_MS);
     if (mt.ui->button_state()) {
       printf("time_stamp: %d\n", tgt_val->nmr.timstamp);
       printf("motion_type: %d\n", static_cast<int>(tgt_val->motion_type));

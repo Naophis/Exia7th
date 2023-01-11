@@ -83,19 +83,19 @@ void ICM20689::setup() {
   uint8_t whoami = read1byte(0x0F);
   printf("%d\n", whoami);
   write1byte(0x6B, 0x80); //スリープ解除?
-  vTaskDelay(10 / portTICK_PERIOD_MS);
+  vTaskDelay(10.0/ portTICK_PERIOD_MS);
   write1byte(0x68, 0x04); //ジャイロリセット
-  vTaskDelay(10 / portTICK_PERIOD_MS);
+  vTaskDelay(10.0/ portTICK_PERIOD_MS);
   write1byte(0x6A, 0x10); // uercontrol i2c=disable
-  vTaskDelay(10 / portTICK_PERIOD_MS);
+  vTaskDelay(10.0/ portTICK_PERIOD_MS);
   write1byte(0x1B, 0x18); // 2000
-  vTaskDelay(10 / portTICK_PERIOD_MS);
+  vTaskDelay(10.0/ portTICK_PERIOD_MS);
   // write1byte(0x1C, 0x08); // 4g
   // write1byte(0x1C, 0x10); // 8g
   // write1byte(0x1C, 0x18); // 16g
-  // vTaskDelay(10 / portTICK_PERIOD_MS);
+  // vTaskDelay(10.0/ portTICK_PERIOD_MS);
   // write1byte(0x1D, 0x00); // 4kHz
-  // vTaskDelay(10 / portTICK_PERIOD_MS);
+  // vTaskDelay(10.0/ portTICK_PERIOD_MS);
 }
 int ICM20689::read_gyro_z() {
   return read2byte(0x47);

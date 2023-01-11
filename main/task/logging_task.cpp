@@ -275,7 +275,7 @@ void LoggingTask::save_sysid(std::string file_name) {
 
 void LoggingTask::dump_log(std::string file_name) {
 
-  const TickType_t xDelay2 = 100 / portTICK_PERIOD_MS;
+  const TickType_t xDelay2 = 100.0 / portTICK_PERIOD_MS;
   FILE *f = fopen(file_name.c_str(), "rb");
   if (f == NULL)
     return;
@@ -310,7 +310,7 @@ void LoggingTask::dump_log(std::string file_name) {
 // 116076
 void LoggingTask::dump_log_sysid(std::string file_name) {
 
-  const TickType_t xDelay2 = 100 / portTICK_PERIOD_MS;
+  const TickType_t xDelay2 = 100.0 / portTICK_PERIOD_MS;
   FILE *f = fopen(file_name.c_str(), "rb");
   if (f == NULL)
     return;

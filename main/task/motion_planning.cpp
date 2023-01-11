@@ -68,13 +68,13 @@ MotionResult MotionPlanning::go_straight(param_straight_t &p,
   tgt_val->nmr.timstamp++;
   xQueueReset(*qh);
   xQueueSendToFront(*qh, &tgt_val, 1);
-  vTaskDelay(1 / portTICK_RATE_MS);
+  vTaskDelay(1.0 / portTICK_RATE_MS);
   if (adachi != nullptr) {
     adachi->update();
   }
   unsigned int cnt = 0;
   while (1) {
-    vTaskDelay(1 / portTICK_RATE_MS);
+    vTaskDelay(1.0 / portTICK_RATE_MS);
     cnt++;
     if (std::abs(tgt_val->ego_in.dist) >= std::abs(p.dist)) {
       break;
@@ -116,7 +116,7 @@ MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
   tgt_val->nmr.timstamp++;
   xQueueReset(*qh);
   xQueueSendToFront(*qh, &tgt_val, 1);
-  vTaskDelay(1 / portTICK_RATE_MS);
+  vTaskDelay(1.0 / portTICK_RATE_MS);
 
   tgt_val->nmr.v_max = 0;
   tgt_val->nmr.v_end = 0;
@@ -142,11 +142,11 @@ MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
   tgt_val->nmr.timstamp++;
   xQueueReset(*qh);
   xQueueSendToFront(*qh, &tgt_val, 1);
-  vTaskDelay(10 / portTICK_RATE_MS);
+  vTaskDelay(10.0/ portTICK_RATE_MS);
 
   int c = 0;
   while (1) {
-    vTaskDelay(1 / portTICK_RATE_MS);
+    vTaskDelay(1.0 / portTICK_RATE_MS);
     c++;
     if (std::abs(tgt_val->ego_in.ang) >= std::abs(p.ang) &&
         std::abs(tgt_val->ego_in.ang * 180 / PI) > 10) {
@@ -155,7 +155,7 @@ MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
     if (c == 250) { //動き出さないとき
       if (std::abs(tgt_val->ego_in.ang * 180 / PI) < 10) {
         pt->motor_disable();
-        vTaskDelay(10 / portTICK_RATE_MS);
+        vTaskDelay(10.0/ portTICK_RATE_MS);
         pt->motor_enable();
         reset_tgt_data();
         reset_ego_data();
@@ -163,7 +163,7 @@ MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
         tgt_val->nmr.timstamp++;
         xQueueReset(*qh);
         xQueueSendToFront(*qh, &tgt_val, 1);
-        vTaskDelay(1 / portTICK_RATE_MS);
+        vTaskDelay(1.0 / portTICK_RATE_MS);
 
         tgt_val->nmr.v_max = 0;
         tgt_val->nmr.v_end = 0;
@@ -190,7 +190,7 @@ MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
         c = 0;
         xQueueReset(*qh);
         xQueueSendToFront(*qh, &tgt_val, 1);
-        vTaskDelay(10 / portTICK_RATE_MS);
+        vTaskDelay(10.0/ portTICK_RATE_MS);
       }
     }
     if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
@@ -512,7 +512,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
     adachi->update();
   }
   while (1) {
-    vTaskDelay(1 / portTICK_RATE_MS);
+    vTaskDelay(1.0 / portTICK_RATE_MS);
 
     if (sp.type == TurnType::Orval) {
       if (tgt_val->ego_in.pivot_state == 3 &&
@@ -585,7 +585,7 @@ void MotionPlanning::reset_tgt_data() {
   // TODO
   xQueueReset(*qh);
   xQueueSendToFront(*qh, &tgt_val, 1);
-  vTaskDelay(1 / portTICK_RATE_MS);
+  vTaskDelay(1.0 / portTICK_RATE_MS);
   tgt_val->nmr.tgt_reset_req = false;
 }
 
@@ -620,11 +620,11 @@ void MotionPlanning::reset_ego_data() {
 
   xQueueReset(*qh);
   xQueueSendToFront(*qh, &tgt_val, 1);
-  vTaskDelay(1 / portTICK_RATE_MS);
+  vTaskDelay(1.0 / portTICK_RATE_MS);
   tgt_val->nmr.ego_reset_req = false;
 
   req_error_reset();
-  vTaskDelay(1 / portTICK_RATE_MS);
+  vTaskDelay(1.0 / portTICK_RATE_MS);
 }
 
 void MotionPlanning::reset_gyro_ref() {
@@ -676,7 +676,7 @@ MotionResult MotionPlanning::front_ctrl(bool limit) {
   unsigned int cnt = 0;
   unsigned int max_cnt = 0;
   while (1) {
-    vTaskDelay(1 / portTICK_RATE_MS);
+    vTaskDelay(1.0 / portTICK_RATE_MS);
     if (ui->button_state_hold()) {
       break;
     }
@@ -731,7 +731,7 @@ void MotionPlanning::keep() {
   xQueueSendToFront(*qh, &tgt_val, 1);
 
   while (1) {
-    vTaskDelay(1 / portTICK_RATE_MS);
+    vTaskDelay(1.0 / portTICK_RATE_MS);
     if (ui->button_state_hold()) {
       break;
     }
@@ -758,7 +758,7 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
 
   if (p_set.suction) {
     pt->suction_enable(p_set.suction_duty);
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    vTaskDelay(1000.0 / portTICK_PERIOD_MS);
   }
   if (param->fast_log_enable > 0)
     lt->start_slalom_log();
@@ -884,7 +884,7 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
   go_straight(ps);
   reset_tgt_data();
   reset_ego_data();
-  vTaskDelay(250 / portTICK_RATE_MS);
+  vTaskDelay(250.0 / portTICK_RATE_MS);
   pt->motor_disable();
   pt->suction_disable();
 
@@ -892,7 +892,7 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
   // front_ctrl(false);
   // reset_tgt_data();
   // reset_ego_data();
-  // vTaskDelay(25 / portTICK_RATE_MS);
+  // vTaskDelay(25.0 / portTICK_RATE_MS);
   // pt->motor_disable(false);
 
   lt->stop_slalom_log();
@@ -901,7 +901,7 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
   while (1) {
     if (ui->button_state_hold())
       break;
-    vTaskDelay(10 / portTICK_RATE_MS);
+    vTaskDelay(10.0/ portTICK_RATE_MS);
   }
   lt->dump_log(slalom_log_file);
 }
@@ -936,7 +936,7 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
   tgt_val->nmr.timstamp++;
   xQueueReset(*qh);
   xQueueSendToFront(*qh, &tgt_val, 1);
-  vTaskDelay(1 / portTICK_RATE_MS);
+  vTaskDelay(1.0 / portTICK_RATE_MS);
   if (td == TurnDirection::Right) {
     while (true) {
       if (sensing_result->ego.right45_dist <
@@ -954,7 +954,7 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
       if (std::abs(tgt_val->ego_in.dist) >= std::abs(tgt_val->nmr.dist)) {
         return;
       }
-      vTaskDelay(1 / portTICK_RATE_MS);
+      vTaskDelay(1.0 / portTICK_RATE_MS);
     }
     while (true) {
       // if (40 < sensing_result->ego.left90_dist &&
@@ -970,7 +970,7 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
         ps_front.dist += param->wall_off_dist.right_str;
         return;
       }
-      vTaskDelay(1 / portTICK_RATE_MS);
+      vTaskDelay(1.0 / portTICK_RATE_MS);
     }
   } else {
     while (true) {
@@ -988,7 +988,7 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
       if (std::abs(tgt_val->ego_in.dist) >= std::abs(tgt_val->nmr.dist)) {
         return;
       }
-      vTaskDelay(1 / portTICK_RATE_MS);
+      vTaskDelay(1.0 / portTICK_RATE_MS);
     }
     while (true) {
       if (sensing_result->ego.left45_dist > param->wall_off_dist.noexist_th_l) {
@@ -1003,7 +1003,7 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
       //       (param->front_dist_offset2 - sensing_result->ego.front_dist);
       //   return;
       // }
-      vTaskDelay(1 / portTICK_RATE_MS);
+      vTaskDelay(1.0 / portTICK_RATE_MS);
     }
   }
 }
@@ -1038,7 +1038,7 @@ bool MotionPlanning::wall_off_dia(TurnDirection td,
         ps_front.dist += param->wall_off_dist.right_dia;
         return false;
       }
-      vTaskDelay(1 / portTICK_RATE_MS);
+      vTaskDelay(1.0 / portTICK_RATE_MS);
     }
     while (true) {
       // 壁切れ終了
@@ -1047,7 +1047,7 @@ bool MotionPlanning::wall_off_dia(TurnDirection td,
         ps_front.dist += param->wall_off_dist.right_dia2;
         return true;
       }
-      vTaskDelay(1 / portTICK_RATE_MS);
+      vTaskDelay(1.0 / portTICK_RATE_MS);
     }
   } else {
     while (true) {
@@ -1061,7 +1061,7 @@ bool MotionPlanning::wall_off_dia(TurnDirection td,
         ps_front.dist += param->wall_off_dist.left_dia;
         return false;
       }
-      vTaskDelay(1 / portTICK_RATE_MS);
+      vTaskDelay(1.0 / portTICK_RATE_MS);
     }
     while (true) {
       // 壁切れ終了
@@ -1070,7 +1070,7 @@ bool MotionPlanning::wall_off_dia(TurnDirection td,
         ps_front.dist += param->wall_off_dist.left_dia2;
         return true;
       }
-      vTaskDelay(1 / portTICK_RATE_MS);
+      vTaskDelay(1.0 / portTICK_RATE_MS);
     }
   }
 }

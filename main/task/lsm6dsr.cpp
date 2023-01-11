@@ -152,13 +152,13 @@ void LSM6DSR::begin() {
   // ctrl9_xl.i3c_disable = ((uint8_t)LSM6DSR_I3C_DISABLE & 0x80U) >> 7;
   // printf("%d\n", *(uint8_t *)&ctrl9_xl);
   // ret = write1byte(LSM6DSR_CTRL9_XL, *(uint8_t *)&ctrl9_xl);
-  // vTaskDelay(10 / portTICK_PERIOD_MS);
+  // vTaskDelay(10.0/ portTICK_PERIOD_MS);
 
   // lsm6dsr_i3c_bus_avb_t i3c_bus_avb = {0};
   // i3c_bus_avb.i3c_bus_avb_sel = (uint8_t)LSM6DSR_I3C_DISABLE & 0x03U;
   // printf("%d\n", *(uint8_t *)&i3c_bus_avb);
   // ret = write1byte(LSM6DSR_I3C_BUS_AVB, *(uint8_t *)&i3c_bus_avb);
-  // vTaskDelay(10 / portTICK_PERIOD_MS);
+  // vTaskDelay(10.0/ portTICK_PERIOD_MS);
 
   // /* Enable register address automatically incremented during a multiple byte
   //  access with a serial interface. */
@@ -168,14 +168,14 @@ void LSM6DSR::begin() {
   // ctrl3_c.bdu = (uint8_t)PROPERTY_ENABLE;
   // printf("%d\n", *(uint8_t *)&ctrl3_c);
   // ret = write1byte(LSM6DSR_CTRL3_C, *(uint8_t *)&ctrl3_c);
-  // vTaskDelay(10 / portTICK_PERIOD_MS);
+  // vTaskDelay(10.0/ portTICK_PERIOD_MS);
 
   // /* FIFO mode selection */
   // lsm6dsr_fifo_ctrl4_t fifo_ctrl4 = {0};
   // fifo_ctrl4.fifo_mode = (uint8_t)LSM6DSR_BYPASS_MODE;
   // printf("%d\n", *(uint8_t *)&fifo_ctrl4);
   // ret = write1byte(LSM6DSR_FIFO_CTRL4, *(uint8_t *)&fifo_ctrl4);
-  // vTaskDelay(10 / portTICK_PERIOD_MS);
+  // vTaskDelay(10.0/ portTICK_PERIOD_MS);
   // /* Select default output data rate. */
   // /* Output data rate selection - power down. */
   // /* Full scale selection. */
@@ -184,7 +184,7 @@ void LSM6DSR::begin() {
   // ctrl2_g.fs_g = LSM6DSR_4000dps;
   // printf("%d\n", *(uint8_t *)&ctrl2_g);
   // ret = write1byte(LSM6DSR_CTRL2_G, *(uint8_t *)&ctrl2_g);
-  // vTaskDelay(10 / portTICK_PERIOD_MS);
+  // vTaskDelay(10.0/ portTICK_PERIOD_MS);
 }
 void LSM6DSR::enable_g() {}
 #define LSM6DSRX_CTRL1_XL 0x10U
@@ -198,14 +198,14 @@ void LSM6DSR::setup() {
   // begin();
 
   write1byte(LSM6DSRX_CTRL3_C, 0x01); // LSM6DSRXをリセット
-  vTaskDelay(200 / portTICK_PERIOD_MS);
+  vTaskDelay(200.0 / portTICK_PERIOD_MS);
   while ((read1byte(LSM6DSRX_CTRL3_C) & 0x01) == 0x01)
     ;
 
   write1byte(LSM6DSRX_CTRL9_XL, 0xE2); // I3CモードをDisableに設定
-  vTaskDelay(10 / portTICK_PERIOD_MS);
+  vTaskDelay(10.0/ portTICK_PERIOD_MS);
   write1byte(LSM6DSRX_CTRL4_C, 0x06); // I2CモードをDisableに設定
-  vTaskDelay(10 / portTICK_PERIOD_MS);
+  vTaskDelay(10.0/ portTICK_PERIOD_MS);
 
   // 加速度計の設定
   write1byte(LSM6DSRX_CTRL1_XL, 0xAA); // 4g
@@ -213,9 +213,9 @@ void LSM6DSR::setup() {
   // write1byte(LSM6DSRX_CTRL1_XL, 0xA6); // 16g
   // 加速度計のスケールを±8gに設定
   // 加速度計の出力データレートを416Hzに設定
-  vTaskDelay(10 / portTICK_PERIOD_MS);
+  vTaskDelay(10.0/ portTICK_PERIOD_MS);
   write1byte(LSM6DSRX_CTRL8_XL, 0xB0); // 加速度計のLPFを100Hzに設定
-  vTaskDelay(10 / portTICK_PERIOD_MS);
+  vTaskDelay(10.0/ portTICK_PERIOD_MS);
 
   // ジャイロの設定
   write1byte(LSM6DSRX_CTRL2_G, 0xA1);
@@ -228,7 +228,7 @@ void LSM6DSR::setup() {
   // ジャイロのスケールを±4000deg/sに設定
   // ジャイロの出力データレートを6.66Hzに設定
 
-  vTaskDelay(10 / portTICK_PERIOD_MS);
+  vTaskDelay(10.0/ portTICK_PERIOD_MS);
 }
 int LSM6DSR::read_gyro_z() { return read2byte(0x26); }
 int LSM6DSR::read_accel_x() { return read2byte(0x3B); }
