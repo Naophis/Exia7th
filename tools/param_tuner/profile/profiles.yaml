@@ -12,14 +12,20 @@ list: [
     "t_1100.txt", #10
     "t_1150.txt", #11
     "t_1200.txt", #12
+    "t_1250.txt", #13 
+    "t_1300.txt", #14
+    "t_1350.txt", #15
+    "t_1400.txt", #16
+    "t_1450.txt", #17
+    "t_1500.txt", #18
   ]
 # 限界性能
-# Large: 1200
-# Orval: 950
-# 45: 950
-# 135: 1050
-# V90: 1000
-profile_idx_size: 13
+# Large: 1500
+# Orval: 1500
+# 45: ~1300
+# 135: 1350~1400
+# V90: 1350
+profile_idx_size: 19
 # idx = mode選択時
 profile_idx: [
     {
@@ -190,5 +196,83 @@ profile_idx: [
       dia135: 9,
       dia135_2: 9,
       dia90: 7,
+    },
+    {
+      # 13: 最短パラメータ 1250
+      run_param: 12,
+      suction: 1,
+      normal: 0,
+      large: 13,
+      orval: 13,
+      dia45: 13,
+      dia45_2: 13,
+      dia135: 13,
+      dia135_2: 13,
+      dia90: 13,
+    },
+    {
+      # 14: 最短パラメータ 1300
+      run_param: 14,
+      suction: 1,
+      normal: 14,
+      large: 14,
+      orval: 14,
+      dia45: 14,
+      dia45_2: 14,
+      dia135: 14,
+      dia135_2: 14,
+      dia90: 14,
+    },
+    {
+      # 15: 最短パラメータ 1350
+      run_param: 15,
+      suction: 1,
+      normal: 0,
+      large: 15,
+      orval: 15,
+      dia45: 15,
+      dia45_2: 15,
+      dia135: 15,
+      dia135_2: 15,
+      dia90: 15,
+    },
+    {
+      # 16: 最短パラメータ 1400
+      run_param: 16,
+      suction: 1,
+      normal: 0,
+      large: 16,
+      orval: 16,
+      dia45: 16,
+      dia45_2: 16,
+      dia135: 16,
+      dia135_2: 16,
+      dia90: 16,
+    },
+    {
+      # 17: 最短パラメータ 1450
+      run_param: 17,
+      suction: 1,
+      normal: 0,
+      large: 17,
+      orval: 17,
+      dia45: 17,
+      dia45_2: 17,
+      dia135: 17,
+      dia135_2: 17,
+      dia90: 17,
+    },
+    {
+      # 18: 最短パラメータ 1500
+      run_param: 18,
+      suction: 1,
+      normal: 0,
+      large: 18,
+      orval: 18,
+      dia45: 18,
+      dia45_2: 18,
+      dia135: 18,
+      dia135_2: 18,
+      dia90: 18,
     },
   ]

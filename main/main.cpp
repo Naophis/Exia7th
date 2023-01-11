@@ -17,6 +17,7 @@
 #include "xtensa/core-macros.h"
 #include <driver/adc.h>
 #include <esp_adc_cal.h>
+#include <esp_task_wdt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -160,7 +161,8 @@ extern "C" void app_main() {
   //   while (1) {
   //     auto enc_l3 = enc_if.read2byte(0x3F, 0xFF, false) & 0x3FFF;
   //     auto enc_r3 = enc_if.read2byte(0x3F, 0xFF, true) & 0x3FFF;
-  //     cout << "3_" << 360 * enc_l3 / 16384.0 << "\t" << 360 * enc_r3 / 16384.0
+  //     cout << "3_" << 360 * enc_l3 / 16384.0 << "\t" << 360 * enc_r3 /
+  //     16384.0
   //          << endl;
   //     vTaskDelay(100 / portTICK_RATE_MS);
   //   }
@@ -233,7 +235,9 @@ extern "C" void app_main() {
   gpio_set_level(LED3, 0);
   gpio_set_level(LED4, 0);
   gpio_set_level(LED5, 0);
-
+  esp_task_wdt_reset();
+  esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(0));
+  esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(1));
   while (1) {
     vTaskDelay(5000 / portTICK_RATE_MS);
     if (mt.ui->button_state()) {

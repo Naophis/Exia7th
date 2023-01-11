@@ -117,7 +117,7 @@ constexpr uint16_t MOTION_CHECK_TH = 1000;
 constexpr uint16_t ENC_OPE_V_R_TH = 175;
 
 constexpr uint16_t LOG_SIZE = 1300;
-constexpr uint16_t LINE_BUF_SIZE = 312;
+constexpr uint16_t LINE_BUF_SIZE = 512;
 // constexpr float BATTERY_GAIN = 3.2075; // 2.97324;
 constexpr float BATTERY_GAIN = 3.096; // 2.97324;
 

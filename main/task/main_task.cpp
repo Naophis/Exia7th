@@ -838,12 +838,12 @@ void MainTask::load_slas(
   cJSON *root = cJSON_CreateObject();
   root = cJSON_Parse(str.c_str());
   str.shrink_to_fit();
-  // printf("%s\n", file_name.c_str());
+  printf("%s\n", file_name.c_str());
   for (const auto p : turn_list) {
-    // printf(" - %s\n", p.second.c_str());
+    printf(" - %s\n", p.second.c_str());
     turn_map[p.first].v =
         getItem(getItem(root, p.second.c_str()), "v")->valuedouble;
-    // printf(" - v: %f\n", turn_map[p.first].v);
+    printf(" - v: %f\n", turn_map[p.first].v);
     turn_map[p.first].ang =
         getItem(getItem(root, p.second.c_str()), "ang")->valuedouble;
     turn_map[p.first].ang = PI * turn_map[p.first].ang / 180;

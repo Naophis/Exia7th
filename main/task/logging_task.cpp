@@ -289,8 +289,15 @@ void LoggingTask::dump_log(std::string file_name) {
          "front_d,right45_d,right90_d,battery,duty_l,"
          "duty_r,motion_state,duty_sen,dist_mod90,"
          "sen_dist_l45,sen_dist_r45,timestamp\n");
-  while (fgets(line_buf, sizeof(line_buf), f) != NULL)
+  int c = 0;
+  while (fgets(line_buf, sizeof(line_buf), f) != NULL) {
     printf("%s\n", line_buf);
+    c++;
+    if (c == 50) {
+      c = 0;
+      vTaskDelay(1.0 / portTICK_PERIOD_MS);
+    }
+  }
   printf("end___\n"); // csvファイル追記終了トリガー
 
   fclose(f);

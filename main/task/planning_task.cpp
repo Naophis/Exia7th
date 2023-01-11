@@ -246,7 +246,10 @@ void PlanningTask::task() {
     if (tgt_val->motion_type == MotionType::STRAIGHT ||
         tgt_val->motion_type == MotionType::SLA_FRONT_STR ||
         tgt_val->motion_type == MotionType::SLA_BACK_STR) {
-      if (tgt_val->tgt_in.tgt_dist <= tgt_val->ego_in.img_dist) {
+      if (tgt_val->ego_in.img_dist >= tgt_val->tgt_in.tgt_dist) {
+        mpc_next_ego.v = tgt_val->tgt_in.end_v;
+      }
+      if (tgt_val->ego_in.dist >= tgt_val->tgt_in.tgt_dist) {
         mpc_next_ego.v = tgt_val->tgt_in.end_v;
       }
     }
@@ -955,7 +958,7 @@ void PlanningTask::calc_tgt_duty() {
 
   tgt_val->v_error = error_entity.v.error_i;
   tgt_val->w_error = error_entity.w.error_i;
-  
+
   // float duty_rpm_r = get_rpm_ff_val(TurnDirection::Right);
   // float duty_rpm_l = get_rpm_ff_val(TurnDirection::Left);
   // float duty_rpm_r = get_feadforward_front(TurnDirection::Right);
@@ -1279,6 +1282,9 @@ void PlanningTask::check_fail_safe() {
   if (ABS(error_entity.w.error_i) > param_ro->fail_check.w) {
     tgt_val->fss.error = 1;
   }
+  if (!std::isfinite(tgt_duty.duty_l) || !std::isfinite(tgt_duty.duty_r)) {
+    tgt_val->fss.error = 1;
+  }
 }
 
 void PlanningTask::cp_request() {
@@ -1353,7 +1359,7 @@ void PlanningTask::cp_request() {
   tgt_val->dia_mode = receive_req->nmr.dia_mode;
   tgt_val->tgt_in.slip_gain_K1 = param_ro->slip_param_K;
   tgt_val->tgt_in.slip_gain_K2 = param_ro->slip_param_k2;
-  if (tgt_val->nmr.motion_type == MotionType::SLALOM) {
+  if (receive_req->nmr.motion_type == MotionType::SLALOM) {
     tgt_val->ego_in.v = receive_req->nmr.v_max;
   }
 }

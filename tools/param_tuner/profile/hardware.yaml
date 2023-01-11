@@ -4,7 +4,7 @@ dt: 0.001
 # tire: 13.46
 # tire: 13.367
 # tire: 15.15
-tire: 13.0925
+tire: 13.295
 # tire: 13.095
 # tire: 13.135
 offset_start_dist: 21.0
@@ -12,7 +12,7 @@ offset_start_dist: 21.0
 gear_a: 37
 gear_b: 9
 # max_duty: 99.9
-max_duty: 75.0
+max_duty: 99.999
 FF_front: 1
 FF_roll: 1
 FF_keV: 1
@@ -47,8 +47,8 @@ front_dist_offset: 106.0 # 探索時の前壁補正
 front_dist_offset2: 135
 led_light_delay_cnt: 500
 
-front_dist_offset_pivot_th: 83
-front_dist_offset_pivot: 90
+front_dist_offset_pivot_th: 85
+front_dist_offset_pivot: 96
 
 front_dist_offset_dia_front: 139
 front_dist_offset_dia_45_th: 77
@@ -112,12 +112,12 @@ dia_wall_off_ref_l: 38.0
 dia_wall_off_ref_r: 33.0
 
 #ログON_OFF
-logging_time: 1.0
+logging_time: 4.0
 search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1
 sen_log_size: 100
-log_size: 1200
+log_size: 1400
 
 normal_sla_offset: 7
 

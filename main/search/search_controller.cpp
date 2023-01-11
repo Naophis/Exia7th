@@ -135,6 +135,8 @@ MotionResult SearchController::pivot(param_set_t &p_set, float diff) {
       sensing_result->ego.left45_dist < param->sen_ref_p.search_exist.left90;
   bool right_exist =
       sensing_result->ego.right45_dist < param->sen_ref_p.search_exist.right90;
+  bool near =
+      sensing_result->ego.left45_dist < sensing_result->ego.right45_dist;
 
   p.v_max = p_set.str_map[StraightType::Search].v_max;
   p.v_end = 20;
@@ -184,6 +186,13 @@ MotionResult SearchController::pivot(param_set_t &p_set, float diff) {
   bool front_ctrl2 = false;
   if (!left_exist && !right_exist) {
     pr.RorL = TurnDirection::Right;
+  } else if (left_exist && right_exist) {
+    if (near) {
+      pr.RorL = TurnDirection::Right;
+    } else {
+      pr.RorL = TurnDirection::Left;
+    }
+    front_ctrl2 = true;
   } else if (left_exist) {
     pr.RorL = TurnDirection::Left;
     front_ctrl2 = true;

@@ -110,6 +110,12 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
       }
 
       rtb_Abs6 = static_cast<real32_T>(rtb_Switch);
+      if (!(mpc_tgt_calc_P.dt * static_cast<real32_T>(rtb_Switch) * static_cast<
+            real32_T>(arg_time_step) + arg_ego->v > arg_tgt->end_v)) {
+        rtb_Abs6 = (arg_tgt->end_v - arg_ego->v) / (mpc_tgt_calc_P.dt *
+          static_cast<real32_T>(arg_time_step));
+      }
+
       rtb_pivot_state = mpc_tgt_calc_P.Constant2_Value_p;
     } else if (arg_ego->state == mpc_tgt_calc_P.Constant2_Value) {
       if (arg_ego->v < arg_tgt->v_max) {
