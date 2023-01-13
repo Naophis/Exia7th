@@ -8,14 +8,14 @@ from plotorval import PlotOrval
 p = Plot()
 po = PlotOrval()
 
-v = 1350
-show = True
-# show = False
+v = 350
+# show = True
+show = False
 
 
-# p.exe("normal", v,show)
+p.exe("normal", v,show)
 # p.exe("large", v, show)
-po.exe("orval", v, show)  # not use
+# po.exe("orval", v, show)  # not use
 # p.exe("dia45", v, show)
 # p.exe("dia45_2", v, show)
 # p.exe("dia135", v, show)
