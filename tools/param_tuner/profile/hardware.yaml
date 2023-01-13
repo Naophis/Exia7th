@@ -227,7 +227,8 @@ comp_v_param:
   enable: 0
 
 battery_param:
-  lp_delay: 0.25
+  # lp_delay: 0.25
+  lp_delay: 1
 led_param:
   # lp_delay: 0.925
   lp_delay: 0.75

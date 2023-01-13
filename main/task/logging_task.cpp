@@ -26,9 +26,10 @@ void LoggingTask::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
 void LoggingTask::start_slalom_log() {
   req_logging_active = true;
   idx_slalom_log = 0;
-  std::vector<std::unique_ptr<log_data_t2>>().swap(log_vec);
+  // std::vector<std::unique_ptr<log_data_t2>>().swap(log_vec);
   log_vec.clear();
   log_vec.shrink_to_fit();
+  sysidlog_vec.clear();
   // log_vec.resize(param->log_size);
   // for (int i = 0; i < param->log_size; i++) {
   //   log_vec[i] = std::make_shared<log_data_t2>();
@@ -73,8 +74,7 @@ void LoggingTask::task() {
     if (log_mode) {
       if (logging_active) {
         if (idx_slalom_log <= param->log_size) {
-          auto ld = make_unique<log_data_t2>();
-
+          auto ld = std::make_shared<log_data_t2>();
           ld->img_v = floatToHalf(tgt_val->ego_in.v);
           ld->v_l = floatToHalf(sensing_result->ego.v_l);
           ld->v_c = floatToHalf(sensing_result->ego.v_c);
@@ -176,16 +176,15 @@ void LoggingTask::save(std::string file_name) {
 
   for (const auto &ld : log_vec) {
 
-    fprintf(f_slalom_log, f1,         //
-            i++,                      //
-            halfToFloat(ld->img_v),   //
-            halfToFloat(ld->v_c),     //
-            halfToFloat(ld->v_c2),    //
-            halfToFloat(ld->v_l),     //
-            halfToFloat(ld->v_r),     //
-            halfToFloat(ld->accl),    //
-            halfToFloat(ld->accl_x)); // 8
-
+    fprintf(f_slalom_log, f1,          //
+            i++,                       //
+            halfToFloat(ld->img_v),    //
+            halfToFloat(ld->v_c),      //
+            halfToFloat(ld->v_c2),     //
+            halfToFloat(ld->v_l),      //
+            halfToFloat(ld->v_r),      //
+            halfToFloat(ld->accl),     //
+            halfToFloat(ld->accl_x));  // 8
     fprintf(f_slalom_log, f2,          //
             halfToFloat(ld->img_w),    //
             halfToFloat(ld->w_lp),     //
@@ -305,9 +304,6 @@ void LoggingTask::dump_log(std::string file_name) {
   log_vec.clear();
   // std::vector<std::shared_ptr<log_data_t2>>().swap(log_vec);
 }
-// 135276
-// 135152
-// 116076
 void LoggingTask::dump_log_sysid(std::string file_name) {
 
   const TickType_t xDelay2 = 100.0 / portTICK_PERIOD_MS;

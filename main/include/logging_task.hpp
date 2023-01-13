@@ -58,7 +58,7 @@ private:
   int idx_slalom_log = 0;
   FILE *f_slalom_log;
   // std::vector<std::shared_ptr<log_data_t>> log_vec;
-  std::vector<std::unique_ptr<log_data_t2>> log_vec;
+  std::vector<std::shared_ptr<log_data_t2>> log_vec;
   std::vector<std::shared_ptr<sysid_log>> sysidlog_vec;
   float calc_sensor(float data, float a, float b, char motion_type);
   float duty_l = 0;
