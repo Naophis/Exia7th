@@ -51,37 +51,37 @@ float TrajectoryCreator::get_run_dir(Direction dir, float ang) {
   if (dir == Direction::North)
     return 0;
   else if (dir == Direction::East)
-    return PI / 2;
+    return m_PI / 2;
   else if (dir == Direction::West)
-    return -PI / 2;
+    return -m_PI / 2;
   else if (dir == Direction::South)
-    return PI;
+    return m_PI;
   else if (dir == Direction::NorthEast)
-    return PI / 4;
+    return m_PI / 4;
   else if (dir == Direction::NorthWest)
-    return -PI / 4;
+    return -m_PI / 4;
   else if (dir == Direction::SouthEast)
-    return PI * 3 / 4;
+    return m_PI * 3 / 4;
   else if (dir == Direction::SouthWest)
-    return -PI * 3 / 4;
+    return -m_PI * 3 / 4;
   return ang;
 }
 
 float TrajectoryCreator::get_turn_tgt_ang(TurnType type) {
   if (type == TurnType::Normal)
-    return PI / 2;
+    return m_PI / 2;
   else if (type == TurnType::Orval)
-    return PI;
+    return m_PI;
   else if (type == TurnType::Large)
-    return PI / 2;
+    return m_PI / 2;
   else if (type == TurnType::Dia45)
-    return PI / 4;
+    return m_PI / 4;
   else if (type == TurnType::Dia135)
-    return PI * 3 / 4;
+    return m_PI * 3 / 4;
   else if (type == TurnType::Dia90)
-    return PI / 2;
+    return m_PI / 2;
   else if (type == TurnType::Kojima)
-    return PI / 2;
+    return m_PI / 2;
   return 0;
 }
 
@@ -635,19 +635,19 @@ void TrajectoryCreator::repaint_slalom(vector<trajectory_point_t> &trajectory,
         tmp_ele.x = trj_ele.x - trj.x;
         tmp_ele.y = trj_ele.y - trj.y;
       } else if (ego.dir == Direction::NorthEast) {
-        const float theta = -45.0 / 180 * PI;
+        const float theta = -45.0 / 180 * m_PI;
         tmp_ele.x = trj_ele.x + (trj.x * cos(theta) - trj.y * sin(theta));
         tmp_ele.y = trj_ele.y + (trj.x * sin(theta) + trj.y * cos(theta));
       } else if (ego.dir == Direction::NorthWest) {
-        const float theta = 45.0 / 180 * PI;
+        const float theta = 45.0 / 180 * m_PI;
         tmp_ele.x = trj_ele.x + (trj.x * cos(theta) - trj.y * sin(theta));
         tmp_ele.y = trj_ele.y + (trj.x * sin(theta) + trj.y * cos(theta));
       } else if (ego.dir == Direction::SouthEast) {
-        const float theta = -135.0 / 180 * PI;
+        const float theta = -135.0 / 180 * m_PI;
         tmp_ele.x = trj_ele.x + (trj.x * cos(theta) - trj.y * sin(theta));
         tmp_ele.y = trj_ele.y + (trj.x * sin(theta) + trj.y * cos(theta));
       } else if (ego.dir == Direction::SouthWest) {
-        const float theta = 135.0 / 180 * PI;
+        const float theta = 135.0 / 180 * m_PI;
         tmp_ele.x = trj_ele.x + (trj.x * cos(theta) - trj.y * sin(theta));
         tmp_ele.y = trj_ele.y + (trj.x * sin(theta) + trj.y * cos(theta));
       }
@@ -668,19 +668,19 @@ void TrajectoryCreator::repaint_slalom(vector<trajectory_point_t> &trajectory,
         tmp_ele.x = trj_ele.x + trj.x;
         tmp_ele.y = trj_ele.y - trj.y;
       } else if (ego.dir == Direction::NorthEast) {
-        const float theta = -45.0 / 180 * PI;
+        const float theta = -45.0 / 180 * m_PI;
         tmp_ele.x = trj_ele.x + (-trj.x * cos(theta) - trj.y * sin(theta));
         tmp_ele.y = trj_ele.y + (-trj.x * sin(theta) + trj.y * cos(theta));
       } else if (ego.dir == Direction::NorthWest) {
-        const float theta = 45.0 / 180 * PI;
+        const float theta = 45.0 / 180 * m_PI;
         tmp_ele.x = trj_ele.x + (-trj.x * cos(theta) - trj.y * sin(theta));
         tmp_ele.y = trj_ele.y + (-trj.x * sin(theta) + trj.y * cos(theta));
       } else if (ego.dir == Direction::SouthEast) {
-        const float theta = -135.0 / 180 * PI;
+        const float theta = -135.0 / 180 * m_PI;
         tmp_ele.x = trj_ele.x + (-trj.x * cos(theta) - trj.y * sin(theta));
         tmp_ele.y = trj_ele.y + (-trj.x * sin(theta) + trj.y * cos(theta));
       } else if (ego.dir == Direction::SouthWest) {
-        const float theta = 135.0 / 180 * PI;
+        const float theta = 135.0 / 180 * m_PI;
         tmp_ele.x = trj_ele.x + (-trj.x * cos(theta) - trj.y * sin(theta));
         tmp_ele.y = trj_ele.y + (-trj.x * sin(theta) + trj.y * cos(theta));
       }

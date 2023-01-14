@@ -427,7 +427,7 @@ float PlanningTask::check_sen_error() {
       if (!(param_ro->clear_dist_ragne_from <= tmp_dist &&
             tmp_dist <= param_ro->clear_dist_ragne_to)) {
         if ((std::abs(tgt_val->ego_in.ang - tgt_val->ego_in.img_ang) * 180 /
-             PI) < param_ro->clear_angle) {
+             m_PI) < param_ro->clear_angle) {
           tgt_val->global_pos.ang = tgt_val->global_pos.img_ang;
           error_entity.w.error_i = 0;
           error_entity.w.error_d = 0;
@@ -513,8 +513,8 @@ float PlanningTask::check_sen_error_dia() {
   } else {
     // TODO Uターン字は別ロジックに修正
     if (tgt_val->tgt_in.tgt_dist >= param_ro->clear_dist_order) {
-      if ((std::abs(tgt_val->ego_in.ang - tgt_val->ego_in.img_ang) * 180 / PI) <
-          param_ro->clear_angle) {
+      if ((std::abs(tgt_val->ego_in.ang - tgt_val->ego_in.img_ang) * 180 /
+           m_PI) < param_ro->clear_angle) {
         // tgt_val->global_pos.ang = tgt_val->global_pos.img_ang;
         // error_entity.w.error_i = 0;
         // error_entity.w.error_d = 0;
@@ -549,13 +549,13 @@ void PlanningTask::calc_vel() {
   float enc_ang_l = 0.f;
   if (ABS(enc_delta_l) < MIN(ABS(enc_delta_l - ENC_RESOLUTION),
                              ABS(enc_delta_l + ENC_RESOLUTION))) {
-    enc_ang_l = 2 * PI * (float)enc_delta_l / (float)ENC_RESOLUTION;
+    enc_ang_l = 2 * m_PI * (float)enc_delta_l / (float)ENC_RESOLUTION;
   } else {
     if (ABS(enc_delta_l - ENC_RESOLUTION) < ABS(enc_delta_l + ENC_RESOLUTION)) {
-      enc_ang_l = 2 * PI * (float)(enc_delta_l - ENC_RESOLUTION) /
+      enc_ang_l = 2 * m_PI * (float)(enc_delta_l - ENC_RESOLUTION) /
                   (float)ENC_RESOLUTION;
     } else {
-      enc_ang_l = 2 * PI * (float)(enc_delta_l + ENC_RESOLUTION) /
+      enc_ang_l = 2 * m_PI * (float)(enc_delta_l + ENC_RESOLUTION) /
                   (float)ENC_RESOLUTION;
     }
   }
@@ -565,13 +565,13 @@ void PlanningTask::calc_vel() {
   float enc_ang_r = 0.f;
   if (ABS(enc_delta_r) < MIN(ABS(enc_delta_r - ENC_RESOLUTION),
                              ABS(enc_delta_r + ENC_RESOLUTION))) {
-    enc_ang_r = 2 * PI * (float)enc_delta_r / (float)ENC_RESOLUTION;
+    enc_ang_r = 2 * m_PI * (float)enc_delta_r / (float)ENC_RESOLUTION;
   } else {
     if (ABS(enc_delta_r - ENC_RESOLUTION) < ABS(enc_delta_r + ENC_RESOLUTION)) {
-      enc_ang_r = 2 * PI * (float)(enc_delta_r - ENC_RESOLUTION) /
+      enc_ang_r = 2 * m_PI * (float)(enc_delta_r - ENC_RESOLUTION) /
                   (float)ENC_RESOLUTION;
     } else {
-      enc_ang_r = 2 * PI * (float)(enc_delta_r + ENC_RESOLUTION) /
+      enc_ang_r = 2 * m_PI * (float)(enc_delta_r + ENC_RESOLUTION) /
                   (float)ENC_RESOLUTION;
     }
   }
@@ -604,9 +604,9 @@ void PlanningTask::update_ego_motion() {
   calc_filter();
 
   sensing_result->ego.rpm.right =
-      30.0 * sensing_result->ego.v_r / (PI * tire / 2);
+      30.0 * sensing_result->ego.v_r / (m_PI * tire / 2);
   sensing_result->ego.rpm.left =
-      30.0 * sensing_result->ego.v_l / (PI * tire / 2);
+      30.0 * sensing_result->ego.v_l / (m_PI * tire / 2);
 
   if (GY_MODE) {
     sensing_result->gyro.data = 0;
@@ -854,10 +854,10 @@ float PlanningTask::get_rpm_ff_val(TurnDirection td) {
   if (td == TurnDirection::Right)
     return param_ro->Ke *
            (tgt_val->ego_in.v + param_ro->tread / 2 * tgt_val->ego_in.w) /
-           (param_ro->tire / 2) * 30.0 / PI;
+           (param_ro->tire / 2) * 30.0 / m_PI;
   return param_ro->Ke *
          (tgt_val->ego_in.v - param_ro->tread / 2 * tgt_val->ego_in.w) /
-         (param_ro->tire / 2) * 30.0 / PI;
+         (param_ro->tire / 2) * 30.0 / m_PI;
 }
 float PlanningTask::satuate_sen_duty(float duty_sen) { return duty_sen; }
 void PlanningTask::calc_tgt_duty() {

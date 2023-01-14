@@ -129,7 +129,7 @@ void MainTask::dump1() {
 
     printf("ego_w: %2.3f, %2.3f, %2.3f, %3.3f deg\n", sensing_result->ego.w_raw,
            sensing_result->ego.w_lp, tgt_val->ego_in.ang,
-           tgt_val->ego_in.ang * 180 / PI);
+           tgt_val->ego_in.ang * 180 / m_PI);
     const float tgt_gain =
         1000.0 /
         (sensing_result->accel_x.raw - tgt_val->accel_x_zero_p_offset) * 9.8;
@@ -795,7 +795,7 @@ void MainTask::load_straight(
   root = cJSON_Parse(str.c_str());
   str.shrink_to_fit();
   const auto key = "straight";
-  for (const auto p2 : straight_name_list) {
+  for (const auto &p2 : straight_name_list) {
     str_p.v_max =
         getItem(getItem(getItem(root, key), p2.second.c_str()), "v_max")
             ->valuedouble;
@@ -839,14 +839,14 @@ void MainTask::load_slas(
   root = cJSON_Parse(str.c_str());
   str.shrink_to_fit();
   printf("%s\n", file_name.c_str());
-  for (const auto p : turn_list) {
+  for (const auto &p : turn_list) {
     printf(" - %s\n", p.second.c_str());
     turn_map[p.first].v =
         getItem(getItem(root, p.second.c_str()), "v")->valuedouble;
     printf(" - v: %f\n", turn_map[p.first].v);
     turn_map[p.first].ang =
         getItem(getItem(root, p.second.c_str()), "ang")->valuedouble;
-    turn_map[p.first].ang = PI * turn_map[p.first].ang / 180;
+    turn_map[p.first].ang = m_PI * turn_map[p.first].ang / 180;
 
     turn_map[p.first].rad =
         getItem(getItem(root, p.second.c_str()), "rad")->valuedouble;
@@ -878,7 +878,7 @@ void MainTask::load_slalom_param(int idx, int idx2) {
   param_set.str_map.clear();
 
   turn_map.clear();
-  for (const auto p : turn_name_list) {
+  for (const auto &p : turn_name_list) {
     if (p.first == TurnType::None) {
       continue;
     }
@@ -890,7 +890,7 @@ void MainTask::load_slalom_param(int idx, int idx2) {
     load_slas(itr->first, itr->second, param_set.map);
   }
   turn_map.clear();
-  for (const auto p : turn_name_list) {
+  for (const auto &p : turn_name_list) {
     if (p.first == TurnType::None) {
       continue;
     }
@@ -1431,7 +1431,7 @@ void MainTask::test_turn() {
   pr.w_max = sys.test.w_max;
   pr.alpha = sys.test.alpha;
   pr.w_end = 0;
-  pr.ang = sys.test.ang * PI / 180;
+  pr.ang = sys.test.ang * m_PI / 180;
   pr.RorL = rorl;
 
   mp->pivot_turn(pr);
@@ -1476,7 +1476,7 @@ void MainTask::test_pivot_n() {
   pr.w_max = sys.test.w_max;
   pr.alpha = sys.test.alpha;
   pr.w_end = 0;
-  pr.ang = sys.test.ang * PI / 180;
+  pr.ang = sys.test.ang * m_PI / 180;
   pr.RorL = rorl;
 
   for (int i = 0; i < sys.test.turn_times; i++) {
@@ -1529,7 +1529,7 @@ void MainTask::test_pivot_n2() {
   pr.w_max = sys.test.w_max;
   pr.alpha = sys.test.alpha;
   pr.w_end = 0;
-  pr.ang = sys.test.ang * PI / 180;
+  pr.ang = sys.test.ang * m_PI / 180;
   pr.RorL = rorl;
 
   for (int i = 0; i < sys.test.turn_times; i++) {
@@ -1572,7 +1572,7 @@ void MainTask::test_sla() {
   auto sla_p2 = param_set.map[static_cast<TurnType>(sys.test.sla_type2)];
   printf("slalom params\n");
   printf("v = %f\n", sla_p.v);
-  printf("ang = %f\n", sla_p.ang * 180 / PI);
+  printf("ang = %f\n", sla_p.ang * 180 / m_PI);
   printf("radius =  %f\n", sla_p.rad);
   printf("time =  %f\n", sla_p.time);
   printf("n = %d\n", sla_p.pow_n);

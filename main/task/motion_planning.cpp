@@ -149,11 +149,11 @@ MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
     vTaskDelay(1.0 / portTICK_RATE_MS);
     c++;
     if (std::abs(tgt_val->ego_in.ang) >= std::abs(p.ang) &&
-        std::abs(tgt_val->ego_in.ang * 180 / PI) > 10) {
+        std::abs(tgt_val->ego_in.ang * 180 / m_PI) > 10) {
       break;
     }
     if (c == 250) { //動き出さないとき
-      if (std::abs(tgt_val->ego_in.ang * 180 / PI) < 10) {
+      if (std::abs(tgt_val->ego_in.ang * 180 / m_PI) < 10) {
         pt->motor_disable();
         vTaskDelay(10.0/ portTICK_RATE_MS);
         pt->motor_enable();
@@ -516,7 +516,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
 
     if (sp.type == TurnType::Orval) {
       if (tgt_val->ego_in.pivot_state == 3 &&
-          std::abs(tgt_val->ego_in.ang * 180 / PI) > 10) {
+          std::abs(tgt_val->ego_in.ang * 180 / m_PI) > 10) {
         tgt_val->ego_in.w = 0;
         break;
       }

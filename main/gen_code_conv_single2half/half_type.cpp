@@ -102,7 +102,8 @@ real16_T doubleToHalf(real64_T a)
   uint16_T outExponent;
   uint16_T outMantissa;
   real16_T out;
-  real64_T one = 1.0;
+  static real64_T one = 1.0;
+ 
   uint32_T endianAdjustment = *((uint32_T*)&one);
   aBitsPointer = (uint32_T *) &a;
   if (endianAdjustment) {

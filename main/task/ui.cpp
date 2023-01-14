@@ -81,29 +81,29 @@ void UserInterface::coin(int time) {
 void UserInterface::hello_exia() {
   int time = 120;
   music_sync(MUSIC::A6_, time);
-  vTaskDelay(10.0/ portTICK_PERIOD_MS);
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
   music_sync(MUSIC::A6_, time);
-  vTaskDelay(10.0/ portTICK_PERIOD_MS);
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
   music_sync(MUSIC::A6_, time);
-  vTaskDelay(10.0/ portTICK_PERIOD_MS);
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
   music_sync(MUSIC::A6_, 3 * time);
   vTaskDelay(time / portTICK_PERIOD_MS);
   music_sync(MUSIC::A6_, time);
-  vTaskDelay(10.0/ portTICK_PERIOD_MS);
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
   music_sync(MUSIC::A6_, time);
-  vTaskDelay(10.0/ portTICK_PERIOD_MS);
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
   music_sync(MUSIC::A6_, time);
-  vTaskDelay(10.0/ portTICK_PERIOD_MS);
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
   music_sync(MUSIC::A6_, time);
-  vTaskDelay(10.0/ portTICK_PERIOD_MS);
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
   music_sync(MUSIC::C7_, 1.5 * time);
   vTaskDelay(time / 3 / portTICK_PERIOD_MS);
   music_sync(MUSIC::G6_, 2 * time);
-  vTaskDelay(10.0/ portTICK_PERIOD_MS);
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
   music_sync(MUSIC::F6_, 2 * time);
-  vTaskDelay(10.0/ portTICK_PERIOD_MS);
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
   music_sync(MUSIC::G6_, 2 * time);
-  vTaskDelay(10.0/ portTICK_PERIOD_MS);
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
 }
 
 void UserInterface::LED_on_off(gpio_num_t gpio_num, int state) {

@@ -8,6 +8,7 @@
 #include "sdkconfig.h"
 #include "soc/adc_channel.h"
 #include "soc/ledc_periph.h"
+#include "soc/gpio_struct.h"
 
 #include "include/enums.hpp"
 #include "include/structs.hpp"
@@ -20,6 +21,9 @@
 #include <string_view>
 #include <unordered_map>
 #include <vector>
+
+#define portTICK_RATE_MS portTICK_PERIOD_MS
+#define xTaskHandle TaskHandle_t
 
 #define ABS(IN) ((IN) < 0 ? -(IN) : (IN))
 
@@ -119,7 +123,7 @@ constexpr uint16_t ENC_OPE_V_R_TH = 175;
 constexpr uint16_t LOG_SIZE = 1300;
 constexpr uint16_t LINE_BUF_SIZE = 512;
 // constexpr float BATTERY_GAIN = 3.2075; // 2.97324;
-constexpr float BATTERY_GAIN = 3.096; // 2.97324;
+constexpr float BATTERY_GAIN = 3.396; // 2.97324;
 
 constexpr uint8_t LEDC_HIGH_SPEED_MODE = 0;
 constexpr float LOW_BATTERY_TH = 7.65;

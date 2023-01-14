@@ -13,7 +13,6 @@ typedef struct {
   real16_T re;
   real16_T im;
 } creal16_T;
-
 extern real32_T halfToFloat(real16_T a);
 extern real64_T halfToDouble(real16_T a);
 extern real16_T floatToHalf(real32_T a);

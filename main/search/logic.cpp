@@ -691,8 +691,8 @@ unsigned int MazeSolverBaseLgc::updateVectorMap(const bool isSearch) {
     Direction dir = now_pos.dir;
     int i = 0;
     int j = 0;
-    Direction d[3];
-    Direction d2[3];
+    Direction d[3] = {Direction::North, Direction::North, Direction::North};
+    Direction d2[3] = {Direction::North, Direction::North, Direction::North};
     float now = getDistV(X, Y, dir);
     if (dir == Direction::North) {
       j = 1;
@@ -807,8 +807,8 @@ unsigned int MazeSolverBaseLgc::updateVectorMap(
 
     int i = 0;
     int j = 0;
-    Direction d[3];
-    Direction d2[3];
+    Direction d[3] = {Direction::North, Direction::North, Direction::North};
+    Direction d2[3] = {Direction::North, Direction::North, Direction::North};
     float now = getDistV(X, Y, dir);
     if (dir == Direction::North) {
       j = 1;

@@ -48,7 +48,7 @@ public:
 
 private:
   float calc_sensor(float data, float a, float b);
-  volatile int lec_cnt = 0;
+  int lec_cnt = 0;
   std::shared_ptr<input_param_t> param;
   int led_light_delay_cnt = 10000;
   xTaskHandle handle = 0;

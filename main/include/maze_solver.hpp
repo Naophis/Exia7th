@@ -11,7 +11,7 @@ constexpr unsigned char MAX_MAZE_SIZE = 32;
 constexpr float ROOT2 = sqrt(2);
 constexpr float dt = 0.001;
 constexpr float eps = 0.001;
-constexpr float PI = 3.141592653589793238;
+constexpr float m_PI = 3.141592653589793238;
 
 typedef struct {
   float n;

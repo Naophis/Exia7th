@@ -93,8 +93,8 @@ void LoggingTask::task() {
           ld->img_dist = floatToHalf(tgt_val->ego_in.img_dist);
           ld->dist = floatToHalf(tgt_val->ego_in.dist);
 
-          ld->img_ang = floatToHalf(tgt_val->ego_in.img_ang * 180 / PI);
-          ld->ang = floatToHalf(tgt_val->ego_in.ang * 180 / PI);
+          ld->img_ang = floatToHalf(tgt_val->ego_in.img_ang * 180 / m_PI);
+          ld->ang = floatToHalf(tgt_val->ego_in.ang * 180 / m_PI);
 
           ld->left90_lp = floatToHalf(sensing_result->ego.left90_lp);
           ld->left45_lp = floatToHalf(sensing_result->ego.left45_lp);
@@ -247,24 +247,7 @@ void LoggingTask::save_sysid(std::string file_name) {
   if (f_slalom_log == NULL)
     printf("slalom_file_load_failed\n");
 
-  const char *f1 = formatsysid.c_str();
-
   int i = 0;
-
-  for (const auto ld : sysidlog_vec) {
-
-    fprintf(f_slalom_log, f1,         //
-            i++,                      //
-            halfToFloat(ld->v_l),     //
-            halfToFloat(ld->v_c),     //
-            halfToFloat(ld->v_r),     //
-            halfToFloat(ld->w_lp),    //
-            halfToFloat(ld->volt_l),  //
-            halfToFloat(ld->volt_r)); // 8
-    if (i > 10 && halfToFloat(ld->v_r) == 0) {
-      break;
-    }
-  }
 
   if (f_slalom_log != NULL) {
     fclose(f_slalom_log);

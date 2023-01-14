@@ -182,7 +182,7 @@ MotionResult SearchController::pivot(param_set_t &p_set, float diff) {
   pr.w_end = p_set.str_map[StraightType::Search].w_end;
 
   flag = (left_exist || right_exist);
-  pr.ang = (flag) ? PI / 2 : PI;
+  pr.ang = (flag) ? m_PI / 2 : m_PI;
   bool front_ctrl2 = false;
   if (!left_exist && !right_exist) {
     pr.RorL = TurnDirection::Right;
@@ -233,7 +233,7 @@ MotionResult SearchController::pivot(param_set_t &p_set, float diff) {
   if (flag) {
     p.motion_type = MotionType::PIVOT_OFFSET;
     p.sct = SensorCtrlType::NONE;
-    pr.ang = PI / 2;
+    pr.ang = m_PI / 2;
 
     res = mp->pivot_turn(pr);
     vTaskDelay(1.0 / portTICK_RATE_MS);
@@ -269,7 +269,7 @@ MotionResult SearchController::pivot(param_set_t &p_set, float diff) {
     mp->reset_ego_data();
     vTaskDelay(1.0 / portTICK_RATE_MS);
   } else {
-    pr.ang = PI;
+    pr.ang = m_PI;
     res = mp->pivot_turn(pr);
     pt->motor_disable();
     mp->reset_tgt_data();
@@ -381,7 +381,7 @@ MotionResult SearchController::pivot90(param_set_t &p_set,
   pr.w_max = p_set.str_map[StraightType::Search].w_max;
   pr.alpha = p_set.str_map[StraightType::Search].alpha;
   pr.w_end = p_set.str_map[StraightType::Search].w_end;
-  pr.ang = PI / 2;
+  pr.ang = m_PI / 2;
   pr.RorL = td;
 
   // pt->motor_disable();
@@ -604,7 +604,7 @@ MotionResult SearchController::straight_offset(param_set_t &p_set,
   pr.w_max = p_set.str_map[StraightType::Search].w_max;
   pr.alpha = p_set.str_map[StraightType::Search].alpha;
   pr.w_end = p_set.str_map[StraightType::Search].w_end;
-  pr.ang = PI / 2;
+  pr.ang = m_PI / 2;
   pr.RorL = td;
 
   pt->motor_enable();
