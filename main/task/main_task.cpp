@@ -174,8 +174,8 @@ int MainTask::select_mode() {
     int res = ui->encoder_operation();
     mode_num += res;
     if (mode_num == -1) {
-      mode_num = 15;
-    } else if (mode_num == 16) {
+      mode_num = 23;
+    } else if (mode_num == 24) {
       mode_num = (int)(MODE::SEARCH);
     }
     lbit.byte = mode_num + 1;
@@ -1100,21 +1100,33 @@ void MainTask::task() {
         path_run(9, 8);
       } else if (mode_num == 12) {
         path_run(10, 8);
-      } else if (mode_num == 12) {
-        path_run(11, 8);
-      } else if (mode_num == 12) {
-        path_run(12, 8);
       } else if (mode_num == 13) {
+        path_run(11, 8);
+      } else if (mode_num == 14) {
+        path_run(12, 8);
+      } else if (mode_num == 15) {
+        path_run(13, 8);
+      } else if (mode_num == 16) {
+        path_run(14, 8);
+      } else if (mode_num == 17) {
+        path_run(15, 8);
+      } else if (mode_num == 18) {
+        path_run(16, 8);
+      } else if (mode_num == 19) {
+        path_run(17, 8);
+      } else if (mode_num == 20) {
+        path_run(18, 8);
+      } else if (mode_num == 21) {
         printf("keep_pivot\n");
         keep_pivot();
-      } else if (mode_num == 14) {
+      } else if (mode_num == 22) {
         // dump1(); // taskの最終行に配置すること
         printf("suction\n");
         mp->reset_gyro_ref_with_check();
         pt->suction_enable(sys.test.suction_duty);
         vTaskDelay(1000 * 10 / portTICK_PERIOD_MS);
         pt->suction_disable();
-      } else if (mode_num == 15) {
+      } else if (mode_num == 23) {
         save_maze_data(false);
         save_maze_kata_data(false);
         save_maze_return_data(false);

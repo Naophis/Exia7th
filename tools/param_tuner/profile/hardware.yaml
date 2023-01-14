@@ -4,7 +4,8 @@ dt: 0.001
 # tire: 13.46
 # tire: 13.367
 # tire: 15.15
-tire: 13.295
+# tire: 13.23
+tire: 12.825
 # tire: 13.095
 # tire: 13.135
 offset_start_dist: 21.0
@@ -42,9 +43,10 @@ clear_angle: 5
 clear_dist_order: 80
 # front_dist_offset: 91.5
 # front_dist_offset: 97.5 # 探索時の前壁補正
-front_dist_offset: 106.0 # 探索時の前壁補正
+# front_dist_offset: 106.0 # 探索時の前壁補正
+front_dist_offset: 97.0 # 探索時の前壁補正
 # front_dist_offset2: 137.0
-front_dist_offset2: 135
+front_dist_offset2: 133
 led_light_delay_cnt: 500
 
 front_dist_offset_pivot_th: 84
@@ -62,7 +64,7 @@ clear_dist_ragne_to: 45
 wall_off_hold_dist: 30
 
 # スラロームオフセット距離壁補正リファレンス値
-sla_wall_ref_l: 46
+sla_wall_ref_l: 47
 sla_wall_ref_r: 46
 
 
@@ -75,19 +77,21 @@ sla_wall_ref_r: 46
 
 # 壁切れ In
 wall_off_hold_exist_dist_l: 73
-wall_off_hold_exist_dist_r: 55
+wall_off_hold_exist_dist_r: 60
 # 壁切れ Out
 wall_off_hold_noexist_th_l: 75
-wall_off_hold_noexist_th_r: 60
+wall_off_hold_noexist_th_r: 63
 # 壁切れ オフセット距離
-wall_off_hold_dist_str_l: -11.5
-wall_off_hold_dist_str_r: -14.0
+# wall_off_hold_dist_str_l: -11.5
+# wall_off_hold_dist_str_r: -14.0
+wall_off_hold_dist_str_l: -8.0
+wall_off_hold_dist_str_r: -8.0
 
 # 壁切れ In(斜め)
-wall_off_hold_exist_dist_dia_l: 45
+wall_off_hold_exist_dist_dia_l: 50
 wall_off_hold_exist_dist_dia_r: 50
 # 壁切れ Out(斜め)
-wall_off_hold_noexist_dia_th_l: 50
+wall_off_hold_noexist_dia_th_l: 55
 wall_off_hold_noexist_dia_th_r: 55
 # 壁切れ オフセット距離(柱)
 wall_off_hold_dist_dia_l2: -0.5
@@ -98,21 +102,20 @@ dia_turn_th_r: 40
 # 壁切れ オフセット距離(斜め壁有り)
 wall_off_hold_dist_dia_l: 6
 wall_off_hold_dist_dia_r: -1.0
+#斜め壁切れ時のmax接近距離
+dia_wall_off_ref_l: 39.0
+dia_wall_off_ref_r: 34.0
 
 #ターン後オフセット距離
-offset_after_turn_l: 30
-offset_after_turn_r: 30
+offset_after_turn_l: 20
+offset_after_turn_r: 20
 offset_after_turn_l2: 15
 offset_after_turn_r2: 15
 offset_after_turn_dia_l: 10
 offset_after_turn_dia_r: 10
 
-#斜め壁切れ時のmax接近距離
-dia_wall_off_ref_l: 38.0
-dia_wall_off_ref_r: 33.0
-
 #ログON_OFF
-logging_time: 4.0
+logging_time: 1.0
 search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1
@@ -129,7 +132,7 @@ ff_front_dury: 0.95
 
 fail_duty_cnt: 150
 fail_v_cnt: 8000
-fail_w_cnt: 250
+fail_w_cnt: 500
 
 cell: 90
 cell2: 90
@@ -201,12 +204,12 @@ sensor_pid:
   c: 0
   mode: 1
 sensor_pid_dia:
-  p: 0.0
+  p: 0.075
   i: 0.0
   d: 0.0
   b: 0
   c: 0
-  mode: 1
+  mode: 0
 gyro_param:
   # gyro_w_gain_right: 0.0024635
   # gyro_w_gain_left: 0.00246375
