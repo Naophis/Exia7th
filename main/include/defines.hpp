@@ -7,8 +7,8 @@
 #include "include/maze_solver.hpp"
 #include "sdkconfig.h"
 #include "soc/adc_channel.h"
-#include "soc/ledc_periph.h"
 #include "soc/gpio_struct.h"
+#include "soc/ledc_periph.h"
 
 #include "include/enums.hpp"
 #include "include/structs.hpp"
@@ -123,7 +123,7 @@ constexpr uint16_t ENC_OPE_V_R_TH = 175;
 constexpr uint16_t LOG_SIZE = 1300;
 constexpr uint16_t LINE_BUF_SIZE = 512;
 // constexpr float BATTERY_GAIN = 3.2075; // 2.97324;
-constexpr float BATTERY_GAIN = 3.396; // 2.97324;
+constexpr float BATTERY_GAIN = 3.3; // 2.97324;
 
 constexpr uint8_t LEDC_HIGH_SPEED_MODE = 0;
 constexpr float LOW_BATTERY_TH = 7.65;
@@ -159,9 +159,9 @@ static const std::string maze_log_return_file("/spiflash/maze_return.log");
 static const std::string
     format1("%d,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
 static const std::string format2("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
-static const std::string format3(
-    "%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,"
-    "%0.3f,%d,");
+static const std::string format3("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0."
+                                 "3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,"
+                                 "%0.3f,%d,");
 static const std::string format4("%0.3f,%0.3f,%0.3f,%0.3f,%d\n");
 static const std::string
     formatsysid("%d,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f\n");

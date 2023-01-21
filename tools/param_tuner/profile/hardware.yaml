@@ -5,7 +5,7 @@ dt: 0.001
 # tire: 13.367
 # tire: 15.15
 # tire: 13.23
-tire: 12.825
+tire: 13.375
 # tire: 13.095
 # tire: 13.135
 offset_start_dist: 21.0
@@ -44,12 +44,12 @@ clear_dist_order: 80
 # front_dist_offset: 91.5
 # front_dist_offset: 97.5 # 探索時の前壁補正
 # front_dist_offset: 106.0 # 探索時の前壁補正
-front_dist_offset: 97.0 # 探索時の前壁補正
+front_dist_offset: 90.50 # 探索時の前壁補正
 # front_dist_offset2: 137.0
-front_dist_offset2: 133
+front_dist_offset2: 115
 led_light_delay_cnt: 500
 
-front_dist_offset_pivot_th: 84
+front_dist_offset_pivot_th: 78
 front_dist_offset_pivot: 96
 
 front_dist_offset_dia_front: 139
@@ -58,14 +58,14 @@ front_dist_offset_dia_45_th: 77
 front_dist_offset_dia_right45: 54
 front_dist_offset_dia_left45: 50
 
-clear_dist_ragne_from: 30
-clear_dist_ragne_to: 45
+clear_dist_ragne_from: 40
+clear_dist_ragne_to: 50
 
 wall_off_hold_dist: 30
 
 # スラロームオフセット距離壁補正リファレンス値
-sla_wall_ref_l: 47
-sla_wall_ref_r: 46
+sla_wall_ref_l: 48
+sla_wall_ref_r: 48
 
 
 # # 壁切れ In
@@ -77,15 +77,15 @@ sla_wall_ref_r: 46
 
 # 壁切れ In
 wall_off_hold_exist_dist_l: 73
-wall_off_hold_exist_dist_r: 60
+wall_off_hold_exist_dist_r: 65
 # 壁切れ Out
 wall_off_hold_noexist_th_l: 75
-wall_off_hold_noexist_th_r: 63
+wall_off_hold_noexist_th_r: 68
 # 壁切れ オフセット距離
 # wall_off_hold_dist_str_l: -11.5
 # wall_off_hold_dist_str_r: -14.0
-wall_off_hold_dist_str_l: -8.0
-wall_off_hold_dist_str_r: -8.0
+wall_off_hold_dist_str_l: -5.50
+wall_off_hold_dist_str_r: -6.0
 
 # 壁切れ In(斜め)
 wall_off_hold_exist_dist_dia_l: 50
@@ -93,18 +93,18 @@ wall_off_hold_exist_dist_dia_r: 50
 # 壁切れ Out(斜め)
 wall_off_hold_noexist_dia_th_l: 55
 wall_off_hold_noexist_dia_th_r: 55
-# 壁切れ オフセット距離(柱)
-wall_off_hold_dist_dia_l2: -0.5
-wall_off_hold_dist_dia_r2: -4.5
+# 壁切れ オフセット距離
+wall_off_hold_dist_dia_l2: -2.0
+wall_off_hold_dist_dia_r2: 3.0
 #斜めターン壁有り補正
-dia_turn_th_l: 40
-dia_turn_th_r: 40
-# 壁切れ オフセット距離(斜め壁有り)
-wall_off_hold_dist_dia_l: 6
-wall_off_hold_dist_dia_r: -1.0
+dia_turn_th_l: 57
+dia_turn_th_r: 55
+# 壁切れ オフセット距離(反対側の壁有り)
+wall_off_hold_dist_dia_l: -7.0
+wall_off_hold_dist_dia_r: -8.0
 #斜め壁切れ時のmax接近距離
-dia_wall_off_ref_l: 39.0
-dia_wall_off_ref_r: 34.0
+dia_wall_off_ref_l: 38.0
+dia_wall_off_ref_r: 39.0
 
 #ターン後オフセット距離
 offset_after_turn_l: 20
@@ -115,7 +115,7 @@ offset_after_turn_dia_l: 10
 offset_after_turn_dia_r: 10
 
 #ログON_OFF
-logging_time: 1.0
+logging_time: 4.0
 search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1
@@ -125,7 +125,7 @@ log_size: 1400
 normal_sla_offset: 7
 
 front_ctrl_error_th: 1
-front_diff_th: 16
+front_diff_th: 20
 
 ff_v_th: 200
 ff_front_dury: 0.95
@@ -138,31 +138,18 @@ cell: 90
 cell2: 90
 
 motor_pid:
-  # p: 0.00475
-  # i: 4.125
-
-  # p: 0.0275
-  # i: 3.75
-
-  # p: 0.0025
-  # i: 1.375
-  # p: 0.0175
-  # i: 0.000215
-  # p: 0.0065
-  # i: 0.0005125
-  # d: 0.012
-
-  # p: 0.00525
-  # i: 1.25
-  p: 0.00475
-  i: 1.95
+  p: 0.00575
+  i: 1.925
   d: 0.0
+  # p: 0.0
+  # i: 0.0
+  # d: 0.0
   b: 0
   c: 0
   mode: 1
 dist_pid:
-  p: 0.5
-  i: 0.00035
+  p: 0.75
+  i: 0.0015
   d: 0.175
   b: 0
   c: 0
@@ -177,9 +164,9 @@ gyro_pid:
   # d: 0.0
   # mode: 1
   # 通常 mode=0
-  p: 0.275
-  i: 0.0285
-  d: 0.275
+  p: 0.175
+  i: 0.0225
+  d: 0.175
   mode: 0
   # p: 0.0
   # i: 0.0
@@ -187,7 +174,7 @@ gyro_pid:
   b: 0
   c: 0
 angle_pid:
-  p: 0.12
+  p: 0.25
   i: 0.0
   d: 0.0
   mode: 1
@@ -213,8 +200,8 @@ sensor_pid_dia:
 gyro_param:
   # gyro_w_gain_right: 0.0024635
   # gyro_w_gain_left: 0.00246375
-  gyro_w_gain_right: 0.002470
-  gyro_w_gain_left: 0.002470
+  gyro_w_gain_right: 0.0024739
+  gyro_w_gain_left: 0.0024739
   lp_delay: 1
 accel_x_param:
   # gain: 315.56 # 16g

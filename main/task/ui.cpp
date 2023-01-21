@@ -61,7 +61,9 @@ void UserInterface::motion_check() {
       break;
     }
     if (sensing_result->ego.left90_dist < 60 &&
-        sensing_result->ego.right90_dist < 60) {
+        sensing_result->ego.right90_dist < 60 &&
+        sensing_result->ego.left90_dist > 10 &&
+        sensing_result->ego.right90_dist > 10) {
       LED_off_all();
       for (int i = 0; i < 2; i++) {
         music_sync(MUSIC::C6_, 100);

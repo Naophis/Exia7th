@@ -3,6 +3,7 @@
 
 // constexpr int MOTOR_HZ = 250000;
 // constexpr int MOTOR_HZ = 125000;
+// constexpr int MOTOR_HZ = 100000;
 constexpr int MOTOR_HZ = 75000 / 1;
 constexpr int SUCTION_MOTOR_HZ = 10000;
 PlanningTask::PlanningTask() {}
@@ -151,7 +152,9 @@ void PlanningTask::task() {
   const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
   BaseType_t queue_recieved;
   init_gpio();
-
+  for (int i = 0; i < 4097; i++) {
+    log_table.push_back(std::log(i));
+  }
   memset(&buzzer_ch, 0, sizeof(buzzer_ch));
   memset(&buzzer_timer, 0, sizeof(buzzer_timer));
   buzzer_ch.channel = (ledc_channel_t)LEDC_CHANNEL_0;
@@ -1364,9 +1367,17 @@ void PlanningTask::cp_request() {
   }
 }
 float PlanningTask::calc_sensor(float data, float a, float b) {
-  auto res = a / std::log(data) - b;
-  if (res < 5 || res > 180)
+  int idx = (int)data;
+  if (idx <= 50 || idx >= log_table.size()) {
     return 180;
+  }
+  auto res = a / log_table.at(idx) - b;
+  if (res < 20 || res > 180) {
+    return 180;
+  }
+  if (!isfinite(res)) {
+    return 180;
+  }
   return res;
 }
 
@@ -1391,9 +1402,44 @@ void PlanningTask::calc_sensor_dist_all() {
     sensing_result->ego.right90_dist =
         calc_sensor(sensing_result->ego.right90_lp, param_ro->sensor_gain.r90.a,
                     param_ro->sensor_gain.r90.b);
-    sensing_result->ego.front_dist =
-        (sensing_result->ego.left90_dist + sensing_result->ego.right90_dist) /
-        2;
+
+    sensing_result->ego.left90_far_dist = calc_sensor(
+        sensing_result->ego.left90_lp, param_ro->sensor_gain.l90_far.a,
+        param_ro->sensor_gain.l90_far.b);
+    sensing_result->ego.right90_far_dist = calc_sensor(
+        sensing_result->ego.right90_lp, param_ro->sensor_gain.r90_far.a,
+        param_ro->sensor_gain.r90_far.b);
+
+    if (sensing_result->ego.left90_dist < 150 &&
+        sensing_result->ego.right90_dist < 150) {
+      sensing_result->ego.front_dist =
+          (sensing_result->ego.left90_dist + sensing_result->ego.right90_dist) /
+          2;
+    } else if (sensing_result->ego.left90_dist > 150 &&
+               sensing_result->ego.right90_dist < 150) {
+      sensing_result->ego.front_dist = sensing_result->ego.right90_dist;
+    } else if (sensing_result->ego.left90_dist < 150 &&
+               sensing_result->ego.right90_dist > 150) {
+      sensing_result->ego.front_dist = sensing_result->ego.left90_dist;
+    } else {
+      sensing_result->ego.front_dist = 180;
+    }
+
+    if (sensing_result->ego.left90_far_dist < 150 &&
+        sensing_result->ego.right90_far_dist < 150) {
+      sensing_result->ego.front_far_dist =
+          (sensing_result->ego.left90_far_dist +
+           sensing_result->ego.right90_far_dist) /
+          2;
+    } else if (sensing_result->ego.left90_far_dist > 150 &&
+               sensing_result->ego.right90_far_dist < 150) {
+      sensing_result->ego.front_far_dist = sensing_result->ego.right90_far_dist;
+    } else if (sensing_result->ego.left90_far_dist < 150 &&
+               sensing_result->ego.right90_far_dist > 150) {
+      sensing_result->ego.front_far_dist = sensing_result->ego.left90_far_dist;
+    } else {
+      sensing_result->ego.front_far_dist = 180;
+    }
   } else {
     sensing_result->ego.left90_dist        //
         = sensing_result->ego.left45_dist  //

@@ -100,19 +100,19 @@ void SensingTask::task() {
           tgt_val->motion_type == MotionType::PIVOT)) {
     }
 
-    gpio_set_level(LED_R90, 1);
-    gpio_set_level(LED_L90, 1);
+    GPIO.out_w1ts = BIT(LED_R90_BIT);
+    GPIO.out_w1ts = BIT(LED_L90_BIT);
     lec_cnt = 0;
     for (int i = 0; i < param->led_light_delay_cnt; i++) {
       lec_cnt++;
     }
     adc2_get_raw(SEN_R90, width, &sensing_result->led_sen_after.right90.raw);
     adc2_get_raw(SEN_L90, width, &sensing_result->led_sen_after.left90.raw);
-    gpio_set_level(LED_R90, 0);
-    gpio_set_level(LED_L90, 0);
+    GPIO.out_w1tc = BIT(LED_R90_BIT);
+    GPIO.out_w1tc = BIT(LED_L90_BIT);
 
-    gpio_set_level(LED_R45, 1);
-    gpio_set_level(LED_L45, 1);
+    GPIO.out_w1ts = BIT(LED_R45_BIT);
+    GPIO.out_w1ts = BIT(LED_L45_BIT);
     lec_cnt = 0;
     // sensing_result->gyro.raw = gyro_if.read_2byte_itr();
     // gyro_if.req_read2byte_itr(0x3B);
@@ -144,11 +144,10 @@ void SensingTask::task() {
     sensing_result->led_sen.front.raw = (sensing_result->led_sen.left90.raw +
                                          sensing_result->led_sen.right90.raw) /
                                         2;
-    gpio_set_level(LED_R90, 0);
-    gpio_set_level(LED_R45, 0);
-    gpio_set_level(LED_L45, 0);
-    gpio_set_level(LED_L90, 0);
-
+    GPIO.out_w1tc = BIT(LED_R90_BIT);
+    GPIO.out_w1tc = BIT(LED_R45_BIT);
+    GPIO.out_w1tc = BIT(LED_R45_BIT);
+    GPIO.out_w1tc = BIT(LED_L45_BIT);
     // pcnt_get_counter_value(PCNT_UNIT_0, &sensing_result->encoder_raw.right);
     // pcnt_counter_clear(PCNT_UNIT_0);
     // pcnt_get_counter_value(PCNT_UNIT_1, &sensing_result->encoder_raw.left);

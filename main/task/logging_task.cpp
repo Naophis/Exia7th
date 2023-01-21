@@ -153,11 +153,16 @@ float LoggingTask::calc_sensor(float data, float a, float b, char motion_type) {
        motion_type == static_cast<char>(MotionType::PIVOT))) {
     return 0;
   }
-  auto res = a / std::log(data) - b;
-  if (res < 0)
+  if (data <= 50 || data >= 3800) {
     return 0;
-  if (res > 180)
-    return 180;
+  }
+  auto res = a / std::log(data) - b;
+  if (res < 20 || res > 180) {
+    return 0;
+  }
+  if (!isfinite(res)) {
+    return 0;
+  }
   return res;
 }
 
@@ -198,16 +203,42 @@ void LoggingTask::save(std::string file_name) {
                            param->sensor_gain.l90.b, ld->motion_type);
     auto l45 = calc_sensor(halfToFloat(ld->left45_lp), param->sensor_gain.l45.a,
                            param->sensor_gain.l45.b, ld->motion_type);
-    auto front = calc_sensor(
-        (halfToFloat(ld->left90_lp) + halfToFloat(ld->right90_lp)) / 2,
-        param->sensor_gain.front.a, param->sensor_gain.front.b,
-        ld->motion_type);
     auto r45 =
         calc_sensor(halfToFloat(ld->right45_lp), param->sensor_gain.r45.a,
                     param->sensor_gain.r45.b, ld->motion_type);
     auto r90 =
         calc_sensor(halfToFloat(ld->right90_lp), param->sensor_gain.r90.a,
                     param->sensor_gain.r90.b, ld->motion_type);
+
+    auto l90_far =
+        calc_sensor(halfToFloat(ld->left90_lp), param->sensor_gain.l90_far.a,
+                    param->sensor_gain.l90_far.b, ld->motion_type);
+    auto r90_far =
+        calc_sensor(halfToFloat(ld->right90_lp), param->sensor_gain.r90_far.a,
+                    param->sensor_gain.r90_far.b, ld->motion_type);
+    float front = 0;
+    if (l90 > 0 && r90 > 0) {
+      front = (l90 + r90) / 2;
+    } else if (l90 == 0 && r90 > 0) {
+      front = r90;
+    } else if (l90 > 0 && r90 == 0) {
+      front = l90;
+    } else {
+      front = 0;
+    }
+
+    float front_far = 0;
+
+    if (l90_far > 0 && r90_far > 0) {
+      front_far = (l90_far + r90_far) / 2;
+    } else if (l90_far > 0 && r90_far == 0) {
+      front_far = l90_far;
+    } else if (l90_far == 0 && r90_far > 0) {
+      front_far = r90_far;
+    } else {
+      front_far = 0;
+    }
+
     auto dist = halfToFloat(ld->img_dist);
     float dist_mod = (int)(dist / 90);
     float tmp_dist = dist - 90 * dist_mod;
@@ -219,6 +250,7 @@ void LoggingTask::save(std::string file_name) {
             halfToFloat(ld->right45_lp),                                      //
             halfToFloat(ld->right90_lp),                                      //
             l90, l45, front, r45, r90,                                        //
+            l90_far, front_far, r90_far,                                      //
             halfToFloat(ld->battery_lp),                                      //
             halfToFloat(ld->duty_l),                                          //
             halfToFloat(ld->duty_r),                                          //
@@ -268,7 +300,8 @@ void LoggingTask::dump_log(std::string file_name) {
          "ideal_dist,"
          "dist,"
          "ideal_ang,ang,left90,left45,front,right45,right90,left90_d,left45_d,"
-         "front_d,right45_d,right90_d,battery,duty_l,"
+         "front_d,right45_d,right90_d,left90_far_d,front_far_d,right90_far_d,"
+         "battery,duty_l,"
          "duty_r,motion_state,duty_sen,dist_mod90,"
          "sen_dist_l45,sen_dist_r45,timestamp\n");
   int c = 0;

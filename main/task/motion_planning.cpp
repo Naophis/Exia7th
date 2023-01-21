@@ -142,7 +142,7 @@ MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
   tgt_val->nmr.timstamp++;
   xQueueReset(*qh);
   xQueueSendToFront(*qh, &tgt_val, 1);
-  vTaskDelay(10.0/ portTICK_RATE_MS);
+  vTaskDelay(10.0 / portTICK_RATE_MS);
 
   int c = 0;
   while (1) {
@@ -155,7 +155,7 @@ MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
     if (c == 250) { //動き出さないとき
       if (std::abs(tgt_val->ego_in.ang * 180 / m_PI) < 10) {
         pt->motor_disable();
-        vTaskDelay(10.0/ portTICK_RATE_MS);
+        vTaskDelay(10.0 / portTICK_RATE_MS);
         pt->motor_enable();
         reset_tgt_data();
         reset_ego_data();
@@ -190,7 +190,7 @@ MotionResult MotionPlanning::pivot_turn(param_roll_t &p) {
         c = 0;
         xQueueReset(*qh);
         xQueueSendToFront(*qh, &tgt_val, 1);
-        vTaskDelay(10.0/ portTICK_RATE_MS);
+        vTaskDelay(10.0 / portTICK_RATE_MS);
       }
     }
     if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
@@ -695,8 +695,8 @@ MotionResult MotionPlanning::front_ctrl(bool limit) {
     } else {
       cnt = 0;
     }
-    // printf("%f %f %f\n", sensing_result->ego.front_dist,
-    //        sensing_result->ego.duty.duty_l, sensing_result->ego.duty.duty_r);
+    // printf("%f %f %f\n", sensing_result->ego.left90_dist,
+    //        sensing_result->ego.front_dist, sensing_result->ego.right90_dist);
     max_cnt++;
     if (!limit) {
       if (cnt > param->sen_ref_p.search_exist.front_ctrl_th)
@@ -901,7 +901,7 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
   while (1) {
     if (ui->button_state_hold())
       break;
-    vTaskDelay(10.0/ portTICK_RATE_MS);
+    vTaskDelay(10.0 / portTICK_RATE_MS);
   }
   lt->dump_log(slalom_log_file);
 }
@@ -944,11 +944,13 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
         break;
       }
       if (40 < sensing_result->ego.left90_dist &&
-          sensing_result->ego.left90_dist < 150 &&
-          40 < sensing_result->ego.right90_dist &&
-          sensing_result->ego.right90_dist < 150) {
+          sensing_result->ego.left90_dist < 150
+          // &&
+          // 40 < sensing_result->ego.right90_far_dist &&
+          // sensing_result->ego.right90_far_dist < 150
+      ) {
         ps_front.dist -=
-            (param->front_dist_offset2 - sensing_result->ego.front_dist);
+            (param->front_dist_offset2 - sensing_result->ego.front_far_dist);
         return;
       }
       if (std::abs(tgt_val->ego_in.dist) >= std::abs(tgt_val->nmr.dist)) {
@@ -957,12 +959,12 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
       vTaskDelay(1.0 / portTICK_RATE_MS);
     }
     while (true) {
-      // if (40 < sensing_result->ego.left90_dist &&
-      //     sensing_result->ego.left90_dist < 150 &&
-      //     40 < sensing_result->ego.right90_dist &&
-      //     sensing_result->ego.right90_dist < 150) {
+      // if (40 < sensing_result->ego.left90_far_dist &&
+      //     sensing_result->ego.left90_far_dist < 150 &&
+      //     40 < sensing_result->ego.right90_far_dist &&
+      //     sensing_result->ego.right90_far_dist < 150) {
       //   ps_front.dist -=
-      //       (param->front_dist_offset2 - sensing_result->ego.front_dist);
+      //       (param->front_dist_offset2 - sensing_result->ego.front_far_dist);
       //   return;
       // }
       if (sensing_result->ego.right45_dist >
@@ -978,11 +980,13 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
         break;
       }
       if (40 < sensing_result->ego.left90_dist &&
-          sensing_result->ego.left90_dist < 150 &&
-          40 < sensing_result->ego.right90_dist &&
-          sensing_result->ego.right90_dist < 150) {
+          sensing_result->ego.left90_dist < 150
+          // &&
+          // 40 < sensing_result->ego.right90_far_dist &&
+          // sensing_result->ego.right90_far_dist < 150
+      ) {
         ps_front.dist -=
-            (param->front_dist_offset2 - sensing_result->ego.front_dist);
+            (param->front_dist_offset2 - sensing_result->ego.front_far_dist);
         return;
       }
       if (std::abs(tgt_val->ego_in.dist) >= std::abs(tgt_val->nmr.dist)) {
@@ -995,12 +999,12 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
         ps_front.dist += param->wall_off_dist.left_str;
         return;
       }
-      // if (40 < sensing_result->ego.left90_dist &&
-      //     sensing_result->ego.left90_dist < 150 &&
-      //     40 < sensing_result->ego.right90_dist &&
-      //     sensing_result->ego.right90_dist < 150) {
+      // if (40 < sensing_result->ego.left90_far_dist &&
+      //     sensing_result->ego.left90_far_dist < 150 &&
+      //     40 < sensing_result->ego.right90_far_dist &&
+      //     sensing_result->ego.right90_far_dist < 150) {
       //   ps_front.dist -=
-      //       (param->front_dist_offset2 - sensing_result->ego.front_dist);
+      //       (param->front_dist_offset2 - sensing_result->ego.front_far_dist);
       //   return;
       // }
       vTaskDelay(1.0 / portTICK_RATE_MS);

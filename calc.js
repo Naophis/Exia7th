@@ -33,3 +33,13 @@ function calc_req_enc_spec(v, r, gear_ratio) {
 
 }
 calc_req_enc_spec(v, r, gear_ratio);
+
+var right = 400;
+var a = 417.79380553801263;
+// var b = 29.122723581924973;
+var b = 24.122723581924973;
+
+function calc_dist(data, a, b) {
+  return a / Math.log(a) - b;
+}
+console.log(calc_dist(right, a, b));

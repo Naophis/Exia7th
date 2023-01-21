@@ -64,6 +64,7 @@ public:
   motion_tgt_val_t *receive_req;
 
   void set_queue_handler(QueueHandle_t &_qh) { qh = &_qh; }
+  std::vector<float> log_table;
 
 private:
   void motor_enable_main();

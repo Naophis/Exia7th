@@ -116,6 +116,9 @@ typedef struct {
   float left90_dist = 0;
   float right45_dist = 0;
   float right90_dist = 0;
+  float front_far_dist = 0;
+  float left90_far_dist = 0;
+  float right90_far_dist = 0;
 
   float front_dist_old = 0;
   float left45_dist_old = 0;
@@ -247,6 +250,8 @@ typedef struct {
   sensor_gain_param_t front;
   sensor_gain_param_t r45;
   sensor_gain_param_t r90;
+  sensor_gain_param_t l90_far;
+  sensor_gain_param_t r90_far;
 } sensor_gain_t;
 
 // typedef struct{

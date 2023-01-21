@@ -106,12 +106,26 @@ void MainTask::dump1() {
         sensing_result->led_sen.left45.raw, sensing_result->led_sen.front.raw,
         sensing_result->led_sen.right45.raw,
         sensing_result->led_sen.right90.raw);
-    printf("sensor_dist: %3.2f, %3.2f, %3.2f, %3.2f, %3.2f\n",
-           sensing_result->ego.left90_dist,  //
-           sensing_result->ego.left45_dist,  //
-           sensing_result->ego.front_dist,   //
-           sensing_result->ego.right45_dist, //
-           sensing_result->ego.right90_dist);
+    printf("sensor_before: %4d, %4d, %4d, %4d, %4d\n",
+           sensing_result->led_sen_before.left90.raw,
+           sensing_result->led_sen_before.left45.raw,
+           sensing_result->led_sen_before.front.raw,
+           sensing_result->led_sen_before.right45.raw,
+           sensing_result->led_sen_before.right90.raw);
+    printf("sensor_after: %4d, %4d, %4d, %4d, %4d\n",
+           sensing_result->led_sen_after.left90.raw,
+           sensing_result->led_sen_after.left45.raw,
+           sensing_result->led_sen_after.front.raw,
+           sensing_result->led_sen_after.right45.raw,
+           sensing_result->led_sen_after.right90.raw);
+    printf("sensor_dist: %3.2f(%3.2f), %3.2f, %3.2f, %3.2f, %3.2f(%3.2f)\n",
+           sensing_result->ego.left90_dist,     //
+           sensing_result->ego.left90_far_dist, //
+           sensing_result->ego.left45_dist,     //
+           sensing_result->ego.front_dist,      //
+           sensing_result->ego.right45_dist,    //
+           sensing_result->ego.right90_dist,    //
+           sensing_result->ego.right90_far_dist);
 
     printf("sensor: %0.1f, %0.1f, %0.1f, %0.1f, %0.1f\n",
            param->sen_ref_p.search_exist.left90,
@@ -613,9 +627,13 @@ void MainTask::load_sensor_param() {
 
   gain = getItem(root, "gain");
   param->sensor_gain.l90.a =
-      cJSON_GetArrayItem(getItem(gain, "L90"), 0)->valuedouble;
+      cJSON_GetArrayItem(getItem(gain, "L90_near"), 0)->valuedouble;
   param->sensor_gain.l90.b =
-      cJSON_GetArrayItem(getItem(gain, "L90"), 1)->valuedouble;
+      cJSON_GetArrayItem(getItem(gain, "L90_near"), 1)->valuedouble;
+  param->sensor_gain.l90_far.a =
+      cJSON_GetArrayItem(getItem(gain, "L90_far"), 0)->valuedouble;
+  param->sensor_gain.l90_far.b =
+      cJSON_GetArrayItem(getItem(gain, "L90_far"), 1)->valuedouble;
   param->sensor_gain.l45.a =
       cJSON_GetArrayItem(getItem(gain, "L45"), 0)->valuedouble;
   param->sensor_gain.l45.b =
@@ -629,9 +647,13 @@ void MainTask::load_sensor_param() {
   param->sensor_gain.r45.b =
       cJSON_GetArrayItem(getItem(gain, "R45"), 1)->valuedouble;
   param->sensor_gain.r90.a =
-      cJSON_GetArrayItem(getItem(gain, "R90"), 0)->valuedouble;
+      cJSON_GetArrayItem(getItem(gain, "R90_near"), 0)->valuedouble;
   param->sensor_gain.r90.b =
-      cJSON_GetArrayItem(getItem(gain, "R90"), 1)->valuedouble;
+      cJSON_GetArrayItem(getItem(gain, "R90_near"), 1)->valuedouble;
+  param->sensor_gain.r90_far.a =
+      cJSON_GetArrayItem(getItem(gain, "R90_far"), 0)->valuedouble;
+  param->sensor_gain.r90_far.b =
+      cJSON_GetArrayItem(getItem(gain, "R90_far"), 1)->valuedouble;
 
   // cJSON_free(normal);
   // cJSON_free(normal_ref);
