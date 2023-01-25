@@ -41,12 +41,14 @@ Lm: 0.0000035
 sakiyomi_time: 10
 clear_angle: 5
 clear_dist_order: 80
-# front_dist_offset: 91.5
-# front_dist_offset: 97.5 # 探索時の前壁補正
-# front_dist_offset: 106.0 # 探索時の前壁補正
-front_dist_offset: 90.50 # 探索時の前壁補正
+
+# 探索スラローム
+front_dist_offset: 89.50 # 探索時の前壁補正
+# スラロームオフセット距離壁補正リファレンス値
+sla_wall_ref_l: 47
+sla_wall_ref_r: 47
+
 # front_dist_offset2: 137.0
-front_dist_offset2: 115
 led_light_delay_cnt: 500
 
 front_dist_offset_pivot_th: 78
@@ -63,29 +65,17 @@ clear_dist_ragne_to: 50
 
 wall_off_hold_dist: 30
 
-# スラロームオフセット距離壁補正リファレンス値
-sla_wall_ref_l: 48
-sla_wall_ref_r: 48
-
-
-# # 壁切れ In
-# wall_off_hold_exist_dist_l: 73
-# wall_off_hold_exist_dist_r: 76
-# # 壁切れ Out
-# wall_off_hold_noexist_th_l: 75
-# wall_off_hold_noexist_th_r: 79
-
 # 壁切れ In
 wall_off_hold_exist_dist_l: 73
-wall_off_hold_exist_dist_r: 65
+wall_off_hold_exist_dist_r: 73
 # 壁切れ Out
 wall_off_hold_noexist_th_l: 75
-wall_off_hold_noexist_th_r: 68
+wall_off_hold_noexist_th_r: 75
 # 壁切れ オフセット距離
-# wall_off_hold_dist_str_l: -11.5
-# wall_off_hold_dist_str_r: -14.0
-wall_off_hold_dist_str_l: -5.50
-wall_off_hold_dist_str_r: -6.0
+wall_off_hold_dist_str_l: -6.50
+wall_off_hold_dist_str_r: -7.0
+# 壁切れ：前壁補正
+front_dist_offset2: 133
 
 # 壁切れ In(斜め)
 wall_off_hold_exist_dist_dia_l: 50
@@ -115,7 +105,7 @@ offset_after_turn_dia_l: 10
 offset_after_turn_dia_r: 10
 
 #ログON_OFF
-logging_time: 4.0
+logging_time: 1.0
 search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1
@@ -164,9 +154,9 @@ gyro_pid:
   # d: 0.0
   # mode: 1
   # 通常 mode=0
-  p: 0.175
+  p: 0.275
   i: 0.0225
-  d: 0.175
+  d: 0.275
   mode: 0
   # p: 0.0
   # i: 0.0
@@ -191,7 +181,8 @@ sensor_pid:
   c: 0
   mode: 1
 sensor_pid_dia:
-  p: 0.075
+  # p: 0.075
+  p: 0.0
   i: 0.0
   d: 0.0
   b: 0

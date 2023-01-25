@@ -2,7 +2,7 @@ clear;
 
 home = pwd;
 
-sim_time = 15;
+sim_time = 25;
 script_file = mfilename('fullpath');
 [filepath, name, ext] = fileparts(script_file);
 cd(filepath);
@@ -17,7 +17,7 @@ test_mode = 0; % straight
 % test_mode = 1; % slalom
 % test_mode = 2; % pivot
 %  test_mode = 3; % back_straight
-%test_mode = 4; % slalom2
+test_mode = 4; % slalom2
 % test_mode = 5; % back
 
 %default
@@ -261,6 +261,9 @@ elseif test_mode == 4
     radius = 68;
 
     tgt_angle = 180.0 * pi / 180;
+    param_alpha = (2 * ego_v^2 / (radius^2 * tgt_angle / 2));
+
+    tgt_angle = 45.0 * pi / 180;
     param_alpha = (2 * ego_v^2 / (radius^2 * tgt_angle / 2));
 
     w_max = 250000;

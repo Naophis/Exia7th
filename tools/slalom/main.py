@@ -8,9 +8,9 @@ from plotorval import PlotOrval
 p = Plot()
 po = PlotOrval()
 
-v = 300
-show = True
-# show = False
+v = 380
+# show = True
+show = False
 
 
 p.exe("normal", v,show)

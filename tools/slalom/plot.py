@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import math
 
 from slalom import Slalom
+from slalom2 import Slalom2
 from matplotlib import gridspec
 
 plot_row = 5
@@ -27,6 +28,7 @@ class Plot:
         start_pos = {"x": 0, "y": 0}
         end_pos = {"x": 90, "y": 90}
         start_ang = 0
+        tgt_ang1 = tgt_ang2 = tgt_ang3 = 0
         if type == "normal":
             rad = 26
             n = 4
@@ -46,8 +48,11 @@ class Plot:
             end_pos = {"x": 0, "y": 180}
             start_ang = 0
         elif type == "dia45":
-            rad = 52
-            n = 4
+            rad = 70
+            n = 2
+            tgt_ang1 = 45.0 * 1 / 3
+            tgt_ang2 = 45.0 * 2 / 3
+            tgt_ang3 = 45.0
             tgt_ang = 45
             end_pos = {"x": 90, "y": 45}
             start_ang = 0
@@ -75,10 +80,15 @@ class Plot:
             tgt_ang = 90
             end_pos = {"x": 0, "y": 90}
             start_ang = 0
+        res = {}
+        if type == "dia45":
+            sla = Slalom2(v, rad, tgt_ang1, tgt_ang2, tgt_ang3, end_pos, slip_gain, type)
+            res = sla.calc(start_ang)
+        else:
+            sla = Slalom(v, rad, n, tgt_ang, end_pos, slip_gain, type)
+            sla.calc_base_time()
+            res = sla.calc(start_ang)
 
-        sla = Slalom(v, rad, n, tgt_ang, end_pos, slip_gain, type)
-        sla.calc_base_time()
-        res = sla.calc(start_ang)
         # sla.calc_offset_front()
         start_pos_x = [0, 0]
         start_pos_y = [0, 0]
@@ -129,7 +139,8 @@ class Plot:
         # # 後距離
         trj.plot(sla.end_offset_list[0], sla.end_offset_list[1],
                  ls="-", color="coral", lw=trj_width, alpha=trj_alpha)
-
+        plW = plt.subplot2grid((plot_row, plot_col), (4, 1), rowspan=1)
+        plW.plot(res["w"])
         first = [sla.start_offset, sla.end_offset]
         start_pos_x = [0, 0]
         start_pos_y = [0, 0]
@@ -153,8 +164,8 @@ class Plot:
         plVy.plot(res["vy"] * 1000)
         plW = plt.subplot2grid((plot_row, plot_col), (3, 1), rowspan=1)
         plW.plot(res["w"])
-        plBeta = plt.subplot2grid((plot_row, plot_col), (4, 1), rowspan=1)
-        plBeta.plot(res["beta"] * 180 / np.pi)
+        # plBeta = plt.subplot2grid((plot_row, plot_col), (4, 1), rowspan=1)
+        # plBeta.plot(res["beta"] * 180 / np.pi)
         # plVx.plot(res["vx"])
         print('{}:'.format(type))
         print('  v: {}'.format(sla.v))
@@ -168,7 +179,7 @@ class Plot:
             sla.end_offset, sla.end_offset))
 
         accY = plt.subplot2grid((plot_row, plot_col), (4, 0), rowspan=1)
-        accY.plot(res["acc_y"]/9.8)
+        accY.plot(res["acc_y"] / 9.8)
 
         trj.set_aspect('1.0')
         plot_range = [-60, 180]
@@ -179,5 +190,5 @@ class Plot:
 
         if show:
             acc_y = np.abs(res["acc_y"]).max()
-            plt.suptitle("{}[G]".format(acc_y/9.8))
+            plt.suptitle("{}[G]".format(acc_y / 9.8))
             plt.show()

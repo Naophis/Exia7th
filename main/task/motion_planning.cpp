@@ -486,12 +486,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   tgt_val->nmr.sct = SensorCtrlType::NONE;
   // tgt_val->ego_in.v = sp.v;//強制的に速度を指定
 
-  if (sp.type != TurnType::Orval) {
-    tgt_val->nmr.ang = 0;
-    tgt_val->nmr.w_max = 0;
-    tgt_val->nmr.w_end = 0;
-    tgt_val->nmr.alpha = 0;
-  } else if (sp.type == TurnType::Orval) {
+  if (sp.type == TurnType::Orval) {
     tgt_val->nmr.motion_mode = RUN_MODE2::SLALOM_RUN2;
     tgt_val->nmr.ang = sp.ang;
     tgt_val->nmr.sla_rad = sp.rad;
@@ -502,6 +497,22 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
       tgt_val->nmr.w_max = -200000;
       tgt_val->nmr.alpha = -(2 * sp.v * sp.v / (sp.rad * sp.rad * sp.ang / 3));
     }
+  } else if (sp.type == TurnType::Dia45) {
+    tgt_val->nmr.motion_mode = RUN_MODE2::SLALOM_RUN2;
+    tgt_val->nmr.ang = sp.ang;
+    tgt_val->nmr.sla_rad = sp.rad;
+    tgt_val->nmr.w_end = 0;
+    tgt_val->nmr.alpha = (2 * sp.v * sp.v / (sp.rad * sp.rad * sp.ang / 3));
+    tgt_val->nmr.w_max = 200000;
+    if (td == TurnDirection::Right) {
+      tgt_val->nmr.w_max = -200000;
+      tgt_val->nmr.alpha = -(2 * sp.v * sp.v / (sp.rad * sp.rad * sp.ang / 3));
+    }
+  } else {
+    tgt_val->nmr.ang = 0;
+    tgt_val->nmr.w_max = 0;
+    tgt_val->nmr.w_end = 0;
+    tgt_val->nmr.alpha = 0;
   }
   tgt_val->ego_in.sla_param.counter = 1;
   tgt_val->ego_in.sla_param.limit_time_count = (int)(sp.time * 2 / dt);
@@ -514,7 +525,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
   while (1) {
     vTaskDelay(1.0 / portTICK_RATE_MS);
 
-    if (sp.type == TurnType::Orval) {
+    if (tgt_val->nmr.motion_mode == RUN_MODE2::SLALOM_RUN2) {
       if (tgt_val->ego_in.pivot_state == 3 &&
           std::abs(tgt_val->ego_in.ang * 180 / m_PI) > 10) {
         tgt_val->ego_in.w = 0;
