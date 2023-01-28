@@ -51,6 +51,9 @@ MotionResult SearchController::go_straight_wrapper(param_set_t &p_set,
     p.v_max = p_set.str_map[StraightType::FastRun].v_max;
   }
   p.v_end = p_set.str_map[st].v_max;
+  if (st == StraightType::FastRunDia) {
+    p.v_end = p_set.str_map[StraightType::Search].v_max;
+  }
   // p.v_end = p_set.map[TurnType::Normal].v;
   p.accl = p_set.str_map[st].accl;
   p.decel = p_set.str_map[st].decel;
@@ -521,6 +524,9 @@ SearchResult SearchController::exec(param_set_t &p_set, SearchMode sm) {
       if (front_is_stepped && next_motion2 == Motion::Straight) {
         adachi->diff += std::abs(after2 - before2);
         mr = go_straight_wrapper(p_set, adachi->diff, StraightType::FastRun);
+      } else if (front_is_stepped && next_motion2 != Motion::Straight) {
+        adachi->diff += std::abs(after2 - before2);
+        mr = go_straight_wrapper(p_set, adachi->diff, StraightType::FastRunDia);
       } else {
         mr = go_straight_wrapper(p_set, adachi->diff, StraightType::Search);
       }

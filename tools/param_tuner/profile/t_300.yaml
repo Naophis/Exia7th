@@ -16,12 +16,12 @@ straight:
     w_end: 0.1
     alpha: 240
   fast_run_dia:
-    v_max: 500
-    accl: 3500
-    decel: -3000
-    w_max: 5
+    v_max: 700
+    accl: 2500
+    decel: -2500
+    w_max: 22.5
     w_end: 0.1
-    alpha: 10
+    alpha: 240
 
 orval:
   v: 300.000000
