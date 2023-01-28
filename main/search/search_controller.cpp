@@ -43,13 +43,18 @@ void SearchController::reset() {
   adachi->reset_goal();
 }
 MotionResult SearchController::go_straight_wrapper(param_set_t &p_set,
-                                                   float diff) {
+                                                   float diff,
+                                                   StraightType st) {
   // param_straight_t p;
-  p.v_max = p_set.str_map[StraightType::Search].v_max;
-  p.v_end = p_set.str_map[StraightType::Search].v_max;
+  p.v_max = p_set.str_map[st].v_max;
+  if (pt->mpc_next_ego.v + 10 > p.v_max) {
+    p.v_max = p_set.str_map[StraightType::FastRun].v_max;
+  }
+  p.v_max = p_set.str_map[st].v_max;
+  p.v_end = p_set.str_map[st].v_max;
   // p.v_end = p_set.map[TurnType::Normal].v;
-  p.accl = p_set.str_map[StraightType::Search].accl;
-  p.decel = p_set.str_map[StraightType::Search].decel;
+  p.accl = p_set.str_map[st].accl;
+  p.decel = p_set.str_map[st].decel;
 
   p.dist = param->cell - diff;
   p.motion_type = MotionType::STRAIGHT;
@@ -306,7 +311,7 @@ MotionResult SearchController::pivot(param_set_t &p_set, float diff) {
 
   if (adachi != nullptr) {
     adachi->update();
-    vTaskDelay(10.0/ portTICK_RATE_MS);
+    vTaskDelay(10.0 / portTICK_RATE_MS);
   }
 
   vTaskDelay(25.0 / portTICK_RATE_MS);
@@ -391,7 +396,7 @@ MotionResult SearchController::pivot90(param_set_t &p_set,
 
   if (adachi != nullptr) {
     adachi->update();
-    vTaskDelay(10.0/ portTICK_RATE_MS);
+    vTaskDelay(10.0 / portTICK_RATE_MS);
   }
 
   // mp->reset_tgt_data();
@@ -481,6 +486,8 @@ SearchResult SearchController::exec(param_set_t &p_set, SearchMode sm) {
     mr = MotionResult::NONE;
     // sensing(ego);
     bool is_stepped = lgc->is_stepped(ego->x, ego->y);
+    bool front_is_stepped =
+        lgc->is_front_cell_stepped(ego->x, ego->y, ego->dir);
     judge_wall();
     // 片道モードでゴールしたらbreak
     if (sm == SearchMode::Kata) {
@@ -500,13 +507,18 @@ SearchResult SearchController::exec(param_set_t &p_set, SearchMode sm) {
     }
     // 足立法で行き先決定
     const float before = mp->tgt_val->global_pos.dist;
-    auto next_motion = adachi->exec(is_stepped);
+    auto next_motion = adachi->exec(false);
     const float after = mp->tgt_val->global_pos.dist;
     adachi->diff = std::abs(after - before);
 
     // go_straight_wrapper(p_set);
     if (next_motion == Motion::Straight) {
-      mr = go_straight_wrapper(p_set, adachi->diff);
+      auto next_motion2 = adachi->exec(true);
+      if (front_is_stepped && next_motion2 == Motion::Straight) {
+        mr = go_straight_wrapper(p_set, adachi->diff, StraightType::FastRun);
+      } else {
+        mr = go_straight_wrapper(p_set, adachi->diff, StraightType::Search);
+      }
     } else if (next_motion == Motion::TurnRight) {
       // mr = slalom(p_set, TurnDirection::Right, adachi->diff);
       if (judge2()) {
@@ -573,7 +585,7 @@ SearchResult SearchController::exec(param_set_t &p_set, SearchMode sm) {
   while (1) {
     if (ui->button_state_hold())
       break;
-    vTaskDelay(10.0/ portTICK_RATE_MS);
+    vTaskDelay(10.0 / portTICK_RATE_MS);
   }
   if (param->search_log_enable > 0) {
     lt->dump_log(slalom_log_file);

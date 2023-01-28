@@ -66,6 +66,7 @@ public:
   void set_queue_handler(QueueHandle_t &_qh) { qh = &_qh; }
   std::vector<float> log_table;
 
+  t_ego mpc_next_ego;
 private:
   void motor_enable_main();
   void motor_disable_main();
@@ -122,7 +123,6 @@ private:
   t_ego *mpc_now_ego;
   int32_t mpc_mode;
   int32_t mpc_step;
-  t_ego mpc_next_ego;
   t_ego mpc_next_ego2;
 
   fail_safe_t fail_safe;

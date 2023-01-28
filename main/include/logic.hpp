@@ -60,7 +60,7 @@ public:
   bool isStep(const int x, const int y, Direction dir);
 
   bool is_stepped(int x, int y);
-
+  bool is_front_cell_stepped(int x, int y, Direction now_dir);
   void back_home();
 
   int get_max_step_val();

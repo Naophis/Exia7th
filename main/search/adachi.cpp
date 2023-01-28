@@ -263,9 +263,7 @@ Motion Adachi::exec(bool is_stepped) {
       }
     }
     lgc->set_goal_pos2(pt_list);
-    // if (!is_stepped) {
     lgc->update_dist_map(0, goaled); // 再更新したらもう1回歩数マップ生成
-    // }
     if (pt_list.size() == 1 && pt_list[0].x == 0 && pt_list[0].y == 0) {
       goal_startpos_lock = true; //ゴール固定
     } else {
@@ -287,9 +285,12 @@ Motion Adachi::exec(bool is_stepped) {
   }
   Direction next_dir = detect_next_direction();
   Motion next_motion = get_next_motion(next_dir);
-  get_next_pos(next_dir);
-  lgc->remove_goal_pos3();
-  goal_step_check();
+
+  if (!is_stepped) {
+    get_next_pos(next_dir);
+    lgc->remove_goal_pos3();
+    goal_step_check();
+  }
 
   // create_path(path, next_motion);
   // ROS_INFO("calc_cnt = %d", calc_cnt);

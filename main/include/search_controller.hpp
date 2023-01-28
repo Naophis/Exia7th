@@ -45,7 +45,8 @@ private:
   std::shared_ptr<sensing_result_entity_t> sensing_result;
   std::shared_ptr<Adachi> fake_adachi;
 
-  MotionResult go_straight_wrapper(param_set_t &p_set, float diff);
+  MotionResult go_straight_wrapper(param_set_t &p_set, float diff,
+                                   StraightType st);
   MotionResult slalom(param_set_t &p_set, const TurnDirection td, float diff);
   MotionResult straight_offset(param_set_t &p_set, const TurnDirection td,
                                float diff);

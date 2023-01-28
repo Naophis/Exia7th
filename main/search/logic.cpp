@@ -920,6 +920,28 @@ bool MazeSolverBaseLgc::is_stepped(int x, int y) {
     return ((map[x + y * maze_size]) & 0xf0) == 0xf0;
   return false;
 }
+bool MazeSolverBaseLgc::is_front_cell_stepped(int x, int y, Direction dir) {
+  if (valid_map_list_idx(x, y)) {
+    if (dir == Direction::North) {
+      if (valid_map_list_idx(x, y + 1)) {
+        return ((map[x + (y + 1) * maze_size]) & 0xf0) == 0xf0;
+      }
+    } else if (dir == Direction::East) {
+      if (valid_map_list_idx(x + 1, y)) {
+        return ((map[(x + 1) + y * maze_size]) & 0xf0) == 0xf0;
+      }
+    } else if (dir == Direction::West) {
+      if (valid_map_list_idx(x - 1, y)) {
+        return ((map[(x - 1) + y * maze_size]) & 0xf0) == 0xf0;
+      }
+    } else if (dir == Direction::South) {
+      if (valid_map_list_idx(x, y - 1)) {
+        return ((map[x + (y - 1) * maze_size]) & 0xf0) == 0xf0;
+      }
+    }
+  }
+  return false;
+}
 
 float MazeSolverBaseLgc::getDistVector(const int x, const int y,
                                        Direction dir) {
