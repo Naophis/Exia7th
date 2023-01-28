@@ -9,7 +9,7 @@ straight:
     w_end: 0.1
     alpha: 240
   fast_run:
-    v_max: 600
+    v_max: 700
     accl: 2500
     decel: -2500
     w_max: 22.5
