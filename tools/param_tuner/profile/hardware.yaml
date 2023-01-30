@@ -43,10 +43,10 @@ clear_angle: 5
 clear_dist_order: 80
 
 # 探索スラローム
-front_dist_offset: 89.50 # 探索時の前壁補正
+front_dist_offset: 86.50 # 探索時の前壁補正
 # スラロームオフセット距離壁補正リファレンス値
-sla_wall_ref_l: 47
-sla_wall_ref_r: 47
+sla_wall_ref_l: 48.5
+sla_wall_ref_r: 48.5
 
 # front_dist_offset2: 137.0
 led_light_delay_cnt: 500
@@ -66,16 +66,20 @@ clear_dist_ragne_to: 50
 wall_off_hold_dist: 30
 
 # 壁切れ In
-wall_off_hold_exist_dist_l: 73
-wall_off_hold_exist_dist_r: 73
+wall_off_hold_exist_dist_l: 77
+wall_off_hold_exist_dist_r: 77
 # 壁切れ Out
-wall_off_hold_noexist_th_l: 75
-wall_off_hold_noexist_th_r: 75
+wall_off_hold_noexist_th_l: 80
+wall_off_hold_noexist_th_r: 80
 # 壁切れ オフセット距離
-wall_off_hold_dist_str_l: -6.50
-wall_off_hold_dist_str_r: -7.0
+# wall_off_hold_dist_str_l: -4.0
+# wall_off_hold_dist_str_r: -5.5
+wall_off_hold_dist_str_l: -3.0
+wall_off_hold_dist_str_r: -5.5
 # 壁切れ：前壁補正
-front_dist_offset2: 133
+front_dist_offset2: 134
+# 壁切れ：前壁補正
+front_dist_offset3: 130
 
 # 壁切れ In(斜め)
 wall_off_hold_exist_dist_dia_l: 50
@@ -84,7 +88,7 @@ wall_off_hold_exist_dist_dia_r: 50
 wall_off_hold_noexist_dia_th_l: 55
 wall_off_hold_noexist_dia_th_r: 55
 # 壁切れ オフセット距離
-wall_off_hold_dist_dia_l2: -2.0
+wall_off_hold_dist_dia_l2: -0.0
 wall_off_hold_dist_dia_r2: 3.0
 #斜めターン壁有り補正
 dia_turn_th_l: 57
@@ -93,8 +97,8 @@ dia_turn_th_r: 55
 wall_off_hold_dist_dia_l: -7.0
 wall_off_hold_dist_dia_r: -8.0
 #斜め壁切れ時のmax接近距離
-dia_wall_off_ref_l: 38.0
-dia_wall_off_ref_r: 39.0
+dia_wall_off_ref_l: 37.0
+dia_wall_off_ref_r: 38.5
 
 #ターン後オフセット距離
 offset_after_turn_l: 20
@@ -171,7 +175,7 @@ angle_pid:
   b: 0
   c: 0
 sensor_pid:
-  p: 0.125
+  p: 0.05
   # i: 0.0
   # d: 0.025
   # p: 0.0
@@ -212,7 +216,7 @@ battery_param:
   lp_delay: 1
 led_param:
   # lp_delay: 0.925
-  lp_delay: 0.75
+  lp_delay: 1
 kalman_config:
   # q_ang: 0.01 #大：応答早
   # q_bias: 0.01 # 大：gyro_wの値を類似する

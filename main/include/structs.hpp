@@ -330,6 +330,7 @@ typedef struct {
   float clear_dist_order = 0;
   float front_dist_offset = 0;
   float front_dist_offset2 = 0;
+  float front_dist_offset3 = 0;
   float front_dist_offset_dia_front = 0;
   float front_dist_offset_dia_45_th = 0;
   float front_dist_offset_dia_right45 = 0;

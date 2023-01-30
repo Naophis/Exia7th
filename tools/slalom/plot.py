@@ -11,7 +11,7 @@ plot_col = 2
 
 
 class Plot:
-    def exe(self, type, tgt_v, show):
+    def exe(self, type, tgt_v, show, mode=0):
 
         # fig = plt.figure(figsize=(5, 5), dpi=500)
         fig = plt.figure(dpi=200, tight_layout=True)
@@ -42,20 +42,41 @@ class Plot:
             end_pos = {"x": 90, "y": 90}
             start_ang = 0
         elif type == "orval":
-            rad = 54
-            n = 2
-            tgt_ang = 180
-            end_pos = {"x": 0, "y": 180}
-            start_ang = 0
+            if mode == 1:
+                rad = 54
+                n = 0
+                tgt_ang1 = 180.0 * 1 / 3
+                tgt_ang2 = 180.0 * 2 / 3
+                tgt_ang3 = 180.0
+                tgt_ang = 180
+                end_pos = {"x": 90, "y": 90}
+                start_ang = 0
+            else:
+                rad = 54
+                n = 2
+                tgt_ang = 180
+                end_pos = {"x": 0, "y": 180}
+                start_ang = 0
         elif type == "dia45":
-            rad = 70
-            n = 2
-            tgt_ang1 = 45.0 * 1 / 3
-            tgt_ang2 = 45.0 * 2 / 3
-            tgt_ang3 = 45.0
-            tgt_ang = 45
-            end_pos = {"x": 90, "y": 45}
-            start_ang = 0
+            if mode == 1:
+                rad = 70
+                n = 0
+                tgt_ang1 = 45.0 * 1 / 3
+                tgt_ang2 = 45.0 * 2 / 3
+                tgt_ang3 = 45.0
+                tgt_ang = 45
+                end_pos = {"x": 90, "y": 45}
+                start_ang = 0
+            else :
+                rad = 60
+                n = 2
+                tgt_ang1 = 45.0 * 1 / 3
+                tgt_ang2 = 45.0 * 2 / 3
+                tgt_ang3 = 45.0
+                tgt_ang = 45
+                end_pos = {"x": 90, "y": 45}
+                start_ang = 0
+                
         elif type == "dia135":
             rad = 45
             n = 4
@@ -81,7 +102,7 @@ class Plot:
             end_pos = {"x": 0, "y": 90}
             start_ang = 0
         res = {}
-        if type == "dia45":
+        if mode == 1:
             sla = Slalom2(v, rad, tgt_ang1, tgt_ang2, tgt_ang3, end_pos, slip_gain, type)
             res = sla.calc(start_ang)
         else:

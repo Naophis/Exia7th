@@ -415,10 +415,10 @@ class Slalom2:
                                      self.res["x"][-1] + start_x_diff + end_x_diff],
                                     [self.res["y"][-1],
                                      self.res["y"][-1] + end_y_diff]]
-            print(self.end_offset_list)
+            # print(self.end_offset_list)
             self.start_offset = self.start_offset_list[0][1]
             self.end_offset = end_y_diff * math.sqrt(2)
-            print(self.start_offset, self.end_offset)
+            # print(self.start_offset, self.end_offset)
         elif self.type == "dia135":
             self.start_offset_list = [[0, self.start_offset], start_pos_y]
             self.end_offset_list = [[self.res["x"][-1] + self.start_offset,

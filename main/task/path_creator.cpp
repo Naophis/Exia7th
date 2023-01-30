@@ -835,6 +835,11 @@ float PathCreator::slalom_dummy(TurnType turn_type, TurnDirection td,
   float turn_front_dist = 0;
   float turn_back_dist = 0;
   float v = p_set.map[turn_type].v;
+
+  if (turn_type == TurnType::Orval) {
+    // TODO 
+  }
+
   if (td == TurnDirection::Right) {
     turn_front_dist = p_set.map[turn_type].front.right;
     turn_back_dist = p_set.map[turn_type].back.right;

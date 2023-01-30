@@ -316,6 +316,7 @@ void MainTask::load_hw_param() {
   param->clear_dist_order = getItem(root, "clear_dist_order")->valuedouble;
   param->front_dist_offset = getItem(root, "front_dist_offset")->valuedouble;
   param->front_dist_offset2 = getItem(root, "front_dist_offset2")->valuedouble;
+  param->front_dist_offset3 = getItem(root, "front_dist_offset3")->valuedouble;
   param->clear_dist_ragne_from =
       getItem(root, "clear_dist_ragne_from")->valuedouble;
   param->clear_dist_ragne_to =

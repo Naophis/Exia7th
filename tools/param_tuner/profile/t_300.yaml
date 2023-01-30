@@ -1,7 +1,7 @@
 straight:
   search:
     # v_max: 420
-    v_max: 385
+    v_max: 350
     # v_max: 550
     accl: 2500
     decel: -2500
@@ -9,7 +9,7 @@ straight:
     w_end: 0.1
     alpha: 240
   fast_run:
-    v_max: 700
+    v_max: 550
     accl: 2500
     decel: -2500
     w_max: 22.5
@@ -91,7 +91,7 @@ dia45:
   pow_n: 0
   time: 0
   # front: { left: 12.051280394058836, right: 12.051280394058836 }
-  front: { left: 17.051280394058836, right: 17.051280394058836 }
+  front: { left: 13.051280394058836, right: 13.051280394058836 }
   back: { left: 37.63429293717982, right: 37.63429293717982 }
 dia45_2:
   v: 300
