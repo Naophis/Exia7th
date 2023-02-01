@@ -6,8 +6,8 @@ normal:
     kireme_r: 1.50
     kireme_l: 1.50
   exist:
-    right45: 46.5
-    left45: 46.5
+    right45: 47.5
+    left45: 47.5
     # right45: 48
     # left45: 48
     front: 65 #80
@@ -34,13 +34,13 @@ normal2: #壁なし補正時
     left90: 100
 dia:
   ref:
-    right90: 100
-    left90: 135
+    right90: 110
+    left90: 90
     kireme_r: 160
     kireme_l: 160
   exist:
-    right90: 100 # dia.ref.right90と同じ
-    left90: 135 # dia.ref.left90と同じ
+    right90: 110 # dia.ref.right90と同じ
+    left90: 90 # dia.ref.left90と同じ
 search:
   ref:
     right45: 38
@@ -67,7 +67,8 @@ search:
     front_ctrl_th: 56
     # 前壁補正
     front_ctrl: 45.5
-    kireme_r: 0.95 #前壁補正：角度
+    # kireme_r: 0.95 #前壁補正：角度
+    kireme_r: 0.65 #前壁補正：角度
 gain:
   F: [1045.261252658666, 93.66899135977148]
 

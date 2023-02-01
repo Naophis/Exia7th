@@ -358,30 +358,32 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
     const auto orval_gain = 2;
     if (td == TurnDirection::Right) {
       if (sensing_result->ego.right45_dist < th_offset_dist) {
-        float rad2 =
-            (sensing_result->ego.right45_dist - param->sla_wall_ref_r) /
-            orval_gain;
+        float rad2 = (sensing_result->ego.right45_dist -
+                      param->sen_ref_p.normal.ref.right45) /
+                     orval_gain;
         rad_r += rad2;
         find_r = true;
       }
       if (sensing_result->ego.left45_dist < th_offset_dist) {
-        float rad2 = (param->sla_wall_ref_l - sensing_result->ego.left45_dist) /
+        float rad2 = (param->sen_ref_p.normal.ref.left45 -
+                      sensing_result->ego.left45_dist) /
                      orval_gain;
         rad_l += rad2;
         find_l = true;
       }
     } else {
       if (sensing_result->ego.left45_dist < th_offset_dist) {
-        float rad2 = (sensing_result->ego.left45_dist - param->sla_wall_ref_l) /
+        float rad2 = (sensing_result->ego.left45_dist -
+                      param->sen_ref_p.normal.ref.left45) /
                      orval_gain;
         rad_l += rad2;
         find_l = true;
       }
       if (!find) {
         if (sensing_result->ego.right45_dist < th_offset_dist) {
-          float rad2 =
-              (param->sla_wall_ref_r - sensing_result->ego.right45_dist) /
-              orval_gain;
+          float rad2 = (param->sen_ref_p.normal.ref.right45 -
+                        sensing_result->ego.right45_dist) /
+                       orval_gain;
           rad_r += rad2;
           find_r = true;
         }
@@ -497,7 +499,7 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
       tgt_val->nmr.w_max = -200000;
       tgt_val->nmr.alpha = -(2 * sp.v * sp.v / (sp.rad * sp.rad * sp.ang / 3));
     }
-  } else if (sp.type == TurnType::Dia45 && sp.pow_n == 0) {
+  } else if (sp.type == TurnType::Dia45 && sp.time == 0) {
     tgt_val->nmr.motion_mode = RUN_MODE2::SLALOM_RUN2;
     tgt_val->nmr.ang = sp.ang;
     tgt_val->nmr.sla_rad = sp.rad;
@@ -926,8 +928,13 @@ MotionResult MotionPlanning::wall_off(param_straight_t &p, bool dia) {
 }
 
 void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
-  if (ps_front.skil_wall_off) {
-    // return;
+
+  bool exist = false;
+  if (td == TurnDirection::Right) {
+    exist =
+        sensing_result->ego.right45_dist < param->wall_off_dist.exist_dist_r;
+  } else {
+    exist = sensing_result->ego.left45_dist < param->wall_off_dist.exist_dist_l;
   }
   tgt_val->nmr.v_max = ps_front.v_max;
   tgt_val->nmr.v_end = ps_front.v_end;
@@ -976,10 +983,18 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
             (param->front_dist_offset2 - sensing_result->ego.front_far_dist);
         return;
       }
-      if (sensing_result->ego.right45_dist >
-          param->wall_off_dist.noexist_th_r) {
-        ps_front.dist += param->wall_off_dist.right_str;
-        return;
+      if (exist) {
+        if (sensing_result->ego.right45_dist >
+            param->wall_off_dist.noexist_th_r2) {
+          ps_front.dist += param->wall_off_dist.right_str_exist;
+          return;
+        }
+      } else {
+        if (sensing_result->ego.right45_dist >
+            param->wall_off_dist.noexist_th_r) {
+          ps_front.dist += param->wall_off_dist.right_str;
+          return;
+        }
       }
       vTaskDelay(1.0 / portTICK_RATE_MS);
     }
@@ -1002,10 +1017,6 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
       vTaskDelay(1.0 / portTICK_RATE_MS);
     }
     while (true) {
-      if (sensing_result->ego.left45_dist > param->wall_off_dist.noexist_th_l) {
-        ps_front.dist += param->wall_off_dist.left_str;
-        return;
-      }
       if (40 < sensing_result->ego.left90_dist &&
           sensing_result->ego.left90_dist < param->front_dist_offset2 &&
           40 < sensing_result->ego.right90_far_dist &&
@@ -1014,8 +1025,21 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
             (param->front_dist_offset2 - sensing_result->ego.front_far_dist);
         return;
       }
-      vTaskDelay(1.0 / portTICK_RATE_MS);
+      if (exist) {
+        if (sensing_result->ego.left45_dist >
+            param->wall_off_dist.noexist_th_l2) {
+          ps_front.dist += param->wall_off_dist.left_str_exist;
+        }
+      } else {
+        if (sensing_result->ego.left45_dist >
+            param->wall_off_dist.noexist_th_l) {
+          ps_front.dist += param->wall_off_dist.left_str;
+        }
+      }
+
+      return;
     }
+    vTaskDelay(1.0 / portTICK_RATE_MS);
   }
 }
 

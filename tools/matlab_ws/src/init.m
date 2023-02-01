@@ -17,7 +17,7 @@ test_mode = 0; % straight
 % test_mode = 1; % slalom
 % test_mode = 2; % pivot
 %  test_mode = 3; % back_straight
-% test_mode = 4; % slalom2
+test_mode = 4; % slalom2
 % test_mode = 5; % back
 
 %default
@@ -239,7 +239,7 @@ elseif test_mode == 3
 
 elseif test_mode == 4
     % tgt
-    v_max = 1000;
+    v_max = 1400;
     end_v = v_max;
     accl = 28000;
     decel = -20000;

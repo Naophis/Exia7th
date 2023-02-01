@@ -178,7 +178,7 @@ extern "C" void app_main() {
   wl_handle_t s_wl_handle = WL_INVALID_HANDLE;
 
   printf("storage0: try mount\n");
-  esp_err_t err = esp_vfs_fat_spiflash_mount(base_path, "storage0",
+  esp_err_t err = esp_vfs_fat_spiflash_mount_rw_wl(base_path, "storage0",
                                              &mount_config, &s_wl_handle);
   if (err != ESP_OK) {
     printf("storage0: Failed to mount FATFS (%s)\n", esp_err_to_name(err));

@@ -5,7 +5,7 @@ dt: 0.001
 # tire: 13.367
 # tire: 15.15
 # tire: 13.23
-tire: 13.375
+tire: 13.305
 # tire: 13.095
 # tire: 13.135
 offset_start_dist: 21.0
@@ -23,18 +23,20 @@ FF_keV: 1
 
 # Ke: 0.00125
 # Km: 0.0005
-Ke: 0.00185
-Km: 0.0025
+Ke: 0.00185 # 大：逆起電力大
+Km: 0.0025 # 大：縦系の出力小
+# Ke: 0.00105 # 大：逆起電力大
+# Km: 0.00085 # 大：縦系の出力小
 
 # Ke: 0.00105
 # Km: 0.0025
 # Resist: 2.93
-Resist: 4.6
-Mass: 0.0205
+Resist: 2.4
+Mass: 0.022
 
 slip_param_K: 0.5
 # slip_param_k2: 150
-slip_param_k2: 135
+slip_param_k2: 100
 # slip_param_k2: 5
 
 Lm: 0.0000035
@@ -43,10 +45,14 @@ clear_angle: 5
 clear_dist_order: 80
 
 # 探索スラローム
-front_dist_offset: 86.50 # 探索時の前壁補正
+front_dist_offset: 88.50 # 探索時の前壁補正
 # スラロームオフセット距離壁補正リファレンス値
-sla_wall_ref_l: 48.5
-sla_wall_ref_r: 48.5
+sla_wall_ref_l: 44.0
+sla_wall_ref_r: 49.5
+
+# Orvalスラロームオフセット距離壁補正リファレンス値
+sla_wall_ref_l_orval: 48.5
+sla_wall_ref_r_orval: 44.50
 
 # front_dist_offset2: 137.0
 led_light_delay_cnt: 500
@@ -66,20 +72,25 @@ clear_dist_ragne_to: 50
 wall_off_hold_dist: 30
 
 # 壁切れ In
-wall_off_hold_exist_dist_l: 77
-wall_off_hold_exist_dist_r: 77
+wall_off_hold_exist_dist_l: 63
+wall_off_hold_exist_dist_r: 63
 # 壁切れ Out
-wall_off_hold_noexist_th_l: 80
-wall_off_hold_noexist_th_r: 80
+wall_off_hold_noexist_th_l: 75
+wall_off_hold_noexist_th_r: 75
+# 壁切れ Out(最初からあるとき)
+wall_off_hold_noexist_th_l2: 65
+wall_off_hold_noexist_th_r2: 65
 # 壁切れ オフセット距離
 # wall_off_hold_dist_str_l: -4.0
 # wall_off_hold_dist_str_r: -5.5
-wall_off_hold_dist_str_l: -3.0
-wall_off_hold_dist_str_r: -5.5
+wall_off_hold_dist_str_l: 0.125
+wall_off_hold_dist_str_r: -3.0
+wall_off_hold_dist_str_l_exist: -1.5
+wall_off_hold_dist_str_r_exist: -5.0
 # 壁切れ：前壁補正
-front_dist_offset2: 134
+front_dist_offset2: 133.25
 # 壁切れ：前壁補正
-front_dist_offset3: 130
+front_dist_offset3: 126
 
 # 壁切れ In(斜め)
 wall_off_hold_exist_dist_dia_l: 50
@@ -88,17 +99,17 @@ wall_off_hold_exist_dist_dia_r: 50
 wall_off_hold_noexist_dia_th_l: 55
 wall_off_hold_noexist_dia_th_r: 55
 # 壁切れ オフセット距離
-wall_off_hold_dist_dia_l2: -0.0
-wall_off_hold_dist_dia_r2: 3.0
+wall_off_hold_dist_dia_l2: 3.0
+wall_off_hold_dist_dia_r2: 6.0
 #斜めターン壁有り補正
 dia_turn_th_l: 57
-dia_turn_th_r: 55
+dia_turn_th_r: 58
 # 壁切れ オフセット距離(反対側の壁有り)
-wall_off_hold_dist_dia_l: -7.0
+wall_off_hold_dist_dia_l: -6.0
 wall_off_hold_dist_dia_r: -8.0
 #斜め壁切れ時のmax接近距離
-dia_wall_off_ref_l: 37.0
-dia_wall_off_ref_r: 38.5
+dia_wall_off_ref_l: 31.0
+dia_wall_off_ref_r: 33.0
 
 #ターン後オフセット距離
 offset_after_turn_l: 20
@@ -109,7 +120,7 @@ offset_after_turn_dia_l: 10
 offset_after_turn_dia_r: 10
 
 #ログON_OFF
-logging_time: 1.0
+logging_time: 3.0
 search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1
@@ -125,7 +136,7 @@ ff_v_th: 200
 ff_front_dury: 0.95
 
 fail_duty_cnt: 150
-fail_v_cnt: 8000
+fail_v_cnt: 12000
 fail_w_cnt: 500
 
 cell: 90
@@ -175,7 +186,7 @@ angle_pid:
   b: 0
   c: 0
 sensor_pid:
-  p: 0.05
+  p: 0.075
   # i: 0.0
   # d: 0.025
   # p: 0.0
@@ -185,8 +196,8 @@ sensor_pid:
   c: 0
   mode: 1
 sensor_pid_dia:
-  # p: 0.075
-  p: 0.0
+  p: 0.075
+  # p: 0.0
   i: 0.0
   d: 0.0
   b: 0

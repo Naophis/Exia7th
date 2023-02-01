@@ -41,7 +41,7 @@ class Slalom2:
     half_cell_size = 45
     slip_gain = 50
 
-    def __init__(self, v, rad, ang1, ang2, ang3, end_pos, slip_gain, type):
+    def __init__(self, v, rad, n, ang1, ang2, ang3, end_pos, slip_gain, type):
         self.v = v
         self.rad = rad
         self.ang1 = ang1 * math.pi / 180
@@ -53,6 +53,7 @@ class Slalom2:
         self.slip_gain = slip_gain
         self.base_alpha = (2 * v * v) / (rad * rad * self.ang3 / 2)
         self.limit_time_count = 1500
+        self.pow_n = n
 
     def calc_base_time(self):
         c = 0
@@ -152,6 +153,7 @@ class Slalom2:
                 mode = 1
             if tmp_w <= 0 and i>10:
                 break
+
             if mode == 0:
                 tmp_alpha = self.base_alpha
             elif mode == 1:
@@ -161,8 +163,8 @@ class Slalom2:
                 diff = math.fabs(tmp_theta - self.ang3)
                 if diff < 0.01:
                     diff = 0.01
-                if diff * 180 / math.pi < 0.75:
-                    tmp_alpha = -tmp_w * tmp_w / (2 * diff)
+                # if diff * 180 / math.pi < 0.75:
+                tmp_alpha = -tmp_w * tmp_w / (2 * diff)
 
             old_w = tmp_w
 

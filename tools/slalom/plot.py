@@ -30,8 +30,8 @@ class Plot:
         start_ang = 0
         tgt_ang1 = tgt_ang2 = tgt_ang3 = 0
         if type == "normal":
-            rad = 26
-            n = 4
+            rad = 24
+            n = 2
             tgt_ang = 90
             end_pos = {"x": 45, "y": 45}
             start_ang = 0
@@ -58,18 +58,29 @@ class Plot:
                 end_pos = {"x": 0, "y": 180}
                 start_ang = 0
         elif type == "dia45":
-            if mode == 1:
-                rad = 70
-                n = 0
+            if mode > 0:
+                rad = 74
+                # rad = 80
+                n = mode
                 tgt_ang1 = 45.0 * 1 / 3
                 tgt_ang2 = 45.0 * 2 / 3
                 tgt_ang3 = 45.0
+                if mode == 1:
+                    tgt_ang1 = 45.0 * 1 / 3
+                    tgt_ang2 = 45.0 * 2 / 3
+                    tgt_ang3 = 45.0
+                if mode ==2:
+                    tgt_ang1 = 45.0 * 1 / 2
+                    tgt_ang2 = 45.0 * 1 / 2
+                    tgt_ang3 = 45.0
+                    n = 0
+
                 tgt_ang = 45
                 end_pos = {"x": 90, "y": 45}
                 start_ang = 0
             else :
-                rad = 60
-                n = 2
+                rad = 44
+                n = 4
                 tgt_ang1 = 45.0 * 1 / 3
                 tgt_ang2 = 45.0 * 2 / 3
                 tgt_ang3 = 45.0
@@ -102,8 +113,8 @@ class Plot:
             end_pos = {"x": 0, "y": 90}
             start_ang = 0
         res = {}
-        if mode == 1:
-            sla = Slalom2(v, rad, tgt_ang1, tgt_ang2, tgt_ang3, end_pos, slip_gain, type)
+        if mode > 0:
+            sla = Slalom2(v, rad, n, tgt_ang1, tgt_ang2, tgt_ang3, end_pos, slip_gain, type)
             res = sla.calc(start_ang)
         else:
             sla = Slalom(v, rad, n, tgt_ang, end_pos, slip_gain, type)

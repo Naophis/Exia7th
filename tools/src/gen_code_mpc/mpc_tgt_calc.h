@@ -43,6 +43,7 @@ class mpc_tgt_calcModelClass final
     real_T Constant1_Value_m;
     real_T Gain_Gain_g;
     real_T Constant_Value_p;
+    real_T Constant_Value_g;
     real_T Constant1_Value_k;
     real_T Constant3_Value;
     real_T Gain1_Gain;
@@ -105,11 +106,12 @@ class mpc_tgt_calcModelClass final
     real32_T Switch1_Threshold_i;
     real32_T Constant_Value_h;
     real32_T Switch2_Threshold_m;
+    real32_T Gain6_Gain;
+    real32_T Gain7_Gain;
+    real32_T Gain4_Gain;
     real32_T Gain2_Gain_i;
     real32_T Gain1_Gain_hy;
     real32_T Gain_Gain_m;
-    real32_T Gain4_Gain;
-    real32_T Gain5_Gain;
     real32_T Constant_Value_m;
     real32_T Constant_Value_e;
     real32_T Constant_Value_o;
@@ -138,10 +140,10 @@ class mpc_tgt_calcModelClass final
     real32_T Gain1_Gain_it;
     real32_T Gain2_Gain_j;
     real32_T Gain4_Gain_m;
-    real32_T Gain5_Gain_c;
+    real32_T Gain5_Gain;
     real32_T Gain_Gain_k;
     real32_T Gain2_Gain_d;
-    real32_T Gain6_Gain;
+    real32_T Gain6_Gain_f;
     real32_T Gain1_Gain_i5;
     real32_T Gain3_Gain_k;
     real32_T DataStoreMemory_InitialValue;

@@ -261,6 +261,8 @@ typedef struct {
 typedef struct {
   float left_str;
   float right_str;
+  float left_str_exist;
+  float right_str_exist;
   float left_dia;
   float right_dia;
   float left_dia2;
@@ -269,6 +271,8 @@ typedef struct {
   float exist_dist_r;
   float noexist_th_l;
   float noexist_th_r;
+  float noexist_th_l2;
+  float noexist_th_r2;
 
   float exist_dia_th_l;
   float exist_dia_th_r;
@@ -338,6 +342,8 @@ typedef struct {
 
   float sla_wall_ref_l = 45;
   float sla_wall_ref_r = 45;
+  float sla_wall_ref_l_orval = 45;
+  float sla_wall_ref_r_orval = 45;
   float front_ctrl_error_th = 4;
 
   float clear_dist_ragne_from = 0;

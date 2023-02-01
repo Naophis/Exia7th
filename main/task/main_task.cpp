@@ -371,6 +371,10 @@ void MainTask::load_hw_param() {
       getItem(root, "wall_off_hold_dist_str_l")->valuedouble;
   param->wall_off_dist.right_str =
       getItem(root, "wall_off_hold_dist_str_r")->valuedouble;
+  param->wall_off_dist.left_str_exist =
+      getItem(root, "wall_off_hold_dist_str_l_exist")->valuedouble;
+  param->wall_off_dist.right_str_exist =
+      getItem(root, "wall_off_hold_dist_str_r_exist")->valuedouble;
 
   param->wall_off_dist.left_dia =
       getItem(root, "wall_off_hold_dist_dia_l")->valuedouble;
@@ -391,6 +395,11 @@ void MainTask::load_hw_param() {
   param->wall_off_dist.noexist_th_r =
       getItem(root, "wall_off_hold_noexist_th_r")->valuedouble;
 
+  param->wall_off_dist.noexist_th_l2 =
+      getItem(root, "wall_off_hold_noexist_th_l2")->valuedouble;
+  param->wall_off_dist.noexist_th_r2 =
+      getItem(root, "wall_off_hold_noexist_th_r2")->valuedouble;
+
   param->wall_off_dist.exist_dia_th_l =
       getItem(root, "wall_off_hold_exist_dist_dia_l")->valuedouble;
   param->wall_off_dist.exist_dia_th_r =
@@ -406,6 +415,8 @@ void MainTask::load_hw_param() {
 
   param->sla_wall_ref_l = getItem(root, "sla_wall_ref_l")->valuedouble;
   param->sla_wall_ref_r = getItem(root, "sla_wall_ref_r")->valuedouble;
+  param->sla_wall_ref_l_orval = getItem(root, "sla_wall_ref_l_orval")->valuedouble;
+  param->sla_wall_ref_r_orval = getItem(root, "sla_wall_ref_r_orval")->valuedouble;
 
   param->front_dist_offset_dia_front =
       getItem(root, "front_dist_offset_dia_front")->valuedouble;
