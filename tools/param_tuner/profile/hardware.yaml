@@ -5,7 +5,7 @@ dt: 0.001
 # tire: 13.367
 # tire: 15.15
 # tire: 13.23
-tire: 13.305
+tire: 13.40
 # tire: 13.095
 # tire: 13.135
 offset_start_dist: 21.0
@@ -36,7 +36,7 @@ Mass: 0.022
 
 slip_param_K: 0.5
 # slip_param_k2: 150
-slip_param_k2: 100
+slip_param_k2: 135
 # slip_param_k2: 5
 
 Lm: 0.0000035
@@ -120,7 +120,7 @@ offset_after_turn_dia_l: 10
 offset_after_turn_dia_r: 10
 
 #ログON_OFF
-logging_time: 3.0
+logging_time: 1.0
 search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1
@@ -179,7 +179,7 @@ gyro_pid:
   b: 0
   c: 0
 angle_pid:
-  p: 0.25
+  p: 0.45
   i: 0.0
   d: 0.0
   mode: 1
