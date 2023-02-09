@@ -991,14 +991,12 @@ unsigned int MazeSolverBaseLgc::searchGoalPosition(
   // int position = 0;
   // int idx;
 
-  Direction dirLog[3];
+  Direction dirLog[3] = {now_dir, now_dir, now_dir};
   point_t pt;
   pt.x = 0;
   pt.y = 0;
   search_log.clear();
   search_log.shrink_to_fit();
-
-  dirLog[2] = dirLog[1] = dirLog[0] = now_dir;
 
   unsigned int cnt = updateVectorMap(isSearch, subgoal_list);
 
@@ -1055,6 +1053,19 @@ unsigned int MazeSolverBaseLgc::searchGoalPosition(
       if (is_unknown(x, y, Direction::South))
         subgoal_list[x + (y - 1) * maze_size] = 1;
     }
+    // if (next_dir == Direction::North) {
+    //   if (!is_stepped(x, y + 1))
+    //     subgoal_list[x + (y + 1) * maze_size] = 1;
+    // } else if (next_dir == Direction::East) {
+    //   if (!is_stepped(x + 1, y))
+    //     subgoal_list[x + 1 + y * maze_size] = 1;
+    // } else if (next_dir == Direction::West) {
+    //   if (!is_stepped(x - 1, y))
+    //     subgoal_list[x - 1 + y * maze_size] = 1;
+    // } else if (next_dir == Direction::South) {
+    //   if (!is_stepped(x, y - 1))
+    //     subgoal_list[x + (y - 1) * maze_size] = 1;
+    // }
 
     if (next_dir == Direction::North)
       y++;

@@ -10,6 +10,8 @@ straight:
     alpha: 240
   fast_run:
     v_max: 600
+    # v_max: 450
+    # v_max: 385
     accl: 1500
     decel: -2500
     w_max: 22.5
@@ -71,7 +73,8 @@ normal:
   rad: 24
   pow_n: 2
   time: 0.10412500000000875
-  front: { left: 8.824937804096592, right: 8.824937804096592 }
+  # front: { left: 8.824937804096592, right: 8.824937804096592 }
+  front: { left: 10, right: 10 }
   back: { left: 12.526650712076496, right: 12.526650712076496 }
 large:
   v: 300

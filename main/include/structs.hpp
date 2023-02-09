@@ -111,14 +111,17 @@ typedef struct {
   float right45_lp_old = 0;
   float right90_lp_old = 0;
 
-  float front_dist = 0;
-  float left45_dist = 0;
-  float left90_dist = 0;
-  float right45_dist = 0;
-  float right90_dist = 0;
-  float front_far_dist = 0;
-  float left90_far_dist = 0;
-  float right90_far_dist = 0;
+  volatile float front_dist = 0;
+  volatile float left45_dist = 0;
+  volatile float left90_dist = 0;
+  volatile float right45_dist = 0;
+  volatile float right90_dist = 0;
+  volatile float front_far_dist = 0;
+  volatile float left90_far_dist = 0;
+  volatile float right90_far_dist = 0;
+  volatile float left90_mid_dist = 0;
+  volatile float right90_mid_dist = 0;
+  volatile float front_mid_dist = 0;
 
   float front_dist_old = 0;
   float left45_dist_old = 0;
@@ -252,6 +255,8 @@ typedef struct {
   sensor_gain_param_t r90;
   sensor_gain_param_t l90_far;
   sensor_gain_param_t r90_far;
+  sensor_gain_param_t l90_mid;
+  sensor_gain_param_t r90_mid;
 } sensor_gain_t;
 
 // typedef struct{
@@ -278,6 +283,12 @@ typedef struct {
   float exist_dia_th_r;
   float noexist_dia_th_l;
   float noexist_dia_th_r;
+
+  float wall_off_exist_wall_th_l;
+  float wall_off_exist_wall_th_r;
+
+  float ctrl_exist_wall_th_l;
+  float ctrl_exist_wall_th_r;
 } wall_off_hold_dist_t;
 
 typedef struct {
@@ -342,8 +353,11 @@ typedef struct {
 
   float sla_wall_ref_l = 45;
   float sla_wall_ref_r = 45;
+  float sla_max_offset_dist = 45;
   float sla_wall_ref_l_orval = 45;
   float sla_wall_ref_r_orval = 45;
+  int orval_enable = 0;
+  int dia45_offset_enable = 0;
   float front_ctrl_error_th = 4;
 
   float clear_dist_ragne_from = 0;
@@ -352,6 +366,7 @@ typedef struct {
   wall_off_hold_dist_t wall_off_dist;
 
   int search_log_enable = 0;
+  int seach_timer = 60 * 3;
   int test_log_enable = 0;
   int fast_log_enable = 0;
   float front_dist_offset_pivot_th = 0;

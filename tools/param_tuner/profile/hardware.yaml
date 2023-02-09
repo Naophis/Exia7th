@@ -5,7 +5,7 @@ dt: 0.001
 # tire: 13.367
 # tire: 15.15
 # tire: 13.23
-tire: 13.40
+tire: 13.525
 # tire: 13.095
 # tire: 13.135
 offset_start_dist: 21.0
@@ -45,20 +45,26 @@ clear_angle: 5
 clear_dist_order: 80
 
 # 探索スラローム
-front_dist_offset: 88.50 # 探索時の前壁補正
+front_dist_offset: 93.50 # 探索時の前壁補正
 # スラロームオフセット距離壁補正リファレンス値
-sla_wall_ref_l: 44.0
-sla_wall_ref_r: 49.5
+# sla_wall_ref_l: 44.0
+# sla_wall_ref_r: 49.5
+sla_wall_ref_l: 44.50
+sla_wall_ref_r: 48.50
+sla_max_offset_dist: 6
+normal_sla_offset: 6
 
 # Orvalスラロームオフセット距離壁補正リファレンス値
 sla_wall_ref_l_orval: 48.5
 sla_wall_ref_r_orval: 44.50
+orval_offset_enable: 0
+dia45_offset_enable: 0
 
 # front_dist_offset2: 137.0
-led_light_delay_cnt: 500
+led_light_delay_cnt: 1800
 
 front_dist_offset_pivot_th: 78
-front_dist_offset_pivot: 96
+front_dist_offset_pivot: 90
 
 front_dist_offset_dia_front: 139
 front_dist_offset_dia_45_th: 77
@@ -66,14 +72,23 @@ front_dist_offset_dia_45_th: 77
 front_dist_offset_dia_right45: 54
 front_dist_offset_dia_left45: 50
 
-clear_dist_ragne_from: 40
-clear_dist_ragne_to: 50
+seach_timer: 420
+
+clear_dist_ragne_from: 30
+clear_dist_ragne_to: 60
 
 wall_off_hold_dist: 30
 
+# 探索壁あり判定
+ctrl_exist_wall_th_l: 50
+ctrl_exist_wall_th_r: 50
+
+# 壁切れ壁あり判定
+wall_off_exist_wall_th_l: 50
+wall_off_exist_wall_th_r: 55
 # 壁切れ In
-wall_off_hold_exist_dist_l: 63
-wall_off_hold_exist_dist_r: 63
+wall_off_hold_exist_dist_l: 72
+wall_off_hold_exist_dist_r: 72
 # 壁切れ Out
 wall_off_hold_noexist_th_l: 75
 wall_off_hold_noexist_th_r: 75
@@ -83,9 +98,9 @@ wall_off_hold_noexist_th_r2: 65
 # 壁切れ オフセット距離
 # wall_off_hold_dist_str_l: -4.0
 # wall_off_hold_dist_str_r: -5.5
-wall_off_hold_dist_str_l: 0.125
-wall_off_hold_dist_str_r: -3.0
-wall_off_hold_dist_str_l_exist: -1.5
+wall_off_hold_dist_str_l: -5.5
+wall_off_hold_dist_str_r: -7.0
+wall_off_hold_dist_str_l_exist: -5.0
 wall_off_hold_dist_str_r_exist: -5.0
 # 壁切れ：前壁補正
 front_dist_offset2: 133.25
@@ -127,24 +142,22 @@ fast_log_enable: 1
 sen_log_size: 100
 log_size: 1400
 
-normal_sla_offset: 7
-
 front_ctrl_error_th: 1
-front_diff_th: 20
+front_diff_th: 9
 
 ff_v_th: 200
 ff_front_dury: 0.95
 
 fail_duty_cnt: 150
-fail_v_cnt: 12000
-fail_w_cnt: 500
+fail_v_cnt: 15000
+fail_w_cnt: 2500
 
 cell: 90
 cell2: 90
 
 motor_pid:
   p: 0.00575
-  i: 1.925
+  i: 1.725
   d: 0.0
   # p: 0.0
   # i: 0.0
@@ -171,6 +184,7 @@ gyro_pid:
   # 通常 mode=0
   p: 0.275
   i: 0.0225
+  # i: 0.0175
   d: 0.275
   mode: 0
   # p: 0.0
@@ -186,9 +200,9 @@ angle_pid:
   b: 0
   c: 0
 sensor_pid:
-  p: 0.075
+  p: 0.175
   # i: 0.0
-  # d: 0.025
+  # d: 0.045
   # p: 0.0
   i: 0.0
   d: 0.0
@@ -196,7 +210,7 @@ sensor_pid:
   c: 0
   mode: 1
 sensor_pid_dia:
-  p: 0.075
+  p: 0.045
   # p: 0.0
   i: 0.0
   d: 0.0
@@ -206,8 +220,8 @@ sensor_pid_dia:
 gyro_param:
   # gyro_w_gain_right: 0.0024635
   # gyro_w_gain_left: 0.00246375
-  gyro_w_gain_right: 0.0024739
-  gyro_w_gain_left: 0.0024739
+  gyro_w_gain_right: 0.00247265
+  gyro_w_gain_left: 0.00247265
   lp_delay: 1
 accel_x_param:
   # gain: 315.56 # 16g
@@ -224,7 +238,7 @@ comp_v_param:
 
 battery_param:
   # lp_delay: 0.25
-  lp_delay: 1
+  lp_delay: 0.65
 led_param:
   # lp_delay: 0.925
   lp_delay: 1

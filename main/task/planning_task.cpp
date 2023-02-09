@@ -147,6 +147,9 @@ void PlanningTask::calc_filter() {
       alpha * (sensing_result->ego.filter_v +
                sensing_result->ego.accel_x_raw * dt) + //
       (1 - alpha) * sensing_result->ego.v_c;
+  if (!std::isfinite(sensing_result->ego.filter_v)) {
+    sensing_result->ego.filter_v = sensing_result->ego.v_c;
+  }
 }
 void PlanningTask::task() {
   const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
@@ -316,6 +319,13 @@ float PlanningTask::calc_sensor_pid() {
   // sen_pid.step(&error_entity.sen.error_p, &param_ro->sensor_pid.p,
   //              &param_ro->sensor_pid.i, &param_ro->sensor_pid.d, &enable,
   //              &dt, &duty);
+
+  if (duty > param_ro->sensor_gain.front.a) {
+    duty = param_ro->sensor_gain.front.a;
+  } else if (duty < -param_ro->sensor_gain.front.a) {
+    duty = -param_ro->sensor_gain.front.a;
+  }
+
   return duty;
 }
 float PlanningTask::calc_sensor_pid_dia() {
@@ -345,6 +355,11 @@ float PlanningTask::calc_sensor_pid_dia() {
   // &param_ro->sensor_pid_dia.p,
   //                  &param_ro->sensor_pid_dia.i, &param_ro->sensor_pid_dia.d,
   //                  &enable, &dt, &duty);
+  if (duty > param_ro->sensor_gain.front.b) {
+    duty = param_ro->sensor_gain.front.b;
+  } else if (duty < -param_ro->sensor_gain.front.b) {
+    duty = -param_ro->sensor_gain.front.b;
+  }
 
   return duty;
 }
@@ -361,17 +376,32 @@ float PlanningTask::check_sen_error() {
                                        param_ro->sen_ref_p.search_exist.left45;
   }
 
+  auto exist_right45 = param_ro->sen_ref_p.normal.exist.right45;
+  auto exist_left45 = param_ro->sen_ref_p.normal.exist.left45;
+  // if (search_mode) {
+  //   if (!(param_ro->clear_dist_ragne_from <= tmp_dist &&
+  //         tmp_dist <= param_ro->clear_dist_ragne_to)) {
+  //     if (sensing_result->ego.left45_dist <
+  //         param_ro->wall_off_dist.ctrl_exist_wall_th_l) {
+  //       exist_left45 = param_ro->wall_off_dist.ctrl_exist_wall_th_l;
+  //     }
+  //     if (sensing_result->ego.right45_dist <
+  //         param_ro->wall_off_dist.ctrl_exist_wall_th_r) {
+  //       exist_right45 = param_ro->wall_off_dist.ctrl_exist_wall_th_r;
+  //     }
+  //   }
+  // }
+
   //前壁が近すぎるときはエスケープ
-  if (!(sensing_result->ego.left90_dist <
+  if (!(sensing_result->ego.left90_mid_dist <
             param_ro->sen_ref_p.normal.exist.front &&
-        sensing_result->ego.right90_dist <
+        sensing_result->ego.right90_mid_dist <
             param_ro->sen_ref_p.normal.exist.front)) {
     if (std::abs(sensing_result->ego.right45_dist -
                  sensing_result->ego.right45_dist_old) <
         param_ro->sen_ref_p.normal.ref.kireme_r) {
       if ((1 < sensing_result->ego.right45_dist &&
-           sensing_result->ego.right45_dist <
-               param_ro->sen_ref_p.normal.exist.right45)) {
+           sensing_result->ego.right45_dist < exist_right45)) {
         error += param_ro->sen_ref_p.normal.ref.right45 -
                  sensing_result->ego.right45_dist;
         check++;
@@ -381,8 +411,7 @@ float PlanningTask::check_sen_error() {
                  sensing_result->ego.left45_dist_old) <
         param_ro->sen_ref_p.normal.ref.kireme_l) {
       if ((1 < sensing_result->ego.left45_dist &&
-           sensing_result->ego.left45_dist <
-               param_ro->sen_ref_p.normal.exist.left45)) {
+           sensing_result->ego.left45_dist < exist_left45)) {
         error -= param_ro->sen_ref_p.normal.ref.left45 -
                  sensing_result->ego.left45_dist;
         check++;
@@ -394,9 +423,9 @@ float PlanningTask::check_sen_error() {
     error_entity.sen_log.gain_zz = 0;
     error_entity.sen_log.gain_z = 0;
 
-    if (!(sensing_result->ego.left90_dist <
+    if (!(sensing_result->ego.left90_mid_dist <
               param_ro->sen_ref_p.normal.exist.front &&
-          sensing_result->ego.right90_dist <
+          sensing_result->ego.right90_mid_dist <
               param_ro->sen_ref_p.normal.exist.front)) {
       if (sensing_result->ego.right45_dist >
               param_ro->sen_ref_p.normal2.ref.kireme_r &&
@@ -471,14 +500,14 @@ float PlanningTask::check_sen_error_dia() {
     // if (std::abs(sensing_result->ego.right90_dist -
     //         sensing_result->ego.right90_dist_old) <
     //     param_ro->sen_ref_p.dia.ref.kireme_r) {
-    if (1 < sensing_result->ego.right90_dist &&
-        sensing_result->ego.right90_dist <
+    if (1 < sensing_result->ego.right90_mid_dist &&
+        sensing_result->ego.right90_mid_dist <
             param_ro->sen_ref_p.dia.exist.right90) {
       error += param_ro->sen_ref_p.dia.ref.right90 -
-               sensing_result->ego.right90_dist;
+               sensing_result->ego.right90_mid_dist;
 
       tgt_val->dia_state.right_old = param_ro->sen_ref_p.dia.ref.right90 -
-                                     sensing_result->ego.right90_dist;
+                                     sensing_result->ego.right90_mid_dist;
       tgt_val->dia_state.right_save = true;
 
       check++;
@@ -492,13 +521,13 @@ float PlanningTask::check_sen_error_dia() {
     // if (std::abs(sensing_result->ego.left90_dist -
     //         sensing_result->ego.left90_dist_old) <
     //     param_ro->sen_ref_p.dia.ref.kireme_l) {
-    if (1 < sensing_result->ego.left90_dist &&
-        sensing_result->ego.left90_dist <
+    if (1 < sensing_result->ego.left90_mid_dist &&
+        sensing_result->ego.left90_mid_dist <
             param_ro->sen_ref_p.dia.exist.left90) {
-      error -=
-          param_ro->sen_ref_p.dia.ref.left90 - sensing_result->ego.left90_dist;
-      tgt_val->dia_state.left_old =
-          param_ro->sen_ref_p.dia.ref.left90 - sensing_result->ego.left90_dist;
+      error -= param_ro->sen_ref_p.dia.ref.left90 -
+               sensing_result->ego.left90_mid_dist;
+      tgt_val->dia_state.left_old = param_ro->sen_ref_p.dia.ref.left90 -
+                                    sensing_result->ego.left90_mid_dist;
       tgt_val->dia_state.left_save = true;
       check++;
     } else {
@@ -515,6 +544,9 @@ float PlanningTask::check_sen_error_dia() {
     error_entity.sen_log_dia.gain_z = 0;
   } else {
     // TODO Uターン字は別ロジックに修正
+    error_entity.sen.error_i = 0;
+    error_entity.sen_log.gain_zz = 0;
+    error_entity.sen_log.gain_z = 0;
     if (tgt_val->tgt_in.tgt_dist >= param_ro->clear_dist_order) {
       if ((std::abs(tgt_val->ego_in.ang - tgt_val->ego_in.img_ang) * 180 /
            m_PI) < param_ro->clear_angle) {
@@ -1368,7 +1400,7 @@ void PlanningTask::cp_request() {
 }
 float PlanningTask::calc_sensor(float data, float a, float b) {
   int idx = (int)data;
-  if (idx <= 50 || idx >= log_table.size()) {
+  if (idx <= 20 || idx >= log_table.size()) {
     return 180;
   }
   auto res = a / log_table.at(idx) - b;
@@ -1410,6 +1442,13 @@ void PlanningTask::calc_sensor_dist_all() {
         sensing_result->ego.right90_lp, param_ro->sensor_gain.r90_far.a,
         param_ro->sensor_gain.r90_far.b);
 
+    sensing_result->ego.left90_mid_dist = calc_sensor(
+        sensing_result->ego.left90_lp, param_ro->sensor_gain.l90_mid.a,
+        param_ro->sensor_gain.l90_mid.b);
+    sensing_result->ego.right90_mid_dist = calc_sensor(
+        sensing_result->ego.right90_lp, param_ro->sensor_gain.r90_mid.a,
+        param_ro->sensor_gain.r90_mid.b);
+
     if (sensing_result->ego.left90_dist < 150 &&
         sensing_result->ego.right90_dist < 150) {
       sensing_result->ego.front_dist =
@@ -1439,6 +1478,21 @@ void PlanningTask::calc_sensor_dist_all() {
       sensing_result->ego.front_far_dist = sensing_result->ego.left90_far_dist;
     } else {
       sensing_result->ego.front_far_dist = 180;
+    }
+    if (sensing_result->ego.left90_mid_dist < 150 &&
+        sensing_result->ego.right90_mid_dist < 150) {
+      sensing_result->ego.front_mid_dist =
+          (sensing_result->ego.left90_mid_dist +
+           sensing_result->ego.right90_mid_dist) /
+          2;
+    } else if (sensing_result->ego.left90_mid_dist > 150 &&
+               sensing_result->ego.right90_mid_dist < 150) {
+      sensing_result->ego.front_mid_dist = sensing_result->ego.right90_mid_dist;
+    } else if (sensing_result->ego.left90_mid_dist < 150 &&
+               sensing_result->ego.right90_mid_dist > 150) {
+      sensing_result->ego.front_mid_dist = sensing_result->ego.left90_mid_dist;
+    } else {
+      sensing_result->ego.front_mid_dist = 180;
     }
   } else {
     sensing_result->ego.left90_dist        //

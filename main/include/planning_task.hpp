@@ -49,6 +49,7 @@ public:
 
   bool motor_en = false;
   bool suction_en = false;
+  bool search_mode = false;
 
   t_dynamics dynamics;
   QueueHandle_t *qh;

@@ -57,6 +57,11 @@ void MainTask::check_battery() {
   while (1) {
     ui->music_sync(MUSIC::G5_, 250);
     vTaskDelay(tgt_val->buzzer.time / portTICK_PERIOD_MS);
+    bool break_btn = ui->button_state_hold();
+    if (break_btn) {
+      ui->coin(100);
+      break;
+    }
   }
 }
 
@@ -118,13 +123,23 @@ void MainTask::dump1() {
            sensing_result->led_sen_after.front.raw,
            sensing_result->led_sen_after.right45.raw,
            sensing_result->led_sen_after.right90.raw);
-    printf("sensor_dist: %3.2f(%3.2f), %3.2f, %3.2f, %3.2f, %3.2f(%3.2f)\n",
-           sensing_result->ego.left90_dist,     //
+    printf("sensor_dist(near): %3.2f, %3.2f, %3.2f, %3.2f, %3.2f\n",
+           sensing_result->ego.left90_dist,  //
+           sensing_result->ego.left45_dist,  //
+           sensing_result->ego.front_dist,   //
+           sensing_result->ego.right45_dist, //
+           sensing_result->ego.right90_dist);
+    printf("sensor_dist(mid): %3.2f, %3.2f, %3.2f, %3.2f, %3.2f\n",
+           sensing_result->ego.left90_mid_dist, //
+           sensing_result->ego.left45_dist,     //
+           sensing_result->ego.front_mid_dist,      //
+           sensing_result->ego.right45_dist,    //
+           sensing_result->ego.right90_mid_dist);
+    printf("sensor_dist(far): %3.2f, %3.2f, %3.2f, %3.2f, %3.2f\n",
            sensing_result->ego.left90_far_dist, //
            sensing_result->ego.left45_dist,     //
-           sensing_result->ego.front_dist,      //
+           sensing_result->ego.front_far_dist,      //
            sensing_result->ego.right45_dist,    //
-           sensing_result->ego.right90_dist,    //
            sensing_result->ego.right90_far_dist);
 
     printf("sensor: %0.1f, %0.1f, %0.1f, %0.1f, %0.1f\n",
@@ -331,6 +346,7 @@ void MainTask::load_hw_param() {
   param->fail_check.duty = getItem(root, "fail_duty_cnt")->valueint;
   param->fail_check.v = getItem(root, "fail_v_cnt")->valueint;
   param->fail_check.w = getItem(root, "fail_w_cnt")->valueint;
+  param->seach_timer = getItem(root, "seach_timer")->valueint;
   tgt_val->ego_in.ff_duty_low_th = param->ff_front_dury;
   tgt_val->ego_in.ff_duty_low_v_th = param->ff_v_th;
   param->front_ctrl_error_th =
@@ -389,6 +405,15 @@ void MainTask::load_hw_param() {
       getItem(root, "wall_off_hold_exist_dist_l")->valuedouble;
   param->wall_off_dist.exist_dist_r =
       getItem(root, "wall_off_hold_exist_dist_r")->valuedouble;
+  param->wall_off_dist.wall_off_exist_wall_th_l =
+      getItem(root, "wall_off_exist_wall_th_l")->valuedouble;
+  param->wall_off_dist.wall_off_exist_wall_th_r =
+      getItem(root, "wall_off_exist_wall_th_r")->valuedouble;
+
+  param->wall_off_dist.ctrl_exist_wall_th_l =
+      getItem(root, "ctrl_exist_wall_th_l")->valuedouble;
+  param->wall_off_dist.ctrl_exist_wall_th_r =
+      getItem(root, "ctrl_exist_wall_th_r")->valuedouble;
 
   param->wall_off_dist.noexist_th_l =
       getItem(root, "wall_off_hold_noexist_th_l")->valuedouble;
@@ -415,8 +440,14 @@ void MainTask::load_hw_param() {
 
   param->sla_wall_ref_l = getItem(root, "sla_wall_ref_l")->valuedouble;
   param->sla_wall_ref_r = getItem(root, "sla_wall_ref_r")->valuedouble;
-  param->sla_wall_ref_l_orval = getItem(root, "sla_wall_ref_l_orval")->valuedouble;
-  param->sla_wall_ref_r_orval = getItem(root, "sla_wall_ref_r_orval")->valuedouble;
+  param->sla_max_offset_dist = getItem(root, "sla_max_offset_dist")->valuedouble;
+  
+  param->sla_wall_ref_l_orval =
+      getItem(root, "sla_wall_ref_l_orval")->valuedouble;
+  param->sla_wall_ref_r_orval =
+      getItem(root, "sla_wall_ref_r_orval")->valuedouble;
+  param->orval_enable = getItem(root, "orval_offset_enable")->valueint;
+  param->dia45_offset_enable = getItem(root, "dia45_offset_enable")->valueint;
 
   param->front_dist_offset_dia_front =
       getItem(root, "front_dist_offset_dia_front")->valuedouble;
@@ -646,6 +677,10 @@ void MainTask::load_sensor_param() {
       cJSON_GetArrayItem(getItem(gain, "L90_far"), 0)->valuedouble;
   param->sensor_gain.l90_far.b =
       cJSON_GetArrayItem(getItem(gain, "L90_far"), 1)->valuedouble;
+  param->sensor_gain.l90_mid.a =
+      cJSON_GetArrayItem(getItem(gain, "L90_mid"), 0)->valuedouble;
+  param->sensor_gain.l90_mid.b =
+      cJSON_GetArrayItem(getItem(gain, "L90_mid"), 1)->valuedouble;
   param->sensor_gain.l45.a =
       cJSON_GetArrayItem(getItem(gain, "L45"), 0)->valuedouble;
   param->sensor_gain.l45.b =
@@ -666,6 +701,10 @@ void MainTask::load_sensor_param() {
       cJSON_GetArrayItem(getItem(gain, "R90_far"), 0)->valuedouble;
   param->sensor_gain.r90_far.b =
       cJSON_GetArrayItem(getItem(gain, "R90_far"), 1)->valuedouble;
+  param->sensor_gain.r90_mid.a =
+      cJSON_GetArrayItem(getItem(gain, "R90_mid"), 0)->valuedouble;
+  param->sensor_gain.r90_mid.b =
+      cJSON_GetArrayItem(getItem(gain, "R90_mid"), 1)->valuedouble;
 
   // cJSON_free(normal);
   // cJSON_free(normal_ref);
@@ -1279,6 +1318,7 @@ void MainTask::test_run() {
   if (param->test_log_enable > 0) {
     lt->start_slalom_log();
   }
+  pt->search_mode = true;
   ps.v_max = sys.test.v_max;
   ps.v_end = 20;
   ps.dist = sys.test.dist - 5;
@@ -1314,7 +1354,7 @@ void MainTask::test_run() {
   mp->coin();
   lt->save(slalom_log_file);
   ui->coin(120);
-
+  pt->search_mode = false;
   while (1) {
     if (ui->button_state_hold())
       break;
@@ -1898,9 +1938,9 @@ void MainTask::test_front_wall_offset() {
   mp->go_straight(ps);
 
   ps.dist = 85;
-  if (sensing_result->ego.left90_dist < 150 &&
-      sensing_result->ego.right90_dist < 150) {
-    ps.dist -= (param->front_dist_offset2 - sensing_result->ego.front_dist);
+  if (sensing_result->ego.left90_mid_dist < 150 &&
+      sensing_result->ego.right90_mid_dist < 150) {
+    ps.dist -= (param->front_dist_offset2 - sensing_result->ego.front_mid_dist);
   }
 
   ps.v_max = sys.test.v_max;
@@ -2127,6 +2167,27 @@ void MainTask::save_maze_data(bool write) {
     fprintf(f, "null");
   }
   fclose(f);
+
+  printf("wall: [");
+  // for (const auto d : lgc->map) {
+  for (int x = 0; x < sys.maze_size; x++) {
+    for (int y = 0; y < sys.maze_size; y++) {
+      auto d = lgc->map[x + y * sys.maze_size];
+      printf("%d,", (d & 0x0f));
+    }
+  }
+  printf("]\n");
+
+  printf("wall2: [");
+  // for (const auto d : lgc->map) {
+  for (int x = 0; x < sys.maze_size; x++) {
+    for (int y = 0; y < sys.maze_size; y++) {
+      auto d = lgc->map[x + y * sys.maze_size];
+      printf("%d,", (d & 0xff));
+    }
+    printf("\n");
+  }
+  printf("]\n");
 }
 void MainTask::save_maze_kata_data(bool write) {
   auto *f = fopen(maze_log_kata_file.c_str(), "wb");

@@ -21,7 +21,7 @@ public:
   Motion get_next_motion(Direction next_dir);
   void get_next_pos(Direction next_dir);
   // int exec(path_type &path);
-  Motion exec(bool is_stepped);
+  Motion exec(bool is_stepped, bool force_back);
   void back_home();
   bool is_go_home();
   void deadEnd(int egox, int egoy);

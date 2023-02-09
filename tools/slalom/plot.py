@@ -59,7 +59,7 @@ class Plot:
                 start_ang = 0
         elif type == "dia45":
             if mode > 0:
-                rad = 74
+                rad = 72
                 # rad = 80
                 n = mode
                 tgt_ang1 = 45.0 * 1 / 3

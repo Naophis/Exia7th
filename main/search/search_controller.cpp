@@ -89,7 +89,7 @@ MotionResult SearchController::go_straight_wrapper(param_set_t &p_set,
       sensing_result->ego.right45_dist > param->sen_ref_p.search_ref.right90;
 
   if (!left_exist && !right_exist) {
-    return mp->go_straight(p, adachi);
+    return mp->go_straight(p, adachi, true);
   }
   if ((near_left && right_exist)) {
     return straight_offset(p_set, TurnDirection::Right, diff);
@@ -104,7 +104,7 @@ MotionResult SearchController::go_straight_wrapper(param_set_t &p_set,
   }
   p.search_str_wide_ctrl_l = left_exist;
   p.search_str_wide_ctrl_r = right_exist;
-  return mp->go_straight(p, fake_adachi);
+  return mp->go_straight(p, fake_adachi, false);
 
   return MotionResult::NONE;
 }
@@ -152,11 +152,11 @@ MotionResult SearchController::pivot(param_set_t &p_set, float diff) {
   p.dist = 43 - diff;
   p.search_str_wide_ctrl_l = p.search_str_wide_ctrl_r = false;
   bool back_enable = false;
-  if (10 < sensing_result->ego.left90_dist &&
-      sensing_result->ego.left90_dist < 130 &&
-      10 < sensing_result->ego.right90_dist &&
-      sensing_result->ego.right90_dist < 130) {
-    p.dist += (sensing_result->ego.front_dist - param->front_dist_offset);
+  if (10 < sensing_result->ego.left90_mid_dist &&
+      sensing_result->ego.left90_mid_dist < 130 &&
+      10 < sensing_result->ego.right90_mid_dist &&
+      sensing_result->ego.right90_mid_dist < 130) {
+    p.dist += (sensing_result->ego.front_mid_dist - param->front_dist_offset);
     back_enable = true;
   }
   p.motion_type = MotionType::PIVOT_PRE;
@@ -349,11 +349,11 @@ MotionResult SearchController::pivot90(param_set_t &p_set,
   p.decel = p_set.str_map[StraightType::Search].decel;
   p.dist = 40 - diff;
   p.search_str_wide_ctrl_l = p.search_str_wide_ctrl_r = false;
-  if (10 < sensing_result->ego.left90_dist &&
-      sensing_result->ego.left90_dist < 130 &&
-      10 < sensing_result->ego.right90_dist &&
-      sensing_result->ego.right90_dist < 130) {
-    p.dist += (sensing_result->ego.front_dist - param->front_dist_offset_pivot);
+  if (10 < sensing_result->ego.left90_mid_dist &&
+      sensing_result->ego.left90_mid_dist < 130 &&
+      10 < sensing_result->ego.right90_mid_dist &&
+      sensing_result->ego.right90_mid_dist < 130) {
+    p.dist += (sensing_result->ego.front_mid_dist - param->front_dist_offset_pivot);
   }
   p.motion_type = MotionType::PIVOT_PRE;
   p.sct = SensorCtrlType::Straight;
@@ -430,6 +430,25 @@ MotionResult SearchController::pivot90(param_set_t &p_set,
 
   return res;
 }
+
+MotionResult SearchController::timeup_motion(param_set_t &p_set) {
+  // param_straight_t p;
+  MotionResult res;
+
+  pr.w_max = p_set.str_map[StraightType::Search].w_max / 2;
+  pr.alpha = p_set.str_map[StraightType::Search].alpha;
+  pr.w_end = p_set.str_map[StraightType::Search].w_end;
+  pr.ang = m_PI * 2 * 2;
+  pr.RorL = TurnDirection::Right;
+
+  res = mp->pivot_turn(pr);
+  pt->motor_disable();
+  mp->reset_tgt_data();
+  mp->reset_ego_data();
+
+  return res;
+}
+
 MotionResult SearchController::finish(param_set_t &p_set) {
   // param_straight_t p;
   p.v_max = p_set.str_map[StraightType::Search].v_max;
@@ -451,6 +470,7 @@ MotionResult SearchController::finish(param_set_t &p_set) {
 SearchResult SearchController::exec(param_set_t &p_set, SearchMode sm) {
   unsigned long long start_time = pt->global_msec_timer;
   unsigned long long end_time = pt->global_msec_timer;
+  pt->search_mode = true;
   adachi->lgc->reset_dist_map();
   mp->reset_gyro_ref_with_check();
   if (param->search_log_enable > 0)
@@ -484,6 +504,9 @@ SearchResult SearchController::exec(param_set_t &p_set, SearchMode sm) {
   saved = false;
   int go_home_fix_cnt = 0;
   adachi->sm = sm;
+  bool timeup = false;
+  bool state = true;
+  int goal_state = 0;
   while (1) {
     mr = MotionResult::NONE;
     // sensing(ego);
@@ -507,18 +530,26 @@ SearchResult SearchController::exec(param_set_t &p_set, SearchMode sm) {
         }
       }
     }
+
     // 足立法で行き先決定
     const float before = mp->tgt_val->global_pos.dist;
-    auto next_motion = adachi->exec(false);
+    Motion next_motion = Motion::NONE;
+    if (adachi->goal_step && goal_state == 0) {
+      goal_state = 1;
+      next_motion = adachi->exec(false, true);
+    } else {
+      next_motion = adachi->exec(false, false);
+    }
+
     const float after = mp->tgt_val->global_pos.dist;
     adachi->diff = std::abs(after - before);
 
     // go_straight_wrapper(p_set);
     if (next_motion == Motion::Straight) {
-      Motion next_motion2;
+      Motion next_motion2 = Motion::NONE;
       const float before2 = mp->tgt_val->global_pos.dist;
       if (front_is_stepped) {
-        next_motion2 = adachi->exec(true);
+        next_motion2 = adachi->exec(true, false);
       }
       const float after2 = mp->tgt_val->global_pos.dist;
       if (front_is_stepped && next_motion2 == Motion::Straight) {
@@ -554,6 +585,7 @@ SearchResult SearchController::exec(param_set_t &p_set, SearchMode sm) {
     }
 
     if (mr == MotionResult::ERROR) {
+      state = false;
       break;
     }
 
@@ -564,6 +596,7 @@ SearchResult SearchController::exec(param_set_t &p_set, SearchMode sm) {
     }
 
     if (back_cnt >= 4) {
+      state = false;
       break;
     }
     if (sm == SearchMode::ALL) {
@@ -584,15 +617,25 @@ SearchResult SearchController::exec(param_set_t &p_set, SearchMode sm) {
       }
     }
     end_time = pt->global_msec_timer;
-    if (ABS((end_time - start_time) / 1000) > 60 * 3) {
+    if (ABS((end_time - start_time) / 1000) > param->seach_timer) {
+      timeup = true;
       break;
     }
   }
   finish(p_set);
   pt->motor_disable();
+  if (timeup) {
+    timeup_motion(p_set);
+  }
+  if (state) {
+    save_maze_data();
+    mp->coin();
+    mp->coin();
+  }
   lt->stop_slalom_log();
   lt->save(slalom_log_file);
   mp->coin();
+  pt->search_mode = false;
   while (1) {
     if (ui->button_state_hold())
       break;
@@ -663,19 +706,20 @@ MotionResult SearchController::straight_offset(param_set_t &p_set,
   return mp->go_straight(p);
 }
 bool SearchController::judge2() {
-  const auto near =
-      (10 < sensing_result->ego.left90_dist &&
-       sensing_result->ego.left90_dist < param->front_dist_offset_pivot_th &&
-       10 < sensing_result->ego.right90_dist &&
-       sensing_result->ego.right90_dist < param->front_dist_offset_pivot_th);
+  const auto near = (10 < sensing_result->ego.left90_mid_dist &&
+                     sensing_result->ego.left90_mid_dist <
+                         param->front_dist_offset_pivot_th &&
+                     10 < sensing_result->ego.right90_mid_dist &&
+                     sensing_result->ego.right90_mid_dist <
+                         param->front_dist_offset_pivot_th);
 
   const auto diff =
-      (10 < sensing_result->ego.left90_dist) &&
-      (10 < sensing_result->ego.right90_dist) &&
-      (sensing_result->ego.left90_dist < 150) &&
-      (sensing_result->ego.right90_dist < 150) &&
-      (std::abs(sensing_result->ego.left90_dist -
-                sensing_result->ego.right90_dist) > param->front_diff_th);
+      (10 < sensing_result->ego.left90_mid_dist) &&
+      (10 < sensing_result->ego.right90_mid_dist) &&
+      (sensing_result->ego.left90_mid_dist < 150) &&
+      (sensing_result->ego.right90_mid_dist < 150) &&
+      (std::abs(sensing_result->ego.left90_mid_dist -
+                sensing_result->ego.right90_mid_dist) > param->front_diff_th);
 
   return near | diff;
 }
@@ -687,33 +731,37 @@ void SearchController::judge_wall() {
   wall_s = false;
 
   if (ego->dir == Direction::North) {
-    wall_n =
-        sensing_result->ego.left90_dist < param->sen_ref_p.search_exist.front &&
-        sensing_result->ego.right90_dist < param->sen_ref_p.search_exist.front;
+    wall_n = sensing_result->ego.left90_mid_dist <
+                 param->sen_ref_p.search_exist.front &&
+             sensing_result->ego.right90_mid_dist <
+                 param->sen_ref_p.search_exist.front;
     wall_e = sensing_result->ego.right45_dist <
              param->sen_ref_p.search_exist.right45;
     wall_w =
         sensing_result->ego.left45_dist < param->sen_ref_p.search_exist.left45;
   } else if (ego->dir == Direction::East) {
-    wall_e =
-        sensing_result->ego.left90_dist < param->sen_ref_p.search_exist.front &&
-        sensing_result->ego.right90_dist < param->sen_ref_p.search_exist.front;
+    wall_e = sensing_result->ego.left90_mid_dist <
+                 param->sen_ref_p.search_exist.front &&
+             sensing_result->ego.left90_mid_dist <
+                 param->sen_ref_p.search_exist.front;
     wall_s = sensing_result->ego.right45_dist <
              param->sen_ref_p.search_exist.right45;
     wall_n =
         sensing_result->ego.left45_dist < param->sen_ref_p.search_exist.left45;
   } else if (ego->dir == Direction::West) {
-    wall_w =
-        sensing_result->ego.left90_dist < param->sen_ref_p.search_exist.front &&
-        sensing_result->ego.right90_dist < param->sen_ref_p.search_exist.front;
+    wall_w = sensing_result->ego.left90_mid_dist <
+                 param->sen_ref_p.search_exist.front &&
+             sensing_result->ego.left90_mid_dist <
+                 param->sen_ref_p.search_exist.front;
     wall_n = sensing_result->ego.right45_dist <
              param->sen_ref_p.search_exist.right45;
     wall_s =
         sensing_result->ego.left45_dist < param->sen_ref_p.search_exist.left45;
   } else if (ego->dir == Direction::South) {
-    wall_s =
-        sensing_result->ego.left90_dist < param->sen_ref_p.search_exist.front &&
-        sensing_result->ego.right90_dist < param->sen_ref_p.search_exist.front;
+    wall_s = sensing_result->ego.left90_mid_dist <
+                 param->sen_ref_p.search_exist.front &&
+             sensing_result->ego.left90_mid_dist <
+                 param->sen_ref_p.search_exist.front;
     wall_w = sensing_result->ego.right45_dist <
              param->sen_ref_p.search_exist.right45;
     wall_e =

@@ -29,6 +29,7 @@ public:
   void save_maze_data();
   MotionResult pivot(param_set_t &p_set, float diff);
   MotionResult pivot90(param_set_t &p_set, const TurnDirection td, float diff);
+  MotionResult timeup_motion(param_set_t &p_set);
 
 private:
   bool saved = false;

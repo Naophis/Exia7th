@@ -233,7 +233,7 @@ void Adachi::goal_step_check() {
   }
 }
 
-Motion Adachi::exec(bool is_stepped) {
+Motion Adachi::exec(bool is_stepped, bool force_back) {
   int calc_cnt = 0;
   goal_step_check();
   goaled = goal_step;
@@ -263,27 +263,42 @@ Motion Adachi::exec(bool is_stepped) {
       }
     }
     lgc->set_goal_pos2(pt_list);
-    lgc->update_dist_map(0, goaled); // 再更新したらもう1回歩数マップ生成
+    if (!is_stepped) {
+      lgc->update_dist_map(0, goaled); // 再更新したらもう1回歩数マップ生成
+    }
     if (pt_list.size() == 1 && pt_list[0].x == 0 && pt_list[0].y == 0) {
       goal_startpos_lock = true; //ゴール固定
     } else {
       goal_startpos_lock = false;
     }
   } else {
-    // if (!is_stepped) {
-    lgc->update_dist_map(0, goaled); // search
-    // }
+    if (!is_stepped) {
+      lgc->update_dist_map(0, goaled); // search
+    }
   }
 
   if (goal_startpos_lock) {
     if (ego->x == 0 && ego->y == 0) {
       lgc->set_param3();
       calc_cnt += lgc->searchGoalPosition(false, subgoal_list);
-      lgc->update_dist_map(1, false); // search
+      if (!is_stepped) {
+        lgc->update_dist_map(1, false); // search
+      }
       return Motion::NONE;
     }
   }
   Direction next_dir = detect_next_direction();
+  if (force_back) {
+    if (ego->dir == Direction::North) {
+      next_dir = Direction::South;
+    } else if (ego->dir == Direction::East) {
+      next_dir = Direction::West;
+    } else if (ego->dir == Direction::West) {
+      next_dir = Direction::East;
+    } else if (ego->dir == Direction::South) {
+      next_dir = Direction::North;
+    }
+  }
   Motion next_motion = get_next_motion(next_dir);
 
   if (!is_stepped) {
@@ -311,21 +326,21 @@ void Adachi::update() {
       lgc->searchGoalPosition(true, subgoal_list);
       cost_mode = 3;
     }
-    if (subgoal_list.size() == 0) {
-      lgc->set_param4();
-      lgc->searchGoalPosition(true, subgoal_list);
-      cost_mode = 4;
-    }
-    if (subgoal_list.size() == 0) {
-      lgc->set_param1();
-      lgc->searchGoalPosition(true, subgoal_list);
-      cost_mode = 1;
-    }
-    if (subgoal_list.size() == 0) {
-      lgc->set_param2();
-      lgc->searchGoalPosition(true, subgoal_list);
-      cost_mode = 2;
-    }
+    // if (subgoal_list.size() == 0) {
+    //   lgc->set_param4();
+    //   lgc->searchGoalPosition(true, subgoal_list);
+    //   cost_mode = 4;
+    // }
+    // if (subgoal_list.size() == 0) {
+    //   lgc->set_param1();
+    //   lgc->searchGoalPosition(true, subgoal_list);
+    //   cost_mode = 1;
+    // }
+    // if (subgoal_list.size() == 0) {
+    //   lgc->set_param2();
+    //   lgc->searchGoalPosition(true, subgoal_list);
+    //   cost_mode = 2;
+    // }
   }
   // lgc->reset_dist_map();
   // if (subgoal_list.size() == 0) {
