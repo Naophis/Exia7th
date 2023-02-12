@@ -389,6 +389,7 @@ typedef struct {
 
   float dia_wall_off_ref_l = 0;
   float dia_wall_off_ref_r = 0;
+  float dia_offset_max_dist = 0;
 
   float slip_param_K = 0;
   float slip_param_k2 = 0;

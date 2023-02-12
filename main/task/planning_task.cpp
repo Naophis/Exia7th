@@ -544,9 +544,9 @@ float PlanningTask::check_sen_error_dia() {
     error_entity.sen_log_dia.gain_z = 0;
   } else {
     // TODO Uターン字は別ロジックに修正
-    error_entity.sen.error_i = 0;
-    error_entity.sen_log.gain_zz = 0;
-    error_entity.sen_log.gain_z = 0;
+    error_entity.sen_dia.error_i = 0;
+    error_entity.sen_log_dia.gain_zz = 0;
+    error_entity.sen_log_dia.gain_z = 0;
     if (tgt_val->tgt_in.tgt_dist >= param_ro->clear_dist_order) {
       if ((std::abs(tgt_val->ego_in.ang - tgt_val->ego_in.img_ang) * 180 /
            m_PI) < param_ro->clear_angle) {
@@ -754,14 +754,14 @@ void PlanningTask::set_next_duty(float duty_l, float duty_r,
     // duty_l = 25;
     // duty_r = -25;
 
-    if (duty_l < 0) {
+    if (duty_l > 0) {
       GPIO.out1_w1ts.val = BIT(A_CW_CCW2_BIT);
       GPIO.out1_w1tc.val = BIT(A_CW_CCW1_BIT);
     } else {
       GPIO.out1_w1ts.val = BIT(A_CW_CCW1_BIT);
       GPIO.out1_w1tc.val = BIT(A_CW_CCW2_BIT);
     }
-    if (duty_r < 0) {
+    if (duty_r > 0) {
       GPIO.out1_w1ts.val = BIT(B_CW_CCW1_BIT);
       GPIO.out1_w1tc.val = BIT(B_CW_CCW2_BIT);
     } else {

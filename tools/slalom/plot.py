@@ -36,7 +36,7 @@ class Plot:
             end_pos = {"x": 45, "y": 45}
             start_ang = 0
         elif type == "large":
-            rad = 60
+            rad = 57
             n = 4
             tgt_ang = 90
             end_pos = {"x": 90, "y": 90}
@@ -79,7 +79,7 @@ class Plot:
                 end_pos = {"x": 90, "y": 45}
                 start_ang = 0
             else :
-                rad = 52
+                rad = 54
                 n = 4
                 tgt_ang1 = 45.0 * 1 / 3
                 tgt_ang2 = 45.0 * 2 / 3

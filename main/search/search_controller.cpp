@@ -327,7 +327,7 @@ MotionResult SearchController::pivot(param_set_t &p_set, float diff) {
   if (tmp_dist > 0) {
     p.dist = 45 + tmp_dist;
   } else {
-    p.dist = 50;
+    p.dist = 45;
   }
   p.motion_type = MotionType::PIVOT_AFTER;
   p.sct = SensorCtrlType::Straight;
@@ -353,7 +353,8 @@ MotionResult SearchController::pivot90(param_set_t &p_set,
       sensing_result->ego.left90_mid_dist < 130 &&
       10 < sensing_result->ego.right90_mid_dist &&
       sensing_result->ego.right90_mid_dist < 130) {
-    p.dist += (sensing_result->ego.front_mid_dist - param->front_dist_offset_pivot);
+    p.dist +=
+        (sensing_result->ego.front_mid_dist - param->front_dist_offset_pivot);
   }
   p.motion_type = MotionType::PIVOT_PRE;
   p.sct = SensorCtrlType::Straight;
@@ -742,7 +743,7 @@ void SearchController::judge_wall() {
   } else if (ego->dir == Direction::East) {
     wall_e = sensing_result->ego.left90_mid_dist <
                  param->sen_ref_p.search_exist.front &&
-             sensing_result->ego.left90_mid_dist <
+             sensing_result->ego.right90_mid_dist <
                  param->sen_ref_p.search_exist.front;
     wall_s = sensing_result->ego.right45_dist <
              param->sen_ref_p.search_exist.right45;
@@ -751,7 +752,7 @@ void SearchController::judge_wall() {
   } else if (ego->dir == Direction::West) {
     wall_w = sensing_result->ego.left90_mid_dist <
                  param->sen_ref_p.search_exist.front &&
-             sensing_result->ego.left90_mid_dist <
+             sensing_result->ego.right90_mid_dist <
                  param->sen_ref_p.search_exist.front;
     wall_n = sensing_result->ego.right45_dist <
              param->sen_ref_p.search_exist.right45;
@@ -760,7 +761,7 @@ void SearchController::judge_wall() {
   } else if (ego->dir == Direction::South) {
     wall_s = sensing_result->ego.left90_mid_dist <
                  param->sen_ref_p.search_exist.front &&
-             sensing_result->ego.left90_mid_dist <
+             sensing_result->ego.right90_mid_dist <
                  param->sen_ref_p.search_exist.front;
     wall_w = sensing_result->ego.right45_dist <
              param->sen_ref_p.search_exist.right45;

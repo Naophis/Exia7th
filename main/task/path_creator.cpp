@@ -623,7 +623,7 @@ float PathCreator::timebase_path_create(bool is_search, param_set_t &p_set) {
       }
       // 該当の位置で分岐してPathを形成。それぞれ評価。
       for (const auto dir : cand.candidate_dir_set) {
-        bool goal = path_create_with_change(true, x, y, dir, pc_result, p_set);
+        bool goal = path_create_with_change(is_search, x, y, dir, pc_result, p_set);
         if (ui->button_state_hold()) {
           return 0;
         }

@@ -132,13 +132,13 @@ void MainTask::dump1() {
     printf("sensor_dist(mid): %3.2f, %3.2f, %3.2f, %3.2f, %3.2f\n",
            sensing_result->ego.left90_mid_dist, //
            sensing_result->ego.left45_dist,     //
-           sensing_result->ego.front_mid_dist,      //
+           sensing_result->ego.front_mid_dist,  //
            sensing_result->ego.right45_dist,    //
            sensing_result->ego.right90_mid_dist);
     printf("sensor_dist(far): %3.2f, %3.2f, %3.2f, %3.2f, %3.2f\n",
            sensing_result->ego.left90_far_dist, //
            sensing_result->ego.left45_dist,     //
-           sensing_result->ego.front_far_dist,      //
+           sensing_result->ego.front_far_dist,  //
            sensing_result->ego.right45_dist,    //
            sensing_result->ego.right90_far_dist);
 
@@ -437,11 +437,14 @@ void MainTask::load_hw_param() {
 
   param->dia_wall_off_ref_l = getItem(root, "dia_wall_off_ref_l")->valuedouble;
   param->dia_wall_off_ref_r = getItem(root, "dia_wall_off_ref_r")->valuedouble;
+  param->dia_offset_max_dist =
+      getItem(root, "dia_offset_max_dist")->valuedouble;
 
   param->sla_wall_ref_l = getItem(root, "sla_wall_ref_l")->valuedouble;
   param->sla_wall_ref_r = getItem(root, "sla_wall_ref_r")->valuedouble;
-  param->sla_max_offset_dist = getItem(root, "sla_max_offset_dist")->valuedouble;
-  
+  param->sla_max_offset_dist =
+      getItem(root, "sla_max_offset_dist")->valuedouble;
+
   param->sla_wall_ref_l_orval =
       getItem(root, "sla_wall_ref_l_orval")->valuedouble;
   param->sla_wall_ref_r_orval =
@@ -784,7 +787,7 @@ void MainTask::load_sys_param() {
   cJSON_Delete(root);
 }
 
-void MainTask::load_turn_param_profiles() {
+void MainTask::load_turn_param_profiles(bool const_mode) {
   string fileName = "/spiflash/profiles.txt";
   std::ifstream ifs(fileName);
   if (!ifs) {
@@ -840,6 +843,18 @@ void MainTask::load_turn_param_profiles() {
         getItem(getArray(profile_idx, i), "dia135_2")->valueint;
     p_idx[TurnType::Dia90] =
         getItem(getArray(profile_idx, i), "dia90")->valueint;
+    if (const_mode) {
+      p_idx[TurnType::None] = i;
+      p_idx[TurnType::Finish] = i;
+      p_idx[TurnType::Normal] = i;
+      p_idx[TurnType::Large] = i;
+      p_idx[TurnType::Orval] = i;
+      p_idx[TurnType::Dia45] = i;
+      p_idx[TurnType::Dia45_2] = i;
+      p_idx[TurnType::Dia135] = i;
+      p_idx[TurnType::Dia135_2] = i;
+      p_idx[TurnType::Dia90] = i;
+    }
     tpp.profile_list.emplace_back(p_idx);
   }
   // cJSON_free(profile_list);
@@ -983,7 +998,7 @@ void MainTask::load_param() {
     load_hw_param();
     load_sensor_param();
     load_sys_param();
-    load_turn_param_profiles();
+    load_turn_param_profiles(false);
     // load_slalom_param();
   }
 }
@@ -1640,7 +1655,7 @@ void MainTask::test_sla() {
     ui->error();
     return;
   }
-
+  load_turn_param_profiles(true);
   load_slalom_param(file_idx, file_idx);
   sla_p = param_set.map[static_cast<TurnType>(sys.test.sla_type)];
   auto sla_p2 = param_set.map[static_cast<TurnType>(sys.test.sla_type2)];
@@ -2302,6 +2317,7 @@ void MainTask::path_run(int idx, int idx2) {
     }
     pc->convert_large_path(true);
     pc->diagonalPath(true, true);
+    pc->print_path();
   }
   mp->exec_path_running(param_set);
 
