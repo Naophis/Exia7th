@@ -170,22 +170,23 @@ extern "C" void app_main() {
 
   QueueHandle_t xQueue;
   xQueue = xQueueCreate(1, sizeof(motion_tgt_val_t *));
-  esp_vfs_fat_mount_config_t mount_config;
-  mount_config.max_files = 8;
-  mount_config.format_if_mount_failed = true;
-  mount_config.allocation_unit_size = CONFIG_WL_SECTOR_SIZE;
-  const char *base_path = "/spiflash";
-  wl_handle_t s_wl_handle = WL_INVALID_HANDLE;
 
-  printf("storage0: try mount\n");
-  esp_err_t err = esp_vfs_fat_spiflash_mount_rw_wl(base_path, "storage0",
-                                             &mount_config, &s_wl_handle);
-  if (err != ESP_OK) {
-    printf("storage0: Failed to mount FATFS (%s)\n", esp_err_to_name(err));
-    return;
-  } else {
-    printf("storage0: mount OK\n");
-  }
+  // esp_vfs_fat_mount_config_t mount_config;
+  // mount_config.max_files = 8;
+  // mount_config.format_if_mount_failed = true;
+  // mount_config.allocation_unit_size = CONFIG_WL_SECTOR_SIZE;
+  // const char *base_path = "/spiflash";
+  // wl_handle_t s_wl_handle = WL_INVALID_HANDLE;
+
+  // printf("storage0: try mount\n");
+  // esp_err_t err = esp_vfs_fat_spiflash_mount_rw_wl(base_path, "storage0",
+  //                                            &mount_config, &s_wl_handle);
+  // if (err != ESP_OK) {
+  //   printf("storage0: Failed to mount FATFS (%s)\n", esp_err_to_name(err));
+  //   return;
+  // } else {
+  //   printf("storage0: mount OK\n");
+  // }
 
   gpio_set_level(SUCTION_PWM, 0);
   param->tire = 12.0;

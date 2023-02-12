@@ -251,6 +251,7 @@ typedef struct {
   sensor_gain_param_t l90;
   sensor_gain_param_t l45;
   sensor_gain_param_t front;
+  sensor_gain_param_t front2;
   sensor_gain_param_t r45;
   sensor_gain_param_t r90;
   sensor_gain_param_t l90_far;

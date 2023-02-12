@@ -271,6 +271,7 @@ vector<string> MainTask::split(const string &s, char delim) {
 }
 
 void MainTask::save_json_data(std::string &str) {
+  mount();
   //「ファイル名@JSON文字列」の体裁でクエリーが来ること前提
   auto res = split(str, '@'); // セパレータ「＠」で分割
   if (res.size() != 2)        // invalid check
@@ -306,7 +307,8 @@ void MainTask::load_hw_param() {
 
   cJSON *root = cJSON_CreateObject(), *motor_pid, *gyro_pid, *gyro_param,
         *kalman_config, *battery_param, *led_param, *angle_pid, *dist_pid,
-        *sen_pid, *sen_pid_dia, *accel_x, *comp_v_param;
+        *sen_pid, *sen_pid_dia, *accel_x, *comp_v_param, *axel_degenerate_x,
+        *axel_degenerate_y;
   root = cJSON_Parse(str.c_str());
 
   param->dt = getItem(root, "dt")->valuedouble;
@@ -339,6 +341,16 @@ void MainTask::load_hw_param() {
   param->led_light_delay_cnt =
       getItem(root, "led_light_delay_cnt")->valuedouble;
   param->front_diff_th = getItem(root, "front_diff_th")->valuedouble;
+
+  axel_degenerate_x = getItem(root, "axel_degenerate_x");
+  axel_degenerate_y = getItem(root, "axel_degenerate_y");
+  int list_size = cJSON_GetArraySize(axel_degenerate_x);
+  for (int i = 0; i < list_size; i++) {
+    const auto x = cJSON_GetArrayItem(axel_degenerate_x, i)->valuedouble;
+    const auto y = cJSON_GetArrayItem(axel_degenerate_y, i)->valuedouble;
+    pt->axel_degenerate_x.emplace_back(x);
+    pt->axel_degenerate_y.emplace_back(y);
+  }
 
   param->ff_v_th = getItem(root, "ff_v_th")->valuedouble;
   param->ff_front_dury = getItem(root, "ff_front_dury")->valuedouble;
@@ -692,6 +704,10 @@ void MainTask::load_sensor_param() {
       cJSON_GetArrayItem(getItem(gain, "F"), 0)->valuedouble;
   param->sensor_gain.front.b =
       cJSON_GetArrayItem(getItem(gain, "F"), 1)->valuedouble;
+  param->sensor_gain.front2.a =
+      cJSON_GetArrayItem(getItem(gain, "F2"), 0)->valuedouble;
+  param->sensor_gain.front2.b =
+      cJSON_GetArrayItem(getItem(gain, "F2"), 1)->valuedouble;
   param->sensor_gain.r45.a =
       cJSON_GetArrayItem(getItem(gain, "R45"), 0)->valuedouble;
   param->sensor_gain.r45.b =
@@ -865,6 +881,7 @@ void MainTask::load_turn_param_profiles(bool const_mode) {
 void MainTask::load_sla(int idx, string turn_name, slalom_param2_t &sla_p) {}
 void MainTask::load_straight(
     int idx, std::unordered_map<StraightType, straight_param_t> &str_map) {
+  mount();
   if ((int)(tpp.file_list.size()) < (idx - 1)) {
     return;
   }
@@ -904,12 +921,15 @@ void MainTask::load_straight(
     str_map[p2.first] = str_p;
   }
   cJSON_Delete(root);
+  umount();
 }
 
 void MainTask::load_slas(
     int idx, vector<pair<TurnType, string>> &turn_list,
     std::unordered_map<TurnType, slalom_param2_t> &turn_map) {
+  mount();
   if ((int)(tpp.file_list.size()) < (idx - 1)) {
+    umount();
     return;
   }
   const auto file_name = tpp.file_list[idx];
@@ -957,8 +977,10 @@ void MainTask::load_slas(
     turn_map[p.first].type = cast_turn_type(p.second);
   }
   cJSON_Delete(root);
+  umount();
 }
 void MainTask::load_slalom_param(int idx, int idx2) {
+  mount();
   param_set.suction = tpp.profile_list[idx][TurnType::Finish] > 0;
   param_set.suction_duty = sys.test.suction_duty;
   param_set.map.clear();
@@ -990,6 +1012,7 @@ void MainTask::load_slalom_param(int idx, int idx2) {
     load_slas(itr->first, itr->second, param_set.map_slow);
   }
   load_straight(idx, param_set.str_map);
+  umount();
 }
 void MainTask::load_slalom_param() {}
 
@@ -1004,6 +1027,7 @@ void MainTask::load_param() {
 }
 void MainTask::rx_uart_json() {
 
+  mount();
   load_param();
 
   uint8_t *data = (uint8_t *)malloc(BUF_SIZE);
@@ -1022,7 +1046,7 @@ void MainTask::rx_uart_json() {
     }
   }
   free(data);
-
+  umount();
   ui->coin(100);
   vTaskDelay(100.0 / portTICK_PERIOD_MS);
 }
@@ -1041,6 +1065,7 @@ void MainTask::task() {
   reset_ego_data();
 
   if (sys.user_mode != 0) {
+    mount();
     if (sys.user_mode == 1) {
       printf("test_sla\n");
       test_sla();
@@ -1109,6 +1134,7 @@ void MainTask::task() {
       printf("test_pivot_n2\n");
       test_pivot_n2();
     }
+    umount();
   } else {
     // ui->hello_exia();
     ui->coin(200);
@@ -2170,6 +2196,7 @@ void MainTask::test_sla_walloff() {
 }
 
 void MainTask::save_maze_data(bool write) {
+  mount();
   auto *f = fopen(maze_log_file.c_str(), "wb");
   if (f == NULL)
     return;
@@ -2203,8 +2230,10 @@ void MainTask::save_maze_data(bool write) {
     printf("\n");
   }
   printf("]\n");
+  umount();
 }
 void MainTask::save_maze_kata_data(bool write) {
+  mount();
   auto *f = fopen(maze_log_kata_file.c_str(), "wb");
   if (f == NULL)
     return;
@@ -2217,8 +2246,10 @@ void MainTask::save_maze_kata_data(bool write) {
     fprintf(f, "null");
   }
   fclose(f);
+  umount();
 }
 void MainTask::save_maze_return_data(bool write) {
+  mount();
   auto *f = fopen(maze_log_return_file.c_str(), "wb");
   if (f == NULL)
     return;
@@ -2231,19 +2262,22 @@ void MainTask::save_maze_return_data(bool write) {
     fprintf(f, "null");
   }
   fclose(f);
+  umount();
 }
 
 void MainTask::read_maze_data() {
+  mount();
   auto *f = fopen(maze_log_file.c_str(), "rb");
   if (f == NULL)
     return;
   // char line_buf[LINE_BUF_SIZE];
   std::string str = "";
   while (fgets(line_buf, sizeof(line_buf), f) != NULL) {
-    printf("%s\n", line_buf);
-    printf("_______\n");
+    printf("%s", line_buf);
+    // printf("_______\n");
     str += std::string(line_buf);
   }
+  printf("\n");
   fclose(f);
   // std::string str = std::string(line_buf);
   if (str == "null")
@@ -2254,6 +2288,28 @@ void MainTask::read_maze_data() {
     lgc->set_native_wall_data(i, stoi(map_list[i]));
   }
   printf("read maze data!!!\n");
+
+  printf("wall: [");
+  // for (const auto d : lgc->map) {
+  for (int x = 0; x < sys.maze_size; x++) {
+    for (int y = 0; y < sys.maze_size; y++) {
+      auto d = lgc->map[x + y * sys.maze_size];
+      printf("%d,", (d & 0x0f));
+    }
+  }
+  printf("]\n");
+
+  printf("wall2: [");
+  // for (const auto d : lgc->map) {
+  for (int x = 0; x < sys.maze_size; x++) {
+    for (int y = 0; y < sys.maze_size; y++) {
+      auto d = lgc->map[x + y * sys.maze_size];
+      printf("%d,", (d & 0xff));
+    }
+    printf("\n");
+  }
+  printf("]\n");
+  umount();
 }
 
 void MainTask::path_run(int idx, int idx2) {

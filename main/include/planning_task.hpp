@@ -45,6 +45,9 @@ public:
   void inactive_logging();
   void dump_log();
 
+  float interp1d(vector<float> &vx, vector<float> &vy, float x,
+                 bool extrapolate);
+
   unsigned long long global_msec_timer = 0;
 
   bool motor_en = false;
@@ -68,12 +71,20 @@ public:
   std::vector<float> log_table;
 
   t_ego mpc_next_ego;
+
+  std::vector<float> axel_degenerate_x;
+  std::vector<float> axel_degenerate_y;
+
 private:
+  float diff_old = 0;
+  float diff = 0;
   void motor_enable_main();
   void motor_disable_main();
 
   void suction_motor_enable_main();
   void suction_motor_disable_main();
+
+  bool first_req = false;
 
   xTaskHandle handle = 0;
 

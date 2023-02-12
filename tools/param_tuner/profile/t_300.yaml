@@ -31,7 +31,7 @@ orval:
   rad: 80.000000
   pow_n: 2.000000
   time: 0.347078
-  front: { left: 5, right: 5 }
+  front: { left: 8, right: 8 }
   back: { left: 5, right: 5 }
 # normal:
 #   v: 380

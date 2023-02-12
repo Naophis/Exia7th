@@ -7,7 +7,7 @@ straight:
     w_end: 0.1
     alpha: 10
   fast_run:
-    v_max: 4000
+    v_max: 3250
     accl: 18000
     decel: -18000
     w_max: 5
@@ -26,7 +26,7 @@ orval:
   rad: 80.000000
   pow_n: 2.000000
   time: 0.347078
-  front: { left: 5, right: 5 }
+  front: { left: 8, right: 8 }
   back: { left: 5, right: 5 }
 normal:
   v: 300.000000
@@ -46,12 +46,13 @@ large:
   back: { left: 29.80405635338318, right: 29.80405635338318 }
 dia45:
   v: 1150
-  ang: 45
-  rad: 50
-  pow_n: 4
-  time: 0.022374999999999267
-  front: { left: 7.799702731980396, right: 7.799702731980396 }
-  back: { left: 44.56580748497466, right: 44.56580748497466 }
+  ang: 45.0
+  rad: 70
+  pow_n: 1
+  time: 0
+  front: { left: 8.647420451076428, right: 8.647420451076428 }
+  back: { left: 45.245270271054075, right: 45.245270271054075 }
+
 dia45_2:
   v: 1150
   ang: 45

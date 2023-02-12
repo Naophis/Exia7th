@@ -12,6 +12,7 @@
 
 #include "include/enums.hpp"
 #include "include/structs.hpp"
+#include "sdkconfig.h"
 #include <bitset>
 #include <initializer_list>
 #include <iostream>
@@ -21,6 +22,7 @@
 #include <string_view>
 #include <unordered_map>
 #include <vector>
+#include "fs.hpp"
 
 #define portTICK_RATE_MS portTICK_PERIOD_MS
 #define xTaskHandle TaskHandle_t

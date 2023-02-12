@@ -909,7 +909,7 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
   go_straight(ps);
   reset_tgt_data();
   reset_ego_data();
-  vTaskDelay(250.0 / portTICK_RATE_MS);
+  vTaskDelay(750.0 / portTICK_RATE_MS);
   pt->motor_disable();
   pt->suction_disable();
 
@@ -953,7 +953,7 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
   tgt_val->nmr.v_end = ps_front.v_end;
   tgt_val->nmr.accl = ps_front.accl;
   tgt_val->nmr.decel = ps_front.decel;
-  tgt_val->nmr.dist = 30;
+  tgt_val->nmr.dist = 40;
   tgt_val->nmr.w_max = 0;
   tgt_val->nmr.w_end = 0;
   tgt_val->nmr.alpha = 0;
@@ -975,9 +975,9 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
         break;
       }
       if (40 < sensing_result->ego.left90_far_dist &&
-          sensing_result->ego.left90_far_dist < 150 &&
+          sensing_result->ego.left90_far_dist < param->front_dist_offset3 &&
           40 < sensing_result->ego.right90_far_dist &&
-          sensing_result->ego.right90_far_dist < 150) {
+          sensing_result->ego.right90_far_dist < param->front_dist_offset3) {
         ps_front.dist -=
             (param->front_dist_offset2 - sensing_result->ego.front_far_dist);
         return;
@@ -1017,9 +1017,9 @@ void MotionPlanning::wall_off(TurnDirection td, param_straight_t &ps_front) {
         break;
       }
       if (40 < sensing_result->ego.left90_far_dist &&
-          sensing_result->ego.left90_far_dist < 150 &&
+          sensing_result->ego.left90_far_dist < param->front_dist_offset3 &&
           40 < sensing_result->ego.right90_far_dist &&
-          sensing_result->ego.right90_far_dist < 150) {
+          sensing_result->ego.right90_far_dist < param->front_dist_offset3) {
         ps_front.dist -=
             (param->front_dist_offset2 - sensing_result->ego.front_far_dist);
         return;

@@ -127,9 +127,10 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
       if (arg_ego->v < arg_tgt->v_max) {
         if (arg_ego->v > arg_tgt->accl_param.limit) {
           rtb_Abs7 = (mpc_tgt_calc_P.Constant3_Value_c - rt_powf_snf(arg_ego->v /
-            arg_tgt->v_max, arg_tgt->accl_param.n)) * arg_tgt->accl;
+            arg_tgt->v_max, arg_tgt->accl_param.n)) * (arg_tgt->accl *
+            arg_tgt->axel_degenerate_gain);
         } else {
-          rtb_Abs7 = arg_tgt->accl;
+          rtb_Abs7 = arg_tgt->accl * arg_tgt->axel_degenerate_gain;
         }
 
         rtb_Switch = rtb_Abs7;

@@ -17,6 +17,7 @@ set(COMPONENT_SRCS
     "task/motion_planning.cpp"
     "task/planning_task.cpp"
     "task/ui.cpp"
+    "task/fs.cpp"
     "task/main_task.cpp"
     "task/icm20689.cpp"
     "task/lsm6dsr.cpp"

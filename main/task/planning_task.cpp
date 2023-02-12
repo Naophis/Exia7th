@@ -25,6 +25,29 @@ void PlanningTask::motor_enable_main() {
   mcpwm_start(MCPWM_UNIT_0, MCPWM_TIMER_1);
 }
 
+float PlanningTask::interp1d(vector<float> &vx, vector<float> &vy, float x,
+                             bool extrapolate) {
+  int size = vx.size();
+  int i = 0;
+  if (x >= vx[size - 2]) {
+    i = size - 2;
+  } else {
+    while (x > vx[i + 1])
+      i++;
+  }
+  float xL = vx[i], yL = vy[i], xR = vx[i + 1], yR = vy[i + 1];
+  if (!extrapolate) {
+    if (x < xL)
+      yR = yL;
+    if (x > xR)
+      yL = yR;
+  }
+
+  float dydx = (yR - yL) / (xR - xL);
+
+  return yL + dydx * (x - xL);
+}
+
 void PlanningTask::motor_disable_main() {
   motor_en = false;
 
@@ -244,9 +267,35 @@ void PlanningTask::task() {
 
     if (queue_recieved == pdTRUE) {
       cp_request();
+      first_req = true;
     }
 
     // 物理量ベース計算
+    float axel_degenerate_gain = 1;
+    diff_old = diff;
+    if (!search_mode && tgt_val->motion_type == MotionType::STRAIGHT) {
+    // if (tgt_val->motion_type == MotionType::STRAIGHT) {
+      if (axel_degenerate_x.size() > 0 &&
+          tgt_val->nmr.sct == SensorCtrlType::Straight) {
+        // if (tgt_val->nmr.sct == SensorCtrlType::Straight) {
+        diff = ABS(check_sen_error());
+        // } else if (tgt_val->nmr.sct == SensorCtrlType::Dia) {
+        //   diff = ABS(check_sen_error_dia());
+        // }
+        if (diff == 0) {
+          diff = diff_old;
+        }
+        axel_degenerate_gain =
+            interp1d(axel_degenerate_x, axel_degenerate_y, diff, false);
+        tgt_val->tgt_in.axel_degenerate_gain =
+            (1 - param_ro->sensor_gain.front2.b) *
+                tgt_val->tgt_in.axel_degenerate_gain +
+            param_ro->sensor_gain.front2.b * axel_degenerate_gain;
+      }
+    } else {
+      diff = diff_old = 0;
+      tgt_val->tgt_in.axel_degenerate_gain = axel_degenerate_gain;
+    }
     mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in, tgt_val->motion_mode,
                       mpc_step, &mpc_next_ego, &dynamics);
     if (tgt_val->motion_type == MotionType::STRAIGHT ||
@@ -319,11 +368,18 @@ float PlanningTask::calc_sensor_pid() {
   // sen_pid.step(&error_entity.sen.error_p, &param_ro->sensor_pid.p,
   //              &param_ro->sensor_pid.i, &param_ro->sensor_pid.d, &enable,
   //              &dt, &duty);
-
-  if (duty > param_ro->sensor_gain.front.a) {
-    duty = param_ro->sensor_gain.front.a;
-  } else if (duty < -param_ro->sensor_gain.front.a) {
-    duty = -param_ro->sensor_gain.front.a;
+  if (search_mode) {
+    if (duty > param_ro->sensor_gain.front.a) {
+      duty = param_ro->sensor_gain.front.a;
+    } else if (duty < -param_ro->sensor_gain.front.a) {
+      duty = -param_ro->sensor_gain.front.a;
+    }
+  } else {
+    if (duty > param_ro->sensor_gain.front2.a) {
+      duty = param_ro->sensor_gain.front2.a;
+    } else if (duty < -param_ro->sensor_gain.front2.a) {
+      duty = -param_ro->sensor_gain.front2.a;
+    }
   }
 
   return duty;
@@ -544,9 +600,9 @@ float PlanningTask::check_sen_error_dia() {
     error_entity.sen_log_dia.gain_z = 0;
   } else {
     // TODO Uターン字は別ロジックに修正
-    error_entity.sen_dia.error_i = 0;
-    error_entity.sen_log_dia.gain_zz = 0;
-    error_entity.sen_log_dia.gain_z = 0;
+    // error_entity.sen_dia.error_i = 0;
+    // error_entity.sen_log_dia.gain_zz = 0;
+    // error_entity.sen_log_dia.gain_z = 0;
     if (tgt_val->tgt_in.tgt_dist >= param_ro->clear_dist_order) {
       if ((std::abs(tgt_val->ego_in.ang - tgt_val->ego_in.img_ang) * 180 /
            m_PI) < param_ro->clear_angle) {

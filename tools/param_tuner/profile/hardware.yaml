@@ -5,7 +5,7 @@ dt: 0.001
 # tire: 13.367
 # tire: 15.15
 # tire: 13.23
-tire: 13.575
+tire: 13.525
 # tire: 13.095
 # tire: 13.135
 offset_start_dist: 21.0
@@ -57,7 +57,7 @@ normal_sla_offset: 6
 # Orvalスラロームオフセット距離壁補正リファレンス値
 sla_wall_ref_l_orval: 45.5
 sla_wall_ref_r_orval: 45.50
-orval_offset_enable: 1
+orval_offset_enable: 0
 dia45_offset_enable: 1
 
 # front_dist_offset2: 137.0
@@ -73,6 +73,7 @@ front_dist_offset_dia_right45: 54
 front_dist_offset_dia_left45: 50
 
 seach_timer: 420
+seach_timer_slowdown: 420
 
 clear_dist_ragne_from: 30
 clear_dist_ragne_to: 60
@@ -106,7 +107,7 @@ wall_off_hold_dist_str_r_exist: -3.50
 # 壁切れ：前壁補正
 front_dist_offset2: 133.0
 # 壁切れ：前壁補正
-front_dist_offset3: 126
+front_dist_offset3: 135
 
 # 壁切れ In(斜め)
 wall_off_hold_exist_dist_dia_l: 50
@@ -134,12 +135,12 @@ offset_after_turn_l: 20
 offset_after_turn_r: 20
 offset_after_turn_l2: 15
 offset_after_turn_r2: 15
-offset_after_turn_dia_l: 10
-offset_after_turn_dia_r: 10
+offset_after_turn_dia_l: 20
+offset_after_turn_dia_r: 20
 
 #ログON_OFF
-logging_time: 2.0
-search_log_enable: 1
+logging_time: 1.0
+search_log_enable: 0
 test_log_enable: 1
 fast_log_enable: 1
 sen_log_size: 100
@@ -152,11 +153,16 @@ ff_v_th: 200
 ff_front_dury: 0.95
 
 fail_duty_cnt: 150
-fail_v_cnt: 15000
-fail_w_cnt: 2500
+fail_v_cnt: 30000
+fail_w_cnt: 4500
 
 cell: 90
 cell2: 90
+
+axel_degenerate_x: [0, 1, 2, 4, 6, 8, 10]
+# axel_degenerate_y: [1, 1, 0.65, 0.5, 0.45, 0.3, 0.25]
+# axel_degenerate_y: [1, 1, 0.45, 0.3, 0.2, 0.15, 0.125]
+axel_degenerate_y: [1, 1, 0.2, 0.1, 0.075, 0.05, 0.025]
 
 motor_pid:
   p: 0.00575

@@ -167,6 +167,7 @@ float LoggingTask::calc_sensor(float data, float a, float b, char motion_type) {
 }
 
 void LoggingTask::save(std::string file_name) {
+  mount();
   printf("usefile: %s\n", slalom_log_file.c_str());
   f_slalom_log = fopen(slalom_log_file.c_str(), "wb");
   if (f_slalom_log == NULL)
@@ -271,6 +272,7 @@ void LoggingTask::save(std::string file_name) {
     fclose(f_slalom_log);
     printf("close\n");
   }
+  umount();
 }
 
 void LoggingTask::save_sysid(std::string file_name) {
@@ -288,7 +290,7 @@ void LoggingTask::save_sysid(std::string file_name) {
 }
 
 void LoggingTask::dump_log(std::string file_name) {
-
+  mount();
   const TickType_t xDelay2 = 100.0 / portTICK_PERIOD_MS;
   FILE *f = fopen(file_name.c_str(), "rb");
   if (f == NULL)
@@ -318,6 +320,7 @@ void LoggingTask::dump_log(std::string file_name) {
   fclose(f);
   printf("memory: %d bytes\n", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
   log_vec.clear();
+  umount();
   // std::vector<std::shared_ptr<log_data_t2>>().swap(log_vec);
 }
 void LoggingTask::dump_log_sysid(std::string file_name) {

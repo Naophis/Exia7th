@@ -835,6 +835,7 @@ void SearchController::print_maze() {
 }
 void SearchController::save_maze_data() {
   // auto *f = fopen(maze_log_kata_file.c_str(), "wb");
+  mount();
   auto *f = fopen(maze_log_file.c_str(), "wb");
   if (f == NULL)
     return;
@@ -842,4 +843,5 @@ void SearchController::save_maze_data() {
     fprintf(f, "%d,", d);
   }
   fclose(f);
+  umount();
 }
