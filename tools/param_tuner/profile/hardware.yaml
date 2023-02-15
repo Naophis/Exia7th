@@ -5,7 +5,7 @@ dt: 0.001
 # tire: 13.367
 # tire: 15.15
 # tire: 13.23
-tire: 13.525
+tire: 13.475
 # tire: 13.095
 # tire: 13.135
 offset_start_dist: 21.0
@@ -57,7 +57,7 @@ normal_sla_offset: 6
 # Orvalスラロームオフセット距離壁補正リファレンス値
 sla_wall_ref_l_orval: 45.5
 sla_wall_ref_r_orval: 45.50
-orval_offset_enable: 0
+orval_offset_enable: 1
 dia45_offset_enable: 1
 
 # front_dist_offset2: 137.0
@@ -99,10 +99,10 @@ wall_off_hold_noexist_th_r2: 65
 # 壁切れ オフセット距離
 # wall_off_hold_dist_str_l: -4.0
 # wall_off_hold_dist_str_r: -5.5
-wall_off_hold_dist_str_l: -4.50
+wall_off_hold_dist_str_l: -5.0
 wall_off_hold_dist_str_r: -6.0
 wall_off_hold_dist_str_l_exist: -3.0
-wall_off_hold_dist_str_r_exist: -3.50
+wall_off_hold_dist_str_r_exist: -5.0
 # wall_off_hold_dist_str_r_exist: 3.50
 # 壁切れ：前壁補正
 front_dist_offset2: 133.0
@@ -126,7 +126,8 @@ wall_off_hold_dist_dia_l: -6.0
 wall_off_hold_dist_dia_r: 2.0
 #斜め壁切れ時のmax接近距離
 dia_wall_off_ref_l: 31.0
-dia_wall_off_ref_r: 35.5
+# dia_wall_off_ref_r: 35.5
+dia_wall_off_ref_r: 31.5
 
 dia_offset_max_dist: 10
 
@@ -163,16 +164,23 @@ axel_degenerate_x: [0, 1, 2, 4, 6, 8, 10]
 # axel_degenerate_y: [1, 1, 0.65, 0.5, 0.45, 0.3, 0.25]
 # axel_degenerate_y: [1, 1, 0.45, 0.3, 0.2, 0.15, 0.125]
 axel_degenerate_y: [1, 1, 0.2, 0.1, 0.075, 0.05, 0.025]
+# axel_degenerate_y: [1, 1, 0.7, 0.4, 0.075, 0.05, 0.025]
+# axel_degenerate_y: [1, 1, 0.45, 0.2, 0.1, 0.05, 0.025]
 
 motor_pid:
   p: 0.00575
-  # p: 0.00375
-  # i: 1.725
   i: 1.725
   d: 0.0
-  # p: 0.0
-  # i: 0.0
-  # d: 0.0
+  b: 0
+  c: 0
+  mode: 1
+motor_pid2:
+  # p: 0.00275
+  p: 0.00275
+  # p: 0.00575
+  # i: 2.35
+  i: 1.85
+  d: 0.0
   b: 0
   c: 0
   mode: 1
@@ -211,13 +219,14 @@ angle_pid:
   b: 0
   c: 0
 sensor_pid:
-  p: 0.175
+  p: 0.075 #search_mode
+  b: 0.175 #!searchm_mode
+  # p: 0.075
   # i: 0.0
   # d: 0.045
   # p: 0.0
   i: 0.0
   d: 0.0
-  b: 0
   c: 0
   mode: 1
 sensor_pid_dia:

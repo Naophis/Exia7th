@@ -305,10 +305,10 @@ void MainTask::load_hw_param() {
 
   // printf("%s\n", str.c_str());
 
-  cJSON *root = cJSON_CreateObject(), *motor_pid, *gyro_pid, *gyro_param,
-        *kalman_config, *battery_param, *led_param, *angle_pid, *dist_pid,
-        *sen_pid, *sen_pid_dia, *accel_x, *comp_v_param, *axel_degenerate_x,
-        *axel_degenerate_y;
+  cJSON *root = cJSON_CreateObject(), *motor_pid, *motor_pid2, *gyro_pid,
+        *gyro_param, *kalman_config, *battery_param, *led_param, *angle_pid,
+        *dist_pid, *sen_pid, *sen_pid_dia, *accel_x, *comp_v_param,
+        *axel_degenerate_x, *axel_degenerate_y;
   root = cJSON_Parse(str.c_str());
 
   param->dt = getItem(root, "dt")->valuedouble;
@@ -485,10 +485,19 @@ void MainTask::load_hw_param() {
   param->motor_pid.c = getItem(motor_pid, "c")->valuedouble;
   param->motor_pid.mode = getItem(motor_pid, "mode")->valueint;
 
+  motor_pid2 = getItem(root, "motor_pid2");
+  param->motor_pid2.p = getItem(motor_pid2, "p")->valuedouble;
+  param->motor_pid2.i = getItem(motor_pid2, "i")->valuedouble;
+  param->motor_pid2.d = getItem(motor_pid2, "d")->valuedouble;
+  param->motor_pid2.b = getItem(motor_pid2, "b")->valuedouble;
+  param->motor_pid2.c = getItem(motor_pid2, "c")->valuedouble;
+  param->motor_pid2.mode = getItem(motor_pid2, "mode")->valueint;
+
   sen_pid = getItem(root, "sensor_pid");
   param->sensor_pid.p = getItem(sen_pid, "p")->valuedouble;
   param->sensor_pid.i = getItem(sen_pid, "i")->valuedouble;
   param->sensor_pid.d = getItem(sen_pid, "d")->valuedouble;
+  param->sensor_pid.b = getItem(sen_pid, "b")->valuedouble;
   param->sensor_pid.mode = getItem(sen_pid, "mode")->valueint;
 
   sen_pid_dia = getItem(root, "sensor_pid_dia");
@@ -783,6 +792,8 @@ void MainTask::load_sys_param() {
   sys.test.ang = getItem(test, "ang")->valuedouble;
   sys.test.suction_active = getItem(test, "suction_active")->valueint;
   sys.test.suction_duty = getItem(test, "suction_duty")->valuedouble;
+  sys.test.suction_duty_low = getItem(test, "suction_duty_low")->valuedouble;
+
   sys.test.file_idx = getItem(test, "file_idx")->valueint;
   printf("sys.test.file_idx = %d\n", sys.test.file_idx);
   file_idx = sys.test.file_idx;
@@ -983,6 +994,7 @@ void MainTask::load_slalom_param(int idx, int idx2) {
   mount();
   param_set.suction = tpp.profile_list[idx][TurnType::Finish] > 0;
   param_set.suction_duty = sys.test.suction_duty;
+  param_set.suction_duty_low = sys.test.suction_duty_low;
   param_set.map.clear();
   param_set.map_slow.clear();
   param_set.str_map.clear();
@@ -1099,7 +1111,7 @@ void MainTask::task() {
     } else if (sys.user_mode == 11) {
       printf("suction\n");
       mp->reset_gyro_ref_with_check();
-      pt->suction_enable(sys.test.suction_duty);
+      pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
       vTaskDelay(1000.0 * 10 / portTICK_PERIOD_MS);
       pt->suction_disable();
     } else if (sys.user_mode == 13) {
@@ -1237,7 +1249,7 @@ void MainTask::task() {
         // dump1(); // taskの最終行に配置すること
         printf("suction\n");
         mp->reset_gyro_ref_with_check();
-        pt->suction_enable(sys.test.suction_duty);
+        pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
         vTaskDelay(1000 * 10 / portTICK_PERIOD_MS);
         pt->suction_disable();
       } else if (mode_num == 23) {
@@ -1347,7 +1359,7 @@ void MainTask::test_run() {
   mp->reset_gyro_ref_with_check();
 
   if (sys.test.suction_active) {
-    pt->suction_enable(sys.test.suction_duty);
+    pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
     vTaskDelay(xDelay1000);
   }
 
@@ -1412,7 +1424,7 @@ void MainTask::test_back() {
   mp->reset_gyro_ref_with_check();
 
   if (sys.test.suction_active) {
-    pt->suction_enable(sys.test.suction_duty);
+    pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
     vTaskDelay(xDelay1000);
   }
 
@@ -1473,7 +1485,7 @@ void MainTask::test_run_sla() {
   mp->reset_gyro_ref_with_check();
 
   if (sys.test.suction_active) {
-    pt->suction_enable(sys.test.suction_duty);
+    pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
     vTaskDelay(500.0 / portTICK_PERIOD_MS);
   }
 
@@ -1708,7 +1720,7 @@ void MainTask::test_sla() {
   mp->reset_gyro_ref_with_check();
 
   if (sys.test.suction_active) {
-    pt->suction_enable(sys.test.suction_duty);
+    pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
     vTaskDelay(xDelay1000);
   }
 
@@ -1836,7 +1848,7 @@ void MainTask::test_search_sla() {
   mp->reset_gyro_ref_with_check();
 
   if (sys.test.suction_active) {
-    pt->suction_enable(sys.test.suction_duty);
+    pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
     vTaskDelay(xDelay1000);
   }
 
@@ -1952,7 +1964,7 @@ void MainTask::test_front_wall_offset() {
   mp->reset_gyro_ref_with_check();
 
   if (sys.test.suction_active) {
-    pt->suction_enable(sys.test.suction_duty);
+    pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
     vTaskDelay(xDelay1000);
   }
 
@@ -2032,7 +2044,7 @@ void MainTask::test_dia_walloff() {
   mp->reset_gyro_ref_with_check();
 
   // if (sys.test.suction_active) {
-  //   pt->suction_enable(sys.test.suction_duty);
+  //   pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
   //   vTaskDelay(500.0 / portTICK_PERIOD_MS);
   // }
 
@@ -2126,7 +2138,7 @@ void MainTask::test_sla_walloff() {
   mp->reset_gyro_ref_with_check();
 
   if (sys.test.suction_active) {
-    pt->suction_enable(sys.test.suction_duty);
+    pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
     vTaskDelay(500.0 / portTICK_PERIOD_MS);
   }
 

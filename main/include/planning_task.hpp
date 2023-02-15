@@ -25,7 +25,7 @@ public:
   virtual ~PlanningTask();
   void create_task(const BaseType_t xCoreID);
   void motor_enable();
-  void suction_enable(float duty);
+  void suction_enable(float duty, float duty2);
   void motor_disable();
   void motor_disable(bool reset_req);
   void suction_disable();

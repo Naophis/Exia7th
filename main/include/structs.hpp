@@ -61,6 +61,7 @@ typedef struct {
   float duty_l = 0;
   float duty_r = 0;
   float duty_suction = 0;
+  float duty_suction_low = 0;
   float sen = 0;
 } duty_t;
 
@@ -328,6 +329,7 @@ typedef struct {
   float cell = 90;
   float cell2 = 90;
   pid_param_t motor_pid;
+  pid_param_t motor_pid2;
   pid_param_t dist_pid;
   pid_param_t gyro_pid;
   pid_param_t angle_pid;
@@ -574,6 +576,7 @@ typedef struct {
   float ang = 0;
   int suction_active = 0;
   float suction_duty = 0;
+  float suction_duty_low = 0;
   float sla_dist = 0;
   int file_idx = 0;
   int sla_type = 0;
@@ -650,6 +653,7 @@ typedef struct {
   std::unordered_map<StraightType, straight_param_t> str_map;
   bool suction = false;
   float suction_duty = 0;
+  float suction_duty_low = 0;
 } param_set_t;
 
 typedef struct {

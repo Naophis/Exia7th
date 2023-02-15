@@ -9,11 +9,10 @@ Tc = 0.001
 
 # K = 175
 # K = 135
-K = 135
+# K = 135
 # K = 200
 
-list_K_x = [300, 900, 1000, 1200]
-list_K_y = [0.5, 0.5, 0.5, 0.5]
+list_K_x = [1]
 
 
 # list_K_y = [1, 1, 1, 2]
@@ -43,8 +42,10 @@ class Slalom:
     cell_size = 90
     half_cell_size = 45
     slip_gain = 50
+    K = 1
+    list_K_y = []
 
-    def __init__(self, v, rad, n, ang, end_pos, slip_gain, type):
+    def __init__(self, v, rad, n, ang, end_pos, slip_gain, type, K, list_K_y):
         self.v = v
         self.rad = rad
         self.ang = ang * math.pi / 180
@@ -53,6 +54,8 @@ class Slalom:
         self.end_pos = end_pos
         self.type = type
         self.slip_gain = slip_gain
+        self.K = K
+        self.list_K_y = list_K_y
         if n == 2:
             self.Et = 0.603450161218938087668
         elif n == 4:
@@ -140,7 +143,7 @@ class Slalom:
 
             Fx = 0
             v2 = np.sqrt(vx ** 2 + vy ** 2)
-            tmpK = np.interp(v2 * 1000, list_K_x, list_K_y)
+            tmpK = np.interp(v2 * 1000, list_K_x, self.list_K_y)
             Fy = -tmpK * beta
             # print(Fy, tmpK, v2)
             ax = Fx / m + old_w * vy
@@ -170,7 +173,7 @@ class Slalom:
             res["acc_y"] = np.append(res["acc_y"], (tmp_v * tmp_w))
             old_beta = beta
             beta = np.arctan2(vy, vx)
-            beta = (old_beta / dt - tmp_w) / (1.0 / dt + K / tmp_v)
+            beta = (old_beta / dt - tmp_w) / (1.0 / dt + self.K / tmp_v)
             res["beta"] = np.append(res["beta"], beta)
 
             delta_beta = beta - old_beta
@@ -258,7 +261,7 @@ class Slalom:
         s = 0
         delta_beta = 0
         old_beta = 0
-        state =0
+        state = 0
         alpha = 2 * self.v * self.v / (self.rad * self.rad * self.ang / 3)
         while True:
             tmp_alpha = 0
@@ -281,7 +284,7 @@ class Slalom:
 
             Fx = 0
             v2 = np.sqrt(vx ** 2 + vy ** 2)
-            tmpK = np.interp(v2 * 1000, list_K_x, list_K_y)
+            tmpK = np.interp(v2 * 1000, list_K_x, self.list_K_y)
             Fy = -tmpK * beta
             # print(Fy, tmpK, v2)
             ax = Fx / m + old_w * vy

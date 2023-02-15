@@ -782,7 +782,7 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
   reset_gyro_ref_with_check();
 
   if (p_set.suction) {
-    pt->suction_enable(p_set.suction_duty);
+    pt->suction_enable(p_set.suction_duty, p_set.suction_duty_low);
     vTaskDelay(1000.0 / portTICK_PERIOD_MS);
   }
   if (param->fast_log_enable > 0)

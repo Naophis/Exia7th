@@ -38,24 +38,26 @@ mode: 0 # メイン
 test: # テスト走行時に使用するパラメータ群
   v_max: 300
   end_v: 1
-  accl: 18000
-  decel: -18000
-  dist: 180 #直進全部　
+  accl: 1800
+  decel: -1800
+  dist: 720 #直進全部　
   # dist: 540 #直進全部　
   # dist: 180 # スラロームテスト
   dia: 0
   w_max: 10.5
   alpha: 75
   ang: 3600
-  suction_active: 1
+  suction_active: 0
   suction_duty: 2.75
+  # suction_duty_low: 2.75
+  suction_duty_low: 2.5
   # suction_duty: 3.25
-  file_idx: 13
+  file_idx: 0
   sla_dist: 90
   # sla_type: 3
-  sla_type: 5
+  sla_type: 4
   sla_type2: 6 #復路ターン種類
-  sla_return: 1 # 往復フラグ
+  sla_return: 0 # 往復フラグ
   # sla_type: 1 normal
   # sla_type: 2 #orval
   # sla_type: 3 #large

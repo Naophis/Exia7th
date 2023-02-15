@@ -11,7 +11,7 @@ plot_col = 2
 
 
 class Plot:
-    def exe(self, type, tgt_v, show, mode=0):
+    def exe(self, type, tgt_v, show, mode=0, K=1, list_K_y=[]):
 
         # fig = plt.figure(figsize=(5, 5), dpi=500)
         fig = plt.figure(dpi=200, tight_layout=True)
@@ -36,7 +36,7 @@ class Plot:
             end_pos = {"x": 45, "y": 45}
             start_ang = 0
         elif type == "large":
-            rad = 57
+            rad = 60
             n = 4
             tgt_ang = 90
             end_pos = {"x": 90, "y": 90}
@@ -78,7 +78,7 @@ class Plot:
                 tgt_ang = 45
                 end_pos = {"x": 90, "y": 45}
                 start_ang = 0
-            else :
+            else:
                 rad = 54
                 n = 4
                 tgt_ang1 = 45.0 * 1 / 3
@@ -87,7 +87,7 @@ class Plot:
                 tgt_ang = 45
                 end_pos = {"x": 90, "y": 45}
                 start_ang = 0
-                
+
         elif type == "dia135":
             rad = 45
             n = 4
@@ -114,10 +114,10 @@ class Plot:
             start_ang = 0
         res = {}
         if mode > 0:
-            sla = Slalom2(v, rad, n, tgt_ang1, tgt_ang2, tgt_ang3, end_pos, slip_gain, type)
+            sla = Slalom2(v, rad, n, tgt_ang1, tgt_ang2, tgt_ang3, end_pos, slip_gain, type, K, list_K_y)
             res = sla.calc(start_ang)
         else:
-            sla = Slalom(v, rad, n, tgt_ang, end_pos, slip_gain, type)
+            sla = Slalom(v, rad, n, tgt_ang, end_pos, slip_gain, type, K, list_K_y)
             sla.calc_base_time()
             res = sla.calc(start_ang)
 

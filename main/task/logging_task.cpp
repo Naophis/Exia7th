@@ -83,6 +83,7 @@ void LoggingTask::task() {
 
           ld->accl = floatToHalf(tgt_val->ego_in.accl);
           ld->accl_x = floatToHalf(sensing_result->ego.accel_x_raw);
+          // ld->accl_x = floatToHalf((float)tgt_val->ego_in.state);
           // ld->accl = floatToHalf(tgt_val->v_error);
           // ld->accl_x = floatToHalf(tgt_val->w_error);
 
