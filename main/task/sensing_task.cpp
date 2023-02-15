@@ -96,12 +96,15 @@ void SensingTask::task() {
     adc2_get_raw(SEN_L45, width, &sensing_result->led_sen_before.left45.raw);
 
     // 超信地旋回中は発光をサボる
-    if (!(tgt_val->motion_type == MotionType::NONE ||
-          tgt_val->motion_type == MotionType::PIVOT)) {
+    bool led_on = true;
+    if (tgt_val->motion_type == MotionType::PIVOT ||
+        tgt_val->motion_type == MotionType::SLALOM) {
+      led_on = false;
     }
-
-    GPIO.out_w1ts = BIT(LED_R90_BIT);
-    GPIO.out_w1ts = BIT(LED_L90_BIT);
+    if (led_on) {
+      GPIO.out_w1ts = BIT(LED_R90_BIT);
+      GPIO.out_w1ts = BIT(LED_L90_BIT);
+    }
     lec_cnt = 0;
     for (int i = 0; i < param->led_light_delay_cnt; i++) {
       lec_cnt++;
@@ -110,9 +113,10 @@ void SensingTask::task() {
     adc2_get_raw(SEN_L90, width, &sensing_result->led_sen_after.left90.raw);
     GPIO.out_w1tc = BIT(LED_R90_BIT);
     GPIO.out_w1tc = BIT(LED_L90_BIT);
-
-    GPIO.out_w1ts = BIT(LED_R45_BIT);
-    GPIO.out_w1ts = BIT(LED_L45_BIT);
+    if (led_on) {
+      GPIO.out_w1ts = BIT(LED_R45_BIT);
+      GPIO.out_w1ts = BIT(LED_L45_BIT);
+    }
     lec_cnt = 0;
     // sensing_result->gyro.raw = gyro_if.read_2byte_itr();
     // gyro_if.req_read2byte_itr(0x3B);

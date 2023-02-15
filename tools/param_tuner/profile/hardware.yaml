@@ -49,8 +49,8 @@ front_dist_offset: 91.50 # 探索時の前壁補正
 # スラロームオフセット距離壁補正リファレンス値
 # sla_wall_ref_l: 44.0
 # sla_wall_ref_r: 49.5
-sla_wall_ref_l: 45.0
-sla_wall_ref_r: 48.50
+sla_wall_ref_l: 44.50
+sla_wall_ref_r: 46.50
 sla_max_offset_dist: 6
 normal_sla_offset: 6
 
@@ -99,10 +99,11 @@ wall_off_hold_noexist_th_r2: 65
 # 壁切れ オフセット距離
 # wall_off_hold_dist_str_l: -4.0
 # wall_off_hold_dist_str_r: -5.5
-wall_off_hold_dist_str_l: -5.0
-wall_off_hold_dist_str_r: -6.0
-wall_off_hold_dist_str_l_exist: -3.0
-wall_off_hold_dist_str_r_exist: -5.0
+wall_off_hold_dist_str_l: -5.5
+wall_off_hold_dist_str_r: -7.5
+wall_off_hold_dist_str_l_exist: -4.5
+wall_off_hold_dist_str_r_exist: -6.25
+# wall_off_hold_dist_str_r_exist: 0.5
 # wall_off_hold_dist_str_r_exist: 3.50
 # 壁切れ：前壁補正
 front_dist_offset2: 133.0
@@ -116,8 +117,8 @@ wall_off_hold_exist_dist_dia_r: 50
 wall_off_hold_noexist_dia_th_l: 55
 wall_off_hold_noexist_dia_th_r: 55
 # 壁切れ オフセット距離
-wall_off_hold_dist_dia_l2: 4.0
-wall_off_hold_dist_dia_r2: 0.0
+wall_off_hold_dist_dia_l2: 1.0
+wall_off_hold_dist_dia_r2: 2.0
 #斜めターン壁有り補正
 dia_turn_th_l: 60
 dia_turn_th_r: 60
@@ -127,7 +128,7 @@ wall_off_hold_dist_dia_r: 2.0
 #斜め壁切れ時のmax接近距離
 dia_wall_off_ref_l: 31.0
 # dia_wall_off_ref_r: 35.5
-dia_wall_off_ref_r: 31.5
+dia_wall_off_ref_r: 30.5
 
 dia_offset_max_dist: 10
 
@@ -140,7 +141,7 @@ offset_after_turn_dia_l: 20
 offset_after_turn_dia_r: 20
 
 #ログON_OFF
-logging_time: 1.0
+logging_time: 2.0
 search_log_enable: 0
 test_log_enable: 1
 fast_log_enable: 1
@@ -163,7 +164,7 @@ cell2: 90
 axel_degenerate_x: [0, 1, 2, 4, 6, 8, 10]
 # axel_degenerate_y: [1, 1, 0.65, 0.5, 0.45, 0.3, 0.25]
 # axel_degenerate_y: [1, 1, 0.45, 0.3, 0.2, 0.15, 0.125]
-axel_degenerate_y: [1, 1, 0.2, 0.1, 0.075, 0.05, 0.025]
+axel_degenerate_y: [1, 1, 0.2, 0.1, 0.1, 0.1, 0.1]
 # axel_degenerate_y: [1, 1, 0.7, 0.4, 0.075, 0.05, 0.025]
 # axel_degenerate_y: [1, 1, 0.45, 0.2, 0.1, 0.05, 0.025]
 
