@@ -63,6 +63,7 @@ typedef struct {
   float duty_suction = 0;
   float duty_suction_low = 0;
   float sen = 0;
+  float sen_ang = 0;
 } duty_t;
 
 typedef struct {

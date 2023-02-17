@@ -582,12 +582,12 @@ float PlanningTask::check_sen_error_dia() {
 
       check++;
     } else {
-      // if (param->sensor_gain.front4.a != 0) {
-      if (tgt_val->dia_state.right_save) {
-        error += tgt_val->dia_state.right_old;
-        check++;
+      if (param_ro->sensor_gain.front4.a != 0) {
+        if (tgt_val->dia_state.right_save) {
+          error += tgt_val->dia_state.right_old;
+          check++;
+        }
       }
-      // }
     }
     // }
     // if (std::abs(sensing_result->ego.left90_dist -
@@ -603,12 +603,12 @@ float PlanningTask::check_sen_error_dia() {
       tgt_val->dia_state.left_save = true;
       check++;
     } else {
-      // if (param->sensor_gain.front4.a != 0) {
-      if (tgt_val->dia_state.left_save) {
-        error -= tgt_val->dia_state.left_old;
-        check++;
+      if (param_ro->sensor_gain.front4.a != 0) {
+        if (tgt_val->dia_state.left_save) {
+          error -= tgt_val->dia_state.left_old;
+          check++;
+        }
       }
-      // }
     }
   }
   // }
@@ -1011,6 +1011,7 @@ void PlanningTask::calc_tgt_duty() {
     error_entity.sen_log_dia.gain_z = 0;
   }
   sensing_result->ego.duty.sen = duty_sen;
+  sensing_result->ego.duty.sen_ang = sen_ang;
 
   error_entity.v.error_d = error_entity.v.error_p;
   error_entity.dist.error_d = error_entity.dist.error_p;
@@ -1163,12 +1164,15 @@ void PlanningTask::calc_tgt_duty() {
 
     if (tgt_val->nmr.sct == SensorCtrlType::Dia) {
       if (param_ro->str_ang_pid.mode == 1) {
+        duty_roll =
+            param_ro->str_ang_pid.p * error_entity.ang.error_p -
+            param_ro->str_ang_pid.d * sensing_result->ego.w_lp +
+            (error_entity.ang_log.gain_z - error_entity.ang_log.gain_zz) * dt;
+        error_entity.ang_log.gain_zz = error_entity.ang_log.gain_z;
+        error_entity.ang_log.gain_z = duty_roll;
+      } else {
         duty_roll = param_ro->str_ang_pid.p * error_entity.ang.error_p -
                     param_ro->str_ang_pid.d * sensing_result->ego.w_lp;
-      } else {
-        duty_roll = param_ro->str_ang_pid.p * error_entity.ang.error_p +
-                    param_ro->str_ang_pid.i * error_entity.ang.error_i +
-                    param_ro->str_ang_pid.d * error_entity.w.error_p;
         error_entity.ang_log.gain_zz = 0;
         error_entity.ang_log.gain_z = 0;
       }
@@ -1178,6 +1182,11 @@ void PlanningTask::calc_tgt_duty() {
       duty_roll = param_ro->gyro_pid.p * error_entity.w.error_p +
                   param_ro->gyro_pid.i * error_entity.w.error_i +
                   param_ro->gyro_pid.d * error_entity.w.error_d;
+      error_entity.ang_log.gain_zz = 0;
+      error_entity.ang_log.gain_z = 0;
+    } else {
+      error_entity.ang_log.gain_zz = 0;
+      error_entity.ang_log.gain_z = 0;
     }
   }
 

@@ -94,7 +94,9 @@ void LoggingTask::task() {
           ld->img_dist = floatToHalf(tgt_val->ego_in.img_dist);
           ld->dist = floatToHalf(tgt_val->ego_in.dist);
 
-          ld->img_ang = floatToHalf(tgt_val->ego_in.img_ang * 180 / m_PI);
+          ld->img_ang = floatToHalf(
+              (tgt_val->ego_in.img_ang + sensing_result->ego.duty.sen_ang) *
+              180 / m_PI);
           ld->ang = floatToHalf(tgt_val->ego_in.ang * 180 / m_PI);
 
           ld->left90_lp = floatToHalf(sensing_result->ego.left90_lp);
