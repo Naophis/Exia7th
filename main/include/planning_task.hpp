@@ -174,6 +174,7 @@ private:
 
   Simple_PID_Controller vel_pid;
   Simple_PID_Controller gyro_pid;
+  Simple_PID_Controller ang_pid;
 
   // Simple_PID_Controller dist_pid;
   // Simple_PID_Controller sen_pid;

@@ -5,7 +5,7 @@ dt: 0.001
 # tire: 13.367
 # tire: 15.15
 # tire: 13.23
-tire: 13.475
+tire: 13.495
 # tire: 13.095
 # tire: 13.135
 offset_start_dist: 21.0
@@ -102,7 +102,8 @@ wall_off_hold_noexist_th_r2: 65
 wall_off_hold_dist_str_l: -5.5
 wall_off_hold_dist_str_r: -7.5
 wall_off_hold_dist_str_l_exist: -4.5
-wall_off_hold_dist_str_r_exist: -6.25
+# wall_off_hold_dist_str_r_exist: -6.25
+wall_off_hold_dist_str_r_exist: -1.25
 # wall_off_hold_dist_str_r_exist: 0.5
 # wall_off_hold_dist_str_r_exist: 3.50
 # 壁切れ：前壁補正
@@ -204,7 +205,6 @@ gyro_pid:
   # 通常 mode=0
   p: 0.275
   i: 0.0225
-  # i: 0.0175
   d: 0.275
   mode: 0
   # p: 0.0
@@ -219,9 +219,22 @@ angle_pid:
   mode: 1
   b: 0
   c: 0
+str_agl_pid:
+  # p: 0.095
+  # d: 1.25
+  p: 22.75
+  d: 0.45
+  i: 0.0
+  mode: 1
+  b: 0
+  c: 0
 sensor_pid:
   p: 0.075 #search_mode
   b: 0.175 #!searchm_mode
+
+  # p: 0.5 #search_mode
+  # b: 0.1 #!searchm_mode
+
   # p: 0.075
   # i: 0.0
   # d: 0.045
@@ -231,7 +244,8 @@ sensor_pid:
   c: 0
   mode: 1
 sensor_pid_dia:
-  p: 0.045
+  p: 0.0975
+  # p: 0.15
   # p: 0.0
   i: 0.0
   d: 0.0

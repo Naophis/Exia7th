@@ -253,6 +253,8 @@ typedef struct {
   sensor_gain_param_t l45;
   sensor_gain_param_t front;
   sensor_gain_param_t front2;
+  sensor_gain_param_t front3;
+  sensor_gain_param_t front4;
   sensor_gain_param_t r45;
   sensor_gain_param_t r90;
   sensor_gain_param_t l90_far;
@@ -332,6 +334,7 @@ typedef struct {
   pid_param_t motor_pid2;
   pid_param_t dist_pid;
   pid_param_t gyro_pid;
+  pid_param_t str_ang_pid;
   pid_param_t angle_pid;
   pid_param_t sensor_pid;
   pid_param_t sensor_pid_dia;

@@ -306,8 +306,8 @@ void MainTask::load_hw_param() {
   // printf("%s\n", str.c_str());
 
   cJSON *root = cJSON_CreateObject(), *motor_pid, *motor_pid2, *gyro_pid,
-        *gyro_param, *kalman_config, *battery_param, *led_param, *angle_pid,
-        *dist_pid, *sen_pid, *sen_pid_dia, *accel_x, *comp_v_param,
+        *str_agl_pid, *gyro_param, *kalman_config, *battery_param, *led_param,
+        *angle_pid, *dist_pid, *sen_pid, *sen_pid_dia, *accel_x, *comp_v_param,
         *axel_degenerate_x, *axel_degenerate_y;
   root = cJSON_Parse(str.c_str());
 
@@ -484,6 +484,14 @@ void MainTask::load_hw_param() {
   param->motor_pid.b = getItem(motor_pid, "b")->valuedouble;
   param->motor_pid.c = getItem(motor_pid, "c")->valuedouble;
   param->motor_pid.mode = getItem(motor_pid, "mode")->valueint;
+
+  str_agl_pid = getItem(root, "str_agl_pid");
+  param->str_ang_pid.p = getItem(str_agl_pid, "p")->valuedouble;
+  param->str_ang_pid.i = getItem(str_agl_pid, "i")->valuedouble;
+  param->str_ang_pid.d = getItem(str_agl_pid, "d")->valuedouble;
+  param->str_ang_pid.b = getItem(str_agl_pid, "b")->valuedouble;
+  param->str_ang_pid.c = getItem(str_agl_pid, "c")->valuedouble;
+  param->str_ang_pid.mode = getItem(str_agl_pid, "mode")->valueint;
 
   motor_pid2 = getItem(root, "motor_pid2");
   param->motor_pid2.p = getItem(motor_pid2, "p")->valuedouble;
@@ -717,6 +725,14 @@ void MainTask::load_sensor_param() {
       cJSON_GetArrayItem(getItem(gain, "F2"), 0)->valuedouble;
   param->sensor_gain.front2.b =
       cJSON_GetArrayItem(getItem(gain, "F2"), 1)->valuedouble;
+  param->sensor_gain.front3.a =
+      cJSON_GetArrayItem(getItem(gain, "F3"), 0)->valuedouble;
+  param->sensor_gain.front3.b =
+      cJSON_GetArrayItem(getItem(gain, "F3"), 1)->valuedouble;
+  param->sensor_gain.front4.a =
+      cJSON_GetArrayItem(getItem(gain, "F4"), 0)->valuedouble;
+  param->sensor_gain.front4.b =
+      cJSON_GetArrayItem(getItem(gain, "F4"), 1)->valuedouble;
   param->sensor_gain.r45.a =
       cJSON_GetArrayItem(getItem(gain, "R45"), 0)->valuedouble;
   param->sensor_gain.r45.b =
