@@ -45,7 +45,7 @@ clear_angle: 5
 clear_dist_order: 80
 
 # 探索スラローム
-front_dist_offset: 91.50 # 探索時の前壁補正
+front_dist_offset: 92.50 # 探索時の前壁補正
 # スラロームオフセット距離壁補正リファレンス値
 # sla_wall_ref_l: 44.0
 # sla_wall_ref_r: 49.5
@@ -72,8 +72,8 @@ front_dist_offset_dia_45_th: 77
 front_dist_offset_dia_right45: 54
 front_dist_offset_dia_left45: 50
 
-seach_timer: 420
-seach_timer_slowdown: 420
+seach_timer: 450
+seach_timer_slowdown: 450
 
 clear_dist_ragne_from: 30
 clear_dist_ragne_to: 60
@@ -134,8 +134,8 @@ dia_wall_off_ref_r: 30.5
 dia_offset_max_dist: 10
 
 #ターン後オフセット距離
-offset_after_turn_l: 20
-offset_after_turn_r: 20
+offset_after_turn_l: 18
+offset_after_turn_r: 18
 offset_after_turn_l2: 15
 offset_after_turn_r2: 15
 offset_after_turn_dia_l: 20
@@ -210,8 +210,8 @@ gyro_pid:
   # p: 0.0
   # i: 0.0
   # d: 0
-  b: 0
-  c: 0
+  b: 0.0225
+  c: 0.275
 angle_pid:
   p: 0.45
   i: 0.0
@@ -229,7 +229,7 @@ str_agl_pid:
   b: 0
   c: 0
 sensor_pid:
-  p: 0.075 #search_mode
+  p: 0.095 #search_mode
   b: 0.175 #!searchm_mode
 
   # p: 0.5 #search_mode

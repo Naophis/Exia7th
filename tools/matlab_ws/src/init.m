@@ -14,7 +14,7 @@ dt = 0.001;
  
 test_mode = 0; % straight
 
-% test_mode = 1; % slalom
+test_mode = 1; % slalom
 % test_mode = 2; % pivot
 %  test_mode = 3; % back_straight
 % test_mode = 4; % slalom2
@@ -67,7 +67,7 @@ gear_ratio=single(37/9);
 
 if test_mode == 0
     % tgt
-    v_max = 380;
+    v_max = 3800;
     end_v = 200;
     accl = 12000;
     decel = -12000;
@@ -75,7 +75,7 @@ if test_mode == 0
     w_max = 0;
     end_w = 0;
     param_alpha = 0;
-    tgt_dist = 21;
+    tgt_dist = 90*32;
     tgt_angle = 0;
 
     % ego

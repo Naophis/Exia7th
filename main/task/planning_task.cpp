@@ -1179,9 +1179,18 @@ void PlanningTask::calc_tgt_duty() {
     } else if (tgt_val->motion_type == MotionType::PIVOT ||
                tgt_val->motion_type == MotionType::SLALOM || sen_ang == 0 ||
                search_mode) {
-      duty_roll = param_ro->gyro_pid.p * error_entity.w.error_p +
-                  param_ro->gyro_pid.i * error_entity.w.error_i +
-                  param_ro->gyro_pid.d * error_entity.w.error_d;
+      if (
+          // tgt_val->motion_type == MotionType::SLALOM ||
+          // tgt_val->motion_type == MotionType::SLA_FRONT_STR ||
+          tgt_val->motion_type == MotionType::SLA_BACK_STR) {
+        duty_roll = param_ro->gyro_pid.p * error_entity.w.error_p +
+                    param_ro->gyro_pid.b * error_entity.w.error_i +
+                    param_ro->gyro_pid.c * error_entity.w.error_d;
+      } else {
+        duty_roll = param_ro->gyro_pid.p * error_entity.w.error_p +
+                    param_ro->gyro_pid.i * error_entity.w.error_i +
+                    param_ro->gyro_pid.d * error_entity.w.error_d;
+      }
       error_entity.ang_log.gain_zz = 0;
       error_entity.ang_log.gain_z = 0;
     } else {

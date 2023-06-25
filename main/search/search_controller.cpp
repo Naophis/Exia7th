@@ -153,9 +153,9 @@ MotionResult SearchController::pivot(param_set_t &p_set, float diff) {
   p.search_str_wide_ctrl_l = p.search_str_wide_ctrl_r = false;
   bool back_enable = false;
   if (10 < sensing_result->ego.left90_mid_dist &&
-      sensing_result->ego.left90_mid_dist < 130 &&
+      sensing_result->ego.left90_mid_dist < 100 &&
       10 < sensing_result->ego.right90_mid_dist &&
-      sensing_result->ego.right90_mid_dist < 130) {
+      sensing_result->ego.right90_mid_dist < 100) {
     p.dist += (sensing_result->ego.front_mid_dist - param->front_dist_offset);
     back_enable = true;
   }
@@ -209,7 +209,7 @@ MotionResult SearchController::pivot(param_set_t &p_set, float diff) {
   }
 
   if (back_enable) {
-    tmp_dist = 15;
+    tmp_dist = 23;
   }
   bool front_ctrl = (sensing_result->ego.front_dist < 60);
   pt->motor_disable();
@@ -325,7 +325,7 @@ MotionResult SearchController::pivot(param_set_t &p_set, float diff) {
   p.accl = p_set.str_map[StraightType::Search].accl;
   p.decel = p_set.str_map[StraightType::Search].decel;
   if (tmp_dist > 0) {
-    p.dist = 45 + tmp_dist;
+    p.dist = 45 + tmp_dist - 5;
   } else {
     p.dist = 45;
   }
@@ -350,9 +350,9 @@ MotionResult SearchController::pivot90(param_set_t &p_set,
   p.dist = 40 - diff;
   p.search_str_wide_ctrl_l = p.search_str_wide_ctrl_r = false;
   if (10 < sensing_result->ego.left90_mid_dist &&
-      sensing_result->ego.left90_mid_dist < 130 &&
+      sensing_result->ego.left90_mid_dist < 100 &&
       10 < sensing_result->ego.right90_mid_dist &&
-      sensing_result->ego.right90_mid_dist < 130) {
+      sensing_result->ego.right90_mid_dist < 100) {
     p.dist +=
         (sensing_result->ego.front_mid_dist - param->front_dist_offset_pivot);
   }
@@ -360,7 +360,7 @@ MotionResult SearchController::pivot90(param_set_t &p_set,
   p.sct = SensorCtrlType::Straight;
   p.wall_off_req = WallOffReq::NONE;
 
-  float offset_dist = 45;
+  // float offset_dist = 45;
 
   if (p.dist < 10) {
     p.dist = 10;
@@ -420,9 +420,9 @@ MotionResult SearchController::pivot90(param_set_t &p_set,
   p.decel = p_set.str_map[StraightType::Search].decel;
   p.search_str_wide_ctrl_l = p.search_str_wide_ctrl_r = false;
   p.dist = 45;
-  if (offset_dist != 45) {
-    p.dist = offset_dist;
-  }
+  // if (offset_dist != 45) {
+  //   p.dist = offset_dist;
+  // }
   p.motion_type = MotionType::PIVOT_AFTER;
   p.sct = SensorCtrlType::Straight;
   p.wall_off_req = WallOffReq::NONE;
@@ -535,12 +535,12 @@ SearchResult SearchController::exec(param_set_t &p_set, SearchMode sm) {
     // 足立法で行き先決定
     const float before = mp->tgt_val->global_pos.dist;
     Motion next_motion = Motion::NONE;
-    if (adachi->goal_step && goal_state == 0) {
-      goal_state = 1;
-      next_motion = adachi->exec(false, true);
-    } else {
+    // if (adachi->goal_step && goal_state == 0) {
+    //   goal_state = 1;
+    //   next_motion = adachi->exec(false, true);
+    // } else {
+    // }
       next_motion = adachi->exec(false, false);
-    }
 
     const float after = mp->tgt_val->global_pos.dist;
     adachi->diff = std::abs(after - before);
@@ -717,8 +717,8 @@ bool SearchController::judge2() {
   const auto diff =
       (10 < sensing_result->ego.left90_mid_dist) &&
       (10 < sensing_result->ego.right90_mid_dist) &&
-      (sensing_result->ego.left90_mid_dist < 150) &&
-      (sensing_result->ego.right90_mid_dist < 150) &&
+      (sensing_result->ego.left90_mid_dist < 110) &&
+      (sensing_result->ego.right90_mid_dist < 110) &&
       (std::abs(sensing_result->ego.left90_mid_dist -
                 sensing_result->ego.right90_mid_dist) > param->front_diff_th);
 

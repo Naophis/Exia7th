@@ -182,6 +182,7 @@ void LoggingTask::save(std::string file_name) {
   const char *f4 = format4.c_str();
 
   int i = 0;
+  int c = 0;
 
   for (const auto &ld : log_vec) {
 
@@ -268,6 +269,21 @@ void LoggingTask::save(std::string file_name) {
             ld->motion_timestamp);             // 4
     if (i > 10 && ld->motion_timestamp == 0) {
       break;
+    }
+    c++;
+    if (c == 50) {
+      c = 0;
+      vTaskDelay(1.0 / portTICK_PERIOD_MS);
+    }
+    if (!gpio_get_level(SW1)) {
+      unsigned int d = 0;
+      while (!gpio_get_level(SW1)) {
+        d++;
+        vTaskDelay(10.0 / portTICK_PERIOD_MS);
+      }
+      if (d > 50) {
+        break;
+      }
     }
   }
 

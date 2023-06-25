@@ -255,10 +255,10 @@ MotionResult MotionPlanning::slalom(slalom_param2_t &sp, TurnDirection td,
     ps_front.v_max = next_motion.v_max;
     if (param->front_dist_offset_pivot_th <
             sensing_result->ego.left90_mid_dist &&
-        sensing_result->ego.left90_mid_dist < 130 &&
+        sensing_result->ego.left90_mid_dist < 100 &&
         param->front_dist_offset_pivot_th <
             sensing_result->ego.right90_mid_dist &&
-        sensing_result->ego.right90_mid_dist < 130) {
+        sensing_result->ego.right90_mid_dist < 100) {
       auto diff =
           (sensing_result->ego.front_mid_dist - param->front_dist_offset);
       if (diff > param->normal_sla_offset) {
@@ -785,8 +785,13 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
     pt->suction_enable(p_set.suction_duty, p_set.suction_duty_low);
     vTaskDelay(1000.0 / portTICK_PERIOD_MS);
   }
-  if (param->fast_log_enable > 0)
+  if (param->fast_log_enable > 0) {
+    tgt_val->global_pos.ang = 0;
+    tgt_val->global_pos.dist= 0;
     lt->start_slalom_log();
+    tgt_val->global_pos.ang = 0;
+    tgt_val->global_pos.dist= 0;
+  }
   // reset();
   reset_tgt_data();
   reset_ego_data();
@@ -813,6 +818,7 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
 
       ps.dist = !dia ? (dist * cell_size) : (dist * cell_size * ROOT2);
       if (i == 0) {
+        tgt_val->global_pos.ang = 0;
         if (dist == 0) { // 初手ターンの場合は距離合成して加速区間を増やす
           if (fast_mode) {
             dist = (turn_dir == TurnDirection::Left)
@@ -834,7 +840,7 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
       }
       if (turn_type == TurnType::Finish) {
         ps.dist -= 45;
-        ps.v_end = 500;
+        ps.v_end = 1500;
       }
       ps.motion_type = MotionType::STRAIGHT;
       ps.sct = !dia ? SensorCtrlType::Straight : SensorCtrlType::Dia;
@@ -900,7 +906,7 @@ void MotionPlanning::exec_path_running(param_set_t &p_set) {
   if (dist < 0) {
     dist = 1;
   }
-  ps.v_max = 500;
+  ps.v_max = 1500;
   ps.v_end = 20;
   ps.dist = dist;
   ps.accl = p_set.str_map[StraightType::FastRun].accl;

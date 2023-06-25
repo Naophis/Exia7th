@@ -75,6 +75,7 @@ public:
   std::vector<float> axel_degenerate_x;
   std::vector<float> axel_degenerate_y;
 
+  pid_error_entity_t error_entity;
 private:
   float diff_old = 0;
   float diff = 0;
@@ -109,7 +110,6 @@ private:
   void calc_filter();
 
   duty_t tgt_duty;
-  pid_error_entity_t error_entity;
   int buzzer_time_cnt = 0;
   int buzzer_timestamp = 0;
   int motion_req_timestamp = 0;
